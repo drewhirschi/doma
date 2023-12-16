@@ -1,0 +1,59 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Next.js: debug server-side",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm run dev"
+      },
+      {
+        "name": "Next.js: debug client-side",
+        "type": "chrome",
+        "request": "launch",
+        "url": "http://localhost:3000"
+      },
+      {
+        "name": "Next.js: debug full stack",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm run dev",
+        "serverReadyAction": {
+          "pattern": "started server on .+, url: (https?://.+)",
+          "uriFormat": "%s",
+          "action": "debugWithChrome"
+        }
+      },
+      {
+        "type": "bun",
+        "request": "launch",
+        "name": "Debug Bun",
+  
+        "program": "${file}",
+        "args": [],
+        "cwd": "${workspaceFolder}",
+        "env": {},
+  
+        // If the environment variables should not be inherited from the parent process.
+        "strictEnv": false,
+  
+        // If the program should be run in watch mode.
+        // This is equivalent to passing `--watch` to the `bun` executable.
+        // You can also set this to "hot" to enable hot reloading using `--hot`.
+        "watchMode": false,
+  
+        // If the debugger should stop on the first line of the program.
+        "stopOnEntry": true,
+  
+        // If the debugger should be disabled. (for example, breakpoints will not be hit)
+        "noDebug": false,
+  
+        // The path to the `bun` executable, defaults to your `PATH` environment variable.
+        "runtime": "bun",
+  
+        // The arguments to pass to the `bun` executable, if any.
+        // Unlike `args`, these are passed to the executable itself, not the program.
+        "runtimeArgs": [],
+      }
+    ]
+  }

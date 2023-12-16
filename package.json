@@ -1,30 +1,47 @@
 {
-  "name": "mantine-minimal-next-template",
+  "name": "parsl-legal-site",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sb:types": "supabase gen types typescript --project-id \"utlmfaaustebkmpcwlhx\" --schema public > app/types/supabase.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.474.0",
     "@mantine/core": "7.3.0",
+    "@mantine/dates": "^7.3.0",
+    "@mantine/dropzone": "^7.3.0",
+    "@mantine/form": "^7.3.0",
     "@mantine/hooks": "7.3.0",
+    "@mantine/notifications": "^7.3.0",
+    "@supabase/auth-ui-react": "^0.4.6",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/ssr": "^0.0.10",
+    "@supabase/supabase-js": "^2.39.0",
+    "@tabler/icons-react": "^2.42.0",
+    "axios": "^1.6.2",
     "next": "14.0.1",
+    "openai": "^4.20.1",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "tus-js-client": "^4.0.0",
+    "unzip-stream": "^0.3.1",
+    "unzipper": "^0.10.14"
   },
   "devDependencies": {
     "@types/node": "20.8.10",
     "@types/react": "18.2.36",
     "@types/react-dom": "18.2.14",
+    "@types/unzip-stream": "^0.3.4",
+    "@types/unzipper": "^0.10.9",
     "eslint": "8.53.0",
     "eslint-config-next": "14.0.1",
     "postcss": "^8.4.31",
     "postcss-preset-mantine": "1.11.0",
     "postcss-simple-vars": "^7.0.1",
     "typescript": "5.2.2"
-  },
-  "packageManager": "yarn@4.0.1"
+  }
 }
