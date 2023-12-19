@@ -132,7 +132,7 @@ export default function ProjectCard({ project }: Props) {
             />
         </Group>
 
-        <Button color="blue" fullWidth mt="md" radius="md" component={Link} href={`projects/${project.id}`}>
+        <Button color="blue" fullWidth mt="md" radius="md" component={Link} href={`projects/${project.id}/tabs`}>
             Continue
         </Button>
     </Card>

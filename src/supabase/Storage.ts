@@ -13,7 +13,8 @@ export async function uploadTenantFile(supabase: SupabaseClient, fileName: strin
     return new Promise((resolve, reject) => {
         const uploadOptions = {
             endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
-            retryDelays: [0, 3000, 5000, 10000, 20000],
+            // retryDelays: [0, 3000, 5000, 10000, 20000],
+            retryDelays: [0, 3000, 5000],
             headers: {
                 authorization: `Bearer ${sessionData.session?.access_token}`,
                 'x-upsert': 'true', // optionally set upsert to true to overwrite existing files
@@ -41,7 +42,7 @@ export async function uploadTenantFile(supabase: SupabaseClient, fileName: strin
 
             onSuccess: function () {
                 console.log('Download %s from %s', (upload.file as File).name ?? "missing file name", upload.url)
-                resolve(upload.file)
+                resolve(upload.url)
             },
         }
 
@@ -60,3 +61,5 @@ export async function uploadTenantFile(supabase: SupabaseClient, fileName: strin
         })
     })
 }
+
+

@@ -6,11 +6,11 @@ import OverviewTab from './OverviewTab';
 // import { OverviewTab } from './OverviewTab';
 import { serverClient } from '@/supabase/ServerClients';
 
-export default async function Page({ params, children }: { params: { id: string }, children: JSX.Element }) {
+export default async function Page({ params }: { params: { id: string } }) {
 
     const supabase = serverClient()
-    const { data: project, error } = await supabase.from("project").select("*").eq("id", params.id).single()
-
+    const { data: project, error } = await supabase.from("project").select("*, profile(*)").eq("id", params.id).single()
+    const contractsRes = await supabase.from("contract").select("*").eq("project_id", params.id)
 
 
 
@@ -39,7 +39,12 @@ export default async function Page({ params, children }: { params: { id: string 
                 </TabsList>
 
                 <TabsPanel value="overview">
-                    <OverviewTab projectId={project.id}/>
+                    <OverviewTab 
+                    projectId={project.id}
+                     contracts={contractsRes.data!}
+                     members={project.profile}
+                     
+                     />
                 </TabsPanel>
 
                 <TabsPanel value="messages">

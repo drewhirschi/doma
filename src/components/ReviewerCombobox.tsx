@@ -1,102 +1,73 @@
 import { Avatar, Combobox, Group, Input, InputBase, Text, useCombobox } from "@mantine/core";
+import { useEffect, useState } from "react";
 
-import { useState } from "react";
+import { browserClient } from "@/supabase/BrowerClients";
 
-export const teamMembers = [
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-9.png',
-        name: 'Robert Wolfkisser',
-        job: 'Engineer',
-        email: "robert@atlas.com",
-        role: 'Admin',
-        lastActive: '2 days ago',
-        active: true,
-    },
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-10.png',
-        name: 'Emily Johnson',
-        job: 'Designer',
-        email: "emily@atlas.com",
-        role: 'User',
-        lastActive: '1 day ago',
-        active: true,
-    },
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-11.png',
-        name: 'Michael Smith',
-        job: 'Developer',
-        email: "michael@atlas.com",
-        role: 'User',
-        lastActive: '3 days ago',
-        active: false,
-    },
-];
-
-
-function SelectOption({ avatar, email, name }: {avatar: string, email: string, name: string,}) {
+function SelectOption({ avatar, email, name }: { avatar: string, email: string, name: string, }) {
     return (
         <Group gap="sm">
-        <Avatar size={40} src={avatar} radius={40} />
-        <div>
-            <Text fz="sm" fw={500}>
-                {name}
-            </Text>
-            <Text fz="xs" c="dimmed">
-                {email}
-            </Text>
-        </div>
-    </Group>
+            <Avatar size={32} src={avatar} radius={40} />
+            <div>
+                <Text fz="sm" fw={500}>
+                    {name}
+                </Text>
+                <Text fz="xs" c="dimmed" truncate="end">
+                    {email}
+                </Text>
+            </div>
+        </Group>
     );
-  }
+}
 
-export function ReviewerCombobox() {
+export function ReviewerCombobox({selectedProfileId, contractId, projectMembers}: {projectMembers: any[], selectedProfileId: string, contractId:string}) {
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
-      });
-    
-      const [value, setValue] = useState<string | null>("robert@atlas.com");
-      const selectedOption = teamMembers.find((item) => item.email === value);
+    });
 
-    const options = teamMembers.map((item) => (
-        <Combobox.Option  key={item.email} value={item.email}>
-          <SelectOption {...item} />
+    const [selectedMemberId, setSelectedMemberId] = useState<string | null>(selectedProfileId);
+   
+    const supabase = browserClient()
+
+    const assigned_to = projectMembers.find(m => m.id == selectedMemberId)
+
+    const options = projectMembers.map((profile:any) => (
+        <Combobox.Option key={profile.id} value={profile.id}>
+            <SelectOption avatar={profile.avatar_url} email={profile.email} name={profile.display_name}  />
         </Combobox.Option>
-      ));
-
+    ));
+    
     return (
         <Combobox
         store={combobox}
         withinPortal={false}
-        onOptionSubmit={(val) => {
-            setValue(val);
+        onOptionSubmit={async (val) => {
+            setSelectedMemberId(val)
             combobox.closeDropdown();
-        }}
-    >
-        <Combobox.Target>
-            <InputBase
-                component="button"
-                type="button"
-                pointer
-                rightSection={<Combobox.Chevron />}
-                onClick={() => combobox.toggleDropdown()}
-                rightSectionPointerEvents="none"
-                multiline
-                variant="unstyled"
-            >
-                {selectedOption ? (
-                    <SelectOption {...selectedOption} />
-                ) : (
-                    <Input.Placeholder>Pick value</Input.Placeholder>
-                )}
-            </InputBase>
-        </Combobox.Target>
+            await supabase.from("contract").update({assigned_to: val}).eq("id", contractId)
+            }}
+        >
+            <Combobox.Target>
+                <InputBase
+                    component="button"
+                    type="button"
+                    pointer
+                    rightSection={<Combobox.Chevron />}
+                    onClick={() => combobox.toggleDropdown()}
+                    rightSectionPointerEvents="none"
+                    multiline
+                    variant="unstyled"
+                >
+                    {assigned_to ? (
+                        <SelectOption  avatar={""} email={assigned_to.email} name={assigned_to.display_name}  />
+                    ) : (
+                        <Input.Placeholder>Not Assigned</Input.Placeholder>
+                    )}
+                </InputBase>
+            </Combobox.Target>
 
-        <Combobox.Dropdown>
-            <Combobox.Options>{options}</Combobox.Options>
-        </Combobox.Dropdown>
-    </Combobox>
+            <Combobox.Dropdown>
+                <Combobox.Options>{options}</Combobox.Options>
+            </Combobox.Dropdown>
+        </Combobox>
     )
 }

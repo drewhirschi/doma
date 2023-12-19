@@ -7,68 +7,36 @@ import { IconSearch } from "@tabler/icons-react";
 import { ReviewerCombobox } from "@/components/ReviewerCombobox";
 import { TeamRoleSelect } from "@/components/TeamRoleSelect";
 
-export const teamMembers = [
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-9.png',
-        name: 'Robert Wolfkisser',
-        job: 'Engineer',
-        email: "robert@atlas.com",
-        role: 'Admin',
-        lastActive: '2 days ago',
-        active: true,
-    },
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-10.png',
-        name: 'Emily Johnson',
-        job: 'Designer',
-        email: "emily@atlas.com",
-        role: 'User',
-        lastActive: '1 day ago',
-        active: true,
-    },
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-11.png',
-        name: 'Michael Smith',
-        job: 'Developer',
-        email: "michael@atlas.com",
-        role: 'User',
-        lastActive: '3 days ago',
-        active: false,
-    },
-];
-
-
 interface Props {
-    projectId: string
+    projectId: string,
+    contracts: any
+    members: any[]
 }
 
-export default function OverviewTab({ projectId }: Props) {
+export default function OverviewTab({ projectId, contracts, members }: Props) {
    
 
-    const contracts = Array.from({ length: 10 }, (_, index) => (
-        <Table.Tr key={index}>
+    const contractsRow = contracts.map((contract:any) => (
+        <Table.Tr key={contracts.id}>
 
 
             <Table.Td>
-                {`Contract ${index}`}
+                {contract.display_name}
             </Table.Td>
             <Table.Td>
-                No
+                {contract.completed ? "Yes" : "No"}
             </Table.Td>
             <Table.Td>
-                4
+                fix me
             </Table.Td>
             <Table.Td>
-               <ReviewerCombobox/>
+               <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id}/>
             </Table.Td>
 
         </Table.Tr>
     ));
 
-    const memberRows = teamMembers.map((item) => (
+    const memberRows = members.map((item) => (
         <Table.Tr key={item.name}>
             <Table.Td>
                 <Group gap="sm">
@@ -138,7 +106,7 @@ export default function OverviewTab({ projectId }: Props) {
 
                     </Table.Tr>
                 </Table.Thead>
-                <Table.Tbody>{contracts}</Table.Tbody>
+                <Table.Tbody>{contractsRow}</Table.Tbody>
             </Table>
         </Container>
     )
