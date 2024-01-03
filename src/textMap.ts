@@ -1,12 +1,13 @@
-import { getDocument } from 'pdfjs-dist';
+import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
+// GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.mjs';
 
-interface TextItem {
+export interface TextItem {
     str: string;
     x: number;
     y: number;
 }
 
-async function extractTextFromPDF(pdfPath: string) {
+export async function extractTextFromPDF(pdfPath: string) {
     const pdf = await getDocument(pdfPath).promise;
 
     const numPages = pdf.numPages;
@@ -17,7 +18,7 @@ async function extractTextFromPDF(pdfPath: string) {
         const page = await pdf.getPage(pageNum);
         const textContent = await page.getTextContent();
 
-        console.log(`Page ${pageNum}:`);
+        // console.log(`Page ${pageNum}:`);
         textContent.items.forEach((item: any) => {
             const { str, transform } = item;
             const x = transform[4];
@@ -29,19 +30,5 @@ async function extractTextFromPDF(pdfPath: string) {
     return textItems
 }
 
-const pdfPath = 'docs/github.pdf'; // Replace with your PDF file path
-const text = await extractTextFromPDF(pdfPath);
 
-const lines:string[] = []
-let currentLine = ""
-let currentY = 0
-for (const item of text) {
-    if (item.y !== currentY) {
-        lines.push(currentLine)
-        currentLine = ""
-        currentY = item.y
-    }
-    currentLine += item.str
-}
 
-lines.forEach(line => console.log(line))

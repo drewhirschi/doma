@@ -54,7 +54,6 @@ export async function unzipTenantFile(supabase:SupabaseClient, filepath: string)
             })
             .on('error', (err: any) => console.error('Error while unzipping:', err))
             .on('finish', () => {
-                console.log('Finished unzipping')
             });
         const { data, error } = await supabase.storage.from(bucket).remove([filepath]);
 
@@ -62,7 +61,6 @@ export async function unzipTenantFile(supabase:SupabaseClient, filepath: string)
             console.error(error);
             throw new Error(error.message);
         }
-        console.log(data);
     } catch (error) {
         console.error('Error in streaming and unzipping:', error);
     }

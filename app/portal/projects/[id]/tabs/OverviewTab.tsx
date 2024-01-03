@@ -1,9 +1,10 @@
 "use client"
 
-import { Avatar, Badge, Button, Combobox, Container, Group, Input, InputBase, Progress, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
+import { Anchor, Avatar, Badge, Button, Combobox, Container, Group, Input, InputBase, Progress, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
 
 import { AddContractsModalButton } from "./AddContractsModal";
 import { IconSearch } from "@tabler/icons-react";
+import Link from "next/link";
 import { ReviewerCombobox } from "@/components/ReviewerCombobox";
 import { TeamRoleSelect } from "@/components/TeamRoleSelect";
 
@@ -21,7 +22,10 @@ export default function OverviewTab({ projectId, contracts, members }: Props) {
 
 
             <Table.Td>
+                <Anchor href={`contract/${contract.id}`} component={Link}>
+
                 {contract.display_name}
+                </Anchor>
             </Table.Td>
             <Table.Td>
                 {contract.completed ? "Yes" : "No"}

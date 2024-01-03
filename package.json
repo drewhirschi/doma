@@ -28,9 +28,10 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-pdf": "^7.6.0",
+    "react-pdf-highlighter": "^6.1.0",
     "tus-js-client": "^4.0.0",
-    "unzip-stream": "^0.3.1",
-    "unzipper": "^0.10.14"
+    "unzipper": "^0.10.14",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "20.8.10",
@@ -38,6 +39,7 @@
     "@types/react-dom": "18.2.14",
     "@types/unzip-stream": "^0.3.4",
     "@types/unzipper": "^0.10.9",
+    "@types/uuid": "^9.0.7",
     "eslint": "8.53.0",
     "eslint-config-next": "14.0.1",
     "postcss": "^8.4.31",

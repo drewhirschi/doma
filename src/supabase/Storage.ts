@@ -29,7 +29,6 @@ export async function uploadTenantFile(supabase: SupabaseClient, fileName: strin
             },
             chunkSize: 6 * 1024 * 1024, // NOTE: it must be set to 6MB (for now) do not change it
             onError: function (error: any) {
-                console.log('Failed because: ' + error)
                 reject(error)
             },
             // onProgress: callbacks.onProgress ?? function (bytesUploaded: number, bytesTotal: number) {

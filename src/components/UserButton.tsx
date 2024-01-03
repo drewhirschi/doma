@@ -21,7 +21,6 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
   useEffect(() => {
     supabase.auth.getSession().then(({ data, error }) => {
       if (error) {
-        console.log(error, "error getting session")
       }
       if (data.session) {
         setSession(data.session)

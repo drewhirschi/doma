@@ -58,14 +58,11 @@ export function AddContractsModalButton({ projectId }: Props) {
             setUploadStatus(WizStatus.UPLOADING);
             const uploadurl = await uploadTenantFile(supabase, `projects/${projectId}/${files[0]?.name}`, files[0]!, {
                 updatePercentage: (percentage) => {
-                    console.log(percentage);
                     setUploadProgress(percentage);
                 }
             });
-            console.log("upload url", uploadurl);
             setUploadStatus(WizStatus.UPLOAD_SUCCESS);
         } catch (error) {
-            console.log("failed to upload the zip", error);
             setUploadStatus(WizStatus.UPLOAD_ERROR);
             return
         }
