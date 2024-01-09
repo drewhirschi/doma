@@ -1,4 +1,6 @@
-import { PDFHighlighter } from './PDFHighlighter';
+import { Box, Loader } from '@mantine/core';
+
+import { ContractReviewer } from './ContractReviewer';
 import { getUserTenant } from '@/shared/getUserTenant';
 import { serverClient } from '@/supabase/ServerClients';
 
@@ -17,24 +19,23 @@ export default async function Page({ params }: { params: { id: string, contractI
     const parsletQ = await supabase.from("parslet").select("*").eq("tenant_id", tenantId!)
 
 
-    
 
-    console.log("num annotations", data.annotation.length)
+
 
 
 
 
     return (
 
-
-        <PDFHighlighter
-            pdfUrl={signedUrl?.signedUrl!}
-            contractId={params.contractId}
-            projectId={params.id}
-            parslets={parsletQ.data ?? []}
-            annotations={data.annotation ?? []}
-        // saveHighlight={}
-        />
+        
+            <ContractReviewer
+                pdfUrl={signedUrl?.signedUrl!}
+                contractId={params.contractId}
+                projectId={params.id}
+                parslets={parsletQ.data ?? []}
+                annotations={data.annotation ?? []}
+            // saveHighlight={}
+            />
 
     );
 };

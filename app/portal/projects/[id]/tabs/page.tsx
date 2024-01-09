@@ -1,6 +1,7 @@
-import { Avatar, Button, Container, Group, Select, Table, Tabs, TabsList, TabsPanel, TabsTab, Title, rem } from '@mantine/core';
+import { Avatar, Box, Button, Container, Group, Select, Table, Tabs, TabsList, TabsPanel, TabsTab, Title, rem } from '@mantine/core';
 import { IconAlertCircle, IconChevronLeft, IconFileArrowLeft, IconHome, IconMessageCircle, IconPhoto, IconSettings } from '@tabler/icons-react';
 
+import { BackButton } from '@/components/BackButton';
 import Link from 'next/link';
 import OverviewTab from './OverviewTab';
 // import { OverviewTab } from './OverviewTab';
@@ -20,10 +21,8 @@ export default async function Page({ params }: { params: { id: string } }) {
     const iconStyle = { width: rem(12), height: rem(12) };
 
     return (
-        <>
-            <Button href={"/portal/projects"} leftSection={<IconChevronLeft size={14} />} variant="transparent" component={Link}>
-                Back
-            </Button>
+        <Box p="sm">
+           <BackButton href={"/portal/projects"}/>
             <Title mb={"sm"} order={1}>{project.display_name}</Title>
             <Tabs defaultValue="overview">
                 <TabsList mb={"sm"}>
@@ -55,7 +54,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                     Settings tab content
                 </TabsPanel>
             </Tabs>
-        </>
+        </Box>
 
     );
 };

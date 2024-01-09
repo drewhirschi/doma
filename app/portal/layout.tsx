@@ -24,12 +24,11 @@ export default function Home({ children, params }: {
 
     return (
         <AppShell
-            header={{ height: 50 }}
             navbar={{
                 width: { base: 260 },
                 breakpoint: 'xs',
                 collapsed: { mobile: true, desktop: false },
-            }} padding="md"
+            }} 
             layout='alt'
         >
             <AppShell.Navbar p="md">

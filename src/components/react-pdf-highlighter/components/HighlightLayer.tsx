@@ -1,5 +1,3 @@
-import { viewportToScaled } from "../lib/coordinates";
-import React from "react";
 import {
   IHighlight,
   LTWH,
@@ -8,6 +6,8 @@ import {
   Scaled,
   ScaledPosition,
 } from "../types";
+
+import { viewportToScaled } from "../lib/coordinates";
 
 interface HighlightLayerProps<T_HT> {
   highlightsByPage: { [pageNumber: string]: Array<T_HT> };
