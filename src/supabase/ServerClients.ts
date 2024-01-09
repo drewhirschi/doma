@@ -2,6 +2,7 @@ import { type CookieOptions, createBrowserClient, createServerClient } from '@su
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { cookies } from 'next/headers'
+import { Database } from '@/types/supabase';
 
 
 
@@ -9,7 +10,7 @@ import { cookies } from 'next/headers'
 
 export const serverClient = () => {
     const cookieStore = cookies()
-    return createServerClient(
+    return createServerClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
@@ -27,7 +28,7 @@ export const serverClient = () => {
 export const routeClient = () => {
     const cookieStore = cookies()
 
-    return createServerClient(
+    return createServerClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
@@ -49,7 +50,7 @@ export const routeClient = () => {
 export const serverActionClient = () => {
     const cookieStore = cookies()
 
-    return createServerClient(
+    return createServerClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
