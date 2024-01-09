@@ -1,25 +1,34 @@
 "use client"
 
-import { Grid } from "@mantine/core";
+import { Grid, Button } from "@mantine/core";
 import ProjectCard from "@/components/ProjectCard";
 import { error } from "console";
+import { AddProjectsModal } from "./AddProjectsModel";
 
 interface Props {
-    fetchRes: any
+    projectFetch: any
+    userFetch: any
 }
-export function ProjectGrid({ fetchRes }: Props) {
+
+export function ProjectGrid({ projectFetch, userFetch }: Props) {
 
 
-    if (fetchRes.error) {
+    if (projectFetch.error) {
         return <div>There was an error loading the projects</div>
     }
 
     return (
-        <Grid>
-            {fetchRes.data.map((project: any) => (
-                <Grid.Col key={project.id} span={{ base: 12, md: 6, lg: 4 }}> <ProjectCard project={project} /> </Grid.Col>
-            ))}
+        <div>
+            <AddProjectsModal
+                 projectFetch={projectFetch}
+                 userFetch={userFetch}
+            />
+            <Grid>
+                {projectFetch.data.map((project: any) => (
+                    <Grid.Col key={project.id} span={{ base: 12, md: 6, lg: 4 }}> <ProjectCard project={project} /> </Grid.Col>
+                ))}
 
-        </Grid>
+            </Grid>
+        </div>
     )
 }

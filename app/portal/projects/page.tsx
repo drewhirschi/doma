@@ -8,12 +8,11 @@ export default async function Page() {
 
     const supabase = serverClient()
     const projectFetch = await supabase.from("project").select("*")
-    
+    const userFetch = await supabase.from("profile").select("*")
 
-
+    console.log(userFetch.error)
     return <Container>
-        <Button mb={"sm"} py="xs">New</Button>
-        <ProjectGrid fetchRes={projectFetch}/>
-        
+        <ProjectGrid projectFetch={projectFetch}
+        userFetch={userFetch}/>
     </Container>
 }

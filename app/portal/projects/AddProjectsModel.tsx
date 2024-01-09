@@ -1,0 +1,137 @@
+"use client"
+
+import { useForm, isNotEmpty } from '@mantine/form';
+import { Modal, Button, Group, TextInput, Select, Box, MultiSelect, rem, TagsInput} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { useEffect, useState } from 'react';
+import { DatePickerInput } from '@mantine/dates';
+import { IconCalendar } from '@tabler/icons-react';
+import { browserClient } from '@/supabase/BrowerClients';
+import { createProject } from './AddProjectModal.action';
+
+interface Props {
+    userFetch: any // data and error fields
+    projectFetch: any
+}
+
+export interface CreateFormValues {
+    projectName: string,
+    assignedAttorneys: string[], 
+    dealStructure: string,
+    client: string,
+    counterparty: string,
+    targetNames: string[],
+    phaseDeadline: Date
+}
+
+export function AddProjectsModal(props: Props) {
+  const [opened, { open, close }] = useDisclosure(false);
+  const [value, setValue] = useState<Date | null>(null);
+  const icon = <IconCalendar style={{ width: rem(18), height: rem(18) }} stroke={1.5} />;
+  const supabase = browserClient()
+ 
+  const uniqueNames = new Set(props.projectFetch.data.map((d:{display_name:string})=> d.display_name));
+
+    const form = useForm({
+      initialValues: {
+        projectName: '',
+        assignedAttorneys: [], 
+        dealStructure: '',
+        client: '',
+        counterparty: '',
+        targetNames: [],
+        phaseDeadline: new Date()
+      },
+  
+      validate: {
+        projectName: (value) =>
+            uniqueNames.has(value) ? 'Project name already used' : !value ? 'Enter the project name': null,
+        dealStructure: isNotEmpty('Enter the deal structure'),
+        client: isNotEmpty('Enter the client you are representing'),
+        counterparty: (value, values) => 
+            value == values.client ? 'Client and counterparty cannot be the same' : !value ? 'Enter the counterparty' : null,
+        targetNames: isNotEmpty('Enter the company names the entity that is having due diligence performed on goes by')
+      },
+    });
+
+    // autofill with project creator (not working)
+    // useEffect(()=>{
+    //     supabase.auth.getSession().then(session => {
+    //         form.values.assignedAttorneys.push(session.data.session?.user.id)}
+    //     )}, []
+    //   )
+
+  return (
+    <>
+      <Modal opened={opened} onClose={close} title="Authentication">
+        
+      <Box component="form" maw={400} mx="auto" onSubmit={form.onSubmit((values) => {
+        console.log("creating project")
+        createProject(values).then(()=>{
+            close()
+            form.reset()
+        })
+      })}>
+            <TextInput label="Project Name" placeholder="Project name" withAsterisk {...form.getInputProps('projectName')} />
+            <MultiSelect
+            label="Assigned Attorneys"
+            placeholder="Pick attorneys"
+            checkIconPosition="right"
+            data={props.userFetch.data.map((u: {display_name: string, id: string})=>({value: u.id, label: u.display_name}))}
+            clearable
+            mt="md"
+            nothingFoundMessage="Name not found..."
+            {...form.getInputProps('assignedAttorneys')}
+            />
+            <Select
+            label="Deal Structure"
+            placeholder="Pick structure"
+            data={['Asset Purchase', 'Stock Purchase', 'Reverse Triangle Merger', 'Forward Merger', 'Other']} // if other, add a text field to explain
+            withAsterisk
+            mt="md"
+            {...form.getInputProps('dealStructure')}
+            />
+            <TextInput
+            label="Your Client"
+            placeholder="Your client"
+            withAsterisk
+            mt="md"
+            {...form.getInputProps('client')}
+            />
+            <TextInput
+            label="Counterparty"
+            placeholder="Counterparty"
+            withAsterisk
+            mt="md"
+            {...form.getInputProps('counterparty')}
+            />
+            <TagsInput
+            label="Target (all known names)"
+            placeholder="Pick from list or type anything"
+            data={[{value: form.values.client+"_client", label:form.values.client}, {value: form.values.counterparty+"_counterparty", label:form.values.counterparty}].filter((d)=>d.label)}
+            mt="md"
+            {...form.getInputProps('targetNames')}
+            />
+            <DatePickerInput
+            label="Phase Deadline"
+            placeholder="Pick date"
+            leftSection={icon}
+            mt="md"
+            leftSectionPointerEvents="none"
+            clearable
+            {...form.getInputProps('phaseDeadline')}
+            />
+            
+    
+            <Group justify="flex-end" mt="md">
+            <Button type="submit">Submit</Button>
+            </Group>
+      </Box>
+
+  
+      </Modal>
+
+      <Button onClick={open}>New</Button>
+    </>
+  );
+}
