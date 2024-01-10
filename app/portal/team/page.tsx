@@ -5,7 +5,6 @@ import { Badge, Button, Card, Container, Grid, Group, Image, Space, Table, Text 
 import { IconUserPlus, IconUsers } from '@tabler/icons-react';
 
 import { InviteMemberModal } from './InviteMemberModal';
-import ProjectCard from "@/components/ProjectCard";
 import { TeamRoleSelect } from '@/components/TeamRoleSelect';
 
 const data = [

@@ -1,5 +1,6 @@
 "use client"
 
+import { ActionIcon, Autocomplete, Box, Button, Center, CloseButton, Divider, Flex, Group, Loader, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, UnstyledButton, rem } from "@mantine/core";
 import {
     AreaHighlight,
     Highlight,
@@ -8,36 +9,22 @@ import {
     Popup,
     ScaledPosition,
     Tip
-    // } from "@/components/react-pdf-highlighter";
 } from "react-pdf-highlighter";
-import { ActionIcon, Autocomplete, Box, Button, Center, CloseButton, Divider, Flex, Group, Loader, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, UnstyledButton, rem } from "@mantine/core";
 import { IconArrowsLeftRight, IconGripVertical, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconTrash } from "@tabler/icons-react";
-import { type PDFDocumentProxy, getDocument, OnProgressParameters } from "pdfjs-dist";
-import { useEffect, useRef, useState } from "react";
-
-import { browserClient } from "@/supabase/BrowerClients";
-import { extractTextFromPDF } from "@/textMap";
-import { getUserTenant } from "@/shared/getUserTenant";
-import { revalidatePath } from "next/cache";
-import { serverActionClient } from "@/supabase/ServerClients";
-import { v4 as uuidv4 } from 'uuid';
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { useEffect, useOptimistic, useRef, useState } from "react";
+
 import { BackButton } from "@/components/BackButton";
-
-type IAnnotation = {
-    position: ScaledPosition;
-    text: string | undefined
-    id: string
-    parslet_id: string
-
-}
+import { Json } from "@/types/supabase-generated";
+import { browserClient } from "@/supabase/BrowerClients";
+import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
     pdfUrl: string
     projectId: string
     contractId: string
     parslets: { id: string, display_name: string }[]
-    annotations: IAnnotation[]
+    annotations: Annotation_SB[]
 }
 
 
@@ -54,39 +41,12 @@ export function ContractReviewer(props: Props) {
 
     const [parslets, setParslets] = useState<{ id: string, display_name: string, lastUsed?: Date }[]>(props.parslets)
 
-    const [highlights, setHighlights] = useState<IAnnotation[]>(annotations.map((a) => ({ ...a })))
-    // const [pdfDocument, setPdfDocument] = useState<PDFDocumentProxy | null>(null)
-    const [tenant_id, setTenant_id] = useState("")
+    const [highlights, setHighlights] = useState<Partial<Annotation_SB>[]>(annotations.map((a) => ({ ...a })))
+
 
     const supabase = browserClient()
 
-    useEffect(() => {
-        getUserTenant(supabase).then((tenantId) => setTenant_id(tenantId!))
 
-        //     // supabase.channel("realtime_annotation").on("postgres_changes", {
-        //     //     event: '*',
-        //     //     schema: 'public',
-        //     //     table: 'annotation',
-        //     //     filter: `contract_id=eq.${contractId}`,
-        //     // }, (payload) => console.log(payload)).subscribe()
-
-        //     // GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs",
-        //     // GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js",
-
-        //     console.log("getting", pdfUrl)
-        //     getDocument(pdfUrl).onProgress((progress:OnProgressParameters) => {
-        //         console.log("PDF progress", progress)
-        //     })
-
-        //     // .promise.then((pdf) => {
-        //     //     console.log("PDF loaded", pdf)
-        //     //     setPdfDocument(pdf)
-        //     // })
-
-        //     return () => {
-
-        //     }
-    }, [pdfUrl])
 
 
     function HighlightPopup({ id, closeMenu }: { id: string, closeMenu: () => void }) {
@@ -119,45 +79,23 @@ export function ContractReviewer(props: Props) {
 
     async function addHighlight(parsletId: string, text: string | undefined, position: ScaledPosition,) {
 
-        const id = uuidv4()
+        const id: string = uuidv4()
 
-        setHighlights([{ text, position, id, parslet_id: parsletId }, ...highlights])
+        setHighlights([{ text: text ?? "", position, id, parslet_id: parsletId }, ...highlights])
         const { data, error } = await supabase.from("annotation").insert({
+            // @ts-ignore
             id,
             parslet_id: parsletId,
             contract_id: contractId,
             text,
             position,
-            tenant_id
         })
 
-        // revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`, "page")
         if (error) {
             //remove highlight from state
         }
     }
 
-    function updateHighlight(highlightId: string, position: Object, content: Object) {
-        console.log("Updating highlight", highlightId, position, content);
-
-        // setHighlights(highlights.map((h) => {
-        //     const {
-        //         id,
-        //         position: originalPosition,
-        //         content: originalContent,
-        //         ...rest
-        //     } = h;
-        //     return id === highlightId
-        //         ? {
-        //             id,
-        //             position: { ...originalPosition, ...position },
-        //             content: { ...originalContent, ...content },
-        //             ...rest,
-        //         }
-        //         : h;
-        // })
-        // )
-    }
 
     const resetHash = () => {
         document.location.hash = "";
@@ -166,35 +104,29 @@ export function ContractReviewer(props: Props) {
     console.log("wdithc", ref.current?.getSize())
 
     return (
-        // <Box>
 
-        // <Flex
-        //     justify={"space-evenly"}
-        //     direction={"row"}
-        //     wrap={"nowrap"}
-        // >
         <PanelGroup direction="horizontal">
             <Panel defaultSize={40} minSize={20} style={{ height: "100dvh" }}>
-                <Stack justify="space-between" align="flex-start" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
-                    <BackButton href={`/portal/projects/${projectId}/tabs`} mt={"md"} />
-                    <ScrollArea 
-                    offsetScrollbars
-                    h={"100%"}
+                <Stack justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
+                    <BackButton href={`/portal/projects/${projectId}/tabs`} mt={"md"} style={{alignSelf: "flex-start"}}/>
+                    <ScrollArea
+                        offsetScrollbars
+                        h={"100%"}
                     >
 
                         {parslets.map((parslet) => (
-                            <>
+                            <div key={parslet.id}>
                                 <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
                                 <Textarea
-
+                                    // w={"100%"}
                                 />
                                 <ul>
                                     {highlights.filter((highlight) => highlight.parslet_id === parslet.id).map((highlight) => (
-                                        <Group>
+                                        <Group key={highlight.id}>
                                             <ActionIcon variant="outline" color="red"
                                                 onClick={async () => {
                                                     setHighlights(highlights.filter((h) => h.id !== highlight.id))
-                                                    const { data, error } = await supabase.from("annotation").delete().eq("id", highlight.id)
+                                                    const { data, error } = await supabase.from("annotation").delete().eq("id", highlight.id!)
                                                 }}
                                             >
                                                 <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
@@ -203,7 +135,7 @@ export function ContractReviewer(props: Props) {
                                         </Group>
                                     ))}
                                 </ul>
-                            </>
+                            </div>
                         ))}
                     </ScrollArea>
                 </Stack>
@@ -239,7 +171,7 @@ export function ContractReviewer(props: Props) {
                             <PdfHighlighter
                                 // @ts-ignore
                                 pdfDocument={pdfDocument}
-                                highlights={highlights.map((h) => ({ position: h.position, comment: { text: "", emoji: "" }, content: { text: h.text }, id: h.id }))}
+                                highlights={highlights.map((h) => ({ position: h.position! as ScaledPosition, comment: { text: "", emoji: "" }, content: { text: h.text }, id: h.id! }))}
                                 enableAreaSelection={(event) => event.altKey}
                                 onScrollChange={resetHash}
                                 pdfScaleValue="page-width"

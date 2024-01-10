@@ -1,8 +1,8 @@
 import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } from 'openai/resources/index.js';
-import { NextRequest } from "next/server";
-import { routeClient } from "@/supabase/ServerClients";
 
+import { NextRequest } from "next/server";
 import OpenAI from 'openai';
+import { routeClient } from "@/supabase/ServerClients";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -18,7 +18,7 @@ type Extractor = {
     }
 }
 
-export const systemMessage = `You are a tool used by lawyers for extracting verbatim language containing key information and red flags from our client's contracts in the context of a merger or acquisition. 
+const systemMessage = `You are a tool used by lawyers for extracting verbatim language containing key information and red flags from our client's contracts in the context of a merger or acquisition. 
 
 Be thorough, the whole document needs to be handled.
 
@@ -26,11 +26,7 @@ Do not provide explanations, just state the verbatim language.
 
 In the schema add a string called "Lines" that states the start and end of the lines the information came from like "33-48"`
 
-export async function GET(req: NextRequest,) {
 
-
-    return Response.json({ message: "GET request processed" });
-}
 
 async function execExtractor(extractor: Extractor, contract: string): Promise<ChatCompletionMessage> {
     const messages: ChatCompletionMessageParam[] = [
@@ -65,18 +61,24 @@ export async function POST(req: NextRequest) {
 
     const { data: contractData, error: contractError } = await supabase.from('contract').select('*, contract_line(text)').eq('id', contract_id).single()
 
+    if (!contractData) {
+        console.error('Error loading contract:', contractError);
+        return Response.json({ message: "Could not load contract" })
+    }
 
-    contractData.contract_line.forEach((line:any,i:number) => {
-        contract += `<l id="${i}">${line.text}</l>`+ "\n";
+
+    contractData.contract_line.forEach((line: any, i: number) => {
+        contract += `<l id="${i}">${line.text}</l>` + "\n";
     })
 
     const { data: extractorData, error: extractorError } = await supabase.from('parslet').select('*')
 
-    if (!extractorData){
-        return Response.json({message: "Could not load extractors"})
+    if (!extractorData) {
+        console.error('Error loading extractors:', extractorError);
+        return Response.json({ message: "Could not load extractors" })
     }
 
-    const extractors = extractorData.map(e => ({id: e.id, name: e.display_name, instruction: e.instruction, output: {schema: e.schema, examples: e.examples}}))
+    const extractors = extractorData.map(e => ({ id: e.id, name: e.display_name, instruction: e.instruction, output: { schema: e.schema ?? "", examples: e.examples } }))
 
     Object.values(extractors).forEach((extractor) => {
         promises.push(execExtractor(extractor, contract));
@@ -86,7 +88,7 @@ export async function POST(req: NextRequest) {
 
     const responsesMap = responses.flatMap((r, i) => {
         const extractor = extractors[i]
-        if (extractor.output.schema){
+        if (extractor.output.schema) {
             return
         }
         const content = JSON.parse(r.content!)
@@ -115,4 +117,3 @@ export async function POST(req: NextRequest) {
 }
 
 
-// POST /api/contracts/{contract_id}/extraction

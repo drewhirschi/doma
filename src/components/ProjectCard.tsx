@@ -8,41 +8,8 @@ import { browserClient } from "@/supabase/BrowerClients";
 import { getInitials } from "@/helper";
 import { serverClient } from "@/supabase/ServerClients";
 
-export const teamMembers = [
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-9.png',
-        name: 'Robert Wolfkisser',
-        job: 'Engineer',
-        email: "robert@atlas.com",
-        role: 'Admin',
-        lastActive: '2 days ago',
-        active: true,
-    },
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-10.png',
-        name: 'Emily Johnson',
-        job: 'Designer',
-        email: "emily@atlas.com",
-        role: 'User',
-        lastActive: '1 day ago',
-        active: true,
-    },
-    {
-        avatar: null,
-        name: 'Michael Smith',
-        job: 'Developer',
-        email: "michael@atlas.com",
-        role: 'User',
-        lastActive: '3 days ago',
-        active: false,
-    },
-];
-
-
 interface Props {
-    project: any
+    project: Project_SB & { profile: Profile_SB[]}
 }
 
 
@@ -106,17 +73,18 @@ export default function ProjectCard({ project }: Props) {
 
             <Flex>
 
-                {teamMembers.map((avatar, index) => (
+                {project.profile.map((profile, index) => (
                     <Avatar
                         key={index}
-                        src={avatar.avatar}
-                        alt={avatar.name}
+                        // @ts-ignore
+                        src={profile.avatar_url}
+                        alt={profile.display_name ?? profile.email}
                         radius="xl"
                         style={{
                             marginLeft: index === 0 ? 0 : -10, // Adjust overlap size
-                            zIndex: teamMembers.length - index, // Ensures proper stacking
+                            zIndex: project.profile.length - index, // Ensures proper stacking
                         }}
-                    >{getInitials(avatar.name)}</Avatar>
+                    >{getInitials(profile.display_name ?? profile.email)}</Avatar>
                 ))}
             </Flex>
             <RingProgress

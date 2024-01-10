@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export async function getUserTenant(supabase:SupabaseClient):Promise<string| null> {
+export async function getUserTenant(supabase:SupabaseClient):Promise<string |null> {
 
     const sessionRes = await supabase.auth.getSession()
 

@@ -2,7 +2,7 @@ import { type CookieOptions, createBrowserClient, createServerClient } from '@su
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { cookies } from 'next/headers'
-import { Database } from '@/types/supabase';
+import { Database } from '@/types/supabase-generated';
 
 
 

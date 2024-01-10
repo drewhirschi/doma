@@ -1,30 +1,50 @@
 "use client"
 
 import { Anchor, Avatar, Badge, Button, Combobox, Container, Group, Input, InputBase, Progress, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { AddContractsModalButton } from "./AddContractsModal";
 import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
 import { ReviewerCombobox } from "@/components/ReviewerCombobox";
 import { TeamRoleSelect } from "@/components/TeamRoleSelect";
+import { useDebouncedCallback } from 'use-debounce';
 
 interface Props {
-    projectId: string,
-    contracts: any
-    members: any[]
+    project: Project_SB & { profile: Profile_SB[], contract: Contract_SB[] }
+
 }
 
-export default function OverviewTab({ projectId, contracts, members }: Props) {
-   
+export default function OverviewTab({ project}: Props) {
+    const projectId = project.id
+    const members = project.profile
+    const contracts = project.contract
 
-    const contractsRow = contracts.map((contract:any) => (
-        <Table.Tr key={contracts.id}>
+    
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const { replace } = useRouter();
+
+    const debouncedHandleSearch = useDebouncedCallback((value: string) => {
+        const params = new URLSearchParams(searchParams);
+        if (value) {
+            params.set('query', value);
+        } else {
+            params.delete('query');
+        }
+
+        replace(`${pathname}?${params.toString()}`);
+    }, 300)
+
+
+    const contractsRow = contracts.map((contract: any) => (
+        <Table.Tr key={contract.id}>
 
 
             <Table.Td>
-                <Anchor href={`contract/${contract.id}`} component={Link}>
+                <Anchor href={`/portal/projects/${projectId}/contract/${contract.id}`} component={Link}>
 
-                {contract.display_name}
+                    {contract.display_name}
                 </Anchor>
             </Table.Td>
             <Table.Td>
@@ -34,20 +54,21 @@ export default function OverviewTab({ projectId, contracts, members }: Props) {
                 fix me
             </Table.Td>
             <Table.Td>
-               <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id}/>
+                <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id} />
             </Table.Td>
 
         </Table.Tr>
     ));
 
     const memberRows = members.map((item) => (
-        <Table.Tr key={item.name}>
+        <Table.Tr key={item.display_name}>
             <Table.Td>
                 <Group gap="sm">
-                    <Avatar size={40} src={item.avatar} radius={40} />
+                    {/* @ts-ignore */}
+                    <Avatar size={40} src={item.avatar_url} radius={40} />
                     <div>
                         <Text fz="sm" fw={500}>
-                            {item.name}
+                            {item.display_name}
                         </Text>
                         <Text fz="xs" c="dimmed">
                             {item.email}
@@ -59,9 +80,9 @@ export default function OverviewTab({ projectId, contracts, members }: Props) {
             <Table.Td>
                 <Progress value={50} />
             </Table.Td>
-            <Table.Td>{item.lastActive}</Table.Td>
+            <Table.Td>{new Date().toLocaleDateString()}</Table.Td>
             <Table.Td>
-                {item.active ? (
+                {true ? (
                     <Badge fullWidth variant="light">
                         Active
                     </Badge>
@@ -91,14 +112,14 @@ export default function OverviewTab({ projectId, contracts, members }: Props) {
 
                 <TextInput
                     w={200}
-                    placeholder="Search by any field"
+                    placeholder="Search"
                     mb="md"
                     leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-                // value={search}
-                // onChange={handleSearchChange}
+                    defaultValue={searchParams.get('query')?.toString()}
+                    onChange={(event) => debouncedHandleSearch(event.currentTarget.value)}
                 />
 
-                <AddContractsModalButton projectId={projectId}/>
+                <AddContractsModalButton project={project} />
             </Group>
             <Table >
                 <Table.Thead>

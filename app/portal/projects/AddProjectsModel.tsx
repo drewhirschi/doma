@@ -1,17 +1,18 @@
 "use client"
 
-import { useForm, isNotEmpty } from '@mantine/form';
-import { Modal, Button, Group, TextInput, Select, Box, MultiSelect, rem, TagsInput} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { Box, Button, Group, Modal, MultiSelect, Select, TagsInput, TextInput, rem } from '@mantine/core';
+import { isNotEmpty, useForm } from '@mantine/form';
 import { useEffect, useState } from 'react';
+
 import { DatePickerInput } from '@mantine/dates';
 import { IconCalendar } from '@tabler/icons-react';
 import { browserClient } from '@/supabase/BrowerClients';
 import { createProject } from './AddProjectModal.action';
+import { useDisclosure } from '@mantine/hooks';
 
 interface Props {
-    userFetch: any // data and error fields
-    projectFetch: any
+    users: Profile_SB[]
+    projects: (Project_SB & { profile: Profile_SB[] })[]
 }
 
 export interface CreateFormValues {
@@ -30,7 +31,7 @@ export function AddProjectsModal(props: Props) {
   const icon = <IconCalendar style={{ width: rem(18), height: rem(18) }} stroke={1.5} />;
   const supabase = browserClient()
  
-  const uniqueNames = new Set(props.projectFetch.data.map((d:{display_name:string})=> d.display_name));
+  const uniqueNames = new Set(props.projects.map((d)=> d.display_name));
 
     const form = useForm({
       initialValues: {
@@ -77,7 +78,7 @@ export function AddProjectsModal(props: Props) {
             label="Assigned Attorneys"
             placeholder="Pick attorneys"
             checkIconPosition="right"
-            data={props.userFetch.data.map((u: {display_name: string, id: string})=>({value: u.id, label: u.display_name}))}
+            data={props.users.map((u)=>({value: u.id, label: u.display_name ?? u.email}))}
             clearable
             mt="md"
             nothingFoundMessage="Name not found..."

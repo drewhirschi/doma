@@ -16,7 +16,7 @@ import { uploadTenantFile } from '@/supabase/Storage';
 import { useDisclosure } from '@mantine/hooks';
 
 interface Props {
-    projectId: string
+    project: Project_SB
 }
 
 enum WizStatus {
@@ -37,7 +37,7 @@ enum WizSteps {
 
 }
 
-export function AddContractsModalButton({ projectId }: Props) {
+export function AddContractsModalButton({ project }: Props) {
     const [opened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
     const supabase = browserClient()
@@ -56,7 +56,7 @@ export function AddContractsModalButton({ projectId }: Props) {
         e.preventDefault();
         try {
             setUploadStatus(WizStatus.UPLOADING);
-            const uploadurl = await uploadTenantFile(supabase, `projects/${projectId}/${files[0]?.name}`, files[0]!, {
+            const uploadurl = await uploadTenantFile(supabase, `projects/${project.id}/${files[0]?.name}`, files[0]!, {
                 updatePercentage: (percentage) => {
                     setUploadProgress(percentage);
                 }
@@ -71,7 +71,7 @@ export function AddContractsModalButton({ projectId }: Props) {
         setActiveStep(WizSteps.UNZIP);
 
         try {
-            await unzipFile(`projects/${projectId}/${files[0]?.name}`);
+            await unzipFile(`projects/${project.id}/${files[0]?.name}`);
             setUploadStatus(WizStatus.UNZIP_SUCCESS);
         } catch (error) {
             setUploadStatus(WizStatus.UNZIPPING_ERROR);
@@ -81,10 +81,9 @@ export function AddContractsModalButton({ projectId }: Props) {
         setActiveStep(WizSteps.ASSIGN);
 
         try {
-            const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-            const profileRes = await supabase.from("profile").select("tenant_id").eq("id", sessionData?.session?.user?.id).single()
+           
 
-            const filesListRes = await supabase.storage.from(profileRes.data?.tenant_id).list(`projects/${projectId}/${files[0]?.name.replace(".zip", "")}`)
+            const filesListRes = await supabase.storage.from(project.tenant_id).list(`projects/${project.id}/${files[0]?.name.replace(".zip", "")}`)
             if (filesListRes.error) {
                 throw filesListRes.error
             }

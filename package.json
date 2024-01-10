@@ -31,7 +31,9 @@
     "react-pdf-highlighter": "^6.1.0",
     "react-resizable-panels": "^1.0.7",
     "tus-js-client": "^4.0.0",
+    "type-fest": "^4.9.0",
     "unzipper": "^0.10.14",
+    "use-debounce": "^10.0.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
