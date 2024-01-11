@@ -7,7 +7,6 @@ import Link from 'next/link';
 import OverviewTab from './OverviewTab';
 import { ProjectTabs } from './ProjectTabs';
 import { getUserTenant } from '@/shared/getUserTenant';
-// import { OverviewTab } from './OverviewTab';
 import { serverClient } from '@/supabase/ServerClients';
 
 export default async function Page({ params, searchParams }: { params: { projectId: string, tab: string }, searchParams: { query: string } }) {
