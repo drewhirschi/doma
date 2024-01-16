@@ -28,8 +28,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "scripts/pdf.js",
-    "scripts/createGHPdf.js"
+    "scripts/**/*.ts",
   ],
   "exclude": ["node_modules"]
 }

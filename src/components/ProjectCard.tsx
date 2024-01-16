@@ -5,11 +5,12 @@ import { IconDotsVertical, IconMessages, IconNote, IconPlayerPause, IconPlayerPa
 
 import Link from "next/link";
 import { browserClient } from "@/supabase/BrowerClients";
+import { deleteProject } from "./ProjectCard.actions";
 import { getInitials } from "@/helper";
 import { serverClient } from "@/supabase/ServerClients";
 
 interface Props {
-    project: Project_SB & { profile: Profile_SB[]}
+    project: Project_SB & { profile: Profile_SB[] }
 }
 
 
@@ -31,12 +32,10 @@ export default function ProjectCard({ project }: Props) {
         <Group mt={"md"} justify="space-between">
 
             <div>
-
-<Group>
-
-                <Text fw={500}>{project.display_name}</Text>
-                <Badge color="yellow" variant="filled">Paused</Badge>
-</Group>
+                <Group>
+                    <Text fw={500}>{project.display_name}</Text>
+                    <Badge color="yellow" variant="filled">Paused</Badge>
+                </Group>
                 <Text fz={"sm"} c={"dimmed"} >Admin: Trevor Brown</Text>
             </div>
             <Menu
@@ -60,6 +59,7 @@ export default function ProjectCard({ project }: Props) {
                         Pause
                     </Menu.Item>
                     <Menu.Item
+                        onClick={() => deleteProject(project.id)}
                         leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                         color="red"
                     >

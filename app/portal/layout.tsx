@@ -3,8 +3,6 @@
 import { Anchor, AppShell, Breadcrumbs, Code, Group, NavLink, ScrollArea, Space, Stack, Text, UnstyledButton } from '@mantine/core';
 
 import { Icon24Hours } from '@tabler/icons-react';
-// import Banner from '../banner';
-// import Crumbs from './Crumbs';
 import Image from 'next/image'
 import Link from 'next/link'
 import { UserButton } from '@/components/UserButton';
@@ -28,7 +26,7 @@ export default function Home({ children, params }: {
                 width: { base: 260 },
                 breakpoint: 'xs',
                 collapsed: { mobile: true, desktop: false },
-            }} 
+            }}
             layout='alt'
         >
             <AppShell.Navbar p="md">
@@ -54,17 +52,8 @@ export default function Home({ children, params }: {
                             component={Link}
                             active={pathname.split("/")[2] === "team"}
                         />
-                        <NavLink
-                            href={base + `/config`}
-                            label={
-                                <Text>AI Config</Text>
-                            }
-                            component={Link}
-                            active={pathname.split("/")[2] === "config"}
-                        />
+
                     </div>
-
-
 
                     <UserButton collapsed={false} />
                 </Stack>
@@ -73,11 +62,6 @@ export default function Home({ children, params }: {
                 {children}
             </AppShell.Main>
         </AppShell>
-
-
-
-
-
 
     )
 }

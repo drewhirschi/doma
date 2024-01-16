@@ -3,9 +3,15 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { cookies } from 'next/headers'
 import { Database } from '@/types/supabase-generated';
+import { SupabaseClient, createClient } from '@supabase/supabase-js';
 
-
-
+/**
+ * DANGEROUS Creates a full access service client for supabase.
+ * 
+ * @returns {SupabaseClient<Database>} The database client.
+ * @throws {Error} If the SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables are not set.
+ */
+export const fullAccessServiceClient = () => createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
 
 export const serverClient = () => {
