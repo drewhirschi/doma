@@ -34,9 +34,17 @@ export default function ProjectCard({ project }: Props) {
             <div>
                 <Group>
                     <Text fw={500}>{project.display_name}</Text>
-                    <Badge color="yellow" variant="filled">Paused</Badge>
+                    {project.is_active ? (
+                        <Badge color="green" variant="filled">
+                            Active
+                        </Badge>
+                    ) : (
+                        <Badge color="yellow" variant="filled">
+                            Paused
+                        </Badge>
+                    )}
                 </Group>
-                <Text fz={"sm"} c={"dimmed"} >Admin: Trevor Brown</Text>
+                <Text fz={"sm"} c={"dimmed"} >Phase Deadline: {project.phase_deadline}</Text>
             </div>
             <Menu
                 transitionProps={{ transition: 'pop' }}
@@ -72,13 +80,13 @@ export default function ProjectCard({ project }: Props) {
         <Group justify="space-between" mt="md" mb="xs">
 
             <Flex>
-
                 {project.profile.map((profile, index) => (
                     <Avatar
                         key={index}
                         // @ts-ignore
                         src={profile.avatar_url}
                         alt={profile.display_name ?? profile.email}
+                        //color={profile.color!}
                         radius="xl"
                         style={{
                             marginLeft: index === 0 ? 0 : -10, // Adjust overlap size

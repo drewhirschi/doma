@@ -8,6 +8,7 @@ import { Session } from '@supabase/supabase-js';
 import { browserClient } from '@/supabase/BrowerClients';
 import classes from './UserButton.module.css';
 import { useRouter } from 'next/navigation';
+import { getInitials } from '@/helper';
 
 export function UserButton({ collapsed }: { collapsed?: boolean }) {
 
@@ -45,8 +46,9 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
           <Group>
             <Avatar
               src={session?.user?.user_metadata?.avatar_url}
+              //color={session?.user?.user_metadata?.color}
               radius="xl"
-            />
+            >{getInitials(session?.user?.user_metadata?.name)}</Avatar>
 
             {!collapsed && <>
               <div style={{ flex: 1 }}>

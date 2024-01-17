@@ -19,8 +19,8 @@ export default async function Page({ params, searchParams }: { params: { project
     let projectQ
     if (query) {
         projectQ = await supabase.from("project").select("*, profile(*), contract(*)").eq("id", params.projectId)
-        .ilike('contract.display_name', `%${searchParams.query}%`)
-        .single()
+            .ilike('contract.display_name', `%${searchParams.query}%`)
+            .single()
     } else {
         projectQ = await supabase.from("project").select("*, profile(*), contract(*)").eq("id", params.projectId).single()
     }
@@ -32,7 +32,7 @@ export default async function Page({ params, searchParams }: { params: { project
 
     const project = projectQ.data
 
-    const tenantId = getUserTenant(supabase)
+    const tenantId = await getUserTenant(supabase)
 
     if (!tenantId) {
         throw new Error("No tenant id")
@@ -43,7 +43,12 @@ export default async function Page({ params, searchParams }: { params: { project
         <Box p="sm">
             <BackButton href={"/portal/projects"} />
             <Title mb={"sm"} order={1}>{project.display_name}</Title>
-            <ProjectTabs activeTab={params.tab} project={project}/>
+            <Title c="gray" mb={"sm"} order={5}>Deal Structure: {project.deal_structure}</Title>
+            <Title c="gray" mb={"sm"} order={5}>Client: {project.client}</Title>
+            <Title c="gray" mb={"sm"} order={5}>Counterparty: {project.counterparty}</Title>
+            <Title c="gray" mb={"sm"} order={5}>Target: {...project.target}</Title>
+            <Title c="gray" mb={"sm"} order={5}>Phase Deadline: {project.phase_deadline}</Title>
+            <ProjectTabs activeTab={params.tab} project={project} />
         </Box>
 
     );

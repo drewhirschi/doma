@@ -9,18 +9,19 @@ import Link from "next/link";
 import { ReviewerCombobox } from "@/components/ReviewerCombobox";
 import { TeamRoleSelect } from "@/components/TeamRoleSelect";
 import { useDebouncedCallback } from 'use-debounce';
+import { getInitials } from "@/helper";
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[], contract: Contract_SB[] }
 
 }
 
-export default function OverviewTab({ project}: Props) {
+export default function OverviewTab({ project }: Props) {
     const projectId = project.id
     const members = project.profile
     const contracts = project.contract
 
-    
+
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
@@ -64,8 +65,7 @@ export default function OverviewTab({ project}: Props) {
         <Table.Tr key={item.display_name}>
             <Table.Td>
                 <Group gap="sm">
-                    {/* @ts-ignore */}
-                    <Avatar size={40} src={item.avatar_url} radius={40} />
+                    <Avatar size={40} src={item.avatar_url} color={item.color!} radius={40}>{getInitials(item.display_name!)}</Avatar>
                     <div>
                         <Text fz="sm" fw={500}>
                             {item.display_name}
