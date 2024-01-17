@@ -1,11 +1,13 @@
 "use client"
 
-import { Anchor, AppShell, Breadcrumbs, Code, Group, NavLink, ScrollArea, Space, Stack, Text, UnstyledButton } from '@mantine/core';
+import { Anchor, AppShell, Box, Breadcrumbs, Code, Flex, Group, NavLink, ScrollArea, Space, Stack, Text, UnstyledButton } from '@mantine/core';
+import { Icon24Hours, IconFolderOpen, IconUsersGroup } from '@tabler/icons-react';
 
-import { Icon24Hours } from '@tabler/icons-react';
 import Image from 'next/image'
 import Link from 'next/link'
 import { UserButton } from '@/components/UserButton';
+import classnames from "./layout.module.css"
+import { useHover } from '@mantine/hooks';
 import { usePathname } from 'next/navigation'
 
 export default function Home({ children, params }: {
@@ -14,54 +16,51 @@ export default function Home({ children, params }: {
 }) {
 
     const pathname = usePathname()
+    const { hovered: navbarHovered, ref: navbarRef } = useHover();
     const base = `/portal`
-
-    const collapsed = true
 
 
 
     return (
-        <AppShell
-            navbar={{
-                width: { base: 260 },
-                breakpoint: 'xs',
-                collapsed: { mobile: true, desktop: false },
-            }}
-            layout='alt'
+        <Flex
+        w={"100%"}
+            direction={"row"}
+            wrap={"nowrap"}
         >
-            <AppShell.Navbar p="md">
-                <Space h="xl" />
-                <Space h="xl" />
+            <Box
+                ref={navbarRef}
+                className={classnames.navbar}
+            >
+                
                 <Stack justify='space-between' h={"100%"}>
 
                     <div>
                         <NavLink
                             href={base + `/projects`}
-                            label={
-
-                                <Text>Projects</Text>
-                            }
+                            leftSection={<IconFolderOpen />}
+                            label={navbarHovered ? <Text>Projects</Text> : null}
                             component={Link}
                             active={pathname.split("/")[2] === "projects"}
                         />
                         <NavLink
                             href={base + `/team`}
-                            label={
-                                <Text>Team</Text>
-                            }
+                            leftSection={navbarHovered && <IconUsersGroup />}
+                            label={navbarHovered ? <Text>Team</Text> : <IconUsersGroup />}
                             component={Link}
                             active={pathname.split("/")[2] === "team"}
                         />
 
                     </div>
 
-                    <UserButton collapsed={false} />
+                    <UserButton collapsed={!navbarHovered} />
                 </Stack>
-            </AppShell.Navbar>
-            <AppShell.Main>
+            </Box>
+            <Box 
+             className={classnames.content}
+            >
                 {children}
-            </AppShell.Main>
-        </AppShell>
+            </Box>
+        </Flex>
 
     )
 }

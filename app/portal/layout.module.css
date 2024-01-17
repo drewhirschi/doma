@@ -1,0 +1,19 @@
+
+
+.navbar {
+    width: 60px; /* Collapsed width */
+    height: 100vh;
+    transition: width 0.5s cubic-bezier(0, 0.57, 0.21, 0.99);
+    position: relative; /* Needed for absolute positioning of the expanded nav */
+    z-index: 10; /* To ensure it overlays the content */
+    border-right: 1px solid rgb(236, 236, 241); /* Add thin gray border right line */
+}
+    
+
+.navbar:hover {
+    width: 200px;     
+}
+
+.content {
+    flex: 1; /* Take up the remaining flex space */
+}
