@@ -1,6 +1,6 @@
 "use client"
 
-import { ActionIcon, Autocomplete, Box, Button, Center, CloseButton, Divider, Flex, Group, Loader, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, UnstyledButton, rem } from "@mantine/core";
+import { ActionIcon, Button, Center, CloseButton, Divider, Flex, Group, Loader, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, UnstyledButton, rem } from "@mantine/core";
 import {
     AreaHighlight,
     Highlight,
@@ -9,7 +9,7 @@ import {
     Popup,
     ScaledPosition,
     Tip
-} from "react-pdf-highlighter";
+} from "@/components/react-pdf-highlighter";
 import { IconArrowsLeftRight, IconDots, IconDotsVertical, IconGripVertical, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconTrash } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useEffect, useOptimistic, useRef, useState } from "react";
@@ -20,12 +20,11 @@ import { buildAnnotationFromExtraction } from "./helpers";
 import { reviewContractAction } from "./ContractReviewer.actions";
 import { v4 as uuidv4 } from 'uuid';
 
-type ParsletWithEI = (Parslet_SB & { extracted_information: ExtractedInformation_SB[] })
 interface Props {
     pdfUrl: string
     projectId: string
     contract: Contract_SB & { annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
-    parslets: ParsletWithEI[]
+    parslets: Parslet_SB[]
     annotations: Annotation_SB[]
 }
 
@@ -41,8 +40,9 @@ export function ContractReviewer(props: Props) {
 
     const ref = useRef<ImperativePanelHandle>(null);
 
-    const [parslets, setParslets] = useState<(ParsletWithEI & { lastUsed?: Date })[]>(props.parslets)
+    const [parslets, setParslets] = useState<(Parslet_SB & { lastUsed?: Date })[]>(props.parslets)
     const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
+    console.log(extractionsHighlights, "extractionsHighlights")
     const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string | null }[]>([...annotations, ...extractionsHighlights])
 
 
@@ -149,22 +149,8 @@ export function ContractReviewer(props: Props) {
                                 // w={"100%"}
                                 />
                                 <ul>
-                                    {/* {parslet.extracted_information.map((ei) => (
-                                        <Group key={ei.id}>
-                                            <ActionIcon variant="outline" color="red"
-                                                onClick={async () => {
-                                                    setHighlights(highlights.filter((h) => h.id !== ei.id))
-                                                    const { data, error } = await supabase.from("annotation").delete().eq("id", ei.id!)
-                                                }}
-                                            >
-                                                <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                                            </ActionIcon>
-                                            <Text key={ei.id}>{ei.data as string}</Text>
-                                        </Group>
-
-                                    ))} */}
                                     {highlights.filter((highlight) => highlight.parslet_id === parslet.id).map((highlight) => (
-                                        <Group key={highlight.id}>
+                                        <Flex direction={"row"} wrap={"nowrap"} gap={"sm"} key={highlight.id}>
                                             <ActionIcon variant="outline" color="red"
                                                 onClick={async () => {
                                                     setHighlights(highlights.filter((h) => h.id !== highlight.id))
@@ -174,7 +160,7 @@ export function ContractReviewer(props: Props) {
                                                 <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
                                             </ActionIcon>
                                             <Text key={highlight.parslet_id + parslet.id}>{highlight.text}</Text>
-                                        </Group>
+                                        </Flex>
                                     ))}
 
                                 </ul>
@@ -184,11 +170,12 @@ export function ContractReviewer(props: Props) {
                 </Stack>
 
             </Panel>
-            <PanelResizeHandle style={{ width: "16px" }}><Center h={'100dvh'}>
-                <IconGripVertical /> </Center></PanelResizeHandle>
+            <PanelResizeHandle style={{ width: "16px" }}>
+                <Center h={'100dvh'}>
+                    <IconGripVertical />
+                </Center>
+            </PanelResizeHandle>
             <Panel minSize={30} defaultSize={60} ref={ref} >
-
-
                 <div
                     style={{
                         height: "100dvh",
@@ -197,6 +184,7 @@ export function ContractReviewer(props: Props) {
                 >
 
                     <PdfLoader
+
                         url={pdfUrl}
                         beforeLoad={
                             <div>
@@ -212,7 +200,6 @@ export function ContractReviewer(props: Props) {
                         {(pdfDocument) => (
 
                             <PdfHighlighter
-                                // @ts-ignore
                                 pdfDocument={pdfDocument}
                                 highlights={pdfHighlights}
                                 enableAreaSelection={(event) => event.altKey}
@@ -226,49 +213,49 @@ export function ContractReviewer(props: Props) {
                                     hideTipAndSelection,
                                     transformSelection
                                 ) => {
-                                    console.log(position)
+                                    console.log(content, position)
                                     return (
-                                    
-                                    
-                                    <Paper shadow="md" w={200} p={"md"}>
-                                        
 
 
-                                        <Stack gap={"sm"}>
-                                            <Text c="dimmed" size="sm">Recent</Text>
-                                            <Button.Group orientation="vertical">
-
-                                                {[...parslets].sort((a, b) => (b.lastUsed?.getTime() ?? 0) - (a.lastUsed?.getTime() ?? 0))
-                                                    // .slice(0, 3)
-                                                    .map((parslet) => (
-                                                        <Button
-                                                            size="sm"
-                                                            c="black"
-                                                            color="gray"
-                                                            variant="subtle"
-                                                            key={parslet.id}
-                                                            //  leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
-                                                            onClick={() => {
-                                                                addHighlight(parslet.id, content.text, position);
-                                                                hideTipAndSelection();
-                                                                // Set the lastUsed field on the parslet
-                                                                setParslets(parslets.map((p) => {
-                                                                    if (p.id === parslet.id) {
-                                                                        return { ...p, lastUsed: new Date() };
-                                                                    }
-                                                                    return p;
-                                                                }))
+                                        <Paper shadow="md" w={200} p={"md"}>
 
 
-                                                            }}
-                                                            leftSection={<IconMessageCircle style={{ width: rem(14), height: rem(14) }} />}
-                                                        >
 
-                                                            {parslet.display_name}
-                                                        </Button>
-                                                    ))}
-                                            </Button.Group>
-                                            {/* <Divider />
+                                            <Stack gap={"sm"}>
+                                                <Text c="dimmed" size="sm">Recent</Text>
+                                                <Button.Group orientation="vertical">
+
+                                                    {[...parslets].sort((a, b) => (b.lastUsed?.getTime() ?? 0) - (a.lastUsed?.getTime() ?? 0))
+                                                        // .slice(0, 3)
+                                                        .map((parslet) => (
+                                                            <Button
+                                                                size="sm"
+                                                                c="black"
+                                                                color="gray"
+                                                                variant="subtle"
+                                                                key={parslet.id}
+                                                                //  leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+                                                                onClick={() => {
+                                                                    addHighlight(parslet.id, content.text, position);
+                                                                    hideTipAndSelection();
+                                                                    // Set the lastUsed field on the parslet
+                                                                    setParslets(parslets.map((p) => {
+                                                                        if (p.id === parslet.id) {
+                                                                            return { ...p, lastUsed: new Date() };
+                                                                        }
+                                                                        return p;
+                                                                    }))
+
+
+                                                                }}
+                                                                leftSection={<IconMessageCircle style={{ width: rem(14), height: rem(14) }} />}
+                                                            >
+
+                                                                {parslet.display_name}
+                                                            </Button>
+                                                        ))}
+                                                </Button.Group>
+                                                {/* <Divider />
                                             <Autocomplete
                                                 data={
                                                     parslets.map((p) => ({ value: p.id, label: p.display_name }))
@@ -288,14 +275,15 @@ export function ContractReviewer(props: Props) {
                                                     }))
                                                 }}
                                             /> */}
-                                        </Stack>
+                                            </Stack>
 
 
 
 
 
-                                    </Paper>
-                                )}}
+                                        </Paper>
+                                    )
+                                }}
                                 highlightTransform={(
                                     highlight,
                                     index,
