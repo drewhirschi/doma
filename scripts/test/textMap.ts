@@ -15,16 +15,20 @@ export async function extractTextFromPDF(pdfPath: string) {
     const textContent = await page.getTextContent();
 
     // console.log(`Page ${pageNum}:`);
+    // @ts-ignore
     const {pageHeight, pageWidth} = await page.getViewport({ scale: 1.0 }).rawDims
+    // @ts-ignore
     const { str, transform,  } = textContent.items[0];
     const x = transform[4];
     const y = transform[5];
     console.log(textContent.items[0])
-
-   
+    
+    
     console.log({
         x1: x * 4/3,
+        // @ts-ignore
         x2: (x + textContent.items[0].width) * 4/3,
+        // @ts-ignore
         y1:  (pageHeight * 4/3) - ((y + textContent.items[0].height) * 4/3)  ,
         y2:  (pageHeight * 4/3) - (y * 4/3) ,
     })
