@@ -7,7 +7,7 @@ import {
   NullL10n,
   PDFLinkService,
   PDFViewer,
-} from "pdfjs-dist/web/pdf_viewer.mjs";
+} from "pdfjs-dist/legacy/web/pdf_viewer";
 import type {
   IHighlight,
   LTWH,
@@ -17,7 +17,6 @@ import type {
   ScaledPosition,
 } from "../types";
 import React, { PointerEventHandler, PureComponent, RefObject } from "react";
-import { Root, createRoot } from "react-dom/client";
 import {
   asElement,
   findOrCreateContainerLayer,
@@ -27,15 +26,15 @@ import {
   isHTMLElement,
 } from "../lib/pdfjs-dom";
 import { scaledToViewport, viewportToScaled } from "../lib/coordinates";
-
-import { HighlightLayer } from "./HighlightLayer";
 import MouseSelection from "./MouseSelection";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import TipContainer from "./TipContainer";
+import { createRoot, Root } from "react-dom/client";
 import debounce from "lodash.debounce";
 import getAreaAsPng from "../lib/get-area-as-png";
 import getBoundingRect from "../lib/get-bounding-rect";
 import getClientRects from "../lib/get-client-rects";
+import { HighlightLayer } from "./HighlightLayer";
 
 export type T_ViewportHighlight<T_HT> = { position: Position } & T_HT;
 
@@ -179,6 +178,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       new PDFViewer({
         container: this.containerNodeRef!.current!,
         eventBus: this.eventBus,
+        // enhanceTextSelection: true, // deprecated. https://github.com/mozilla/pdf.js/issues/9943#issuecomment-409369485
         textLayerMode: 2,
         removePageBorders: true,
         linkService: this.linkService,

@@ -37,7 +37,8 @@ export class Popup extends Component<Props, State> {
               }}
               paddingX={60}
               paddingY={30}
-            >{popupContent}</MouseMonitor>
+              children={popupContent}
+            />
           );
         }}
         onMouseOut={() => {
