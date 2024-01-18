@@ -6,6 +6,7 @@ import { IconLogin2, IconPhoto } from '@tabler/icons-react';
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { browserClient } from '../../src/supabase/BrowerClients';
+import { useEffect } from 'react';
 
 // import { useRouter } from "next/navigation";
 
@@ -17,6 +18,17 @@ export default function Home() {
         origin = window.location.origin;
     }
 
+  
+    useEffect(() => {
+        supabase.auth.getUser().then((user) => {
+            if (user) {
+                window.location.href = `${origin}/portal/projects`;
+            }
+        })
+        
+    }, []);
+
+    
 
 
 
