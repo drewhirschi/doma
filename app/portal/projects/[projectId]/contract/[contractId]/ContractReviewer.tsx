@@ -1,6 +1,6 @@
 "use client"
 
-import { ActionIcon, Button, Center, CloseButton, Divider, Flex, Group, Loader, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, UnstyledButton, rem } from "@mantine/core";
+import { ActionIcon, Button, Center, Flex, Group, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, rem } from "@mantine/core";
 import {
     AreaHighlight,
     Highlight,
@@ -9,12 +9,13 @@ import {
     Popup,
     ScaledPosition,
     Tip
-} from "@/components/react-pdf-highlighter";
-import { IconArrowsLeftRight, IconDots, IconDotsVertical, IconGripVertical, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconTrash } from "@tabler/icons-react";
+} from "react-pdf-highlighter";
+import { IconArrowsLeftRight, IconDots, IconDotsVertical, IconGripVertical, IconMessageCircle, IconSettings, IconTrash } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 
 import { BackButton } from "@/components/BackButton";
+import { Json } from "@/types/supabase-generated";
 import { browserClient } from "@/supabase/BrowerClients";
 import { buildAnnotationFromExtraction } from "./helpers";
 import { reviewContractAction } from "./ContractReviewer.actions";
@@ -42,7 +43,7 @@ export function ContractReviewer(props: Props) {
 
     const [parslets, setParslets] = useState<(Parslet_SB & { lastUsed?: Date })[]>(props.parslets)
     const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
-    console.log(extractionsHighlights, "extractionsHighlights")
+    // console.log(extractionsHighlights, "extractionsHighlights")
     const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string | null }[]>([...annotations, ...extractionsHighlights])
 
 
@@ -55,12 +56,12 @@ export function ContractReviewer(props: Props) {
 
         const annotation = annotations.find((a) => a.id === id)
         return (
-            <Paper shadow="lg" w={280} withBorder
+            <Paper shadow="lg" w={200} withBorder
                 p={"xs"}>
-                <Text fw={700}>{parslets.find(p => p.id == annotation?.parslet_id)?.display_name}</Text>
-                <Text>
+                <Text fw={700} mb={"sm"}>{parslets.find(p => p.id == annotation?.parslet_id)?.display_name}</Text>
+                {/* <Text>
                     {annotation?.text ?? ""}
-                </Text>
+                </Text> */}
                 <Button
                     fullWidth
                     variant="subtle"
@@ -69,7 +70,7 @@ export function ContractReviewer(props: Props) {
                     onClick={async () => {
                         setHighlights(highlights.filter((h) => h.id !== id))
                         closeMenu()
-                        const { data, error } = await supabase.from("annotation").delete().eq("id", id)
+                        const { data, error } = await supabase.from("extracted_information").delete().eq("id", id)
 
                     }}
                 >
@@ -89,12 +90,13 @@ export function ContractReviewer(props: Props) {
 
         setHighlights([{ text: text ?? "", position, id, parslet_id: parsletId }, ...highlights])
         const { data, error } = await supabase.from("annotation").insert({
-            // @ts-ignore
             id,
             parslet_id: parsletId,
             contract_id: contract.id,
-            text,
-            position,
+            text: text ?? "",
+            position: position as unknown as Json,
+            // take another look at this
+            tenant_id: ""
         })
 
         if (error) {
@@ -154,7 +156,7 @@ export function ContractReviewer(props: Props) {
                                             <ActionIcon variant="outline" color="red"
                                                 onClick={async () => {
                                                     setHighlights(highlights.filter((h) => h.id !== highlight.id))
-                                                    const { data, error } = await supabase.from("annotation").delete().eq("id", highlight.id!)
+                                                    const { data, error } = await supabase.from("extracted_information").delete().eq("id", highlight.id!)
                                                 }}
                                             >
                                                 <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
@@ -176,6 +178,9 @@ export function ContractReviewer(props: Props) {
                 </Center>
             </PanelResizeHandle>
             <Panel minSize={30} defaultSize={60} ref={ref} >
+                {/* <PdfViewer
+                    url={pdfUrl}
+                /> */}
                 <div
                     style={{
                         height: "100dvh",
@@ -197,14 +202,19 @@ export function ContractReviewer(props: Props) {
                             </div>
                         }
                     >
-                        {(pdfDocument) => (
+                        {(pdfDocument) => {
+                            
+                            pdfDocument.getPage(1).then((page) => {
+                                console.log("first page view port",{width:page.getViewport().viewBox[2],height: page.getViewport().viewBox[3]})
+                            })
+                            return (
 
                             <PdfHighlighter
                                 pdfDocument={pdfDocument}
                                 highlights={pdfHighlights}
                                 enableAreaSelection={(event) => event.altKey}
                                 onScrollChange={resetHash}
-                                pdfScaleValue="1"
+                                pdfScaleValue=".75"
                                 // pdfScaleValue="page-width"
                                 scrollRef={(scrollTo) => { }}
                                 onSelectionFinished={(
@@ -213,7 +223,8 @@ export function ContractReviewer(props: Props) {
                                     hideTipAndSelection,
                                     transformSelection
                                 ) => {
-                                    console.log(content, position)
+                                    console.log("scaled hightlight",position)
+                                    
                                     return (
 
 
@@ -226,7 +237,6 @@ export function ContractReviewer(props: Props) {
                                                 <Button.Group orientation="vertical">
 
                                                     {[...parslets].sort((a, b) => (b.lastUsed?.getTime() ?? 0) - (a.lastUsed?.getTime() ?? 0))
-                                                        // .slice(0, 3)
                                                         .map((parslet) => (
                                                             <Button
                                                                 size="sm"
@@ -234,12 +244,9 @@ export function ContractReviewer(props: Props) {
                                                                 color="gray"
                                                                 variant="subtle"
                                                                 key={parslet.id}
-                                                                //  leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                                                 onClick={() => {
                                                                     addHighlight(parslet.id, content.text, position);
-                                                                    hideTipAndSelection();
-                                                                    // Set the lastUsed field on the parslet
-                                                                    setParslets(parslets.map((p) => {
+                                                                    hideTipAndSelection();                                                                    setParslets(parslets.map((p) => {
                                                                         if (p.id === parslet.id) {
                                                                             return { ...p, lastUsed: new Date() };
                                                                         }
@@ -255,26 +262,7 @@ export function ContractReviewer(props: Props) {
                                                             </Button>
                                                         ))}
                                                 </Button.Group>
-                                                {/* <Divider />
-                                            <Autocomplete
-                                                data={
-                                                    parslets.map((p) => ({ value: p.id, label: p.display_name }))
-
-                                                }
-                                                placeholder="Search"
-                                                
-                                                onChange={(parsletId) => {
-                                                    addHighlight(parsletId, content.text, position);
-                                                    hideTipAndSelection();
-                                                    // Set the lastUsed field on the parslet
-                                                    setParslets(parslets.map((p) => {
-                                                        if (p.id === parsletId) {
-                                                            return { ...p, lastUsed: new Date() };
-                                                        }
-                                                        return p;
-                                                    }))
-                                                }}
-                                            /> */}
+                                              
                                             </Stack>
 
 
@@ -293,28 +281,7 @@ export function ContractReviewer(props: Props) {
                                     screenshot,
                                     isScrolledTo
                                 ) => {
-                                    // const isTextHighlight = true
-                                    // //  !Boolean(
-                                    // //     highlight.content && highlight.content.image
-                                    // // );
-
-                                    // const component = isTextHighlight ? (
-                                    //     <>
-
-                                    //     </>
-                                    // ) : (
-                                    //     <AreaHighlight
-                                    //         isScrolledTo={isScrolledTo}
-                                    //         highlight={highlight}
-                                    //         onChange={(boundingRect) => {
-                                    //             updateHighlight(
-                                    //                 highlight.id,
-                                    //                 { boundingRect: viewportToScaled(boundingRect) },
-                                    //                 { image: screenshot(boundingRect) }
-                                    //             );
-                                    //         }}
-                                    //     />
-                                    // );
+                                  
 
                                     return (
                                         <Popup
@@ -337,7 +304,7 @@ export function ContractReviewer(props: Props) {
                                     );
                                 }}
                             />
-                        )}
+                        )}}
                     </PdfLoader>
                 </div>
 

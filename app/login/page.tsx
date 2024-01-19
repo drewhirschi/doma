@@ -19,16 +19,7 @@ export default function Home() {
     }
 
   
-    useEffect(() => {
-        supabase.auth.getUser().then((user) => {
-            if (user) {
-                window.location.href = `${origin}/portal/projects`;
-            }
-        })
-        
-    }, []);
-
-    
+   
 
 
 
