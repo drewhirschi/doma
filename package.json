@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sb:types": "supabase gen types typescript --project-id \"utlmfaaustebkmpcwlhx\" --schema public > app/types/supabase.ts"
+    "sb:types": "supabase gen types typescript --project-id \"utlmfaaustebkmpcwlhx\" --schema public > src/types/supabase-generated.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.474.0",

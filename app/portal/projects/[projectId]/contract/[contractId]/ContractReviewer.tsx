@@ -19,13 +19,15 @@ import { Json } from "@/types/supabase-generated";
 import { browserClient } from "@/supabase/BrowerClients";
 import { buildAnnotationFromExtraction } from "./helpers";
 import { reviewContractAction } from "./ContractReviewer.actions";
+import { useDebouncedCallback } from 'use-debounce';
 import { v4 as uuidv4 } from 'uuid';
 
+type ParsletWithNotes = Parslet_SB & { contract_note: { content: string }[] }
 interface Props {
     pdfUrl: string
     projectId: string
     contract: Contract_SB & { annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
-    parslets: Parslet_SB[]
+    parslets: ParsletWithNotes[]
     annotations: Annotation_SB[]
 }
 
@@ -41,13 +43,26 @@ export function ContractReviewer(props: Props) {
 
     const ref = useRef<ImperativePanelHandle>(null);
 
-    const [parslets, setParslets] = useState<(Parslet_SB & { lastUsed?: Date })[]>(props.parslets)
+    const [parslets, setParslets] = useState<(ParsletWithNotes & { lastUsed?: Date })[]>(props.parslets)
     const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
     // console.log(extractionsHighlights, "extractionsHighlights")
     const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string | null }[]>([...annotations, ...extractionsHighlights])
-
-
+    const [savingNotes, setSetsavingNotes] = useState(false)
     const supabase = browserClient()
+
+    const debouncedSaveNote = useDebouncedCallback(async (value: string, parsletId:string) => {
+
+       console.log("saving note",value,parsletId)
+        setSetsavingNotes(true)
+        const {data, error} = await supabase.from("contract_note").upsert({
+            contract_id: contract.id,
+            parslet_id: parsletId,
+            content: value
+        })
+        setSetsavingNotes(false)
+        
+    }, 1200)
+
 
 
 
@@ -146,9 +161,10 @@ export function ContractReviewer(props: Props) {
                             <div key={parslet.id}>
                                 <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
                                 <Textarea
+                                defaultValue={parslet.contract_note[0]?.content ?? ""}
                                     autosize
                                     minRows={2}
-                                // w={"100%"}
+                                    onChange={(event) => debouncedSaveNote(event.currentTarget.value, parslet.id)}
                                 />
                                 <ul>
                                     {highlights.filter((highlight) => highlight.parslet_id === parslet.id).map((highlight) => (
