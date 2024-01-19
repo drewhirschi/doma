@@ -1,4 +1,4 @@
-import { ScaledPosition } from "react-pdf-highlighter";
+import type { LTWHP, Scaled, ScaledPosition } from "react-pdf-highlighter";
 
 type Rect = {
     x1: number;
@@ -34,13 +34,13 @@ function calculateBoundingRect(rects: Rect[]): Rect | null {
 }
 
 function buildScaledPostionFromContractLines(contractLines: ContractLine_SB[]): ScaledPosition {
-    const rects = contractLines.map(rect => ({
+    const rects = contractLines.map((rect: ContractLine_SB) => ({
         x1: rect.x1,
         x2: rect.x2,
-        y1: rect.y1,
-        y2: rect.y2,
-        width: 1000, 
-        height: 1200, // Assuming constant height
+        y1: rect.y1 - 9,
+        y2: rect.y2 - 9,
+        width: rect.page_width,
+        height: rect.page_height,
         pageNumber: rect.page
     }));
 
@@ -56,11 +56,11 @@ function buildScaledPostionFromContractLines(contractLines: ContractLine_SB[]): 
 
 
 export function buildAnnotationFromExtraction(ei: ExtractedInformation_SB & { contract_line: ContractLine_SB[] }) {
-
-    return {
-        position: buildScaledPostionFromContractLines(ei.contract_line),
-        id: ei.id,
-        text: ei.data as string,
-        parslet_id: ei.parslet_id
-    }
+       
+        return {
+            position: buildScaledPostionFromContractLines(ei.contract_line),
+            id: ei.id,
+            text: ei.data as string,
+            parslet_id: ei.parslet_id
+        }
 }

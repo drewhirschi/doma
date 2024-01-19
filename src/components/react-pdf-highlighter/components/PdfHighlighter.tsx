@@ -7,7 +7,7 @@ import {
   NullL10n,
   PDFLinkService,
   PDFViewer,
-} from "pdfjs-dist/web/pdf_viewer.mjs";
+} from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 import type {
   IHighlight,
   LTWH,
@@ -179,6 +179,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       new PDFViewer({
         container: this.containerNodeRef!.current!,
         eventBus: this.eventBus,
+        // enhanceTextSelection: true, // deprecated. https://github.com/mozilla/pdf.js/issues/9943#issuecomment-409369485
         textLayerMode: 2,
         removePageBorders: true,
         linkService: this.linkService,
