@@ -7,7 +7,7 @@ import ProjectCard from "@/components/ProjectCard";
 import { error } from "console";
 
 interface Props {
-    projects: (Project_SB & { profile: Profile_SB[] })[]
+    projects: (Project_SB & { profile: Profile_SB[], contract: { completed: boolean }[] })[]
     users: Profile_SB[]
 }
 

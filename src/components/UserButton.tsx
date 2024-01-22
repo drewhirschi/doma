@@ -17,21 +17,19 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
 
   const router = useRouter();
 
-  const [session, setSession] = useState<Session | null | undefined>(null);
+  const [profile, setProfile] = useState<Profile_SB | null | undefined>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data, error }) => {
+    supabase.auth.getSession().then(async ({ data, error }) => {
       if (error) {
       }
       if (data.session) {
-        setSession(data.session)
+        const profileQ = await supabase.from("profile").select("*").eq("id", data.session.user.id).single()
+        setProfile(profileQ.data)
       }
     })
 
   }, [supabase]);
-
-
-
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -45,19 +43,19 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
         <UnstyledButton className={classes.user} mx={4}>
           <Group>
             <Avatar
-              src={session?.user?.user_metadata?.avatar_url}
-              //color={session?.user?.user_metadata?.color}
+              //src={session?.user?.user_metadata?.avatar_url} // implement for images
+              color={profile?.color ?? "black"} // need to add color to the user_metadata or retrieve profile
               radius="xl"
-            >{getInitials(session?.user?.user_metadata?.name)}</Avatar>
+            >{getInitials(profile?.display_name ?? "")}</Avatar>
 
             {!collapsed && <>
               <div style={{ flex: 1 }}>
                 <Text size="sm" fw={500}>
-                  {session?.user?.user_metadata.name ?? ""}
+                  {profile?.display_name ?? ""}
                 </Text>
 
                 <Text c="dimmed" size="xs">
-                  {session?.user?.email ?? ""}
+                  {profile?.email ?? ""}
                 </Text>
               </div>
 

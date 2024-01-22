@@ -3,17 +3,19 @@ import { useEffect, useState } from "react";
 
 import { browserClient } from "@/supabase/BrowerClients";
 import { getInitials } from "@/helper";
+import { updateContractAssignment } from "./RevierCombobox.action";
 
-function SelectOption({ avatar, email, name }: { avatar: string, email: string, name: string, }) {
+function SelectOption({ avatar, color, initials, name }: { avatar: string, color: string, initials: string, name: string, }) {
     return (
-        <Group gap="sm">
-            <Avatar size={32} src={avatar} radius={40} />
+        <Group gap="sm" >
+            {initials === "?" ? (
+                <Avatar size={32} src={null}></Avatar>
+            ) : (
+                <Avatar size={32} color={color!}>{getInitials(name!)}</Avatar>
+            )}
             <div>
-                <Text fz="sm" fw={500}>
+                <Text fz="sm" fw={500} truncate="end">
                     {name}
-                </Text>
-                <Text fz="xs" c="dimmed" truncate="end">
-                    {email}
                 </Text>
             </div>
         </Group>
@@ -31,11 +33,25 @@ export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers
 
     const assigned_to = projectMembers.find(m => m.id == selectedMemberId)
 
-    const options = projectMembers.map((profile: any) => (
-        <Combobox.Option key={profile.id} value={profile.id}>
-            <SelectOption avatar={getInitials(profile.display_name)} email={profile.email} name={profile.display_name} />
-        </Combobox.Option>
-    ));
+    const options = projectMembers
+        .filter((profile) => profile.id !== selectedProfileId)
+        .map((profile: any) => (
+            <Combobox.Option key={profile.id} value={profile.id}>
+                <SelectOption avatar={profile.avatar_url} color={profile.color!} initials={getInitials(profile.display_name!)} name={profile.display_name} />
+            </Combobox.Option>
+        ));
+
+    let newOption
+
+    if (selectedProfileId) {
+        newOption = (
+            <Combobox.Option key={null} value={null}>
+                <SelectOption avatar={""} color={""} initials={"?"} name={"Unassign"} />
+            </Combobox.Option>
+        );
+    }
+
+    const allOptions = [...options, newOption];
 
     return (
         <Combobox
@@ -44,7 +60,7 @@ export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers
             onOptionSubmit={async (val) => {
                 setSelectedMemberId(val)
                 combobox.closeDropdown();
-                await supabase.from("contract").update({ assigned_to: val }).eq("id", contractId)
+                updateContractAssignment(val, contractId)
             }}
         >
             <Combobox.Target>
@@ -59,7 +75,7 @@ export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers
                     variant="unstyled"
                 >
                     {assigned_to ? (
-                        <SelectOption avatar={""} email={assigned_to.email} name={assigned_to.display_name} />
+                        <SelectOption avatar={assigned_to.avatar_url} color={assigned_to.color!} initials={getInitials(assigned_to.display_name!)} name={assigned_to.display_name} />
                     ) : (
                         <Input.Placeholder>Not Assigned</Input.Placeholder>
                     )}
@@ -67,7 +83,7 @@ export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers
             </Combobox.Target>
 
             <Combobox.Dropdown>
-                <Combobox.Options>{options}</Combobox.Options>
+                <Combobox.Options>{allOptions}</Combobox.Options>
             </Combobox.Dropdown>
         </Combobox>
     )

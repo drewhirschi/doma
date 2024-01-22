@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Container, Group, Select, Table, Tabs, TabsList, TabsPanel, TabsTab, Title, rem } from '@mantine/core';
+import { Avatar, Grid, Box, Button, Container, Group, Select, Table, Tabs, TabsList, TabsPanel, TabsTab, Title, rem, SimpleGrid, Space } from '@mantine/core';
 import { IconAlertCircle, IconChevronLeft, IconFileArrowLeft, IconHome, IconMessageCircle, IconPhoto, IconSettings } from '@tabler/icons-react';
 import { RedirectType, redirect, } from 'next/navigation';
 
@@ -10,7 +10,6 @@ import { getUserTenant } from '@/shared/getUserTenant';
 import { serverClient } from '@/supabase/ServerClients';
 
 export default async function Page({ params, searchParams }: { params: { projectId: string, tab: string }, searchParams: { query: string } }) {
-
 
     const query = searchParams?.query || '';
 
@@ -38,19 +37,26 @@ export default async function Page({ params, searchParams }: { params: { project
         throw new Error("No tenant id")
     }
 
+    const assignedContracts = project.contract.reduce((count, contract) => {
+        return count +
+            (contract.assigned_to === null ? 0 : 1);
+    }, 0)
 
     return (
         <Box p="sm">
             <BackButton href={"/portal/projects"} />
             <Title mb={"sm"} order={1}>{project.display_name}</Title>
-            <Title c="gray" mb={"sm"} order={5}>Deal Structure: {project.deal_structure}</Title>
-            <Title c="gray" mb={"sm"} order={5}>Client: {project.client}</Title>
-            <Title c="gray" mb={"sm"} order={5}>Counterparty: {project.counterparty}</Title>
-            <Title c="gray" mb={"sm"} order={5}>Target: {...project.target}</Title>
-            <Title c="gray" mb={"sm"} order={5}>Phase Deadline: {project.phase_deadline}</Title>
+            <SimpleGrid cols={3}>
+                <div style={{ color: 'GrayText' }}>Deal Structure: {project.deal_structure}</div>
+                <div style={{ color: 'GrayText' }}>Client: {project.client}</div>
+                <div style={{ color: 'GrayText' }}>Target: {...project.target}</div>
+                <div style={{ color: 'GrayText' }}>Phase Deadline: {project.phase_deadline}</div>
+                <div style={{ color: 'GrayText' }}>Counterparty: {project.counterparty}</div>
+                <div style={{ color: 'GrayText' }}>Assigned Contracts: {assignedContracts} / {project.contract.length}</div>
+            </SimpleGrid>
+            <Space h="md" />
             <ProjectTabs activeTab={params.tab} project={project} />
         </Box>
-
     );
 };
 

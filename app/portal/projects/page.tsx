@@ -6,7 +6,7 @@ import { serverClient } from "@/supabase/ServerClients";
 export default async function Page() {
 
     const supabase = serverClient()
-    const projectFetch = await supabase.from("project").select("*, profile(*)")
+    const projectFetch = await supabase.from("project").select("*, profile(*), contract(completed)")
     const userFetch = await supabase.from("profile").select("*")
 
     if (!projectFetch.data || !userFetch.data) {

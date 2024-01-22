@@ -6,16 +6,27 @@ import { serverActionClient } from "@/supabase/ServerClients"
 export async function deleteProject(projectId: string): Promise<any> {
     const supabase = serverActionClient()
 
-   const {data, error} =  await supabase
+    const { data, error } = await supabase
         .from("project")
         .delete()
         .match({ id: projectId })
 
 
-        revalidatePath("/portal/projects")
+    revalidatePath("/portal/projects")
 
-        return {data, error}
+    return { data, error }
+}
+
+export async function changeProjectStatus(projectId: string, status: boolean): Promise<any> {
+    const supabase = serverActionClient()
+
+    const { data, error } = await supabase
+        .from("project")
+        .update({ 'is_active': !status })
+        .eq('id', projectId)
 
 
+    revalidatePath("/portal/projects")
 
+    return { data, error }
 }

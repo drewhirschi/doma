@@ -1,29 +1,30 @@
-import { Avatar, Select, TableScrollContainer, TableTbody, TableTd, TableTh, TableThead, TableTr, Tabs, TabsList, TabsPanel, TabsTab, rem } from '@mantine/core';
+import { Progress, Avatar, Select, TableScrollContainer, TableTbody, TableTd, TableTh, TableThead, TableTr, Tabs, TabsList, TabsPanel, TabsTab, rem } from '@mantine/core';
 import { Badge, Button, Card, Container, Grid, Group, Image, Space, Table, Text } from "@mantine/core";
 import { IconUserPlus, IconUsers } from '@tabler/icons-react';
 
 import { InviteMemberModal } from './InviteMemberModal';
 import { TeamRoleSelect } from '@/components/TeamRoleSelect';
 import { serverClient } from "@/supabase/ServerClients";
-import { getInitials } from '@/helper';
-
-const role = 'Admin' //add these to profile table if desired
-const lastActive = '2 days ago' //add these to profile table if desired
-const active = true //add these to profile table if desired
+import { getCompletedContracts, getInitials, getTotalContracts } from '@/helper';
 
 export default async function Page() {
 
+    const load = 0
     const supabase = serverClient()
     const userFetch = await supabase.from("profile").select("*")
+    const contractFetch = await supabase.from("contract").select("*")
 
     if (!userFetch.data) {
         console.error(userFetch.error)
-        throw new Error("Failed to fetch data")
+        throw new Error("Failed to fetch user data")
+    }
+
+    if (!contractFetch.data) {
+        console.error(userFetch.error)
+        throw new Error("Failed to fetch contract data")
     }
 
     const iconStyle = { width: rem(12), height: rem(12) };
-
-    //build pending invite table and populate with people who do not have their email confirmed
 
     const rows = userFetch.data
         .filter((profile) => profile.email_confirmed_at)
@@ -31,7 +32,11 @@ export default async function Page() {
             <TableTr key={profile.display_name}>
                 <TableTd>
                     <Group gap="sm">
-                        <Avatar src={profile.avatar_url} color={profile.color!} radius="xl">{getInitials(profile.display_name!)}</Avatar>
+                        {0 ? (
+                            <Avatar size={40} src={profile.avatar_url}></Avatar>
+                        ) : (
+                            <Avatar size={40} color={profile.color!}>{getInitials(profile.display_name!)}</Avatar>
+                        )}
                         <div>
                             <Text fz="sm" fw={500}>
                                 {profile.display_name}
@@ -44,19 +49,17 @@ export default async function Page() {
                 </TableTd>
 
                 <TableTd>
-                    <TeamRoleSelect defaultValue={role} />
-                </TableTd>
-                <TableTd>{lastActive}</TableTd>
-                <TableTd>
-                    {active ? (
-                        <Badge fullWidth variant="light">
-                            Active
-                        </Badge>
-                    ) : (
-                        <Badge color="gray" fullWidth variant="light">
-                            Disabled
-                        </Badge>
-                    )}
+                    <Group gap="sm" grow>
+                        {typeof getCompletedContracts(contractFetch.data, profile.id) === 'number' && typeof getTotalContracts(contractFetch.data, profile.id) === 'number' ? (
+                            <>
+                                <Progress value={(getCompletedContracts(contractFetch.data, profile.id) / getTotalContracts(contractFetch.data, profile.id)) * 100} />
+                                {`${getCompletedContracts(contractFetch.data, profile.id)}`} / {`${getTotalContracts(contractFetch.data, profile.id)}`}
+                            </>
+                        ) : (
+                            // Display a message if the values are not valid numbers
+                            <Text>Error: Invalid contract values</Text>
+                        )}
+                    </Group>
                 </TableTd>
             </TableTr>
         ));
@@ -94,9 +97,7 @@ export default async function Page() {
                             <TableThead>
                                 <TableTr>
                                     <TableTh>Employee</TableTh>
-                                    <TableTh>Role</TableTh>
-                                    <TableTh>Last active</TableTh>
-                                    <TableTh>Status</TableTh>
+                                    <TableTh>Assigned Contracts</TableTh>
                                 </TableTr>
                             </TableThead>
                             <TableTbody>{rows}</TableTbody>

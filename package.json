@@ -30,6 +30,7 @@
     "react-dom": "18.2.0",
     "react-pdf-highlighter": "^6.1.0",
     "react-resizable-panels": "^1.0.7",
+    "redux": "^5.0.1",
     "tus-js-client": "^4.0.0",
     "type-fest": "^4.9.0",
     "unzipper": "^0.10.14",
