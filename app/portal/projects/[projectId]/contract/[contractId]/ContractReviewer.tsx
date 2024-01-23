@@ -13,13 +13,13 @@ import {
 } from "@/components/PdfViewer";
 import { IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconSettings, IconTrash } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { deleteContractExtractedInfo, reviewContractAction } from "./ContractReviewer.actions";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 
 import { BackButton } from "@/components/BackButton";
 import { Json } from "@/types/supabase-generated";
 import { browserClient } from "@/supabase/BrowerClients";
 import { buildAnnotationFromExtraction } from "./helpers";
-import { reviewContractAction } from "./ContractReviewer.actions";
 import { useDebouncedCallback } from 'use-debounce';
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
@@ -178,6 +178,13 @@ export function ContractReviewer(props: Props) {
                                 >
                                     Run AI
                                 </Menu.Item>
+                                <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                                    onClick={() => {
+                                        deleteContractExtractedInfo(contract.id, projectId)
+                                    }}
+                                >
+                                    Delete EI
+                                </Menu.Item>
 
                             </Menu.Dropdown>
                         </Menu>
@@ -227,11 +234,10 @@ export function ContractReviewer(props: Props) {
                                                         <Text key={highlight.parslet_id + parslet.id}>{highlight.text}</Text>
                                                     </HoverCard.Target>
                                                     <HoverCard.Dropdown>
-                                                        {/* {
-                                                        JSON.stringify(highlight.position)
-                                                    } */}
+                                                        
                                                         Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"}
-                                                        {/* Page: {highlight.position.pageNumber} */}
+                                                        <br />
+                                                        EI id: {highlight.id}
                                                     </HoverCard.Dropdown>
                                                 </HoverCard>
                                             </Flex>
@@ -284,7 +290,7 @@ export function ContractReviewer(props: Props) {
                                     enableAreaSelection={(event) => event.altKey}
                                     onScrollChange={resetHash}
                                     pdfScaleValue="page-width"
-                                    // pdfScaleValue="1"
+                                    // pdfScaleValue=".75"
                                     scrollRef={(scrollTo) => {
                                         scrollViewerTo = scrollTo;
                                         // scrollToHighlightFromHash();

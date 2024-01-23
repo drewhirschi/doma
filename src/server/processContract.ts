@@ -71,6 +71,8 @@ export async function reviewContract(supabase: SupabaseClient, contractId: strin
     })
 
     const { data: extractorData, error: extractorError } = await supabase.from('parslet').select('*')
+        .order("order", { ascending: true })
+        // .limit(1)
 
     if (!extractorData) {
         console.error('Error loading extractors:', extractorError);
@@ -79,7 +81,6 @@ export async function reviewContract(supabase: SupabaseClient, contractId: strin
 
     let extractors = extractorData.map(e => ({ id: e.id, name: e.display_name, instruction: e.instruction, output: { schema: e.schema ?? "", examples: e.examples } }))
 
-    // extractors = extractors.slice(0, 5)
 
     for (const extractor of Object.values(extractors)) {
         promises.push(execExtractor(extractor, contract));
@@ -128,6 +129,13 @@ export async function reviewContract(supabase: SupabaseClient, contractId: strin
     }
 
     const eiRefs = extractedInfo.flatMap((ei) => {
+
+        if (!ei.ref_lines.includes('-')) return [{
+            line_id: Number(ei.ref_lines),
+            contract_id: ei.contract_id,
+            extracted_info_id: ei.id
+        }];
+
         const refLines = ei.ref_lines.split('-').map(Number)
         const start = refLines[0]
         const end = refLines[1]
