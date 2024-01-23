@@ -168,6 +168,42 @@ export interface Database {
           }
         ]
       }
+      contract_note: {
+        Row: {
+          content: string
+          contract_id: string
+          created_at: string
+          parslet_id: string
+        }
+        Insert: {
+          content?: string
+          contract_id: string
+          created_at?: string
+          parslet_id: string
+        }
+        Update: {
+          content?: string
+          contract_id?: string
+          created_at?: string
+          parslet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_note_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contract"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_note_parslet_id_fkey"
+            columns: ["parslet_id"]
+            isOneToOne: false
+            referencedRelation: "parslet"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       extracted_information: {
         Row: {
           contract_id: string

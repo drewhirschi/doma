@@ -81,9 +81,10 @@ export async function reviewContract(supabase: SupabaseClient, contractId: strin
 
     // extractors = extractors.slice(0, 5)
 
-    Object.values(extractors).forEach((extractor) => {
+    for (const extractor of Object.values(extractors)) {
         promises.push(execExtractor(extractor, contract));
-    });
+        await new Promise(r => setTimeout(r, 1000))
+    }
 
     const responses = await Promise.all(promises)
 

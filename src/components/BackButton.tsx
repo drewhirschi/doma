@@ -11,7 +11,6 @@ export function BackButton(props: ButtonProps & { href: string }) {
     return (
         <Button
             leftSection={<IconChevronLeft size={14} />} variant="subtle"
-            // component={Link}
             onClick={() => router.back()}
             {...props}>
             Back

@@ -6,8 +6,8 @@ import { IconDotsVertical, IconMessages, IconNote, IconPlayerPause, IconPlayerPa
 import Link from "next/link";
 import { browserClient } from "@/supabase/BrowerClients";
 import { changeProjectStatus, deleteProject } from "./ProjectCard.actions";
-import { getInitials } from "@/helper";
 import { serverClient } from "@/supabase/ServerClients";
+import { getInitials } from "@/ux/helper";
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[], contract: { completed: boolean }[] }
@@ -131,7 +131,7 @@ export default function ProjectCard({ project }: Props) {
             />
         </Group>
 
-        <Button color="blue" fullWidth mt="md" radius="md" component={Link} href={`projects/${project.id}/tabs`}>
+        <Button color="blue" fullWidth mt="md" radius="md" component={Link} href={`projects/${project.id}/tabs/overview`}>
             Continue
         </Button>
     </Card>

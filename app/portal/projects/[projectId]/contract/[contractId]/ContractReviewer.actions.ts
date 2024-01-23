@@ -1,6 +1,6 @@
 "use server"
 
-import { reviewContract } from "@/processContract"
+import { reviewContract } from "@/server/processContract"
 import { serverActionClient } from "@/supabase/ServerClients"
 
 export async function reviewContractAction(contractId:string) {
