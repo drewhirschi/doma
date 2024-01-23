@@ -2,12 +2,12 @@
 
 import { ActionIcon, Avatar, Badge, Button, Card, Container, Flex, Grid, Group, Image, Menu, RingProgress, Text, rem } from "@mantine/core";
 import { IconDotsVertical, IconMessages, IconNote, IconPlayerPause, IconPlayerPauseFilled, IconPlayerPlay, IconTrash } from "@tabler/icons-react";
+import { changeProjectStatus, deleteProject } from "./ProjectCard.actions";
 
 import Link from "next/link";
 import { browserClient } from "@/supabase/BrowerClients";
-import { changeProjectStatus, deleteProject } from "./ProjectCard.actions";
-import { serverClient } from "@/supabase/ServerClients";
 import { getInitials } from "@/ux/helper";
+import { serverClient } from "@/supabase/ServerClients";
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[], contract: { completed: boolean }[] }
@@ -30,7 +30,7 @@ function dispayProfileGroup(profiles: Profile_SB[]) {
                     radius="xl"
                 >{getInitials(profile.display_name ?? profile.email)}</Avatar>
             ))}
-            {remainingCount > 0 && <Avatar key="remaining" children={`+${remainingCount}`} />}
+            {remainingCount > 0 && <Avatar key="remaining">+{remainingCount}</Avatar>}
         </Avatar.Group>
     );
 }

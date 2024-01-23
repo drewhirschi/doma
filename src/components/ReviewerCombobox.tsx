@@ -2,7 +2,7 @@ import { Avatar, Combobox, Group, Input, InputBase, Text, useCombobox } from "@m
 import { useEffect, useState } from "react";
 
 import { browserClient } from "@/supabase/BrowerClients";
-import { getInitials } from "@/helper";
+import { getInitials } from "@/ux/helper";
 import { updateContractAssignment } from "./RevierCombobox.action";
 
 function SelectOption({ avatar, color, initials, name }: { avatar: string, color: string, initials: string, name: string, }) {
@@ -45,7 +45,7 @@ export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers
 
     if (selectedProfileId) {
         newOption = (
-            <Combobox.Option key={null} value={null}>
+            <Combobox.Option key={null} value={""}>
                 <SelectOption avatar={""} color={""} initials={"?"} name={"Unassign"} />
             </Combobox.Option>
         );

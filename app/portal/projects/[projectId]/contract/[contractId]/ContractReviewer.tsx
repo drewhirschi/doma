@@ -7,6 +7,7 @@ import {
     PdfHighlighter,
     PdfLoader,
     Popup,
+    Position,
     ScaledPosition,
     Tip
 } from "@/components/PdfViewer";
@@ -46,7 +47,7 @@ export function ContractReviewer(props: Props) {
 
     const [parslets, setParslets] = useState<(ParsletWithNotes & { lastUsed?: Date })[]>(props.parslets)
     const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
-    const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string | null }[]>([...annotations, ...extractionsHighlights])
+    const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string }[]>([...annotations, ...extractionsHighlights])
     const [savingNotes, setSavingNotes] = useState(false)
     const supabase = browserClient()
 

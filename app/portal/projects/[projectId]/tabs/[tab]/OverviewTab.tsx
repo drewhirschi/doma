@@ -1,19 +1,16 @@
 "use client"
 
 import { Anchor, Avatar, Badge, Button, Combobox, Container, Group, Input, InputBase, Progress, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
+import { getCompletedContracts, getInitials, getTotalContracts } from "@/ux/helper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { useState } from "react";
 import { AddContractsModalButton } from "./AddContractsModal";
 import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
 import { ReviewerCombobox } from "@/components/ReviewerCombobox";
-import { TeamRoleSelect } from "@/components/TeamRoleSelect";
 import { useDebouncedCallback } from 'use-debounce';
-import { getCompletedContracts, getInitials, getTotalContracts } from "@/helper";
 
 //get real last sign date - from auth-users supabase table?
-//how to do active status? do last sign in instead - from auth-users supabase table?
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[], contract: Contract_SB[] }
@@ -30,6 +27,7 @@ export default function OverviewTab({ project }: Props) {
     const { replace } = useRouter();
 
     const debouncedHandleSearch = useDebouncedCallback((value: string) => {
+        //@ts-ignore
         const params = new URLSearchParams(searchParams);
         if (value) {
             params.set('query', value);

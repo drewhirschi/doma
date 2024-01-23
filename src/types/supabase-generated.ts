@@ -14,7 +14,7 @@ export interface Database {
           contract_id: string
           created_at: string
           id: string
-          parslet_id: string | null
+          parslet_id: string
           position: Json
           tenant_id: string
           text: string
@@ -23,7 +23,7 @@ export interface Database {
           contract_id: string
           created_at?: string
           id?: string
-          parslet_id?: string | null
+          parslet_id: string
           position: Json
           tenant_id?: string
           text: string
@@ -32,7 +32,7 @@ export interface Database {
           contract_id?: string
           created_at?: string
           id?: string
-          parslet_id?: string | null
+          parslet_id?: string
           position?: Json
           tenant_id?: string
           text?: string

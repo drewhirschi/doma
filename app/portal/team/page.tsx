@@ -1,11 +1,10 @@
-import { Progress, Avatar, Select, TableScrollContainer, TableTbody, TableTd, TableTh, TableThead, TableTr, Tabs, TabsList, TabsPanel, TabsTab, rem } from '@mantine/core';
+import { Avatar, Progress, Select, TableScrollContainer, TableTbody, TableTd, TableTh, TableThead, TableTr, Tabs, TabsList, TabsPanel, TabsTab, rem } from '@mantine/core';
 import { Badge, Button, Card, Container, Grid, Group, Image, Space, Table, Text } from "@mantine/core";
 import { IconUserPlus, IconUsers } from '@tabler/icons-react';
+import { getCompletedContracts, getInitials, getTotalContracts } from '@/ux/helper';
 
 import { InviteMemberModal } from './InviteMemberModal';
-import { TeamRoleSelect } from '@/components/TeamRoleSelect';
 import { serverClient } from "@/supabase/ServerClients";
-import { getCompletedContracts, getInitials, getTotalContracts } from '@/helper';
 
 export default async function Page() {
 
