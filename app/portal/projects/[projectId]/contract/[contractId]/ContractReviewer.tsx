@@ -1,6 +1,6 @@
 "use client"
 
-import { ActionIcon, Button, Center, Flex, Group, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, rem } from "@mantine/core";
+import { ActionIcon, Button, Center, Flex, Group, HoverCard, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, rem } from "@mantine/core";
 import {
     AreaHighlight,
     Highlight,
@@ -9,8 +9,8 @@ import {
     Popup,
     ScaledPosition,
     Tip
-} from "react-pdf-highlighter";
-import { IconArrowsLeftRight, IconDots, IconDotsVertical, IconGripVertical, IconMessageCircle, IconSettings, IconTrash } from "@tabler/icons-react";
+} from "@/components/PdfViewer";
+import { IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconSettings, IconTrash } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 
@@ -20,6 +20,7 @@ import { browserClient } from "@/supabase/BrowerClients";
 import { buildAnnotationFromExtraction } from "./helpers";
 import { reviewContractAction } from "./ContractReviewer.actions";
 import { useDebouncedCallback } from 'use-debounce';
+import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 
 type ParsletWithNotes = Parslet_SB & { contract_note: { content: string }[] }
@@ -41,27 +42,55 @@ export function ContractReviewer(props: Props) {
 
 
 
-    const ref = useRef<ImperativePanelHandle>(null);
+    const panelRef = useRef<ImperativePanelHandle>(null);
 
     const [parslets, setParslets] = useState<(ParsletWithNotes & { lastUsed?: Date })[]>(props.parslets)
     const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
-    // console.log(extractionsHighlights, "extractionsHighlights")
     const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string | null }[]>([...annotations, ...extractionsHighlights])
-    const [savingNotes, setSetsavingNotes] = useState(false)
+    const [savingNotes, setSavingNotes] = useState(false)
     const supabase = browserClient()
 
-    const debouncedSaveNote = useDebouncedCallback(async (value: string, parsletId:string) => {
+    const router = useRouter()
 
-       console.log("saving note",value,parsletId)
-        setSetsavingNotes(true)
-        const {data, error} = await supabase.from("contract_note").upsert({
+    const debouncedSaveNote = useDebouncedCallback(async (value: string, parsletId: string) => {
+
+        console.log("saving note", value, parsletId)
+        setSavingNotes(true)
+        const { data, error } = await supabase.from("contract_note").upsert({
             contract_id: contract.id,
             parslet_id: parsletId,
             content: value
         })
-        setSetsavingNotes(false)
-        
+        setSavingNotes(false)
+
     }, 1200)
+
+    let scrollViewerTo = (highlight: any) => { }
+
+    function scrollToHighlightFromHash() {
+        const highlight = highlights.find((h) => h.id == window.location.hash.slice(1));
+
+        if (highlight) {
+            console.log("scrolling to", highlight)
+            scrollViewerTo(highlight);
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener(
+            "hashchange",
+            scrollToHighlightFromHash,
+            false
+        );
+
+        return () => {
+            window.removeEventListener(
+                "hashchange",
+                scrollToHighlightFromHash,
+                false
+            );
+        };
+    }, [])
 
 
 
@@ -85,7 +114,8 @@ export function ContractReviewer(props: Props) {
                     onClick={async () => {
                         setHighlights(highlights.filter((h) => h.id !== id))
                         closeMenu()
-                        const { data, error } = await supabase.from("extracted_information").delete().eq("id", id)
+                        await supabase.from("extracted_information").delete().eq("id", id)
+                        await supabase.from("annotation").delete().eq("id", id)
 
                     }}
                 >
@@ -110,8 +140,7 @@ export function ContractReviewer(props: Props) {
             contract_id: contract.id,
             text: text ?? "",
             position: position as unknown as Json,
-            // take another look at this
-            tenant_id: ""
+
         })
 
         if (error) {
@@ -124,7 +153,7 @@ export function ContractReviewer(props: Props) {
         document.location.hash = "";
     };
 
-    const pdfHighlights = highlights.map((h) => ({ position: h.position! as ScaledPosition, comment: { text: "", emoji: "" }, content: { text: h.text }, id: h.id! }))
+    const pdfHighlights = highlights.map((h) => ({ position: h.position! as ScaledPosition, content: { text: h.text }, id: h.id! }))
     return (
 
         <PanelGroup direction="horizontal">
@@ -161,25 +190,51 @@ export function ContractReviewer(props: Props) {
                             <div key={parslet.id}>
                                 <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
                                 <Textarea
-                                defaultValue={parslet.contract_note[0]?.content ?? ""}
+                                    defaultValue={parslet.contract_note[0]?.content ?? ""}
                                     autosize
                                     minRows={2}
                                     onChange={(event) => debouncedSaveNote(event.currentTarget.value, parslet.id)}
                                 />
                                 <ul>
-                                    {highlights.filter((highlight) => highlight.parslet_id === parslet.id).map((highlight) => (
-                                        <Flex direction={"row"} wrap={"nowrap"} gap={"sm"} key={highlight.id}>
-                                            <ActionIcon variant="outline" color="red"
-                                                onClick={async () => {
-                                                    setHighlights(highlights.filter((h) => h.id !== highlight.id))
-                                                    const { data, error } = await supabase.from("extracted_information").delete().eq("id", highlight.id!)
-                                                }}
-                                            >
-                                                <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                                            </ActionIcon>
-                                            <Text key={highlight.parslet_id + parslet.id}>{highlight.text}</Text>
-                                        </Flex>
-                                    ))}
+                                    {highlights
+                                        .filter((highlight) => highlight.parslet_id === parslet.id)
+                                        .map((highlight) => (
+                                            <Flex direction={"row"} wrap={"nowrap"} gap={"sm"} key={highlight.id}>
+                                                <ActionIcon
+                                                    onClick={() => {
+
+                                                        // router.replace("#" + highlight.id)
+                                                        scrollViewerTo(highlight)
+
+                                                    }}
+                                                >
+
+                                                    <IconListSearch style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                                                </ActionIcon>
+                                                <ActionIcon variant="outline" color="red"
+                                                    onClick={async () => {
+                                                        setHighlights(highlights.filter((h) => h.id !== highlight.id))
+                                                        await supabase.from("annotation").delete().eq("id", highlight.id!)
+                                                        await supabase.from("extracted_information").delete().eq("id", highlight.id!)
+                                                    }}
+                                                >
+                                                    <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                                                </ActionIcon>
+                                                <HoverCard shadow="md" openDelay={500}>
+
+                                                    <HoverCard.Target>
+                                                        <Text key={highlight.parslet_id + parslet.id}>{highlight.text}</Text>
+                                                    </HoverCard.Target>
+                                                    <HoverCard.Dropdown>
+                                                        {/* {
+                                                        JSON.stringify(highlight.position)
+                                                    } */}
+                                                        Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"}
+                                                        {/* Page: {highlight.position.pageNumber} */}
+                                                    </HoverCard.Dropdown>
+                                                </HoverCard>
+                                            </Flex>
+                                        ))}
 
                                 </ul>
                             </div>
@@ -193,10 +248,7 @@ export function ContractReviewer(props: Props) {
                     <IconGripVertical />
                 </Center>
             </PanelResizeHandle>
-            <Panel minSize={30} defaultSize={60} ref={ref} >
-                {/* <PdfViewer
-                    url={pdfUrl}
-                /> */}
+            <Panel minSize={30} defaultSize={60} ref={panelRef} >
                 <div
                     style={{
                         height: "100dvh",
@@ -219,115 +271,119 @@ export function ContractReviewer(props: Props) {
                         }
                     >
                         {(pdfDocument) => {
-                            
+
                             pdfDocument.getPage(1).then((page) => {
-                                console.log("first page view port",{width:page.getViewport().viewBox[2],height: page.getViewport().viewBox[3]})
+                                console.log("first page view port", { width: page.getViewport().viewBox[2], height: page.getViewport().viewBox[3] })
                             })
                             return (
 
-                            <PdfHighlighter
-                                pdfDocument={pdfDocument}
-                                highlights={pdfHighlights}
-                                enableAreaSelection={(event) => event.altKey}
-                                onScrollChange={resetHash}
-                                pdfScaleValue=".75"
-                                // pdfScaleValue="page-width"
-                                scrollRef={(scrollTo) => { }}
-                                onSelectionFinished={(
-                                    position,
-                                    content,
-                                    hideTipAndSelection,
-                                    transformSelection
-                                ) => {
-                                    console.log("scaled hightlight",position)
-                                    
-                                    return (
+                                <PdfHighlighter
+                                    pdfDocument={pdfDocument}
+                                    highlights={pdfHighlights}
+                                    enableAreaSelection={(event) => event.altKey}
+                                    onScrollChange={resetHash}
+                                    pdfScaleValue="page-width"
+                                    // pdfScaleValue="1"
+                                    scrollRef={(scrollTo) => {
+                                        scrollViewerTo = scrollTo;
+                                        // scrollToHighlightFromHash();
+                                    }}
+                                    onSelectionFinished={(
+                                        position,
+                                        content,
+                                        hideTipAndSelection,
+                                        transformSelection
+                                    ) => {
+                                        console.log("scaled hightlight", position)
+
+                                        return (
 
 
-                                        <Paper shadow="md" w={200} p={"md"}>
-
-
-
-                                            <Stack gap={"sm"}>
-                                                <Text c="dimmed" size="sm">Recent</Text>
-                                                <Button.Group orientation="vertical">
-
-                                                    {[...parslets].sort((a, b) => (b.lastUsed?.getTime() ?? 0) - (a.lastUsed?.getTime() ?? 0))
-                                                        .map((parslet) => (
-                                                            <Button
-                                                                size="sm"
-                                                                c="black"
-                                                                color="gray"
-                                                                variant="subtle"
-                                                                key={parslet.id}
-                                                                onClick={() => {
-                                                                    addHighlight(parslet.id, content.text, position);
-                                                                    hideTipAndSelection();                                                                    setParslets(parslets.map((p) => {
-                                                                        if (p.id === parslet.id) {
-                                                                            return { ...p, lastUsed: new Date() };
-                                                                        }
-                                                                        return p;
-                                                                    }))
-
-
-                                                                }}
-                                                                leftSection={<IconMessageCircle style={{ width: rem(14), height: rem(14) }} />}
-                                                            >
-
-                                                                {parslet.display_name}
-                                                            </Button>
-                                                        ))}
-                                                </Button.Group>
-                                              
-                                            </Stack>
+                                            <Paper shadow="md" w={200} p={"md"}>
 
 
 
+                                                <Stack gap={"sm"}>
+                                                    <Text c="dimmed" size="sm">Recent</Text>
+                                                    <Button.Group orientation="vertical">
+
+                                                        {[...parslets].sort((a, b) => (b.lastUsed?.getTime() ?? 0) - (a.lastUsed?.getTime() ?? 0))
+                                                            .map((parslet) => (
+                                                                <Button
+                                                                    size="sm"
+                                                                    c="black"
+                                                                    color="gray"
+                                                                    variant="subtle"
+                                                                    key={parslet.id}
+                                                                    onClick={() => {
+                                                                        addHighlight(parslet.id, content.text, position);
+                                                                        hideTipAndSelection(); setParslets(parslets.map((p) => {
+                                                                            if (p.id === parslet.id) {
+                                                                                return { ...p, lastUsed: new Date() };
+                                                                            }
+                                                                            return p;
+                                                                        }))
 
 
-                                        </Paper>
-                                    )
-                                }}
-                                highlightTransform={(
-                                    highlight,
-                                    index,
-                                    setTip,
-                                    hideTip,
-                                    viewportToScaled,
-                                    screenshot,
-                                    isScrolledTo
-                                ) => {
-                                  
+                                                                    }}
+                                                                    leftSection={<IconMessageCircle style={{ width: rem(14), height: rem(14) }} />}
+                                                                >
 
-                                    return (
-                                        <Popup
-                                            popupContent={<HighlightPopup id={highlight.id} closeMenu={hideTip} annotations={highlights} />}
-                                            onMouseOver={(popupContent) =>
-                                                setTip(highlight, (highlight) => popupContent)
-                                            }
-                                            onMouseOut={hideTip}
+                                                                    {parslet.display_name}
+                                                                </Button>
+                                                            ))}
+                                                    </Button.Group>
 
-                                            key={index}
+                                                </Stack>
 
-                                        >
-                                            <Highlight
-                                                isScrolledTo={isScrolledTo}
-                                                position={highlight.position}
-                                                onClick={() => { }}
-                                                comment={{ emoji: "", text: "" }}
-                                            />
-                                        </Popup>
-                                    );
-                                }}
-                            />
-                        )}}
+
+
+
+
+                                            </Paper>
+                                        )
+                                    }}
+                                    highlightTransform={(
+                                        highlight,
+                                        index,
+                                        setTip,
+                                        hideTip,
+                                        viewportToScaled,
+                                        screenshot,
+                                        isScrolledTo
+                                    ) => {
+
+
+                                        return (
+                                            <Popup
+                                                popupContent={<HighlightPopup id={highlight.id} closeMenu={hideTip} annotations={highlights} />}
+                                                onMouseOver={(popupContent) =>
+                                                    setTip(highlight, (highlight) => popupContent)
+                                                }
+                                                onMouseOut={hideTip}
+
+                                                key={index}
+
+                                            >
+                                                <Highlight
+                                                    isScrolledTo={isScrolledTo}
+                                                    position={highlight.position}
+                                                    onClick={() => { }}
+                                                    comment={{ emoji: "", text: "" }}
+                                                />
+                                            </Popup>
+                                        );
+                                    }}
+                                />
+                            )
+                        }}
                     </PdfLoader>
                 </div>
 
             </Panel>
 
 
-        </PanelGroup>
+        </PanelGroup >
 
 
 

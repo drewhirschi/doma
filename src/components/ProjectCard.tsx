@@ -4,10 +4,8 @@ import { ActionIcon, Avatar, Badge, Button, Card, Container, Flex, Grid, Group, 
 import { IconDotsVertical, IconMessages, IconNote, IconPlayerPause, IconPlayerPauseFilled, IconTrash } from "@tabler/icons-react";
 
 import Link from "next/link";
-import { browserClient } from "@/supabase/BrowerClients";
 import { deleteProject } from "./ProjectCard.actions";
-import { getInitials } from "@/helper";
-import { serverClient } from "@/supabase/ServerClients";
+import { getInitials } from "@/ux/helper";
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[] }
@@ -100,7 +98,7 @@ export default function ProjectCard({ project }: Props) {
             />
         </Group>
 
-        <Button color="blue" fullWidth mt="md" radius="md" component={Link} href={`projects/${project.id}/tabs`}>
+        <Button color="blue" fullWidth mt="md" radius="md" component={Link} href={`projects/${project.id}/tabs/overview`}>
             Continue
         </Button>
     </Card>

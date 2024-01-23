@@ -1,4 +1,4 @@
-import type { LTWHP, Scaled, ScaledPosition } from "react-pdf-highlighter";
+import type { LTWHP, Scaled, ScaledPosition } from "@/components/PdfViewer";
 
 type Rect = {
     x1: number;
@@ -37,8 +37,8 @@ function buildScaledPostionFromContractLines(contractLines: ContractLine_SB[]): 
     const rects = contractLines.map((rect: ContractLine_SB) => ({
         x1: rect.x1,
         x2: rect.x2,
-        y1: rect.y1 - 9,
-        y2: rect.y2 - 9,
+        y1: rect.y1,
+        y2: rect.y2,
         width: rect.page_width,
         height: rect.page_height,
         pageNumber: rect.page

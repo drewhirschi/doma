@@ -1,4 +1,4 @@
-import { GlobalWorkerOptions, getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { GlobalWorkerOptions, getDocument } from "pdfjs-dist";
 import React, { Component } from "react";
 
 import type { PDFDocumentProxy } from "pdfjs-dist";

@@ -23,43 +23,48 @@ export default function Home({ children, params }: {
 
     return (
         <Flex
-        w={"100%"}
+            w={"100%"}
             direction={"row"}
             wrap={"nowrap"}
+            h={"100vh"}
         >
-            <Box
+
+
+            <Stack
                 ref={navbarRef}
-                className={classnames.navbar}
-            >
-                
-                <Stack justify='space-between' h={"100%"}>
+                className={classnames.navbar}>
 
-                    <div>
-                        <NavLink
-                            href={base + `/projects`}
-                            leftSection={<IconFolderOpen />}
-                            label={navbarHovered ? <Text>Projects</Text> : null}
-                            component={Link}
-                            active={pathname.split("/")[2] === "projects"}
-                        />
-                        <NavLink
-                            href={base + `/team`}
-                            leftSection={navbarHovered && <IconUsersGroup />}
-                            label={navbarHovered ? <Text>Team</Text> : <IconUsersGroup />}
-                            component={Link}
-                            active={pathname.split("/")[2] === "team"}
-                        />
+                <div className={classnames["nav-item"]}>
+                    <NavLink
+                        href={base + `/projects`}
+                        leftSection={<IconFolderOpen />}
+                        label={navbarHovered ? <Text>Projects</Text> : null}
+                        component={Link}
+                        active={pathname.split("/")[2] === "projects"}
+                    />
+                    <NavLink
+                        href={base + `/team`}
+                        leftSection={navbarHovered && <IconUsersGroup />}
+                        label={navbarHovered ? <Text>Team</Text> : <IconUsersGroup />}
+                        component={Link}
+                        active={pathname.split("/")[2] === "team"}
+                    />
 
-                    </div>
+                </div>
+
+                <div className={classnames["nav-item"]}>
 
                     <UserButton collapsed={!navbarHovered} />
-                </Stack>
-            </Box>
-            <Box 
-             className={classnames.content}
-            >
+                </div>
+            </Stack>
+
+            <ScrollArea h={"100%"} className={classnames.content}>
+
                 {children}
-            </Box>
+            </ScrollArea>
+
+
+
         </Flex>
 
     )

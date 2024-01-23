@@ -2,7 +2,7 @@ import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } fro
 
 import { NextRequest } from "next/server";
 import OpenAI from 'openai';
-import { reviewContract } from '../../../../../../src/processContract';
+import { reviewContract } from '@/server/processContract';
 import { routeClient } from "@/supabase/ServerClients";
 
 export async function POST(req: NextRequest) {
