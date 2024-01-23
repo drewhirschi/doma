@@ -1,5 +1,5 @@
 import { fullAccessServiceClient as fullDBAccessServiceClient } from "@/supabase/ServerClients";
-import { reviewContract } from "../../src/processContract";
+import { reviewContract } from "../../src/server/processContract";
 
 const supabase = fullDBAccessServiceClient()
 

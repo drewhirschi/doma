@@ -11,18 +11,18 @@ import { createProject } from './AddProjectModal.action';
 import { useDisclosure } from '@mantine/hooks';
 
 interface Props {
-    users: Profile_SB[]
-    projects: (Project_SB & { profile: Profile_SB[] })[]
+  users: Profile_SB[]
+  projects: (Project_SB & { profile: Profile_SB[], contract: { completed: boolean }[] })[]
 }
 
 export interface CreateFormValues {
-    projectName: string,
-    assignedAttorneys: string[], 
-    dealStructure: string,
-    client: string,
-    counterparty: string,
-    targetNames: string[],
-    phaseDeadline: Date
+  projectName: string,
+  assignedAttorneys: string[],
+  dealStructure: string,
+  client: string,
+  counterparty: string,
+  targetNames: string[],
+  phaseDeadline: Date
 }
 
 export function AddProjectsModal(props: Props) {
@@ -30,90 +30,90 @@ export function AddProjectsModal(props: Props) {
   const [value, setValue] = useState<Date | null>(null);
   const icon = <IconCalendar style={{ width: rem(18), height: rem(18) }} stroke={1.5} />;
   const supabase = browserClient()
- 
-  const uniqueNames = new Set(props.projects.map((d)=> d.display_name));
 
-    const form = useForm({
-      initialValues: {
-        projectName: '',
-        assignedAttorneys: [], 
-        dealStructure: '',
-        client: '',
-        counterparty: '',
-        targetNames: [],
-        phaseDeadline: new Date()
-      },
-  
-      validate: {
-        projectName: (value) =>
-            uniqueNames.has(value) ? 'Project name already used' : !value ? 'Enter the project name': null,
-        dealStructure: isNotEmpty('Enter the deal structure'),
-        client: isNotEmpty('Enter the client you are representing'),
-        counterparty: (value, values) => 
-            value == values.client ? 'Client and counterparty cannot be the same' : !value ? 'Enter the counterparty' : null,
-        targetNames: isNotEmpty('Enter the company names the entity that is having due diligence performed on goes by')
-      },
-    });
+  const uniqueNames = new Set(props.projects.map((d) => d.display_name));
 
-    // autofill with project creator (not working)
-    // useEffect(()=>{
-    //     supabase.auth.getSession().then(session => {
-    //         form.values.assignedAttorneys.push(session.data.session?.user.id)}
-    //     )}, []
-    //   )
+  const form = useForm({
+    initialValues: {
+      projectName: '',
+      assignedAttorneys: [],
+      dealStructure: '',
+      client: '',
+      counterparty: '',
+      targetNames: [],
+      phaseDeadline: new Date()
+    },
+
+    validate: {
+      projectName: (value) =>
+        uniqueNames.has(value) ? 'Project name already used' : !value ? 'Enter the project name' : null,
+      dealStructure: isNotEmpty('Enter the deal structure'),
+      client: isNotEmpty('Enter the client you are representing'),
+      counterparty: (value, values) =>
+        value == values.client ? 'Client and counterparty cannot be the same' : !value ? 'Enter the counterparty' : null,
+      targetNames: isNotEmpty('Enter the company names the entity that is having due diligence performed on goes by')
+    },
+  });
+
+  // autofill with project creator (not working)
+  // useEffect(()=>{
+  //     supabase.auth.getSession().then(session => {
+  //         form.values.assignedAttorneys.push(session.data.session?.user.id)}
+  //     )}, []
+  //   )
 
   return (
     <>
       <Modal opened={opened} onClose={close} title="Authentication">
-        
-      <Box component="form" maw={400} mx="auto" onSubmit={form.onSubmit((values) => {
-        console.log("creating project")
-        createProject(values).then(()=>{
+
+        <Box component="form" maw={400} mx="auto" onSubmit={form.onSubmit((values) => {
+          console.log("creating project")
+          createProject(values).then(() => {
             close()
             form.reset()
-        })
-      })}>
-            <TextInput label="Project Name" placeholder="Project name" withAsterisk {...form.getInputProps('projectName')} />
-            <MultiSelect
+          })
+        })}>
+          <TextInput label="Project Name" placeholder="Project name" withAsterisk {...form.getInputProps('projectName')} />
+          <MultiSelect
             label="Assigned Attorneys"
             placeholder="Pick attorneys"
             checkIconPosition="right"
-            data={props.users.map((u)=>({value: u.id, label: u.display_name ?? u.email}))}
+            data={props.users.map((u) => ({ value: u.id, label: u.display_name ?? u.email }))}
             clearable
             mt="md"
             nothingFoundMessage="Name not found..."
             {...form.getInputProps('assignedAttorneys')}
-            />
-            <Select
+          />
+          <Select
             label="Deal Structure"
             placeholder="Pick structure"
             data={['Asset Purchase', 'Stock Purchase', 'Reverse Triangle Merger', 'Forward Merger', 'Other']} // if other, add a text field to explain
             withAsterisk
             mt="md"
             {...form.getInputProps('dealStructure')}
-            />
-            <TextInput
+          />
+          <TextInput
             label="Your Client"
             placeholder="Your client"
             withAsterisk
             mt="md"
             {...form.getInputProps('client')}
-            />
-            <TextInput
+          />
+          <TextInput
             label="Counterparty"
             placeholder="Counterparty"
             withAsterisk
             mt="md"
             {...form.getInputProps('counterparty')}
-            />
-            <TagsInput
+          />
+          <TagsInput
             label="Target (all known names)"
             placeholder="Pick from list or type anything"
-            data={[{value: form.values.client+"_client", label:form.values.client}, {value: form.values.counterparty+"_counterparty", label:form.values.counterparty}].filter((d)=>d.label)}
+            data={[{ value: form.values.client + "_client", label: form.values.client }, { value: form.values.counterparty + "_counterparty", label: form.values.counterparty }].filter((d) => d.label)}
             mt="md"
             {...form.getInputProps('targetNames')}
-            />
-            <DatePickerInput
+          />
+          <DatePickerInput
             label="Phase Deadline"
             placeholder="Pick date"
             leftSection={icon}
@@ -121,15 +121,15 @@ export function AddProjectsModal(props: Props) {
             leftSectionPointerEvents="none"
             clearable
             {...form.getInputProps('phaseDeadline')}
-            />
-            
-    
-            <Group justify="flex-end" mt="md">
-            <Button type="submit">Submit</Button>
-            </Group>
-      </Box>
+          />
 
-  
+
+          <Group justify="flex-end" mt="md">
+            <Button type="submit">Submit</Button>
+          </Group>
+        </Box>
+
+
       </Modal>
 
       <Button onClick={open}>New</Button>
