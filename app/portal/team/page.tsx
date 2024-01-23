@@ -1,137 +1,131 @@
-"use client"
-
-import { Avatar, Select, Tabs, rem } from '@mantine/core';
+import { Avatar, Progress, Select, TableScrollContainer, TableTbody, TableTd, TableTh, TableThead, TableTr, Tabs, TabsList, TabsPanel, TabsTab, rem } from '@mantine/core';
 import { Badge, Button, Card, Container, Grid, Group, Image, Space, Table, Text } from "@mantine/core";
 import { IconUserPlus, IconUsers } from '@tabler/icons-react';
+import { getCompletedContracts, getInitials, getTotalContracts } from '@/ux/helper';
 
 import { InviteMemberModal } from './InviteMemberModal';
-import { TeamRoleSelect } from '@/components/TeamRoleSelect';
+import { serverClient } from "@/supabase/ServerClients";
 
-const data = [
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-9.png',
-        name: 'Robert Wolfkisser',
-        job: 'Engineer',
-        email: 'rob_wolf@gmail.com',
-        role: 'Admin',
-        lastActive: '2 days ago',
-        active: true,
-    },
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-6.png',
-        name: 'Jill Jailbreaker',
-        job: 'Engineer',
-        email: 'jj@breaker.com',
-        role: 'Admin',
-        lastActive: '6 days ago',
-        active: true,
-    },
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-10.png',
-        name: 'Henry Silkeater',
-        job: 'Designer',
-        email: 'henry@silkeater.io',
-        role: 'Associate',
-        lastActive: '2 days ago',
-        active: false,
-    },
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png',
-        name: 'Bill Horsefighter',
-        job: 'Designer',
-        email: 'bhorsefighter@gmail.com',
-        role: 'Associate',
-        lastActive: '5 days ago',
-        active: true,
-    },
-    {
-        avatar:
-            'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-3.png',
-        name: 'Jeremy Footviewer',
-        job: 'Manager',
-        email: 'jeremy@foot.dev',
-        role: 'Associate',
-        lastActive: '3 days ago',
-        active: false,
-    },
-];
-export default function Page() {
+export default async function Page() {
+
+    const load = 0
+    const supabase = serverClient()
+    const userFetch = await supabase.from("profile").select("*")
+    const contractFetch = await supabase.from("contract").select("*")
+
+    if (!userFetch.data) {
+        console.error(userFetch.error)
+        throw new Error("Failed to fetch user data")
+    }
+
+    if (!contractFetch.data) {
+        console.error(userFetch.error)
+        throw new Error("Failed to fetch contract data")
+    }
 
     const iconStyle = { width: rem(12), height: rem(12) };
 
+    const rows = userFetch.data
+        .filter((profile) => profile.email_confirmed_at)
+        .map((profile) => (
+            <TableTr key={profile.display_name}>
+                <TableTd>
+                    <Group gap="sm">
+                        {0 ? (
+                            <Avatar size={40} src={profile.avatar_url}></Avatar>
+                        ) : (
+                            <Avatar size={40} color={profile.color!}>{getInitials(profile.display_name!)}</Avatar>
+                        )}
+                        <div>
+                            <Text fz="sm" fw={500}>
+                                {profile.display_name}
+                            </Text>
+                            <Text fz="xs" c="dimmed">
+                                {profile.email}
+                            </Text>
+                        </div>
+                    </Group>
+                </TableTd>
 
-    const rows = data.map((item) => (
-        <Table.Tr key={item.name}>
-            <Table.Td>
-                <Group gap="sm">
-                    <Avatar size={40} src={item.avatar} radius={40} />
-                    <div>
-                        <Text fz="sm" fw={500}>
-                            {item.name}
-                        </Text>
-                        <Text fz="xs" c="dimmed">
-                            {item.email}
-                        </Text>
-                    </div>
-                </Group>
-            </Table.Td>
+                <TableTd>
+                    <Group gap="sm" grow>
+                        {typeof getCompletedContracts(contractFetch.data, profile.id) === 'number' && typeof getTotalContracts(contractFetch.data, profile.id) === 'number' ? (
+                            <>
+                                <Progress value={(getCompletedContracts(contractFetch.data, profile.id) / getTotalContracts(contractFetch.data, profile.id)) * 100} />
+                                {`${getCompletedContracts(contractFetch.data, profile.id)}`} / {`${getTotalContracts(contractFetch.data, profile.id)}`}
+                            </>
+                        ) : (
+                            // Display a message if the values are not valid numbers
+                            <Text>Error: Invalid contract values</Text>
+                        )}
+                    </Group>
+                </TableTd>
+            </TableTr>
+        ));
 
-            <Table.Td>
-                <TeamRoleSelect defaultValue={item.role} />
-            </Table.Td>
-            <Table.Td>{item.lastActive}</Table.Td>
-            <Table.Td>
-                {item.active ? (
-                    <Badge fullWidth variant="light">
-                        Active
-                    </Badge>
-                ) : (
+    const inviteRows = userFetch.data
+        .filter((profile) => !profile.email_confirmed_at)
+        .map((item) => (
+            <TableTr key={item.email}>
+                <TableTd>{item.email}</TableTd>
+                <TableTd>{item.invited_at}</TableTd>
+                <TableTd>
                     <Badge color="gray" fullWidth variant="light">
-                        Disabled
+                        Pending
                     </Badge>
-                )}
-            </Table.Td>
-        </Table.Tr>
-    ));
+                </TableTd>
+            </TableTr>
+        ));
 
     return (<>
         <Tabs defaultValue="team">
-            <Tabs.List mb={"sm"}>
-                <Tabs.Tab value="team" leftSection={<IconUsers style={iconStyle} />}>
+            <TabsList mb={"sm"}>
+                <TabsTab value="team" leftSection={<IconUsers style={iconStyle} />}>
                     Team
-                </Tabs.Tab>
-                <Tabs.Tab value="invites" leftSection={<IconUserPlus style={iconStyle} />}>
+                </TabsTab>
+                <TabsTab value="invites" leftSection={<IconUserPlus style={iconStyle} />}>
                     Invites
-                </Tabs.Tab>
+                </TabsTab>
 
-            </Tabs.List>
+            </TabsList>
 
-            <Tabs.Panel value="team">
+            <TabsPanel value="team">
                 <Container>
-                    <Table.ScrollContainer minWidth={800}>
+                    <TableScrollContainer minWidth={800}>
                         <Table verticalSpacing="sm">
-                            <Table.Thead>
-                                <Table.Tr>
-                                    <Table.Th>Employee</Table.Th>
-                                    <Table.Th>Role</Table.Th>
-                                    <Table.Th>Last active</Table.Th>
-                                    <Table.Th>Status</Table.Th>
-                                </Table.Tr>
-                            </Table.Thead>
-                            <Table.Tbody>{rows}</Table.Tbody>
+                            <TableThead>
+                                <TableTr>
+                                    <TableTh>Employee</TableTh>
+                                    <TableTh>Assigned Contracts</TableTh>
+                                </TableTr>
+                            </TableThead>
+                            <TableTbody>{rows}</TableTbody>
                         </Table>
-                    </Table.ScrollContainer>
+                    </TableScrollContainer>
                 </Container>
-            </Tabs.Panel>
+            </TabsPanel>
 
-            <Tabs.Panel value="invites">
+            <TabsPanel value="invites">
                 <InviteMemberModal />
-            </Tabs.Panel>
+            </TabsPanel>
 
+
+            <TabsPanel value="invites">
+                <Container>
+                    <TableScrollContainer minWidth={800}>
+                        <Table verticalSpacing="sm">
+                            <TableThead>
+                                <TableTr>
+                                    <TableTh>Email</TableTh>
+                                    <TableTh>Invite Sent</TableTh>
+                                    <TableTh>Status</TableTh>
+                                </TableTr>
+                            </TableThead>
+                            <TableTbody>{inviteRows}</TableTbody>
+                        </Table>
+                    </TableScrollContainer>
+                </Container>
+            </TabsPanel>
 
         </Tabs>
     </>)

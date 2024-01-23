@@ -6,7 +6,7 @@ import { serverClient } from "@/supabase/ServerClients";
 export default async function Page() {
 
     const supabase = serverClient()
-    const projectFetch = await supabase.from("project").select("*, profile(*)")
+    const projectFetch = await supabase.from("project").select("*, profile(*), contract(completed)")
     const userFetch = await supabase.from("profile").select("*")
 
     if (!projectFetch.data || !userFetch.data) {
@@ -14,9 +14,12 @@ export default async function Page() {
         throw new Error("Failed to fetch data")
     }
 
-    console.log(userFetch.error)
-    return <Container>
-        <ProjectGrid projects={projectFetch.data}
-        users={userFetch.data}/>
-    </Container>
+    return (
+        <Container mt="xl">
+            <ProjectGrid
+                projects={projectFetch.data}
+                users={userFetch.data}
+            />
+        </Container>
+    )
 }

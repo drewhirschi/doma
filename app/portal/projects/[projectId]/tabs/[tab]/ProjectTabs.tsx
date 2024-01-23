@@ -40,11 +40,11 @@ export function ProjectTabs({ activeTab, project }: Props) {
             </TabsPanel>
 
             <TabsPanel value="messages">
-                Messages tab content
+                Highlevel overview of the important information found in the contracts
             </TabsPanel>
 
             <TabsPanel value="settings">
-                Settings tab content
+                Supplemental Requests - sending, recieving
             </TabsPanel>
         </Tabs>
     )

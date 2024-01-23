@@ -1,13 +1,13 @@
 "use client"
 
-import { Anchor, AppShell, Breadcrumbs, Code, Group, NavLink, ScrollArea, Space, Stack, Text, UnstyledButton } from '@mantine/core';
+import { Anchor, AppShell, Box, Breadcrumbs, Code, Flex, Group, NavLink, ScrollArea, Space, Stack, Text, UnstyledButton } from '@mantine/core';
+import { Icon24Hours, IconFolderOpen, IconUsersGroup } from '@tabler/icons-react';
 
-import { Icon24Hours } from '@tabler/icons-react';
-// import Banner from '../banner';
-// import Crumbs from './Crumbs';
 import Image from 'next/image'
 import Link from 'next/link'
 import { UserButton } from '@/components/UserButton';
+import classnames from "./layout.module.css"
+import { useHover } from '@mantine/hooks';
 import { usePathname } from 'next/navigation'
 
 export default function Home({ children, params }: {
@@ -16,68 +16,56 @@ export default function Home({ children, params }: {
 }) {
 
     const pathname = usePathname()
+    const { hovered: navbarHovered, ref: navbarRef } = useHover();
     const base = `/portal`
-
-    const collapsed = true
 
 
 
     return (
-        <AppShell
-            navbar={{
-                width: { base: 260 },
-                breakpoint: 'xs',
-                collapsed: { mobile: true, desktop: false },
-            }} 
-            layout='alt'
+        <Flex
+            w={"100%"}
+            direction={"row"}
+            wrap={"nowrap"}
+            h={"100vh"}
         >
-            <AppShell.Navbar p="md">
-                <Space h="xl" />
-                <Space h="xl" />
-                <Stack justify='space-between' h={"100%"}>
-
-                    <div>
-                        <NavLink
-                            href={base + `/projects`}
-                            label={
-
-                                <Text>Projects</Text>
-                            }
-                            component={Link}
-                            active={pathname.split("/")[2] === "projects"}
-                        />
-                        <NavLink
-                            href={base + `/team`}
-                            label={
-                                <Text>Team</Text>
-                            }
-                            component={Link}
-                            active={pathname.split("/")[2] === "team"}
-                        />
-                        <NavLink
-                            href={base + `/config`}
-                            label={
-                                <Text>AI Config</Text>
-                            }
-                            component={Link}
-                            active={pathname.split("/")[2] === "config"}
-                        />
-                    </div>
 
 
+            <Stack
+                ref={navbarRef}
+                className={classnames.navbar}>
 
-                    <UserButton collapsed={false} />
-                </Stack>
-            </AppShell.Navbar>
-            <AppShell.Main>
+                <div className={classnames["nav-item"]}>
+                    <NavLink
+                        href={base + `/projects`}
+                        leftSection={<IconFolderOpen />}
+                        label={navbarHovered ? <Text>Projects</Text> : null}
+                        component={Link}
+                        active={pathname.split("/")[2] === "projects"}
+                    />
+                    <NavLink
+                        href={base + `/team`}
+                        leftSection={navbarHovered && <IconUsersGroup />}
+                        label={navbarHovered ? <Text>Team</Text> : <IconUsersGroup />}
+                        component={Link}
+                        active={pathname.split("/")[2] === "team"}
+                    />
+
+                </div>
+
+                <div className={classnames["nav-item"]}>
+
+                    <UserButton collapsed={!navbarHovered} />
+                </div>
+            </Stack>
+
+            <ScrollArea h={"100%"} className={classnames.content}>
+
                 {children}
-            </AppShell.Main>
-        </AppShell>
+            </ScrollArea>
 
 
 
-
-
+        </Flex>
 
     )
 }

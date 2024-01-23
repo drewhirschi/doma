@@ -14,7 +14,7 @@ export interface Database {
           contract_id: string
           created_at: string
           id: string
-          parslet_id: string | null
+          parslet_id: string
           position: Json
           tenant_id: string
           text: string
@@ -23,16 +23,16 @@ export interface Database {
           contract_id: string
           created_at?: string
           id?: string
-          parslet_id?: string | null
+          parslet_id: string
           position: Json
-          tenant_id: string
+          tenant_id?: string
           text: string
         }
         Update: {
           contract_id?: string
           created_at?: string
           id?: string
-          parslet_id?: string | null
+          parslet_id?: string
           position?: Json
           tenant_id?: string
           text?: string
@@ -121,8 +121,10 @@ export interface Database {
       contract_line: {
         Row: {
           contract_id: string
-          id: string
+          id: number
           page: number
+          page_height: number
+          page_width: number
           text: string
           x_scale: number
           x1: number
@@ -132,8 +134,10 @@ export interface Database {
         }
         Insert: {
           contract_id: string
-          id?: string
+          id: number
           page?: number
+          page_height?: number
+          page_width?: number
           text?: string
           x_scale?: number
           x1?: number
@@ -143,8 +147,10 @@ export interface Database {
         }
         Update: {
           contract_id?: string
-          id?: string
+          id?: number
           page?: number
+          page_height?: number
+          page_width?: number
           text?: string
           x_scale?: number
           x1?: number
@@ -162,6 +168,42 @@ export interface Database {
           }
         ]
       }
+      contract_note: {
+        Row: {
+          content: string
+          contract_id: string
+          created_at: string
+          parslet_id: string
+        }
+        Insert: {
+          content?: string
+          contract_id: string
+          created_at?: string
+          parslet_id: string
+        }
+        Update: {
+          content?: string
+          contract_id?: string
+          created_at?: string
+          parslet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_note_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contract"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_note_parslet_id_fkey"
+            columns: ["parslet_id"]
+            isOneToOne: false
+            referencedRelation: "parslet"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       extracted_information: {
         Row: {
           contract_id: string
@@ -169,7 +211,6 @@ export interface Database {
           data: Json
           id: string
           parslet_id: string
-          ref_lines: string
         }
         Insert: {
           contract_id: string
@@ -177,7 +218,6 @@ export interface Database {
           data: Json
           id?: string
           parslet_id: string
-          ref_lines?: string
         }
         Update: {
           contract_id?: string
@@ -185,7 +225,6 @@ export interface Database {
           data?: Json
           id?: string
           parslet_id?: string
-          ref_lines?: string
         }
         Relationships: [
           {
@@ -204,6 +243,39 @@ export interface Database {
           }
         ]
       }
+      line_ref: {
+        Row: {
+          contract_id: string
+          extracted_info_id: string
+          line_id: number
+        }
+        Insert: {
+          contract_id: string
+          extracted_info_id: string
+          line_id: number
+        }
+        Update: {
+          contract_id?: string
+          extracted_info_id?: string
+          line_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_ref_contract_id_line_id_fkey"
+            columns: ["contract_id", "line_id"]
+            isOneToOne: false
+            referencedRelation: "contract_line"
+            referencedColumns: ["contract_id", "id"]
+          },
+          {
+            foreignKeyName: "line_ref_extracted_info_id_fkey"
+            columns: ["extracted_info_id"]
+            isOneToOne: false
+            referencedRelation: "extracted_information"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       parslet: {
         Row: {
           created_at: string
@@ -211,6 +283,7 @@ export interface Database {
           examples: string[]
           id: string
           instruction: string
+          order: number
           schema: string | null
           tenant_id: string
         }
@@ -220,6 +293,7 @@ export interface Database {
           examples?: string[]
           id?: string
           instruction?: string
+          order?: number
           schema?: string | null
           tenant_id: string
         }
@@ -229,6 +303,7 @@ export interface Database {
           examples?: string[]
           id?: string
           instruction?: string
+          order?: number
           schema?: string | null
           tenant_id?: string
         }
@@ -244,24 +319,36 @@ export interface Database {
       }
       profile: {
         Row: {
+          avatar_url: string | null
+          color: string | null
           created_at: string
           display_name: string | null
           email: string
+          email_confirmed_at: string | null
           id: string
+          invited_at: string | null
           tenant_id: string
         }
         Insert: {
+          avatar_url?: string | null
+          color?: string | null
           created_at?: string
           display_name?: string | null
           email: string
+          email_confirmed_at?: string | null
           id?: string
+          invited_at?: string | null
           tenant_id: string
         }
         Update: {
+          avatar_url?: string | null
+          color?: string | null
           created_at?: string
           display_name?: string | null
           email?: string
+          email_confirmed_at?: string | null
           id?: string
+          invited_at?: string | null
           tenant_id?: string
         }
         Relationships: [
@@ -282,6 +369,7 @@ export interface Database {
           deal_structure: string
           display_name: string | null
           id: string
+          is_active: boolean
           phase_deadline: string
           target: string[]
           tenant_id: string
@@ -293,6 +381,7 @@ export interface Database {
           deal_structure: string
           display_name?: string | null
           id?: string
+          is_active?: boolean
           phase_deadline: string
           target: string[]
           tenant_id: string
@@ -304,6 +393,7 @@ export interface Database {
           deal_structure?: string
           display_name?: string | null
           id?: string
+          is_active?: boolean
           phase_deadline?: string
           target?: string[]
           tenant_id?: string

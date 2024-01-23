@@ -1,8 +1,8 @@
 import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } from 'openai/resources/index.js';
 
-import { NextRequest } from "next/server";
 import OpenAI from 'openai';
-import { routeClient } from "@/supabase/ServerClients";
+import { SupabaseClient } from '@supabase/supabase-js';
+import { v4 as uuidv4 } from 'uuid';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -24,7 +24,9 @@ Be thorough, the whole document needs to be handled.
 
 Do not provide explanations, just state the verbatim language.
 
-In the schema add a string called "Lines" that states the start and end of the lines the information came from like "33-48"`
+Your output should be a JSON object with a schema that matches the following: {data: {text: string, lines: string}[]} where each object in the array has a verbaitim quote and the lines that quote came from.
+
+In the schema add a string called "lines" that states the start and end of the lines the information came from like "33-48"`
 
 
 
@@ -50,16 +52,13 @@ async function execExtractor(extractor: Extractor, contract: string): Promise<Ch
     return res.choices[0].message;
 }
 
-export async function POST(req: NextRequest) {
-    console.log(req.url)
+export async function reviewContract(supabase: SupabaseClient, contractId: string) {
 
-    const contract_id = req.url.split('/')[6]
-    const supabase = routeClient()
     const promises: Promise<ChatCompletionMessage>[] = [];
     let contract: string = ""
 
 
-    const { data: contractData, error: contractError } = await supabase.from('contract').select('*, contract_line(text)').eq('id', contract_id).single()
+    const { data: contractData, error: contractError } = await supabase.from('contract').select('*, contract_line(text)').eq('id', contractId).single()
 
     if (!contractData) {
         console.error('Error loading contract:', contractError);
@@ -78,15 +77,18 @@ export async function POST(req: NextRequest) {
         return Response.json({ message: "Could not load extractors" })
     }
 
-    const extractors = extractorData.map(e => ({ id: e.id, name: e.display_name, instruction: e.instruction, output: { schema: e.schema ?? "", examples: e.examples } }))
+    let extractors = extractorData.map(e => ({ id: e.id, name: e.display_name, instruction: e.instruction, output: { schema: e.schema ?? "", examples: e.examples } }))
 
-    Object.values(extractors).forEach((extractor) => {
+    // extractors = extractors.slice(0, 5)
+
+    for (const extractor of Object.values(extractors)) {
         promises.push(execExtractor(extractor, contract));
-    });
+        await new Promise(r => setTimeout(r, 1000))
+    }
 
     const responses = await Promise.all(promises)
 
-    const responsesMap = responses.flatMap((r, i) => {
+    const extractedInfo = responses.flatMap((r, i) => {
         const extractor = extractors[i]
         if (extractor.output.schema) {
             return
@@ -95,17 +97,29 @@ export async function POST(req: NextRequest) {
 
         return content.data.map((d: any) => {
             return {
+                id: uuidv4(),
                 parslet_id: extractor.id,
                 data: d.text,
                 ref_lines: d.lines,
-                contract_id: contract_id
+                contract_id: contractId
             }
         })
     }).filter(Boolean)
 
+
+
     const { data: insertData, error: insertError } = await supabase
         .from('extracted_information')
-        .upsert(responsesMap);
+
+        .insert(extractedInfo.map(({ id, parslet_id, data, contract_id }) => ({
+            id,
+            parslet_id,
+            data,
+            contract_id
+        })));
+
+
+
 
     if (insertError) {
         console.error('Error inserting data:', insertError);
@@ -113,7 +127,33 @@ export async function POST(req: NextRequest) {
         console.log('Data inserted successfully:', insertData);
     }
 
-    return Response.json({ message: "POST request processed" });
+    const eiRefs = extractedInfo.flatMap((ei) => {
+        const refLines = ei.ref_lines.split('-').map(Number)
+        const start = refLines[0]
+        const end = refLines[1]
+
+        const refs = []
+        for (let i = start; i <= end; i++) {
+            refs.push({
+                line_id: i,
+                contract_id: ei.contract_id,
+                extracted_info_id: ei.id
+            })
+        }
+        return refs
+    })
+
+    const { data: insertRelationships, error: insertRelaitonshipError } = await supabase
+        .from('line_ref')
+        .insert(eiRefs);
+
+
+
+
+    if (insertRelaitonshipError) {
+        console.error('Error inserting data:', insertRelaitonshipError);
+    } else {
+        console.log('Data inserted successfully:', insertData);
+    }
+
 }
-
-

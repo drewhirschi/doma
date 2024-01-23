@@ -7,7 +7,7 @@ import {
   NullL10n,
   PDFLinkService,
   PDFViewer,
-} from "pdfjs-dist/web/pdf_viewer.mjs";
+} from "pdfjs-dist/web/pdf_viewer";
 import type {
   IHighlight,
   LTWH,
