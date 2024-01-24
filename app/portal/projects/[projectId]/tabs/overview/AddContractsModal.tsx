@@ -71,7 +71,7 @@ export function AddContractsModalButton({ project }: Props) {
         setActiveStep(WizSteps.UNZIP);
 
         try {
-            await unzipFile(`projects/${project.id}/${files[0]?.name}`);
+            await unzipFile(`projects/${project.id}/${files[0]?.name}`, project.id);
             setUploadStatus(WizStatus.UNZIP_SUCCESS);
         } catch (error) {
             setUploadStatus(WizStatus.UNZIPPING_ERROR);

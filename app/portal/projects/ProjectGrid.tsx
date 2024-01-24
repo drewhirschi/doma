@@ -2,7 +2,7 @@
 
 import { Box, Button, Grid } from "@mantine/core";
 
-import { AddProjectsModal } from "./AddProjectsModel";
+import { AddProjectsModal } from "./AddProjectsModal";
 import ProjectCard from "@/components/ProjectCard";
 import { error } from "console";
 

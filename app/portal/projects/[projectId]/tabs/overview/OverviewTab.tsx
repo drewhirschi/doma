@@ -44,10 +44,14 @@ export default function OverviewTab({ project }: Props) {
 
 
             <Table.Td>
-                <Anchor href={`/portal/projects/${projectId}/contract/${contract.id}`} component={Link}>
+                {contract.display_name.endsWith(".pdf") ? (
+                    <Anchor href={`/portal/projects/${projectId}/contract/${contract.id}`} component={Link}>
+                        {contract.display_name}
+                    </Anchor>
+                ) : (
+                    <Text>{contract.display_name}</Text>
+                )}
 
-                    {contract.display_name}
-                </Anchor>
             </Table.Td>
             <Table.Td>
                 {contract.completed ? "Yes" : "No"}

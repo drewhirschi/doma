@@ -69,7 +69,7 @@ export default function ProjectCard({ project }: Props) {
                         </Badge>
                     )}
                 </Group>
-                <Text fz={"sm"} c={"dimmed"} >Phase Deadline: {project.phase_deadline}</Text>
+                <Text fz={"sm"} c={"dimmed"} >Phase Deadline: {new Date(project.phase_deadline).toLocaleDateString()}</Text>
             </div>
             <Menu
                 transitionProps={{ transition: 'pop' }}
@@ -126,7 +126,7 @@ export default function ProjectCard({ project }: Props) {
                     {completedContracts}/{totalContracts}
                 </Text>}
                 sections={[
-                    { value: (completedContracts / totalContracts) * 100, color: 'green' },
+                    { value: totalContracts && (completedContracts / totalContracts) * 100, color: 'green' },
                 ]}
             />
         </Group>

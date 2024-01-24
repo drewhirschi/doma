@@ -5,7 +5,7 @@ import { RedirectType, redirect, } from 'next/navigation';
 import { BackButton } from '@/components/BackButton';
 import Link from 'next/link';
 import OverviewTab from './OverviewTab';
-import { ProjectTabs } from './ProjectTabs';
+import { ProjectTabs } from '../ProjectTabs';
 import { getUserTenant } from '@/shared/getUserTenant';
 import { serverClient } from '@/supabase/ServerClients';
 
@@ -42,21 +42,10 @@ export default async function Page({ params, searchParams }: { params: { project
             (contract.assigned_to === null ? 0 : 1);
     }, 0)
 
+    // await new Promise((resolve) => setTimeout(resolve, 5_000));
+
     return (
-        <Box p="sm">
-            <BackButton href={"/portal/projects"} />
-            <Title mb={"sm"} order={1}>{project.display_name}</Title>
-            <SimpleGrid cols={3}>
-                <div style={{ color: 'GrayText' }}> <Text c="black" fw={600}>Deal Structure</Text> {project.deal_structure}</div>
-                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Client</Text> {project.client}</div>
-                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Target</Text>{...project.target}</div>
-                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Phase Deadline</Text>{project.phase_deadline}</div>
-                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Counterparty</Text>{project.counterparty}</div>
-                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Assigned Contracts</Text>{assignedContracts} / {project.contract.length}</div>
-            </SimpleGrid>
-            <Space h="md" />
-            <ProjectTabs activeTab={params.tab} project={project} />
-        </Box>
+       <OverviewTab project={project} />
     );
 };
 
