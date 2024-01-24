@@ -17,6 +17,7 @@ import { deleteContractExtractedInfo, reviewContractAction } from "./ContractRev
 import { useEffect, useOptimistic, useRef, useState } from "react";
 
 import { BackButton } from "@/components/BackButton";
+import ColumnEditor from "./ColumnEditor";
 import { Json } from "@/types/supabase-generated";
 import { browserClient } from "@/supabase/BrowerClients";
 import { buildAnnotationFromExtraction } from "./helpers";
@@ -203,6 +204,7 @@ export function ContractReviewer(props: Props) {
                                     minRows={2}
                                     onChange={(event) => debouncedSaveNote(event.currentTarget.value, parslet.id)}
                                 />
+                                {/* <ColumnEditor content={parslet.contract_note[0]?.content ?? ""}/> */}
                                 <ul>
                                     {highlights
                                         .filter((highlight) => highlight.parslet_id === parslet.id)

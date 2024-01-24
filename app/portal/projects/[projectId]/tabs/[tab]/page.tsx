@@ -1,4 +1,4 @@
-import { Avatar, Grid, Box, Button, Container, Group, Select, Table, Tabs, TabsList, TabsPanel, TabsTab, Title, rem, SimpleGrid, Space } from '@mantine/core';
+import { Avatar, Box, Button, Container, Grid, Group, Select, SimpleGrid, Space, Table, Tabs, TabsList, TabsPanel, TabsTab, Text, Title, rem } from '@mantine/core';
 import { IconAlertCircle, IconChevronLeft, IconFileArrowLeft, IconHome, IconMessageCircle, IconPhoto, IconSettings } from '@tabler/icons-react';
 import { RedirectType, redirect, } from 'next/navigation';
 
@@ -47,12 +47,12 @@ export default async function Page({ params, searchParams }: { params: { project
             <BackButton href={"/portal/projects"} />
             <Title mb={"sm"} order={1}>{project.display_name}</Title>
             <SimpleGrid cols={3}>
-                <div style={{ color: 'GrayText' }}>Deal Structure: {project.deal_structure}</div>
-                <div style={{ color: 'GrayText' }}>Client: {project.client}</div>
-                <div style={{ color: 'GrayText' }}>Target: {...project.target}</div>
-                <div style={{ color: 'GrayText' }}>Phase Deadline: {project.phase_deadline}</div>
-                <div style={{ color: 'GrayText' }}>Counterparty: {project.counterparty}</div>
-                <div style={{ color: 'GrayText' }}>Assigned Contracts: {assignedContracts} / {project.contract.length}</div>
+                <div style={{ color: 'GrayText' }}> <Text c="black" fw={600}>Deal Structure</Text> {project.deal_structure}</div>
+                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Client</Text> {project.client}</div>
+                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Target</Text>{...project.target}</div>
+                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Phase Deadline</Text>{project.phase_deadline}</div>
+                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Counterparty</Text>{project.counterparty}</div>
+                <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Assigned Contracts</Text>{assignedContracts} / {project.contract.length}</div>
             </SimpleGrid>
             <Space h="md" />
             <ProjectTabs activeTab={params.tab} project={project} />

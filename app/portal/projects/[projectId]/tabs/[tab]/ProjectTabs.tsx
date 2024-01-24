@@ -1,8 +1,9 @@
 "use client"
 
 import { Avatar, Box, Button, Container, Group, Select, Table, Tabs, TabsList, TabsPanel, TabsTab, Title, rem } from '@mantine/core';
-import { IconAlertCircle, IconFileArrowLeft, IconHome } from '@tabler/icons-react';
+import { IconAlertCircle, IconFileArrowLeft, IconFileSpreadsheet, IconHome } from '@tabler/icons-react';
 
+import ChartTab from './ChartTab';
 import OverviewTab from './OverviewTab';
 import { useRouter } from 'next/navigation';
 
@@ -14,7 +15,7 @@ interface Props {
 export function ProjectTabs({ activeTab, project }: Props) {
 
     const router = useRouter()
-    const iconStyle = { width: rem(12), height: rem(12) };
+    const iconStyle = { width: rem(16), height: rem(16) };
 
     return (
         <Tabs
@@ -25,27 +26,23 @@ export function ProjectTabs({ activeTab, project }: Props) {
                 <TabsTab value="overview" leftSection={<IconHome style={iconStyle} href='tabs/overview' />}>
                     Overview
                 </TabsTab>
-                <TabsTab value="messages" leftSection={<IconAlertCircle style={iconStyle} href='tabs/messages' />}>
-                    Red Flags
+                <TabsTab value="chart" leftSection={<IconFileSpreadsheet style={iconStyle} href='tabs/chart' />}>
+                    Chart
                 </TabsTab>
-                <TabsTab value="settings" leftSection={<IconFileArrowLeft style={iconStyle} />}>
-                    Supplemental Requests
-                </TabsTab>
+               
             </TabsList>
 
-            <TabsPanel value="overview">
+            {/* <TabsPanel value="overview">
                 <OverviewTab
                     project={project}
                 />
             </TabsPanel>
 
-            <TabsPanel value="messages">
-                Highlevel overview of the important information found in the contracts
-            </TabsPanel>
+            <TabsPanel value="chart">
+                <ChartTab projectId={project.id}/>
+            </TabsPanel> */}
 
-            <TabsPanel value="settings">
-                Supplemental Requests - sending, recieving
-            </TabsPanel>
+            
         </Tabs>
     )
 }
