@@ -9,6 +9,6 @@ declare global {
     type Profile_SB = Database['public']['Tables']['profile']['Row']
     type Parslet_SB = Database['public']['Tables']['parslet']['Row']
     type ExtractedInformation_SB = Database['public']['Tables']['extracted_information']['Row']
-    
+    type ContractNote_SB = Database['public']['Tables']['contract_note']['Row']
     
 }

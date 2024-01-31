@@ -1,4 +1,4 @@
-import { Box, Group, SimpleGrid, Space, Tabs, TabsList, TabsTab, Text, Title, rem } from "@mantine/core";
+import { Box, Flex, Group, SimpleGrid, Space, Stack, Tabs, TabsList, TabsTab, Text, Title, rem } from "@mantine/core";
 import { IconFileSpreadsheet, IconHome } from "@tabler/icons-react";
 
 import { BackButton } from "@/components/BackButton";
@@ -24,8 +24,8 @@ export default async function Layout({
     const iconStyle = { width: rem(16), height: rem(16) };
 
     return (
-        <Box p="sm">
-            <Group mb={"sm"} >
+        <Stack h={"100vh"} gap={0} w="calc(100vw - 60px)" >
+            <Group p="sm" mb={"sm"} >
 
                 <div>
 
@@ -43,6 +43,6 @@ export default async function Layout({
             <ProjectTabs >
                 {children}
             </ProjectTabs>
-        </Box>
+        </Stack>
     );
 }

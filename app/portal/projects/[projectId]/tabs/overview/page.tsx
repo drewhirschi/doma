@@ -9,7 +9,7 @@ import { ProjectTabs } from '../ProjectTabs';
 import { getUserTenant } from '@/shared/getUserTenant';
 import { serverClient } from '@/supabase/ServerClients';
 
-export default async function Page({ params, searchParams }: { params: { projectId: string, tab: string }, searchParams: { query: string } }) {
+export default async function Page({ params, searchParams }: { params: { projectId: string}, searchParams: { query: string } }) {
 
     const query = searchParams?.query || '';
 

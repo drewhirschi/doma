@@ -1,0 +1,9 @@
+.tabledata {
+    max-width: 500px; /* Maximum width of the column */
+     overflow: hidden;
+    text-overflow: ellipsis;
+    /* display: -webkit-box; */
+    -webkit-line-clamp: 10;
+    -webkit-box-orient: vertical; 
+  }
+  

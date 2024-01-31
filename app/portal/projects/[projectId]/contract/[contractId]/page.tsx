@@ -28,6 +28,17 @@ export default async function Page({ params }: { params: { id: string, contractI
         throw new Error("Failed to fetch data")
     }
 
+    const fileRes = await supabase.storage.from(tenantId!).download(contractQ.data.name, {})
+    if (!fileRes.data) {
+        console.error(fileRes.error)
+        throw new Error("Failed to download file")
+    }
+    const fileBase64 = Buffer.from(await fileRes.data.arrayBuffer()).toString('base64');
+    
+
+   
+
+
     const signedUrlQ = await supabase.storage.from(tenantId!).createSignedUrl(contractQ.data.name, 60, {})
 
     if (!signedUrlQ.data) {
@@ -41,6 +52,7 @@ export default async function Page({ params }: { params: { id: string, contractI
 
         <ContractReviewer
             pdfUrl={signedUrlQ.data.signedUrl}
+            pdfBase64={fileBase64}
             contract={contractQ.data}
             projectId={params.id}
             parslets={parsletQ.data ?? []}

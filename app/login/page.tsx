@@ -12,14 +12,14 @@ import { useEffect } from 'react';
 
 export default function Home() {
     const supabase = browserClient();
-    
+
     let origin = '';
     if (typeof window !== 'undefined') {
         origin = window.location.origin;
     }
 
-  
-   
+
+
 
 
 
@@ -44,10 +44,14 @@ export default function Home() {
 
                     appearance={{ theme: ThemeSupa }}
                     providers={['google', 'azure']}
+                    providerScopes={{
+                        azure: 'openid, profile, email',
+                        google: 'email'
+                    }}
 
                     redirectTo={`${origin}/auth/callback`}
                     // redirectTo={`${origin}/auth/confirm`}
-                    
+
                     queryParams={{
                         access_type: 'offline',
                         prompt: 'consent',

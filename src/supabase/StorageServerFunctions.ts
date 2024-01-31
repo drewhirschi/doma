@@ -1,16 +1,23 @@
+import { TextItem, TextMarkedContent } from "pdfjs-dist/types/src/display/api"
+
+import { Database } from "@/types/supabase";
 import { SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import path from 'path';
+import pdfjs from "@/server/pdfjs"
+import { sleep } from "@/utils";
 import unzipper from 'unzipper';
 
-export async function unzipTenantFile(supabase:SupabaseClient, filepath: string) {
+export async function unzipTenantFile(supabase: SupabaseClient<Database>, filepath: string) {
 
     const { data: sessionData } = await supabase.auth.getSession()
-    const { data: userData } = await supabase.from("profile").select("*").eq("id", sessionData?.session?.user.id).single()
+    const { data: userData } = await supabase.from("profile").select("*").eq("id", sessionData?.session?.user.id!).single()
 
-    
+    if (!userData) {
+        throw new Error("User not found")
+    }
 
-    const bucket = userData?.tenant_id;
+    const bucket = userData.tenant_id;
 
     const filePathWithoutName = filepath.substring(0, filepath.lastIndexOf('/'));
 
@@ -45,16 +52,15 @@ export async function unzipTenantFile(supabase:SupabaseClient, filepath: string)
                     entry.on('data', (chunk: Buffer) => chunks.push(chunk));
                     entry.on('end', async () => {
                         let fileBuffer = Buffer.concat(chunks);
-                        let { error } = await supabase.storage.from(bucket).upload(fullPath, fileBuffer);
-                        if (error) console.error('Error uploading file:', error);
+                        await handleFileIngestion(supabase, userData.tenant_id, fullPath, fileBuffer);
+
                     });
                 } else {
                     entry.autodrain();
                 }
             })
             .on('error', (err: any) => console.error('Error while unzipping:', err))
-            .on('finish', () => {
-            });
+            .on('finish', () => { });
         const { data, error } = await supabase.storage.from(bucket).remove([filepath]);
 
         if (error) {
@@ -64,4 +70,96 @@ export async function unzipTenantFile(supabase:SupabaseClient, filepath: string)
     } catch (error) {
         console.error('Error in streaming and unzipping:', error);
     }
+}
+
+
+async function handleFileIngestion(supabase: SupabaseClient, tenantId: string, filepath: string, fileBuffer: Buffer) {
+
+
+    let { data: uploadData , error: fileuploadError } = await supabase.storage.from(tenantId).upload(filepath, fileBuffer);
+    if (fileuploadError) console.error('Error uploading file:', fileuploadError);
+
+
+
+    // const ext = path.extname(filepath);
+
+    
+
+    // switch (ext) {
+    //     case ".pdf":
+    //         const pdf = await pdfjs.getDocument(fileBuffer.buffer as ArrayBuffer).promise;
+    //         console.log(filepath, pdf.numPages)
+
+    //         // TODO: read the lines out the pdf 
+    //         // await readPdfLines(fileBuffer)
+
+    //         const { data, error } = await supabase.from('contract').update({ npages: pdf.numPages })
+    //             // .eq('tenant_id', tenantId)
+    //             // @ts-ignore
+    //             .eq('id', uploadData?.id)
+
+    //         if (error) {
+    //             console.error(error)
+    //         }
+
+    //         break;
+
+
+    //     default:
+    //         console.warn("Unhandled file type", ext)
+    //         break;
+    // }
+
+
+
+
+
+
+
+}
+
+export async function readPdfLines(pdfBuffer: Buffer): Promise<void> {
+    // console.log("reading a pdf")
+    // const pdf = await pdfjs.getDocument(pdfBuffer).promise;
+
+    // const numPages = pdf.numPages;
+
+    // for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+    //     const page = await pdf.getPage(pageNum);
+    //     const textContent = await page.getTextContent();
+    //     const viewport = page.getViewport({ scale: 1 });
+
+    //     textContent.items.forEach((content:any, index:number) => {
+
+    //         if (!content.hasOwnProperty("str")) {
+    //             return 
+    //         }
+
+    //         const item:TextItem = content as TextItem
+
+    //         const text = item.str;
+    //         const transform = item.transform;
+
+    //         // PDF.js uses a coordinate system where the origin is at the bottom-left corner.
+    //         // The transform array contains [scaleX, skewY, skewX, scaleY, translateX, translateY]
+    //         const x = transform[4];
+    //         const y = viewport.height - transform[5];
+    //         const width = item.width;
+    //         const height = item.height;
+
+    //         const lineData = {
+    //             text: text,
+    //             xStart: x,
+    //             yStart: y,
+    //             xEnd: x + width,
+    //             yEnd: y - height,
+    //             pageHeight: viewport.height,
+    //             pageWidth: viewport.width,
+    //             page: pageNum
+    //         };
+
+    //         console.log(lineData);
+    //     });
+    // }
+
 }

@@ -57,7 +57,7 @@ export default function OverviewTab({ project }: Props) {
                 {contract.completed ? "Yes" : "No"}
             </Table.Td>
             <Table.Td>
-                {contract.nPages ?? 1}
+                {contract.npages ?? 1}
             </Table.Td>
             <Table.Td>
                 <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id} />

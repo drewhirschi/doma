@@ -259,7 +259,7 @@ export function AddContractsModalButton({ project }: Props) {
                 </Stack>
             </Modal>
 
-            <Button onClick={openModal}>Add</Button>
+            <Button onClick={openModal}>Import</Button>
         </>
     );
 }

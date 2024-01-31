@@ -179,6 +179,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       new PDFViewer({
         container: this.containerNodeRef!.current!,
         eventBus: this.eventBus,
+        annotationEditorMode: 1,
         // enhanceTextSelection: true, // deprecated. https://github.com/mozilla/pdf.js/issues/9943#issuecomment-409369485
         textLayerMode: 2,
         removePageBorders: true,
