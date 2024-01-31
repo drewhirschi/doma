@@ -25,7 +25,7 @@ export default async function Layout({
 
     return (
         <Stack h={"100vh"} gap={0} w="calc(100vw - 60px)" >
-            <Group p="sm" mb={"sm"} >
+            <Group p="sm" mb={"sm"} miw={860}>
 
                 <div>
 

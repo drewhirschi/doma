@@ -1,9 +1,17 @@
-.tabledata {
-    max-width: 500px; /* Maximum width of the column */
-     overflow: hidden;
-    text-overflow: ellipsis;
-    /* display: -webkit-box; */
-    -webkit-line-clamp: 10;
-    -webkit-box-orient: vertical; 
-  }
-  
+
+
+.th,
+.td {
+  min-width: 250px;
+  max-width: 500px !important;
+}
+
+.td {
+  vertical-align: top; /* Place text at the top of the box */
+  white-space: pre-wrap;
+}
+
+.table {
+  table-layout: fixed;
+  width: auto;
+}

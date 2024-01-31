@@ -30,15 +30,10 @@ export default async function Page({ params }: { params: { projectId: string } }
 
 
     return (
-        // <ScrollArea
-        //     bg={"pink"}
-        //     flex={1}
-
-        //     w={"100%"}>
+     
 
 
-        <Chart parslets={parslets} contracts={projectQ.data?.contract ?? []} />
+        <Chart projectId={params.projectId} parslets={parslets} contracts={projectQ.data?.contract ?? []} />
 
-        // </ScrollArea>
     );
 }

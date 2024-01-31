@@ -23,7 +23,7 @@ export function ProjectTabs({ children }: Props) {
         >
             <Stack gap={0} h={"100%"}>
 
-                <TabsList >
+                <TabsList miw={860}>
                     <TabsTab value="overview" leftSection={<IconHome style={iconStyle} href='tabs/overview' />}>
                         Overview
                     </TabsTab>
