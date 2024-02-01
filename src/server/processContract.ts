@@ -58,7 +58,7 @@ export async function reviewContract(supabase: SupabaseClient, contractId: strin
     let contract: string = ""
 
 
-    const { data: contractData, error: contractError } = await supabase.from('contract').select('*, contract_line(text)').eq('id', contractId).single()
+    const { data: contractData, error: contractError } = await supabase.from('contract').select('*, contract_line(text)').order("id", {referencedTable: "contract_line", ascending:true}).eq('id', contractId).single()
 
     if (!contractData) {
         console.error('Error loading contract:', contractError);

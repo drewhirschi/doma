@@ -3,7 +3,7 @@
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 
-import { ActionIcon, Button, Center, Flex, Group, HoverCard, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, rem } from "@mantine/core";
+import { ActionIcon, Button, Center, CopyButton, Flex, Group, HoverCard, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, Title, Tooltip, rem } from "@mantine/core";
 import {
     AreaHighlight,
     Highlight,
@@ -14,9 +14,9 @@ import {
     ScaledPosition,
     Tip
 } from "@/components/PdfViewer";
-import { IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconSettings, IconTrash } from "@tabler/icons-react";
+import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconSettings, IconTrash } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { deleteContractExtractedInfo, reviewContractAction } from "./ContractReviewer.actions";
+import { completeContractAction, deleteContractExtractedInfo, reviewContractAction } from "./ContractReviewer.actions";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 
 import { BackButton } from "@/components/BackButton";
@@ -101,6 +101,8 @@ export function ContractReviewer(props: Props) {
                 <Stack justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
                     <Group mt={"md"}>
                         <BackButton href={`/portal/projects/${projectId}/tabs`} style={{ alignSelf: "flex-start" }} />
+                        {savingNotes ? <IconRefresh color="gray" size={20} /> : <IconCloudCheck color="gray" size={20} />}
+
                         <Menu shadow="md" width={200}>
                             <Menu.Target>
                                 <ActionIcon variant="subtle" c={"gray"}>
@@ -110,6 +112,15 @@ export function ContractReviewer(props: Props) {
 
                             <Menu.Dropdown>
                                 <Menu.Label>Application</Menu.Label>
+                                <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
+                                    onClick={async () => {
+                                         await completeContractAction(contract.id)
+
+                                        
+                                    }}
+                                >
+                                    Complete
+                                </Menu.Item>
                                 <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                     onClick={() => {
                                         reviewContractAction(contract.id)
@@ -128,6 +139,31 @@ export function ContractReviewer(props: Props) {
                             </Menu.Dropdown>
                         </Menu>
                     </Group>
+                    <HoverCard>
+                        <HoverCard.Target>
+                            <Title order={3}>{contract.display_name}</Title>
+                        </HoverCard.Target>
+                        <HoverCard.Dropdown>
+                            <Group>
+                                <Text>
+                                    id: {contract.id}
+                                </Text>
+                                <CopyButton value={contract.id} timeout={2000}>
+                                    {({ copied, copy }) => (
+                                        <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
+                                            <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
+                                                {copied ? (
+                                                    <IconCheck style={{ width: rem(16) }} />
+                                                ) : (
+                                                    <IconCopy style={{ width: rem(16) }} />
+                                                )}
+                                            </ActionIcon>
+                                        </Tooltip>
+                                    )}
+                                </CopyButton>
+                            </Group>
+                        </HoverCard.Dropdown>
+                    </HoverCard>
                     <ScrollArea
                         offsetScrollbars
                         h={"100%"}
@@ -203,7 +239,7 @@ export function ContractReviewer(props: Props) {
                     parslets={parslets}
                     highlights={highlights}
                     setHighlights={setHighlights}
-                    />
+                />
 
                 {/* <p>
                     page {1}

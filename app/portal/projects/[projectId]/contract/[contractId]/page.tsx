@@ -20,7 +20,7 @@ export default async function Page({ params }: { params: { id: string, contractI
 
     const [contractQ, parsletQ] = await Promise.all([
         supabase.from("contract").select("*, annotation(*), extracted_information(*, contract_line(*)), contract_note(content)").eq("id", params.contractId).single(),
-        supabase.from("parslet").select("*, contract_note(content)").eq("tenant_id", tenantId!).eq("contract_note.contract_id", params.contractId).order("order", { ascending: true })
+        supabase.from("parslet").select("*, contract_note(content)").eq("contract_note.contract_id", params.contractId).order("order", { ascending: true })
     ])
 
     if (!contractQ.data || !parsletQ.data) {

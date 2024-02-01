@@ -46,7 +46,7 @@ export default function Home() {
                     providers={['google', 'azure']}
                     providerScopes={{
                         azure: 'openid, profile, email',
-                        google: 'email'
+                        google: 'https://www.googleapis.com/auth/userinfo.email'
                     }}
 
                     redirectTo={`${origin}/auth/callback`}
