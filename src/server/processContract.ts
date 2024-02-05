@@ -1,5 +1,6 @@
 import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } from 'openai/resources/index.js';
 
+import { Database } from '@/types/supabase';
 import OpenAI from 'openai';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
@@ -8,15 +9,7 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-type Extractor = {
-    id: string,
-    name: string,
-    instruction: string,
-    output: {
-        schema: string,
-        examples?: string[]
-    }
-}
+
 
 const systemMessage = `You are a tool used by lawyers for extracting verbatim language containing key information and red flags from our client's contracts in the context of a merger or acquisition. 
 
@@ -29,16 +22,21 @@ Your output should be a JSON object with a schema that matches the following: {d
 In the schema add a string called "lines" that states the start and end of the lines the information came from like "33-48"`
 
 
-
-async function execExtractor(extractor: Extractor, contract: string): Promise<ChatCompletionMessage> {
+/**
+ * Executes an extractor on a contract and returns the chat completion message.
+ * @param {Extractor} extractor - The extractor object containing the id, name, instruction, and output schema.
+ * @param {string} contract - The line XML of the contract.
+ * @returns {Promise<ChatCompletionMessage>} The chat completion message.
+ */
+export async function execExtractor(extractor: Parslet_SB, contract: string): Promise<ChatCompletionMessage> {
     const messages: ChatCompletionMessageParam[] = [
         { role: "system", content: systemMessage },
         { role: 'user', content: `<contract>${contract}</contract>` },
         {
             role: 'user', content: `<instruction>${extractor.instruction}</instruction>
                 <output type="JSON">
-                <schema>${extractor.output.schema ?? "{data: {text: string, lines: string}[]}"}</schema>
-                ${extractor.output.examples ? `<examples>${extractor.output.examples.map(e => "<example>" + e + "</example>").join('\n')}</examples>` : ''}</output>`
+                <schema>${extractor.schema ?? "{data: {text: string, lines: string}[]}"}</schema>
+                ${extractor.examples ? `<examples>${extractor.examples.map(e => "<example>" + e + "</example>").join('\n')}</examples>` : ''}</output>`
         }
     ];
 
@@ -52,13 +50,18 @@ async function execExtractor(extractor: Extractor, contract: string): Promise<Ch
     return res.choices[0].message;
 }
 
-export async function reviewContract(supabase: SupabaseClient, contractId: string) {
+export function xmlLinesContract(contractLines: { text: string }[]) {
+    return contractLines.reduce((acc, line, i) => {
+        return acc + `<l id="${i}">${line.text}</l>` + "\n";
+    }, "")
+}
+
+export async function reviewContract(supabase: SupabaseClient<Database>, contractId: string) {
 
     const promises: Promise<ChatCompletionMessage>[] = [];
-    let contract: string = ""
 
 
-    const { data: contractData, error: contractError } = await supabase.from('contract').select('*, contract_line(text)').order("id", {referencedTable: "contract_line", ascending:true}).eq('id', contractId).single()
+    const { data: contractData, error: contractError } = await supabase.from('contract').select('*, contract_line(text)').order("id", { referencedTable: "contract_line", ascending: true }).eq('id', contractId).single()
 
     if (!contractData) {
         console.error('Error loading contract:', contractError);
@@ -66,24 +69,21 @@ export async function reviewContract(supabase: SupabaseClient, contractId: strin
     }
 
 
-    contractData.contract_line.forEach((line: any, i: number) => {
-        contract += `<l id="${i}">${line.text}</l>` + "\n";
-    })
+    const xmlContract = xmlLinesContract(contractData.contract_line)
 
-    const { data: extractorData, error: extractorError } = await supabase.from('parslet').select('*')
+    const { data: extractors, error: extractorError } = await supabase.from('parslet').select('*')
         .order("order", { ascending: true })
-        // .limit(1)
+    // .limit(1)
 
-    if (!extractorData) {
+    if (!extractors) {
         console.error('Error loading extractors:', extractorError);
         return Response.json({ message: "Could not load extractors" })
     }
 
-    let extractors = extractorData.map(e => ({ id: e.id, name: e.display_name, instruction: e.instruction, output: { schema: e.schema ?? "", examples: e.examples } }))
 
 
     for (const extractor of Object.values(extractors)) {
-        promises.push(execExtractor(extractor, contract));
+        promises.push(execExtractor(extractor, xmlContract));
         await new Promise(r => setTimeout(r, 1000))
     }
 
@@ -91,7 +91,7 @@ export async function reviewContract(supabase: SupabaseClient, contractId: strin
 
     const extractedInfo = responses.flatMap((r, i) => {
         const extractor = extractors[i]
-        if (extractor.output.schema) {
+        if (extractor.schema) {
             return
         }
         const content = JSON.parse(r.content!)
@@ -130,15 +130,8 @@ export async function reviewContract(supabase: SupabaseClient, contractId: strin
 
     const eiRefs = extractedInfo.flatMap((ei) => {
 
-        if (!ei.ref_lines.includes('-')) return [{
-            line_id: Number(ei.ref_lines),
-            contract_id: ei.contract_id,
-            extracted_info_id: ei.id
-        }];
 
-        const refLines = ei.ref_lines.split('-').map(Number)
-        const start = refLines[0]
-        const end = refLines[1]
+        const { start, end } = parseRefLines(ei.ref_lines)
 
         const refs = []
         for (let i = start; i <= end; i++) {
@@ -165,3 +158,17 @@ export async function reviewContract(supabase: SupabaseClient, contractId: strin
     }
 
 }
+
+export function parseRefLines(refLines: string) {
+    if (!refLines.includes('-')) return {
+        start: Number(refLines),
+        end: Number(refLines)
+    };
+
+    const lines = refLines.split('-').map(Number)
+    const start = lines[0]
+    const end = lines[1]
+
+    return { start, end }
+}
+

@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 import { fullAccessServiceClient } from '@/supabase/ServerClients'
+import { Database } from '@/types/supabase'
 
 const supabase = fullAccessServiceClient()
 
@@ -15,13 +16,13 @@ type Rect = {
 }
 
 
-export async function getAnnotationContractLines(supabase: SupabaseClient, annotation: Annotation_SB, contract: { height: number, width: number, id: string }) {
+export async function getAnnotationContractLines(supabase: SupabaseClient<Database>, annotation: Annotation_SB, contract: { height: number, width: number, id: string }):Promise<ContractLine_SB[] | null> {
     //@ts-ignore
     const boundingRect: Rect = annotation.position?.boundingRect
 
     if (!boundingRect) {
         console.log(`Annotation: ${annotation.text}\n No bounding rect found\n\n`)
-        return
+        return null
     }
 
     const scaledBr = {
@@ -38,7 +39,7 @@ export async function getAnnotationContractLines(supabase: SupabaseClient, annot
     const bottomBound = scaledBr.y2
     const tolerance = 0
 
-    console.log(`looking for lines y1 lte ${topBound - tolerance} and y2 gte ${bottomBound + tolerance} and`)
+    // console.log(`looking for lines y1 lte ${topBound - tolerance} and y2 gte ${bottomBound + tolerance} and`)
 
     const linesq = await supabase.from('contract_line').select('*')
         .eq('contract_id', contract.id)
