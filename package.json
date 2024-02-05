@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.474.0",
+    "@docs.plus/extension-hyperlink": "^1.5.2",
     "@mantine/core": "7.4.2",
     "@mantine/dates": "^7.4.2",
     "@mantine/dropzone": "^7.4.2",

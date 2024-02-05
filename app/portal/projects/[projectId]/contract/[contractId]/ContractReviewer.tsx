@@ -14,37 +14,34 @@ import {
     ScaledPosition,
     Tip
 } from "@/components/PdfViewer";
+import { Editor, useEditor } from '@tiptap/react';
+import {
+    Hyperlink,
+    previewHyperlinkModal,
+    setHyperlinkModal
+} from "@docs.plus/extension-hyperlink";
 import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconSettings, IconTrash } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { completeContractAction, deleteContractExtractedInfo, reviewContractAction } from "./ContractReviewer.actions";
 import { useEffect, useOptimistic, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { BackButton } from "@/components/BackButton";
+import { Json } from "@/types/supabase-generated";
+import MetadataItem from '@/components/MetadataItem';
+import { NoteEditor } from './NoteEditor';
+import StarterKit from '@tiptap/starter-kit';
 import { browserClient } from "@/supabase/BrowerClients";
 import { buildAnnotationFromExtraction } from "./helpers";
 import dynamic from 'next/dynamic'
+import { linkPreviewToolTip } from './LinkPreviewTooltip';
+import { sleep } from '@/utils';
 import { useDebouncedCallback } from 'use-debounce';
-import { useRouter } from "next/navigation";
-
-// import { Document, Page, pdfjs } from "react-pdf"
-
-
-
-
-
-
-
-
-
-
-
-
 
 const PDFView = dynamic(() => import('./pdf'), { ssr: false })
 
-// pdfjs.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js"
 
-type ParsletWithNotes = Parslet_SB & { contract_note: { content: string }[] }
+export type ParsletWithNotes = Parslet_SB & { contract_note: { content: string }[] }
 interface Props {
     pdfUrl: string
     pdfBase64: string
@@ -56,23 +53,44 @@ interface Props {
 
 
 
-
-
 export function ContractReviewer(props: Props) {
 
-    const { pdfUrl, contract, annotations, projectId } = props
+    const { pdfUrl, contract, annotations, projectId, parslets } = props
 
 
 
     const panelRef = useRef<ImperativePanelHandle>(null);
 
-    const [parslets, setParslets] = useState<(ParsletWithNotes & { lastUsed?: Date })[]>(props.parslets)
     const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
     const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string }[]>([...annotations, ...extractionsHighlights])
     const [savingNotes, setSavingNotes] = useState(false)
     const supabase = browserClient()
 
+    // const editors = parslets.reduce((acc: { [key: string]: Editor }, parslet: ParsletWithNotes) => {
+    //     const editor = useEditor({
+    //         extensions: [StarterKit,
+    //             Hyperlink.configure({
+    //                 hyperlinkOnPaste: false,
+    //                 openOnClick: true,
+    //                 modals: {
+    //                     previewHyperlink: linkPreviewToolTip,
+    //                     setHyperlink: setHyperlinkModal,
+    //                 },
+    //             }),
+    //         ],
+    //         content: parslet.contract_note[0]?.content ?? "",
+    //     });
+    //     if (editor) {
+    //         acc[parslet.id] = editor
+    //     }
+    //     return acc
+    // }, {})
+
+
+
+
     const router = useRouter()
+    const pathname = usePathname()
 
     const debouncedSaveNote = useDebouncedCallback(async (value: string, parsletId: string) => {
 
@@ -85,10 +103,29 @@ export function ContractReviewer(props: Props) {
         })
         setSavingNotes(false)
 
-    }, 1200)
+    }, 600)
 
 
+    async function handleAddHighlight(highlight: { position: any, text: string, parslet_id: string }) {
+        const { position, text, parslet_id: parsletId } = highlight
+        const id: string = window.crypto.randomUUID()
 
+
+        setHighlights([{ text: text ?? "", position, id, parslet_id: parsletId }, ...highlights])
+        // editors[parsletId].commands.insertContent(`<br/> <a href="${pathname}#${id}">${text}</a>`, { parseOptions: {} })
+        const { data, error } = await supabase.from("annotation").insert({
+            id,
+            parslet_id: parsletId,
+            contract_id: contract.id,
+            text: text ?? "",
+            position: position as unknown as Json,
+
+        })
+
+        if (error) {
+            //remove highlight from state
+        }
+    }
 
 
 
@@ -114,39 +151,39 @@ export function ContractReviewer(props: Props) {
                                 <Menu.Label>Application</Menu.Label>
                                 <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
                                     onClick={async () => {
-                                         await completeContractAction(contract.id)
+                                        await completeContractAction(contract.id)
 
-                                        
+
                                     }}
                                 >
-                                    Complete
+                                    Mark completed
                                 </Menu.Item>
                                 <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                     onClick={() => {
                                         reviewContractAction(contract.id)
                                     }}
                                 >
-                                    Run AI
+                                    Run AI extraciton
                                 </Menu.Item>
                                 <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
                                     onClick={() => {
                                         deleteContractExtractedInfo(contract.id, projectId)
                                     }}
                                 >
-                                    Delete EI
+                                    Clear extracted info
                                 </Menu.Item>
 
                             </Menu.Dropdown>
                         </Menu>
                     </Group>
-                    <HoverCard>
+                    <HoverCard openDelay={500}>
                         <HoverCard.Target>
                             <Title order={3}>{contract.display_name}</Title>
                         </HoverCard.Target>
                         <HoverCard.Dropdown>
                             <Group>
                                 <Text>
-                                    id: {contract.id}
+                                    <MetadataItem header="Contract ID" text={contract.id}/>
                                 </Text>
                                 <CopyButton value={contract.id} timeout={2000}>
                                     {({ copied, copy }) => (
@@ -171,6 +208,7 @@ export function ContractReviewer(props: Props) {
 
                         {parslets.map((parslet) => (
                             <div key={parslet.id}>
+                                {/* <NoteEditor parslet={parslet} editor={editors[parslet.id]} /> */}
                                 <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
                                 <Textarea
                                     defaultValue={parslet.contract_note[0]?.content ?? ""}
@@ -178,17 +216,18 @@ export function ContractReviewer(props: Props) {
                                     minRows={2}
                                     onChange={(event) => debouncedSaveNote(event.currentTarget.value, parslet.id)}
                                 />
-                                {/* <ColumnEditor content={parslet.contract_note[0]?.content ?? ""}/> */}
-                                <ul>
+                                <Stack gap={"xs"} mt="sm">
                                     {highlights
                                         .filter((highlight) => highlight.parslet_id === parslet.id)
                                         .map((highlight) => (
-                                            <Flex direction={"row"} wrap={"nowrap"} gap={"sm"} key={highlight.id}>
+                                            <Flex direction={"row"} wrap={"nowrap"} gap={"xs"} key={highlight.id}>
                                                 <ActionIcon
-                                                    onClick={() => {
+                                                    onClick={async () => {
 
-                                                        // router.replace("#" + highlight.id)
-                                                        // scrollViewerTo(highlight)
+                                                        router.replace(pathname.split("#")[0] + "#" + highlight.id)
+                                                        await sleep(100)
+                                                        window.dispatchEvent(new HashChangeEvent('hashchange'));
+
 
                                                     }}
                                                 >
@@ -219,7 +258,7 @@ export function ContractReviewer(props: Props) {
                                             </Flex>
                                         ))}
 
-                                </ul>
+                                </Stack>
                             </div>
                         ))}
                     </ScrollArea>
@@ -238,7 +277,10 @@ export function ContractReviewer(props: Props) {
                     contract={contract}
                     parslets={parslets}
                     highlights={highlights}
-                    setHighlights={setHighlights}
+                    handleAddHighlight={handleAddHighlight}
+                    handleRemoveHighlight={(id) => {
+                        setHighlights(highlights.filter((h) => h.id !== id))
+                    }}
                 />
 
                 {/* <p>

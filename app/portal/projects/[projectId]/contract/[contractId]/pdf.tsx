@@ -8,13 +8,12 @@ import {
     ScaledPosition,
     Tip
 } from "@/components/PdfViewer";
-import { Button, Paper, Skeleton, Stack, Text, rem } from "@mantine/core";
+import { Button, Paper, ScrollArea, Skeleton, Stack, Text, TextInput, rem } from "@mantine/core";
 import { IconMessageCircle, IconTrash } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
-import { Json } from "@/types/supabase-generated";
 import { browserClient } from "@/supabase/BrowerClients";
-import { useEffect } from "react";
-import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
     pdfUrl: string
@@ -22,11 +21,16 @@ interface Props {
     contract: Contract_SB & { annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
     parslets: Parslet_SB[]
     highlights: { position: any, id: string, text: string, parslet_id: string }[]
-    setHighlights: (highlights: { position: any, id: string, text: string, parslet_id: string }[]) => void
+    handleAddHighlight: (highlight: { position: any,  text: string, parslet_id: string }) => void
+    handleRemoveHighlight: (id: string) => void
 }
 
-export default function PDFView({ pdfBase64,pdfUrl, highlights, contract, parslets, setHighlights }: Props) {
+export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, parslets, handleAddHighlight }: Props) {
     const supabase = browserClient()
+    const router = useRouter()
+    const pathname = usePathname()
+
+    const [parsletSearchTerm, setParsletSearchTerm] = useState("")
 
     function HighlightPopup({ id, closeMenu, annotations }: { id: string, closeMenu: () => void, annotations: any[] }) {
         const supabase = browserClient()
@@ -48,7 +52,7 @@ export default function PDFView({ pdfBase64,pdfUrl, highlights, contract, parsle
                     color="red"
                     rightSection={(<IconTrash />)}
                     onClick={async () => {
-                        setHighlights(highlights.filter((h) => h.id !== id))
+                        handleRemoveHighlight(id)
                         closeMenu()
                         await supabase.from("extracted_information").delete().eq("id", id)
                         await supabase.from("annotation").delete().eq("id", id)
@@ -90,28 +94,9 @@ export default function PDFView({ pdfBase64,pdfUrl, highlights, contract, parsle
         };
     }, [])
 
-    async function addHighlight(parsletId: string, text: string | undefined, position: ScaledPosition,) {
-
-        const id: string = uuidv4()
-
-        setHighlights([{ text: text ?? "", position, id, parslet_id: parsletId }, ...highlights])
-        const { data, error } = await supabase.from("annotation").insert({
-            id,
-            parslet_id: parsletId,
-            contract_id: contract.id,
-            text: text ?? "",
-            position: position as unknown as Json,
-
-        })
-
-        if (error) {
-            //remove highlight from state
-        }
-    }
-
 
     const resetHash = () => {
-        document.location.hash = "";
+        // router.replace(pathname.split("#")[0])
     };
 
 
@@ -150,10 +135,8 @@ export default function PDFView({ pdfBase64,pdfUrl, highlights, contract, parsle
                             enableAreaSelection={(event) => event.altKey}
                             onScrollChange={resetHash}
                             pdfScaleValue="page-width"
-                            // pdfScaleValue=".75"
                             scrollRef={(scrollTo) => {
                                 scrollViewerTo = scrollTo;
-                                // scrollToHighlightFromHash();
                             }}
                             onSelectionFinished={(
                                 position,
@@ -161,20 +144,23 @@ export default function PDFView({ pdfBase64,pdfUrl, highlights, contract, parsle
                                 hideTipAndSelection,
                                 transformSelection
                             ) => {
-                                console.log("scaled hightlight", position)
-
+                                console.log({position, content})
                                 return (
 
 
-                                    <Paper shadow="md" w={200} p={"md"}>
+                                    <Paper shadow="md" p={"md"}>
 
 
-
-                                        <Stack gap={"sm"}>
-                                            <Text c="dimmed" size="sm">Recent</Text>
+                                        <ScrollArea h={300} type="always" >
+                                            {/* <TextInput
+                                                placeholder="Search"
+                                                value={parsletSearchTerm}
+                                                onChange={(e) => {console.log(e.currentTarget.value); setParsletSearchTerm(e.currentTarget.value)}}
+                                            /> */}
                                             <Button.Group orientation="vertical">
 
                                                 {parslets
+                                                    // .filter((parslet) => parsletSearchTerm ? parslet.display_name.toLowerCase().includes(parsletSearchTerm.toLowerCase()) : true)
                                                     .map((parslet) => (
                                                         <Button
                                                             size="sm"
@@ -183,9 +169,9 @@ export default function PDFView({ pdfBase64,pdfUrl, highlights, contract, parsle
                                                             variant="subtle"
                                                             key={parslet.id}
                                                             onClick={() => {
-                                                                addHighlight(parslet.id, content.text, position);
+                                                                handleAddHighlight({parslet_id: parslet.id, text: content.text ?? "", position});
                                                                 hideTipAndSelection();
-
+                                                                // setParsletSearchTerm("")
 
 
                                                             }}
@@ -196,8 +182,9 @@ export default function PDFView({ pdfBase64,pdfUrl, highlights, contract, parsle
                                                         </Button>
                                                     ))}
                                             </Button.Group>
+                                        </ScrollArea>
 
-                                        </Stack>
+
 
 
 
