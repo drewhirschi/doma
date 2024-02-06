@@ -16,7 +16,8 @@ import { ChatCompletionMessage } from "openai/resources"
 const supabase = fullAccessServiceClient()
 
 const TEST_PROJECT_ID = "2b3514bd-7ca7-4236-bf70-17cba9b6cd00"
-
+let completeoldSet: number[] = []
+let completenewSet: number[] = []
 
 function test(name: string, fn: () => Promise<void>) {
     console.log(`Running: ${name}`)
@@ -25,12 +26,12 @@ function test(name: string, fn: () => Promise<void>) {
         .catch((e) => console.error('Error:', e))
 }
 
-test('Incorporated agreements', async () => {
+test('license', async () => {
     // console.log(process.env)
-    const extractor = await supabase.from('parslet').select('*').eq("key", "incorporated_agreements").single()
+    const extractor = await supabase.from('parslet').select('*').eq("key", "license").single()
 
     if (!extractor.data) {
-        throw new Error('No incorporated_agreements extractor found')
+        throw new Error('No license extractor found')
     }
 
     const contracts = await supabase.from('contract')
@@ -90,9 +91,9 @@ test('Incorporated agreements', async () => {
                     a.contractLines.map((l: any) => l.id).forEach((l: any) => acc.add(l))
                 }
                 return acc
-            }, new Set())
+            }, new Set<number>)
 
-        const extractorAgentReferencedLines = new Set()
+        const extractorAgentReferencedLines = new Set<number>
         try {
             contract.results.data.reduce((acc: Set<number>, d: any) => {
                 const { start, end } = parseRefLines(d.lines)
@@ -109,7 +110,39 @@ test('Incorporated agreements', async () => {
 
         console.log("Ezra referenced lines", Array.from(annotationsReferencedLines))
         console.log("Extractor referenced lines", Array.from(extractorAgentReferencedLines))
+        let oldSet: number[] = [...annotationsReferencedLines]
+        let newSet: number[] = [...extractorAgentReferencedLines]
+        completeoldSet.push(...annotationsReferencedLines)
+        completenewSet.push(...extractorAgentReferencedLines)
 
+        const result = compareNumberSets(oldSet, newSet);
+        console.log("Accuracy:", result.oldSetPercentage);
+        console.log("Superfluous Information:", result.newSetPercentage);
+
+    }
+
+    const completeresult = compareNumberSets(completeoldSet, completenewSet);
+    console.log("Total Accuracy:", completeresult.oldSetPercentage);
+    console.log("Total Superfluous Information:", completeresult.newSetPercentage);
+
+    function compareNumberSets(oldSet: number[], newSet: number[]): { oldSetPercentage: number, newSetPercentage: number } {
+        const oldSetCount = oldSet.length;
+        const newSetCount = newSet.length;
+
+        // Use Sets for efficient membership checks and difference calculations
+        const oldSetEntries = new Set(oldSet);
+        const newSetEntries = new Set(newSet);
+
+        const accountedOldEntries = new Set([...oldSet].filter((entry) => newSetEntries.has(entry)));
+        const unaccountedNewEntries = new Set([...newSet].filter((entry) => !oldSetEntries.has(entry)));
+
+        const accountedOldPercentage = (accountedOldEntries.size / oldSetCount) * 100;
+        const unaccountedNewPercentage = (unaccountedNewEntries.size / newSetCount) * 100;
+
+        return {
+            oldSetPercentage: accountedOldPercentage,
+            newSetPercentage: unaccountedNewPercentage,
+        };
     }
 
 
