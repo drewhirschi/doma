@@ -27,7 +27,6 @@ function test(name: string, fn: () => Promise<void>) {
 }
 
 test('license', async () => {
-    // console.log(process.env)
     const extractor = await supabase.from('parslet').select('*').eq("key", "license").single()
 
     if (!extractor.data) {
@@ -110,6 +109,7 @@ test('license', async () => {
 
         console.log("Ezra referenced lines", Array.from(annotationsReferencedLines))
         console.log("Extractor referenced lines", Array.from(extractorAgentReferencedLines))
+        
         let oldSet: number[] = [...annotationsReferencedLines]
         let newSet: number[] = [...extractorAgentReferencedLines]
         completeoldSet.push(...annotationsReferencedLines)
@@ -125,16 +125,16 @@ test('license', async () => {
     console.log("Total Accuracy:", completeresult.oldSetPercentage);
     console.log("Total Superfluous Information:", completeresult.newSetPercentage);
 
-    function compareNumberSets(oldSet: number[], newSet: number[]): { oldSetPercentage: number, newSetPercentage: number } {
-        const oldSetCount = oldSet.length;
-        const newSetCount = newSet.length;
+    function compareNumberSets(humanSet: number[], aiSet: number[]): { oldSetPercentage: number, newSetPercentage: number } {
+        const oldSetCount = humanSet.length;
+        const newSetCount = aiSet.length;
 
         // Use Sets for efficient membership checks and difference calculations
-        const oldSetEntries = new Set(oldSet);
-        const newSetEntries = new Set(newSet);
+        const oldSetEntries = new Set(humanSet);
+        const newSetEntries = new Set(aiSet);
 
-        const accountedOldEntries = new Set([...oldSet].filter((entry) => newSetEntries.has(entry)));
-        const unaccountedNewEntries = new Set([...newSet].filter((entry) => !oldSetEntries.has(entry)));
+        const accountedOldEntries = new Set([...humanSet].filter((entry) => newSetEntries.has(entry)));
+        const unaccountedNewEntries = new Set([...aiSet].filter((entry) => !oldSetEntries.has(entry)));
 
         const accountedOldPercentage = (accountedOldEntries.size / oldSetCount) * 100;
         const unaccountedNewPercentage = (unaccountedNewEntries.size / newSetCount) * 100;
