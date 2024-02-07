@@ -50,7 +50,7 @@ export function DemoSignup({ submitForm }: { submitForm: (values: any) => Promis
                     <TextInput {...form.getInputProps("email")} label="Email" />
                     <Textarea {...form.getInputProps("message")} label="Tell us a little about your work" />
                     <Checkbox {...form.getInputProps("terms", { type: "checkbox" })} label={(<Text size="sm">
-                        By checking the box and pressing "Submit", I acknoledge Parsl's <Anchor href="/docs/privacy-policy.pdf">Privacy Policy</Anchor> and agree to Parsl's <Anchor href="/docs/terms-of-use.pdf">Terms of Service</Anchor>.
+                        {`By checking the box and pressing "Submit", I acknoledge Parsl's `}<Anchor href="/docs/privacy-policy.pdf">Privacy Policy</Anchor>{` and agree to Parsl's `}<Anchor href="/docs/terms-of-use.pdf">Terms of Service</Anchor>.
                     </Text>)} />
 
                     <Button style={{ alignSelf: "center" }} type="submit" disabled={!form.values.terms}>

@@ -42,8 +42,8 @@ export function linkPreviewToolTip(options: THyperlinkPreviewModalOptions): HTML
                     <IconCopy />
                 </ActionIcon>
                 <ActionIcon variant="default" onClick={() => {
-                    options.editor.chain().focus().unsetHyerlink().run()
-                    options.tippy.hide();
+                    // options.editor.chain().focus().unsetHyerlink().run()
+                    // options.tippy.hide();
                 }}>
 
                     <IconTrash />
