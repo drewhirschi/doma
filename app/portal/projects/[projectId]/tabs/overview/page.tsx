@@ -5,24 +5,22 @@ import { RedirectType, redirect, } from 'next/navigation';
 import { BackButton } from '@/components/BackButton';
 import Link from 'next/link';
 import OverviewTab from './OverviewTab';
+import { PAGE_SIZE } from './shared';
 import { ProjectTabs } from '../ProjectTabs';
 import { getUserTenant } from '@/shared/getUserTenant';
 import { serverClient } from '@/supabase/ServerClients';
 
-export default async function Page({ params, searchParams }: { params: { projectId: string}, searchParams: { query: string } }) {
+export default async function Page({ params, searchParams }: { params: { projectId: string }, searchParams: { query: string, page: number } }) {
 
     const query = searchParams?.query || '';
+    const page = Number(searchParams?.page)-1 || 0;
 
     const supabase = serverClient()
 
-    let projectQ
-    if (query) {
-        projectQ = await supabase.from("project").select("*, profile(*), contract(*)").eq("id", params.projectId)
-            .ilike('contract.display_name', `%${searchParams.query}%`)
-            .single()
-    } else {
-        projectQ = await supabase.from("project").select("*, profile(*), contract(*)").eq("id", params.projectId).single()
-    }
+    let projectQ = await supabase.from("project")
+        .select("*, profile(*)")
+        .eq("id", params.projectId)
+        .single()
 
     if (!projectQ.data) {
         console.error(projectQ.error)
@@ -31,21 +29,30 @@ export default async function Page({ params, searchParams }: { params: { project
 
     const project = projectQ.data
 
-    const tenantId = await getUserTenant(supabase)
 
-    if (!tenantId) {
-        throw new Error("No tenant id")
+    let contractQ
+    if (query) {
+        contractQ = await supabase.from("contract")
+            .select("*", { count: 'estimated' })
+            .eq("project_id", params.projectId)
+            .ilike('contract.display_name', `%${searchParams.query}%`)
+            .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
+    } else {
+        contractQ = await supabase.from("contract")
+            .select("*", { count: 'estimated' })
+            .eq("project_id", params.projectId)
+            .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
     }
 
-    const assignedContracts = project.contract.reduce((count, contract) => {
-        return count +
-            (contract.assigned_to === null ? 0 : 1);
-    }, 0)
+    if (contractQ.error) {
+        console.error(contractQ.error)
+        throw new Error("Failed to fetch contracts")
+    }
 
-    // await new Promise((resolve) => setTimeout(resolve, 5_000));
 
     return (
-       <OverviewTab project={project} />
+        // @ts-ignore
+        <OverviewTab project={project} contracts={contractQ.data ?? []}  contractCount={contractQ.count!}/>
     );
 };
 

@@ -249,8 +249,9 @@ export function ContractReviewer(props: Props) {
                                                         <Text key={highlight.parslet_id + parslet.id}>{highlight.text}</Text>
                                                     </HoverCard.Target>
                                                     <HoverCard.Dropdown>
-
-                                                        Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"}
+                                                    <MetadataItem header="y1" text={highlight.position.boundingRect.y1}/>
+                                                    <MetadataItem header="y2" text={highlight.position.boundingRect.y2}/>
+                                                        {/* Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"} */}
                                                         <br />
                                                         EI id: {highlight.id}
                                                     </HoverCard.Dropdown>

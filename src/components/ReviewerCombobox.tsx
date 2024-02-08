@@ -1,4 +1,4 @@
-import { Avatar, Combobox, Group, Input, InputBase, Text, useCombobox } from "@mantine/core";
+import { Avatar, Combobox, Flex, Group, Input, InputBase, Text, useCombobox } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 import { browserClient } from "@/supabase/BrowerClients";
@@ -7,7 +7,7 @@ import { updateContractAssignment } from "./RevierCombobox.action";
 
 function SelectOption({ avatar, color, initials, name }: { avatar: string, color: string, initials: string, name: string, }) {
     return (
-        <Group gap="sm" >
+        <Flex wrap={"nowrap"} gap="sm" >
             {initials === "?" ? (
                 <Avatar size={32} src={null}></Avatar>
             ) : (
@@ -18,11 +18,11 @@ function SelectOption({ avatar, color, initials, name }: { avatar: string, color
                     {name}
                 </Text>
             </div>
-        </Group>
+        </Flex>
     );
 }
 
-export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers }: { projectMembers: any[], selectedProfileId: string, contractId: string }) {
+export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers }: { projectMembers: any[], selectedProfileId: string | null, contractId: string }) {
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     });

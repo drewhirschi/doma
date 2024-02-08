@@ -1,14 +1,22 @@
 import { TextItem, TextMarkedContent } from "pdfjs-dist/types/src/display/api"
 
 import { Database } from "@/types/supabase";
+import PQueue from "p-queue";
 import { SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import path from 'path';
-import pdfjs from "@/server/pdfjs"
 import { sleep } from "@/utils";
 import unzipper from 'unzipper';
 
-export async function unzipTenantFile(supabase: SupabaseClient<Database>, filepath: string) {
+// import pdfjs from "@/server/pdfjs"
+
+
+
+export async function unzipTenantFile(supabase: SupabaseClient<Database>, zipFilepath: string) {
+
+    // const rateLimitter = pLimit(20);
+    const jobQueue = new PQueue({concurrency: 20});
+
 
     const { data: sessionData } = await supabase.auth.getSession()
     const { data: userData } = await supabase.from("profile").select("*").eq("id", sessionData?.session?.user.id!).single()
@@ -19,12 +27,34 @@ export async function unzipTenantFile(supabase: SupabaseClient<Database>, filepa
 
     const bucket = userData.tenant_id;
 
-    const filePathWithoutName = filepath.substring(0, filepath.lastIndexOf('/'));
+    const filePathWithoutName = zipFilepath.substring(0, zipFilepath.lastIndexOf('/'));
+
+    function handleZipEntry(entry: unzipper.Entry) {
+        const fileName = entry.path;
+        const type = entry.type; // 'Directory' or 'File'
+        if (fileName.startsWith("__MACOSX") || fileName.includes(".DS_Store")) {
+            return; // Skip the entry
+        }
+    
+        const fullPath = path.join(filePathWithoutName, fileName);
+    
+        if (type === 'File') {
+            let chunks: Buffer[] = [];
+            entry.on('data', (chunk: Buffer) => chunks.push(chunk));
+            entry.on('end', async () => {
+                let fileBuffer = Buffer.concat(chunks);
+                await handleFileIngestion(supabase, jobQueue, userData!.tenant_id!, fullPath, fileBuffer);
+    
+            });
+        } else {
+            entry.autodrain();
+        }
+    }
 
 
 
     try {
-        const url = `${process.env.SUPABASE_URL}/storage/v1/object/${bucket}/${filepath}`;
+        const url = `${process.env.SUPABASE_URL}/storage/v1/object/${bucket}/${zipFilepath}`;
 
         const response = await axios({
             method: 'get',
@@ -38,78 +68,34 @@ export async function unzipTenantFile(supabase: SupabaseClient<Database>, filepa
 
         response.data
             .pipe(unzipper.Parse())
-            .on('entry', function (entry: unzipper.Entry) {
-                const fileName = entry.path;
-                const type = entry.type; // 'Directory' or 'File'
-                if (fileName.startsWith("__MACOSX") || fileName.includes(".DS_Store")) {
-                    return; // Skip the entry
-                }
-
-                const fullPath = path.join(filePathWithoutName, fileName);
-
-                if (type === 'File') {
-                    let chunks: Buffer[] = [];
-                    entry.on('data', (chunk: Buffer) => chunks.push(chunk));
-                    entry.on('end', async () => {
-                        let fileBuffer = Buffer.concat(chunks);
-                        await handleFileIngestion(supabase, userData.tenant_id, fullPath, fileBuffer);
-
-                    });
-                } else {
-                    entry.autodrain();
-                }
-            })
+            .on('entry', handleZipEntry)
             .on('error', (err: any) => console.error('Error while unzipping:', err))
-            .on('finish', () => { });
-        const { data, error } = await supabase.storage.from(bucket).remove([filepath]);
+            .on('finish', async () => {
+                // const { data, error } = await supabase.storage.from(bucket).remove([zipFilepath]);
 
-        if (error) {
-            console.error(error);
-            throw new Error(error.message);
-        }
+                // if (error) {
+                //     console.error(error);
+                //     throw new Error(error.message);
+                // }
+
+            });
+
     } catch (error) {
         console.error('Error in streaming and unzipping:', error);
     }
 }
 
 
-async function handleFileIngestion(supabase: SupabaseClient, tenantId: string, filepath: string, fileBuffer: Buffer) {
 
 
-    let { data: uploadData , error: fileuploadError } = await supabase.storage.from(tenantId).upload(filepath, fileBuffer);
+async function handleFileIngestion(supabase: SupabaseClient, jobQueue: any, tenantId: string, filepath: string, fileBuffer: Buffer) {
+
+
+
+
+    // let { data: uploadData, error: fileuploadError } = await rateLimitter(() => supabase.storage.from(tenantId).upload(filepath, fileBuffer))
+    let { data: uploadData, error: fileuploadError } = await jobQueue.add(() => supabase.storage.from(tenantId).upload(filepath, fileBuffer))
     if (fileuploadError) console.error('Error uploading file:', fileuploadError);
-
-
-
-    // const ext = path.extname(filepath);
-
-    
-
-    // switch (ext) {
-    //     case ".pdf":
-    //         const pdf = await pdfjs.getDocument(fileBuffer.buffer as ArrayBuffer).promise;
-    //         console.log(filepath, pdf.numPages)
-
-    //         // TODO: read the lines out the pdf 
-    //         // await readPdfLines(fileBuffer)
-
-    //         const { data, error } = await supabase.from('contract').update({ npages: pdf.numPages })
-    //             // .eq('tenant_id', tenantId)
-    //             // @ts-ignore
-    //             .eq('id', uploadData?.id)
-
-    //         if (error) {
-    //             console.error(error)
-    //         }
-
-    //         break;
-
-
-    //     default:
-    //         console.warn("Unhandled file type", ext)
-    //         break;
-    // }
-
 
 
 

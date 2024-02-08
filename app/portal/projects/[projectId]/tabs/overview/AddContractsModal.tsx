@@ -134,7 +134,7 @@ export function AddContractsModalButton({ project }: Props) {
                                     onDrop={(files) => setFiles(files)}
                                     onReject={(files) => console.log('rejected files', files)}
                                     maxSize={5 * 1024 ** 3}
-                                    accept={['application/zip']}
+                                    accept={['application/zip', "application/x-zip-compressed"]}
                                     multiple={false}
                                 >
                                     <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>

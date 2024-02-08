@@ -6,8 +6,8 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
-  public: {
+  export interface Database {
+    public: {
     Tables: {
       annotation: {
         Row: {
@@ -71,6 +71,7 @@ export interface Database {
           in_scope: boolean
           linified: boolean
           name: string
+          npages: number
           path_tokens: string[]
           project_id: string
           tenant_id: string
@@ -84,6 +85,7 @@ export interface Database {
           in_scope?: boolean
           linified?: boolean
           name: string
+          npages?: number
           path_tokens?: string[]
           project_id: string
           tenant_id: string
@@ -97,6 +99,7 @@ export interface Database {
           in_scope?: boolean
           linified?: boolean
           name?: string
+          npages?: number
           path_tokens?: string[]
           project_id?: string
           tenant_id?: string
@@ -122,6 +125,7 @@ export interface Database {
         Row: {
           contract_id: string
           id: number
+          ntokens: number
           page: number
           page_height: number
           page_width: number
@@ -135,6 +139,7 @@ export interface Database {
         Insert: {
           contract_id: string
           id: number
+          ntokens?: number
           page?: number
           page_height?: number
           page_width?: number
@@ -148,6 +153,7 @@ export interface Database {
         Update: {
           contract_id?: string
           id?: number
+          ntokens?: number
           page?: number
           page_height?: number
           page_width?: number
@@ -283,9 +289,10 @@ export interface Database {
           examples: string[]
           id: string
           instruction: string
+          key: string
           order: number
           schema: string | null
-          tenant_id: string
+          tenant_id: string | null
         }
         Insert: {
           created_at?: string
@@ -293,9 +300,10 @@ export interface Database {
           examples?: string[]
           id?: string
           instruction?: string
+          key?: string
           order?: number
           schema?: string | null
-          tenant_id: string
+          tenant_id?: string | null
         }
         Update: {
           created_at?: string
@@ -303,9 +311,10 @@ export interface Database {
           examples?: string[]
           id?: string
           instruction?: string
+          key?: string
           order?: number
           schema?: string | null
-          tenant_id?: string
+          tenant_id?: string | null
         }
         Relationships: [
           {
@@ -320,38 +329,45 @@ export interface Database {
       profile: {
         Row: {
           avatar_url: string | null
-          color: string | null
+          color: string
           created_at: string
           display_name: string | null
           email: string
           email_confirmed_at: string | null
           id: string
           invited_at: string | null
-          tenant_id: string
+          tenant_id: string | null
         }
         Insert: {
           avatar_url?: string | null
-          color?: string | null
+          color?: string
           created_at?: string
           display_name?: string | null
           email: string
           email_confirmed_at?: string | null
-          id?: string
+          id: string
           invited_at?: string | null
-          tenant_id: string
+          tenant_id?: string | null
         }
         Update: {
           avatar_url?: string | null
-          color?: string | null
+          color?: string
           created_at?: string
           display_name?: string | null
           email?: string
           email_confirmed_at?: string | null
           id?: string
           invited_at?: string | null
-          tenant_id?: string
+          tenant_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profile_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profile_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -497,6 +513,10 @@ export interface Database {
           project_id_param: string
         }
         Returns: boolean
+      }
+      random_color: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
     }
     Enums: {

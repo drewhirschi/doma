@@ -33,6 +33,7 @@
     "lodash.debounce": "^4.0.8",
     "next": "^14.0.4",
     "openai": "^4.20.1",
+    "p-queue": "^8.0.1",
     "pdfjs-dist": "^2.16.105",
     "react": "18.2.0",
     "react-dom": "18.2.0",

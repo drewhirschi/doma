@@ -1,11 +1,16 @@
-import React from 'react';
-import { Text } from '@mantine/core';
+import { Group, Text } from '@mantine/core';
 
-export function MetadataItem({header, text}: {header:string,text:string})  {
+import { ClassicCopyButton } from './ClassicCopyButton';
+import React from 'react';
+
+export function MetadataItem({ header, text, copyButton }: { header: string, text: string, copyButton?: boolean }) {
     return (
         <div>
             <Text fw={700}>{header}</Text>
-            <Text c="dimmed" size="sm">{text}</Text>
+            <Group>
+                <Text c="dimmed" size="sm">{text}</Text>
+                {copyButton && <ClassicCopyButton copyValue={text} />}
+            </Group>
         </div>
     );
 };

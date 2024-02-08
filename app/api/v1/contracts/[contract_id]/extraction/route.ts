@@ -2,8 +2,8 @@ import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } fro
 
 import { NextRequest } from "next/server";
 import OpenAI from 'openai';
-import { reviewContract } from '@/server/processContract';
 import { routeClient } from "@/supabase/ServerClients";
+import { runContractExtraction } from '@/server/extractionAgent';
 
 export async function POST(req: NextRequest) {
     console.log(req.url)
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const supabase = routeClient()
 
 
-    await reviewContract(supabase, contract_id)
+    await runContractExtraction(supabase, contract_id)
     
 
     return Response.json({ message: "POST request processed" });

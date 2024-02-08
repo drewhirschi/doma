@@ -12,6 +12,11 @@ export type Database = MergeDeep<
           Row: {
             position: ScaledPosition | Json
           }
+        },
+        project: {
+          Row: {
+            profile: Profile_SB[]
+          }
         }
       }
     }
