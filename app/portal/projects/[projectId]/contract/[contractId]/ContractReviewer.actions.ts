@@ -1,13 +1,14 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { reviewContract } from "@/server/processContract"
+import { runContractExtraction } from "@/server/extractionAgent"
 import { serverActionClient } from "@/supabase/ServerClients"
+import { sleep } from "@/utils"
 
 export async function reviewContractAction(contractId: string) {
     const supabase = serverActionClient()
 
-    reviewContract(supabase, contractId).then(console.log)
+    runContractExtraction(supabase, contractId).then(console.log)
 }
 export async function completeContractAction(contractId: string) {
     const supabase = serverActionClient()

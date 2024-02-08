@@ -23,8 +23,9 @@ export default function HomePage() {
     <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350}>
 
       <Image src="/logo.svg" alt="Parsl logo" height={900} style={{ position: "absolute" }} />
+      <Group justify="flex-end"><Button m={"md"} href="/login" component={Link} variant="subtle">Login</Button></Group>
       <Container >
-        <Center h={900}>
+        <Center h={832}>
           <Stack>
             <Title>Welcome to Parsl</Title>
             <Group>
