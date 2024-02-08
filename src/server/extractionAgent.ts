@@ -78,7 +78,6 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
     const { data: extractors, error: extractorError } = await supabase.from('parslet').select('*')
         .order("order", { ascending: true })
         .is('schema', null)
-        // .limit(4)
 
     if (!extractors) {
         console.error('Error loading extractors:', extractorError);
