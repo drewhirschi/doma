@@ -21,7 +21,7 @@ Do not provide explanations, just state the verbatim language.
 
 Your output should be a JSON object with a schema that matches the following: {data: {text: string, lines: string}[]} where each object in the array has a verbaitim quote and the lines that quote came from.
 
-In the schema add a string called "lines" that states the start and end of the lines the information came from like "33-48"`
+In the schema, the property "lines" should state the start and end of the lines the information came from like "33-48"`
 
 interface IRespError {
     message?: string,
@@ -112,7 +112,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
             if (extraction.error) {
                 console.error('Error extracting data:', extraction.error);
             } else {
-                await saveExtraction(supabase, contractId, extractor!.id, extraction.ok)
+                await saveExtraction(supabase, contractId, extractor!, extraction.ok)
             }
         }
 
@@ -164,13 +164,13 @@ export async function execExtractor(extractor: Parslet_SB, contract: Contract_SB
 }
 
 
-async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractorId: string, extractionData: RawExtractionData[]) {
+async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractionData: RawExtractionData[]) {
     const { error: insertError } = await supabase
         .from('extracted_information')
         .insert(extractionData.map((d) => (
             {
                 id: d.id,
-                parslet_id: extractorId,
+                parslet_id: extractor.id,
                 data: d.text,
                 contract_id: contractId
             }
@@ -180,7 +180,7 @@ async function saveExtraction(supabase: SupabaseClient<Database>, contractId: st
         console.error('Error inserting data:', insertError);
         return
     } else {
-        console.log('Extracted info inserted successfully');
+        console.log(`Inserted ${extractionData.length} ${extractor.display_name} extractions successfully`);
     }
 
 
@@ -208,7 +208,7 @@ async function saveExtraction(supabase: SupabaseClient<Database>, contractId: st
     if (insertRelaitonshipError) {
         console.error('Error inserting data:', insertRelaitonshipError);
     } else {
-        console.log('Relationships inserted successfully');
+        console.log(`Inserted ${eiRefs.length} line references`);
     }
 
 }

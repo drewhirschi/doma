@@ -61,8 +61,10 @@ export function ContractReviewer(props: Props) {
 
     const panelRef = useRef<ImperativePanelHandle>(null);
 
+    
     const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
-    const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string }[]>([...annotations, ...extractionsHighlights])
+    
+    const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string }[]>([...annotations, ...extractionsHighlights, ])
     const [savingNotes, setSavingNotes] = useState(false)
     const supabase = browserClient()
 

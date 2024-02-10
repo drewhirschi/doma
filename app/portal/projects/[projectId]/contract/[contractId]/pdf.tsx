@@ -135,6 +135,7 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                             enableAreaSelection={(event) => event.altKey}
                             onScrollChange={resetHash}
                             pdfScaleValue="page-width"
+                            // pdfScaleValue=".75"
                             scrollRef={(scrollTo) => {
                                 scrollViewerTo = scrollTo;
                             }}

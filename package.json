@@ -62,6 +62,7 @@
     "postcss-preset-mantine": "1.11.0",
     "postcss-simple-vars": "^7.0.1",
     "supabase": "^1.131.5",
+    "ts-node": "^10.9.2",
     "typescript": "5.2.2",
     "vitest": "^1.2.2",
     "worker-loader": "^3.0.8"
