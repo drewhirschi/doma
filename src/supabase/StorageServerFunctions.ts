@@ -8,14 +8,9 @@ import path from 'path';
 import { sleep } from "@/utils";
 import unzipper from 'unzipper';
 
-// import pdfjs from "@/server/pdfjs"
-
-
-
 export async function unzipTenantFile(supabase: SupabaseClient<Database>, zipFilepath: string) {
 
-    // const rateLimitter = pLimit(20);
-    const jobQueue = new PQueue({concurrency: 20});
+    const jobQueue = new PQueue({ concurrency: 20 });
 
 
     const { data: sessionData } = await supabase.auth.getSession()
@@ -25,30 +20,36 @@ export async function unzipTenantFile(supabase: SupabaseClient<Database>, zipFil
         throw new Error("User not found")
     }
 
-    const bucket = userData.tenant_id;
+    const bucket = userData.tenant_id as string;
 
     const filePathWithoutName = zipFilepath.substring(0, zipFilepath.lastIndexOf('/'));
 
     function handleZipEntry(entry: unzipper.Entry) {
-        const fileName = entry.path;
-        const type = entry.type; // 'Directory' or 'File'
-        if (fileName.startsWith("__MACOSX") || fileName.includes(".DS_Store")) {
-            return; // Skip the entry
-        }
-    
-        const fullPath = path.join(filePathWithoutName, fileName);
-    
-        if (type === 'File') {
-            let chunks: Buffer[] = [];
-            entry.on('data', (chunk: Buffer) => chunks.push(chunk));
-            entry.on('end', async () => {
-                let fileBuffer = Buffer.concat(chunks);
-                await handleFileIngestion(supabase, jobQueue, userData!.tenant_id!, fullPath, fileBuffer);
-    
-            });
-        } else {
-            entry.autodrain();
-        }
+        return new Promise<number>((resolve, reject) => {
+
+            const fileName = entry.path;
+            const type = entry.type; // 'Directory' or 'File'
+            if (fileName.startsWith("__MACOSX") || fileName.includes(".DS_Store")) {
+                resolve(0)
+            }
+
+            const fullPath = path.join(filePathWithoutName, fileName);
+
+            if (type === 'File') {
+                let chunks: Buffer[] = [];
+                entry.on('data', (chunk: Buffer) => chunks.push(chunk));
+                entry.on('end', async () => {
+                    let fileBuffer = Buffer.concat(chunks);
+                    await handleFileIngestion(supabase, jobQueue, userData!.tenant_id!, fullPath, fileBuffer);
+                    resolve(1)
+                });
+            } else {
+                entry.autodrain();
+                resolve(0)
+            }
+
+        })
+
     }
 
 
@@ -66,19 +67,27 @@ export async function unzipTenantFile(supabase: SupabaseClient<Database>, zipFil
             }
         });
 
-        response.data
-            .pipe(unzipper.Parse())
-            .on('entry', handleZipEntry)
-            .on('error', (err: any) => console.error('Error while unzipping:', err))
-            .on('finish', async () => {
-                // const { data, error } = await supabase.storage.from(bucket).remove([zipFilepath]);
+        return new Promise((resolve, reject) => {
 
-                // if (error) {
-                //     console.error(error);
-                //     throw new Error(error.message);
-                // }
+            let importedFileCount = 0;
+            response.data
+                .pipe(unzipper.Parse())
+                .on('entry', async (entry: unzipper.Entry) => {
+                    importedFileCount += await handleZipEntry(entry);
+                })
+                .on('error', (err: any) => console.error('Error while unzipping:', err))
+                .on('finish', async () => {
+                    const { data, error } = await supabase.storage.from(bucket).remove([zipFilepath]);
 
-            });
+                    if (error) {
+                        console.error(error);
+                        reject(error.message);
+                    }
+
+                    resolve(importedFileCount);
+
+                });
+        })
 
     } catch (error) {
         console.error('Error in streaming and unzipping:', error);

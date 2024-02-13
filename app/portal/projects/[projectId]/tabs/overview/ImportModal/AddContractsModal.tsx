@@ -248,12 +248,12 @@ export function AddContractsModalButton({ project }: Props) {
 
                         <Button type="submit" disabled={files?.length < 1}
                             loading={uploadStatus === WizStatus.UPLOADING}
-                            onClick={uploadAndUnpackFiles}
-                        >Upload</Button>
+                            onClick={uploadStatus === WizStatus.IDLE ? uploadAndUnpackFiles : closeModal}
+                        >{uploadStatus === WizStatus.IDLE ? "Upload" : "Close"}</Button>
 
 
-                        <Button variant="default" onClick={prevStep}>Back</Button>
-                        <Button onClick={nextStep}>Next step</Button>
+                        {/* <Button variant="default" onClick={prevStep}>Back</Button>
+                        <Button onClick={nextStep}>Next step</Button> */}
                     </Group>
 
                 </Stack>

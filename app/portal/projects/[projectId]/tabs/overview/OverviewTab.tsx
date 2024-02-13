@@ -4,7 +4,7 @@ import { Anchor, Avatar, Badge, Button, Combobox, Container, Group, Input, Input
 import { getCompletedContracts, getInitials, getTotalContracts } from "@/ux/helper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { AddContractsModalButton } from "./AddContractsModal";
+import { AddContractsModalButton } from "./ImportModal/AddContractsModal";
 import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
 import { PAGE_SIZE } from "./shared";

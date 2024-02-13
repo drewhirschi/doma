@@ -22,7 +22,7 @@ export default async function Page({ params, searchParams }: { params: { project
         .eq("id", params.projectId)
         .single()
 
-    if (!projectQ.data) {
+    if (projectQ.error) {
         console.error(projectQ.error)
         throw new Error("Failed to fetch project")
     }
@@ -35,7 +35,7 @@ export default async function Page({ params, searchParams }: { params: { project
         contractQ = await supabase.from("contract")
             .select("*", { count: 'estimated' })
             .eq("project_id", params.projectId)
-            .ilike('contract.display_name', `%${searchParams.query}%`)
+            .ilike('display_name', `%${searchParams.query}%`)
             .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
     } else {
         contractQ = await supabase.from("contract")

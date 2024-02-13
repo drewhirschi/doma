@@ -93,7 +93,7 @@ export default function HomePage() {
               text="At Parsl you are are highest priority and we love to hear from you. Feel free to contact us through the form on this website and we will do our best to get back to you as soon as possible. Our responsiveness is unbeatable in the industry."
             />
           </SimpleGrid>
-          <Group justify="center" mt={150}>© 2023 Atlas AI LLC. All rights reserved.</Group>
+          <Group justify="center" mt={150}>© 2023 Atlas Technology LLC. All rights reserved.</Group>
         </Container>
       </Box>
 

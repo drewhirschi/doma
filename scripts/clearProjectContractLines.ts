@@ -21,11 +21,17 @@ async function regenerateProjectContractsLines(projectId: string) {
             return
         }
 
-        const res = await axios.post('https://xjedm27xqhz6bycbmrdwr4n2ve0ywpli.lambda-url.us-west-2.on.aws/', {
-            contractId: contract.id
+        try {
 
-        })
-        console.log(res.data)
+            const res = await axios.post('https://xjedm27xqhz6bycbmrdwr4n2ve0ywpli.lambda-url.us-west-2.on.aws/', {
+                contractId: contract.id
+                
+            })
+            console.log(res.data)
+        } catch (e) {
+            console.log(`Failed on contract [${contract.id}]`, contract.name)
+            console.error((e as any).response.data)
+        }
 
     })
 
