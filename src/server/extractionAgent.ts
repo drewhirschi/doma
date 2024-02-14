@@ -54,7 +54,35 @@ function rerm<TError = any>(message: string, anyErrorData: TError): IResp<any, T
 export type RawExtractionData = { text: string, lines: string, id: string }
 
 
+export async function runSingleExtraction(supabase: SupabaseClient<Database>, contractId: string, extractorId: string) {
 
+    const [extractorq, contractq] = await Promise.all([
+        supabase.from('parslet').select('*').eq('id', extractorId).single(),
+        supabase.from('contract').select('*, contract_line(text, ntokens)').eq('id', contractId).single()
+    ])
+
+    if (extractorq.error) {
+        console.error('Error loading extractor', extractorq.error);
+        throw extractorq.error
+
+    }
+
+    if (contractq.error) {
+        console.error('Error loading contract', contractq.error);
+        throw contractq.error
+    }
+
+    console.log(`Running extractor ${extractorq.data.display_name} on contract [${contractId}]`)
+
+    const extraction = await execExtractor(extractorq.data, contractq.data)
+
+    if (extraction.error) {
+        console.error('Error extracting data:', extraction.error);
+    } else {
+        await saveExtraction(supabase, contractId, extractorq.data, extraction.ok)
+    }
+
+}
 
 
 
@@ -87,7 +115,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
     let tokensUsedThisMinute = 0;
-    const TOKEN_LIMIT_PER_MINUTE = 450_000 / 9;
+    const TOKEN_LIMIT_PER_MINUTE = 450_000;
     const APX_TOKENS_PER_REQUEST = contractData.contract_line.reduce((sum, line) => sum + line.ntokens, 0) + contractData.contract_line.length * 8;
 
     const rateLimitInterval = setInterval(() => {

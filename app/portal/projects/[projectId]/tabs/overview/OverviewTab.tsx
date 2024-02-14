@@ -1,6 +1,6 @@
 "use client"
 
-import { Anchor, Avatar, Badge, Button, Combobox, Container, Group, Input, InputBase, Pagination, Progress, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
+import { Anchor, Avatar, Badge, Button, Combobox, Container, Group, Input, InputBase, Pagination, Progress, SegmentedControl, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
 import { getCompletedContracts, getInitials, getTotalContracts } from "@/ux/helper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -10,6 +10,7 @@ import Link from "next/link";
 import { PAGE_SIZE } from "./shared";
 import { ReviewerCombobox } from "@/components/ReviewerCombobox";
 import { useDebouncedCallback } from 'use-debounce';
+import { useState } from "react";
 
 //get real last sign date - from auth-users supabase table?
 
@@ -26,6 +27,9 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
+
+    const [filesSegment, setFilesSegment] = useState('list');
+
 
     const debouncedHandleSearch = useDebouncedCallback((value: string) => {
         //@ts-ignore
@@ -113,7 +117,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
         </Table.Tr>
     ));
     return (
-        <Container>
+        <Container miw={860}>
             <Table verticalSpacing="sm">
                 <Table.Thead>
                     <Table.Tr>
@@ -124,34 +128,53 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                 <Table.Tbody>{memberRows}</Table.Tbody>
             </Table>
             <Space h="lg" />
-            <Group justify="space-between">
-                <Group align="baseline">
-
-                    <TextInput
-                        w={200}
-                        placeholder="Search"
-                        mb="md"
-                        leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-                        defaultValue={searchParams.get('query')?.toString()}
-                        onChange={(event) => debouncedHandleSearch(event.currentTarget.value)}
-                    />
-                    <Pagination total={contractCount/PAGE_SIZE} value={Number(searchParams.get("page") ?? 1)} onChange={updatePage} />
-                </Group>
-
-                <AddContractsModalButton project={project} />
+            <Group my={"md"}>
+                <SegmentedControl
+                 value={filesSegment}
+                 onChange={setFilesSegment}
+                    data={[
+                        { value: 'list', label: 'List' },
+                        { value: 'tree', label: 'Tree' },
+                    ]}
+                />
             </Group>
-            <Table >
-                <Table.Thead>
-                    <Table.Tr>
-                        <Table.Th>Contract</Table.Th>
-                        <Table.Th>Completed</Table.Th>
-                        <Table.Th>Pages</Table.Th>
-                        <Table.Th>Assigned To</Table.Th>
+            {filesSegment === 'list' ? (
 
-                    </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>{contractsRow}</Table.Tbody>
-            </Table>
+                <>
+                    <Group justify="space-between">
+                        <Group align="baseline">
+
+                            <TextInput
+                                w={200}
+                                placeholder="Search"
+                                mb="md"
+                                leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+                                defaultValue={searchParams.get('query')?.toString()}
+                                onChange={(event) => debouncedHandleSearch(event.currentTarget.value)}
+                            />
+                            <Pagination total={contractCount / PAGE_SIZE} value={Number(searchParams.get("page") ?? 1)} onChange={updatePage} />
+                        </Group>
+
+                        <AddContractsModalButton project={project} />
+                    </Group>
+                    <Table >
+                        <Table.Thead>
+                            <Table.Tr>
+                                <Table.Th>Contract</Table.Th>
+                                <Table.Th>Completed</Table.Th>
+                                <Table.Th>Pages</Table.Th>
+                                <Table.Th>Assigned To</Table.Th>
+
+                            </Table.Tr>
+                        </Table.Thead>
+                        <Table.Tbody>{contractsRow}</Table.Tbody>
+                    </Table>
+                </>
+
+            ) :
+                (
+                    <div>hello tree</div>
+                )}
         </Container>
     )
 }

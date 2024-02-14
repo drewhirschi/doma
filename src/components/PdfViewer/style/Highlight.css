@@ -16,9 +16,21 @@
 .Highlight__part {
   cursor: pointer;
   position: absolute;
-  background: rgba(255, 226, 143, 1);
   transition: background 0.3s;
 }
+
+.Highlight__part__user {
+  opacity: 0.5;
+  background: rgba(255, 226, 143, 1);
+  
+}
+.Highlight__part__agent {
+  opacity: 0.3;
+  background: rgb(98, 202, 50);
+
+}
+
+
 
 .Highlight__popup {
   background-color: #3d464d;

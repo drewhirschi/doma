@@ -1,7 +1,8 @@
 "use server"
 
+import { runContractExtraction, runSingleExtraction } from "@/server/extractionAgent"
+
 import { revalidatePath } from "next/cache"
-import { runContractExtraction } from "@/server/extractionAgent"
 import { serverActionClient } from "@/supabase/ServerClients"
 import { sleep } from "@/utils"
 
@@ -30,6 +31,22 @@ export async function deleteContractExtractedInfo(contractId: string, projectId:
     const { data, error } = await supabase.from('extracted_information').delete().eq('contract_id', contractId)
 
     revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
+
+
+}
+
+export async function reExtractTopic(contractId: string, parsletId: string) {
+    const supabase = serverActionClient()
+
+
+    const { data, error } = await supabase.from('extracted_information').delete().eq('contract_id', contractId).eq('parslet_id', parsletId)
+
+    try {
+
+        await runSingleExtraction(supabase, contractId, parsletId)
+    } catch (error) {
+
+    }
 
 
 }

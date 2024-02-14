@@ -3,26 +3,10 @@
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 
-import { ActionIcon, Button, Center, CopyButton, Flex, Group, HoverCard, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, Title, Tooltip, rem } from "@mantine/core";
-import {
-    AreaHighlight,
-    Highlight,
-    PdfHighlighter,
-    PdfLoader,
-    Popup,
-    Position,
-    ScaledPosition,
-    Tip
-} from "@/components/PdfViewer";
-import { Editor, useEditor } from '@tiptap/react';
-import {
-    Hyperlink,
-    previewHyperlinkModal,
-    setHyperlinkModal
-} from "@docs.plus/extension-hyperlink";
-import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconSettings, IconTrash } from "@tabler/icons-react";
+import { ActionIcon, Button, Center, CopyButton, Flex, Group, HoverCard, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, ThemeIcon, Title, Tooltip, rem } from "@mantine/core";
+import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTrash, IconUser } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { completeContractAction, deleteContractExtractedInfo, reviewContractAction } from "./ContractReviewer.actions";
+import { completeContractAction, deleteContractExtractedInfo, reExtractTopic, reviewContractAction } from "./ContractReviewer.actions";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -51,7 +35,16 @@ interface Props {
     annotations: Annotation_SB[]
 }
 
-
+export interface IContractHighlight {
+    position: any;
+    id: string;
+    content: {
+        text?: string;
+        image?: string;
+    };
+    parslet_id: string;
+    author: string;
+}
 
 export function ContractReviewer(props: Props) {
 
@@ -61,10 +54,10 @@ export function ContractReviewer(props: Props) {
 
     const panelRef = useRef<ImperativePanelHandle>(null);
 
-    
+
     const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
-    
-    const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string }[]>([...annotations, ...extractionsHighlights, ])
+
+    const [highlights, setHighlights] = useState<IContractHighlight[]>([...annotations.map(a => ({ ...a, author: "user", content: { text: a.text } })), ...extractionsHighlights,])
     const [savingNotes, setSavingNotes] = useState(false)
     const supabase = browserClient()
 
@@ -113,7 +106,7 @@ export function ContractReviewer(props: Props) {
         const id: string = window.crypto.randomUUID()
 
 
-        setHighlights([{ text: text ?? "", position, id, parslet_id: parsletId }, ...highlights])
+        setHighlights([{ content: {text: text ?? ""}, position, id, parslet_id: parsletId, author: "user" }, ...highlights])
         // editors[parsletId].commands.insertContent(`<br/> <a href="${pathname}#${id}">${text}</a>`, { parseOptions: {} })
         const { data, error } = await supabase.from("annotation").insert({
             id,
@@ -185,7 +178,7 @@ export function ContractReviewer(props: Props) {
                         <HoverCard.Dropdown>
                             <Group>
                                 <Text>
-                                    <MetadataItem header="Contract ID" text={contract.id}/>
+                                    <MetadataItem header="Contract ID" text={contract.id} />
                                 </Text>
                                 <CopyButton value={contract.id} timeout={2000}>
                                     {({ copied, copy }) => (
@@ -211,7 +204,17 @@ export function ContractReviewer(props: Props) {
                         {parslets.map((parslet) => (
                             <div key={parslet.id}>
                                 {/* <NoteEditor parslet={parslet} editor={editors[parslet.id]} /> */}
-                                <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
+                                <Group justify='space-between'>
+
+                                    <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
+                                    <ActionIcon color='gray' size={"sm"} onClick={() => {
+                                        reExtractTopic(contract.id, parslet.id)
+                                    }}>
+                                        <IconRepeat style={{ width: rem(12) }} />
+
+                                    </ActionIcon>
+                                </Group>
+
                                 <Textarea
                                     defaultValue={parslet.contract_note[0]?.content ?? ""}
                                     autosize
@@ -248,11 +251,16 @@ export function ContractReviewer(props: Props) {
                                                 <HoverCard shadow="md" openDelay={500}>
 
                                                     <HoverCard.Target>
-                                                        <Text key={highlight.parslet_id + parslet.id}>{highlight.text}</Text>
+                                                        <Flex dir='row' wrap={"nowrap"} align="baseline">
+                                                            {highlight.author == "user" && (<ThemeIcon size={"xs"} color="teal">
+                                                                <IconUser style={{ width: '80%', height: '80%' }} />
+                                                            </ThemeIcon>)}
+                                                            <Text key={highlight.parslet_id + parslet.id}>{highlight.content.text}</Text>
+                                                        </Flex>
                                                     </HoverCard.Target>
                                                     <HoverCard.Dropdown>
-                                                    <MetadataItem header="y1" text={highlight.position.boundingRect.y1}/>
-                                                    <MetadataItem header="y2" text={highlight.position.boundingRect.y2}/>
+                                                        <MetadataItem header="y1" text={highlight.position.boundingRect.y1} />
+                                                        <MetadataItem header="y2" text={highlight.position.boundingRect.y2} />
                                                         {/* Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"} */}
                                                         <br />
                                                         EI id: {highlight.id}

@@ -13,6 +13,7 @@ import { IconMessageCircle, IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
+import { IContractHighlight } from "./ContractReviewer";
 import { browserClient } from "@/supabase/BrowerClients";
 
 interface Props {
@@ -20,7 +21,7 @@ interface Props {
     pdfBase64: string
     contract: Contract_SB & { annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
     parslets: Parslet_SB[]
-    highlights: { position: any, id: string, text: string, parslet_id: string }[]
+    highlights: IContractHighlight[]
     handleAddHighlight: (highlight: { position: any,  text: string, parslet_id: string }) => void
     handleRemoveHighlight: (id: string) => void
 }
@@ -100,7 +101,6 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
     };
 
 
-    const pdfHighlights = highlights.map((h) => ({ position: h.position! as ScaledPosition, content: { text: h.text }, id: h.id! }))
 
     return (
         <div
@@ -129,9 +129,9 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
                     return (
 
-                        <PdfHighlighter
+                        <PdfHighlighter<IContractHighlight>
                             pdfDocument={pdfDocument}
-                            highlights={pdfHighlights}
+                            highlights={highlights}
                             enableAreaSelection={(event) => event.altKey}
                             onScrollChange={resetHash}
                             pdfScaleValue="page-width"
@@ -226,6 +226,7 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                             isScrolledTo={isScrolledTo}
                                             position={highlight.position}
                                             onClick={() => { }}
+                                            isUserHighlight={highlight.author === "user"}
                                         />
                                     </Popup>
                                 );

@@ -14,6 +14,7 @@ interface Props {
   onMouseOut?: () => void;
   
   isScrolledTo: boolean;
+  isUserHighlight: boolean;
 }
 
 export class Highlight extends Component<Props> {
@@ -24,6 +25,7 @@ export class Highlight extends Component<Props> {
       onMouseOver,
       onMouseOut,
       isScrolledTo,
+      isUserHighlight,
     } = this.props;
 
     const { rects, boundingRect } = position;
@@ -41,7 +43,7 @@ export class Highlight extends Component<Props> {
               onClick={onClick}
               key={index}
               style={rect}
-              className={`Highlight__part`}
+              className={`Highlight__part ${isUserHighlight ? "Highlight__part__user" : "Highlight__part__agent"}`}
             />
           ))}
         </div>
