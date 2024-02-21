@@ -6,6 +6,7 @@ import "./global.css";
 
 import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 
+import { Analytics } from "@vercel/analytics/react"
 import { Notifications } from "@mantine/notifications";
 import { theme } from "../theme";
 
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: any }) {
           <Notifications />
           {children}
         </MantineProvider>
+        <Analytics/>
       </body>
     </html>
   );
