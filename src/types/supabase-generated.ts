@@ -6,8 +6,8 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-  export interface Database {
-    public: {
+export type Database = {
+  public: {
     Tables: {
       annotation: {
         Row: {
@@ -66,6 +66,7 @@ export type Json =
           assigned_to: string | null
           completed: boolean
           created_at: string
+          description: string | null
           display_name: string | null
           id: string
           in_scope: boolean
@@ -74,12 +75,14 @@ export type Json =
           npages: number
           path_tokens: string[]
           project_id: string
+          tag: string | null
           tenant_id: string
         }
         Insert: {
           assigned_to?: string | null
           completed?: boolean
           created_at?: string
+          description?: string | null
           display_name?: string | null
           id?: string
           in_scope?: boolean
@@ -88,12 +91,14 @@ export type Json =
           npages?: number
           path_tokens?: string[]
           project_id: string
+          tag?: string | null
           tenant_id: string
         }
         Update: {
           assigned_to?: string | null
           completed?: boolean
           created_at?: string
+          description?: string | null
           display_name?: string | null
           id?: string
           in_scope?: boolean
@@ -102,6 +107,7 @@ export type Json =
           npages?: number
           path_tokens?: string[]
           project_id?: string
+          tag?: string | null
           tenant_id?: string
         }
         Relationships: [
@@ -267,7 +273,7 @@ export type Json =
         }
         Relationships: [
           {
-            foreignKeyName: "line_ref_contract_id_line_id_fkey"
+            foreignKeyName: "line_ref_contract_line_fkey"
             columns: ["contract_id", "line_id"]
             isOneToOne: false
             referencedRelation: "contract_line"

@@ -12,7 +12,20 @@ import { ReviewerCombobox } from "@/components/ReviewerCombobox";
 import { useDebouncedCallback } from 'use-debounce';
 import { useState } from "react";
 
-//get real last sign date - from auth-users supabase table?
+function getAgreementTypeColor(type: string) {
+    switch (type) {
+        case 'customer_agreement':
+            return 'teal';
+        case 'joint_development_agreement':
+            return 'pink';
+        case 'employee_agreement':
+            return 'orange';
+        case 'license_agreement':
+            return 'indigo';
+        default:
+            return 'gray';
+    }
+}
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[] }
@@ -78,6 +91,11 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                 {contract.npages ?? 1}
             </Table.Td>
             <Table.Td>
+               {contract.tag && <Badge color={getAgreementTypeColor(contract.tag)}>
+                    {contract.tag }
+                </Badge>}
+            </Table.Td>
+            <Table.Td>
                 <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id} />
             </Table.Td>
 
@@ -130,8 +148,8 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
             <Space h="lg" />
             <Group my={"md"}>
                 <SegmentedControl
-                 value={filesSegment}
-                 onChange={setFilesSegment}
+                    value={filesSegment}
+                    onChange={setFilesSegment}
                     data={[
                         { value: 'list', label: 'List' },
                         { value: 'tree', label: 'Tree' },
@@ -163,6 +181,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                                 <Table.Th>Contract</Table.Th>
                                 <Table.Th>Completed</Table.Th>
                                 <Table.Th>Pages</Table.Th>
+                                <Table.Th>Type</Table.Th>
                                 <Table.Th>Assigned To</Table.Th>
 
                             </Table.Tr>

@@ -54,7 +54,7 @@ export default function HomePage() {
 
             <Image fit="contain" src="/images/sarah_celebrating.png" alt="celebrating lawyer" h={300} />
             <Center h={300}>
-              <Text maw={400} size="xl">Meet Sarah, who just used Parsl for the first time and was stoked to see that with the help of AI a first draft of her work product was complete before she even read a page!</Text>
+              <Text maw={400} size="xl">Meet Sarah, who just used Parsl for the first time and was amazed to see that with the help of AI a first draft of her work product was complete before she even read a page!</Text>
             </Center>
           </SimpleGrid>
         </Container>
