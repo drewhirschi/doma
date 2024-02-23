@@ -28,7 +28,8 @@ export async function completeContractAction(contractId: string) {
 export async function deleteContractExtractedInfo(contractId: string, projectId: string) {
     const supabase = serverActionClient()
 
-    const { data, error } = await supabase.from('extracted_information').delete().eq('contract_id', contractId)
+    const { error:eiErr } = await supabase.from('extracted_information').delete().eq('contract_id', contractId)
+    const { error:jobErr } = await supabase.from('extract_jobs').delete().eq('contract_id', contractId)
 
     revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 

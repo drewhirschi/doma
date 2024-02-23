@@ -42,7 +42,7 @@ test('license', async () => {
     const promises = []
 
     for (const contract of contracts.data!) {
-        promises.push(execExtractor(extractor.data, contract))
+        promises.push(execExtractor( supabase, extractor.data, contract))
     }
 
     let results = await Promise.all(promises)
