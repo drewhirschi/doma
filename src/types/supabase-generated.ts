@@ -216,6 +216,45 @@ export type Database = {
           }
         ]
       }
+      extract_jobs: {
+        Row: {
+          contract_id: string
+          id: string
+          parslet_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contract_id?: string
+          id?: string
+          parslet_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contract_id?: string
+          id?: string
+          parslet_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_extract_jobs_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contract"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_extract_jobs_extractor_id_fkey"
+            columns: ["parslet_id"]
+            isOneToOne: false
+            referencedRelation: "parslet"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       extracted_information: {
         Row: {
           contract_id: string

@@ -1,6 +1,7 @@
 import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } from 'openai/resources/index.js';
 
 import { Database } from '@/types/supabase';
+import { ExtractJobStatus } from '@/types/enums';
 import OpenAI from 'openai';
 import PQueue from 'p-queue';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -74,7 +75,7 @@ export async function runSingleExtraction(supabase: SupabaseClient<Database>, co
 
     console.log(`Running extractor ${extractorq.data.display_name} on contract [${contractId}]`)
 
-    const extraction = await execExtractor(extractorq.data, contractq.data)
+    const extraction = await execExtractor(supabase, extractorq.data, contractq.data)
 
     if (extraction.error) {
         console.error('Error extracting data:', extraction.error);
@@ -115,7 +116,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
     let tokensUsedThisMinute = 0;
-    const TOKEN_LIMIT_PER_MINUTE = 450_000;
+    const TOKEN_LIMIT_PER_MINUTE = 250_000;
     const APX_TOKENS_PER_REQUEST = contractData.contract_line.reduce((sum, line) => sum + line.ntokens, 0) + contractData.contract_line.length * 8;
 
     const rateLimitInterval = setInterval(() => {
@@ -135,7 +136,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
         const task = async () => {
             tokensUsedThisMinute += APX_TOKENS_PER_REQUEST;
-            const extraction = await execExtractor(extractor!, contractData)
+            const extraction = await execExtractor(supabase, extractor!, contractData)
 
             if (extraction.error) {
                 console.error('Error extracting data:', extraction.error);
@@ -158,37 +159,49 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 }
 
 
-export async function execExtractor(extractor: Parslet_SB, contract: Contract_SB & { contract_line: { text: string, ntokens: number }[] }): Promise<IResp<RawExtractionData[]>> {
 
 
+export async function execExtractor(sb: SupabaseClient<Database>, extractor: Parslet_SB, contract: Contract_SB & { contract_line: { text: string, ntokens: number }[] }): Promise<IResp<RawExtractionData[]>> {
+
+    const job = await createExtractionJob(sb, contract.id, extractor!.id)
+
+    await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.RUNNING)
     console.log(`executing extractor ${extractor.display_name}`)
 
 
     const xmlContractText = buildXmlContract(contract.contract_line)
 
-
-    const res: ChatCompletion = await openai.chat.completions.create({
-        messages: buildExtracitonMessages(extractor, xmlContractText),
-        model: 'gpt-4-1106-preview',
-        temperature: 0,
-        response_format: { 'type': "json_object" }
-    });
-
-    const responseMessage = res.choices[0].message;
-
-
-
-    let content: { data: RawExtractionData[] } = { data: [] }
     try {
-        //FIXME: this is very sketchy...
-        content.data = JSON.parse(responseMessage.content!).data.map((d: { text: string, lines: string }) => ({ ...d, id: uuidv4() }))
+
+        const res: ChatCompletion = await openai.chat.completions.create({
+            messages: buildExtracitonMessages(extractor, xmlContractText),
+            model: 'gpt-4-turbo-preview',
+            temperature: 0,
+            response_format: { 'type': "json_object" }
+        });
+
+        const responseMessage = res.choices[0].message;
+
+        let content: { data: RawExtractionData[] } = { data: [] }
+        try {
+            content.data = JSON.parse(responseMessage.content!).data.map((d: { text: string, lines: string }) => ({ ...d, id: uuidv4() }))
+        } catch (error) {
+            console.error("Failed to parse: ", responseMessage.content)
+            throw error
+        }
+
+        await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.COMPLETE)
+        return rok(content.data)
+
     } catch (error) {
-        console.error('Error parsing JSON:', error);
-        console.error("tried to parse", responseMessage.content)
-        return rerm("Error parsing JSON", { error })
+        console.error('Error extracting data:', error);
+        await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
+        return rerm("Error extracting data", { error })
     }
 
-    return rok(content.data)
+
+
+
 }
 
 
@@ -277,3 +290,28 @@ export function parseRefLines(refLines: string) {
     return { start, end }
 }
 
+
+async function setJobStatus(supabase: SupabaseClient<Database>, contractId:string, extractorId:string, status: ExtractJobStatus) {
+    const { error } = await supabase.from('extract_jobs').update({ status, updated_at: new Date().toISOString() }).eq('contract_id', contractId).eq('parslet_id', extractorId)
+    if (error) {
+        console.error('Error updating job status:', error);
+    }
+}
+
+async function createExtractionJob(supabase: SupabaseClient<Database>, contractId: string, extractorId: string): Promise<ExtractJob_SB | undefined> {
+
+    const job = await supabase.from("extract_jobs").upsert({
+        contract_id: contractId,
+        parslet_id: extractorId,
+        status: "pending",
+        updated_at: new Date().toISOString()
+    }).select().single()
+
+    if (job.error) {
+        console.error('Error creating job:', job.error);
+        return
+    }
+
+    return job.data
+
+}

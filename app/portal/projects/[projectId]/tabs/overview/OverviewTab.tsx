@@ -1,6 +1,6 @@
 "use client"
 
-import { Anchor, Avatar, Badge, Button, Combobox, Container, Group, Input, InputBase, Pagination, Progress, SegmentedControl, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
+import { Anchor, Avatar, Badge, Box, Button, Combobox, Container, Group, Input, InputBase, Pagination, Progress, SegmentedControl, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
 import { getCompletedContracts, getInitials, getTotalContracts } from "@/ux/helper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -84,6 +84,9 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
 
             </Table.Td>
             <Table.Td>
+                {contract.description}
+            </Table.Td>
+            <Table.Td>
                 {contract.completed ? "Yes" : "No"}
             </Table.Td>
             <Table.Td>
@@ -135,7 +138,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
         </Table.Tr>
     ));
     return (
-        <Container miw={860}>
+        <Box miw={860} px={"lg"}>
             <Table verticalSpacing="sm">
                 <Table.Thead>
                     <Table.Tr>
@@ -179,6 +182,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                         <Table.Thead>
                             <Table.Tr>
                                 <Table.Th>Contract</Table.Th>
+                                <Table.Th>Description</Table.Th>
                                 <Table.Th>Completed</Table.Th>
                                 <Table.Th>Pages</Table.Th>
                                 <Table.Th>Type</Table.Th>
@@ -192,8 +196,8 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
 
             ) :
                 (
-                    <div>hello tree</div>
+                    <div>coming soon</div>
                 )}
-        </Container>
+        </Box>
     )
 }

@@ -11,6 +11,7 @@ import { useEffect, useOptimistic, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { BackButton } from "@/components/BackButton";
+import JobInfo from './JobInfo';
 import { Json } from "@/types/supabase-generated";
 import MetadataItem from '@/components/MetadataItem';
 import { NoteEditor } from './NoteEditor';
@@ -30,7 +31,7 @@ interface Props {
     pdfUrl: string
     pdfBase64: string
     projectId: string
-    contract: Contract_SB & { annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
+    contract: Contract_SB & { extract_jobs:ExtractJob_SB[], annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
     parslets: ParsletWithNotes[]
     annotations: Annotation_SB[]
 }
@@ -206,7 +207,11 @@ export function ContractReviewer(props: Props) {
                                 {/* <NoteEditor parslet={parslet} editor={editors[parslet.id]} /> */}
                                 <Group justify='space-between'>
 
+                            <Stack gap={0}>
+
                                     <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
+                                    <JobInfo job={contract.extract_jobs.find(j => j.parslet_id == parslet.id)}/>
+                            </Stack>
                                     <ActionIcon color='gray' size={"sm"} onClick={() => {
                                         reExtractTopic(contract.id, parslet.id)
                                     }}>
