@@ -69,7 +69,6 @@ export default function HomePage() {
           method: "POST",
           body: values,
         })
-        pixel.event("WaitlistJoin")
 
       }} />
 

@@ -3,6 +3,7 @@
 import { Anchor, Button, Checkbox, Container, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
 
 import { notifications } from "@mantine/notifications";
+import { pixel } from "@/utils";
 import { useForm } from "@mantine/form";
 
 export function WaitlistSignup({ submitForm }: { submitForm: (values: any) => Promise<void> }) {
@@ -27,6 +28,7 @@ export function WaitlistSignup({ submitForm }: { submitForm: (values: any) => Pr
                     try {
 
                         await submitForm(values)
+                        pixel.event("WaitlistJoin")
                         form.reset()
                         notifications.show({
                             title: "Thank you!",
