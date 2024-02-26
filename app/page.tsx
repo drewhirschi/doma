@@ -2,7 +2,7 @@ import { Anchor, AspectRatio, Box, Button, Center, Checkbox, Container, Group, I
 
 import Link from "next/link";
 import { ReactNode } from "react";
-import { WaitlistSignup } from "./DemoSignup";
+import { WaitlistSignup } from "./WaitlistSignup";
 import axios from "axios";
 import { redirect } from "next/navigation";
 

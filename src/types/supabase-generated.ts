@@ -291,6 +291,36 @@ export type Database = {
           }
         ]
       }
+      formatted_ei_ref: {
+        Row: {
+          extracted_info_id: string
+          formatted_info_id: string
+        }
+        Insert: {
+          extracted_info_id?: string
+          formatted_info_id?: string
+        }
+        Update: {
+          extracted_info_id?: string
+          formatted_info_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_formatted_ei_ref_extracted_info_id_fkey"
+            columns: ["extracted_info_id"]
+            isOneToOne: false
+            referencedRelation: "extracted_information"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_formatted_ei_ref_formatted_info_id_fkey"
+            columns: ["formatted_info_id"]
+            isOneToOne: false
+            referencedRelation: "formatted_info"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       formatted_info: {
         Row: {
           contract_id: string
@@ -613,6 +643,12 @@ export type Database = {
       random_color: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      user_tenant_owns_contract: {
+        Args: {
+          contract_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
