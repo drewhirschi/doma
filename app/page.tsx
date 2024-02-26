@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { WaitlistSignup } from "./WaitlistSignup";
 import axios from "axios";
+import { pixel } from "@/utils";
 import { redirect } from "next/navigation";
 
 function DescriptionItem({ header, text }: { header: string, text: ReactNode }) {
@@ -63,11 +64,12 @@ export default function HomePage() {
       <WaitlistSignup submitForm={async (values) => {
         "use server"
 
+
         await axios.post("https://submit-form.com/IkZtiKU2d", {
           method: "POST",
           body: values,
         })
-          
+        pixel.event("WaitlistJoin")
 
       }} />
 
