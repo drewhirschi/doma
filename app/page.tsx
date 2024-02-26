@@ -1,8 +1,8 @@
 import { Anchor, AspectRatio, Box, Button, Center, Checkbox, Container, Group, Image, SimpleGrid, Space, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
 
-import { DemoSignup } from "./DemoSignup";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { WaitlistSignup } from "./DemoSignup";
 import axios from "axios";
 import { redirect } from "next/navigation";
 
@@ -28,13 +28,13 @@ export default function HomePage() {
         <Center h={832}>
           <Stack>
             <Title>Welcome to Parsl</Title>
-            <Group>
+            <Group justify="center">
               <Button component={Link} href={"#schedule"} scroll>
-                Schedule a demo
+                Join the waitlist
               </Button>
-              <Button variant="outline" href={"#schedule"} component={Link}>
+              {/* <Button variant="outline" href={"#schedule"} component={Link}>
                 Learn more
-              </Button>
+              </Button> */}
             </Group>
           </Stack>
         </Center>
@@ -60,7 +60,7 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      <DemoSignup submitForm={async (values) => {
+      <WaitlistSignup submitForm={async (values) => {
         "use server"
 
         await axios.post("https://submit-form.com/IkZtiKU2d", {
@@ -93,7 +93,7 @@ export default function HomePage() {
               text="At Parsl you are are highest priority and we love to hear from you. Feel free to contact us through the form on this website and we will do our best to get back to you as soon as possible. Our responsiveness is unbeatable in the industry."
             />
           </SimpleGrid>
-          <Group justify="center" mt={150}>© 2023 Atlas Technology LLC. All rights reserved.</Group>
+          <Group justify="center" mt={150}>© 2024 Atlas Technology LLC. All rights reserved.</Group>
         </Container>
       </Box>
 
