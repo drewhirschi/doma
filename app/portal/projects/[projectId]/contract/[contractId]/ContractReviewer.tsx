@@ -3,23 +3,22 @@
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 
-import { ActionIcon, Button, Center, CopyButton, Flex, Group, HoverCard, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, ThemeIcon, Title, Tooltip, rem } from "@mantine/core";
+import * as actions from "./ContractReviewer.actions";
+
+import { ActionIcon, Box, Button, Center, CopyButton, Flex, Group, HoverCard, Menu, Paper, ScrollArea, SegmentedControl, Skeleton, Stack, Text, Textarea, ThemeIcon, Title, Tooltip, rem } from "@mantine/core";
 import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTrash, IconUser } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { completeContractAction, deleteContractExtractedInfo, reExtractTopic, reviewContractAction } from "./ContractReviewer.actions";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { BackButton } from "@/components/BackButton";
+import { FormattedInfoSwitch } from '@/components/FormattedInfoViews/FormattedInfoSwitch';
 import JobInfo from './JobInfo';
 import { Json } from "@/types/supabase-generated";
 import MetadataItem from '@/components/MetadataItem';
-import { NoteEditor } from './NoteEditor';
-import StarterKit from '@tiptap/starter-kit';
 import { browserClient } from "@/supabase/BrowerClients";
 import { buildAnnotationFromExtraction } from "./helpers";
 import dynamic from 'next/dynamic'
-import { linkPreviewToolTip } from './LinkPreviewTooltip';
 import { sleep } from '@/utils';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -31,7 +30,7 @@ interface Props {
     pdfUrl: string
     pdfBase64: string
     projectId: string
-    contract: Contract_SB & { extract_jobs:ExtractJob_SB[], annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
+    contract: Contract_SB & { formatted_info: FormattedInfo_SB[], extract_jobs: ExtractJob_SB[], annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
     parslets: ParsletWithNotes[]
     annotations: Annotation_SB[]
 }
@@ -51,6 +50,7 @@ export function ContractReviewer(props: Props) {
 
     const { pdfUrl, contract, annotations, projectId, parslets } = props
 
+    const [leftSegment, setLeftSegment] = useState('extractors');
 
 
     const panelRef = useRef<ImperativePanelHandle>(null);
@@ -107,7 +107,7 @@ export function ContractReviewer(props: Props) {
         const id: string = window.crypto.randomUUID()
 
 
-        setHighlights([{ content: {text: text ?? ""}, position, id, parslet_id: parsletId, author: "user" }, ...highlights])
+        setHighlights([{ content: { text: text ?? "" }, position, id, parslet_id: parsletId, author: "user" }, ...highlights])
         // editors[parsletId].commands.insertContent(`<br/> <a href="${pathname}#${id}">${text}</a>`, { parseOptions: {} })
         const { data, error } = await supabase.from("annotation").insert({
             id,
@@ -147,7 +147,7 @@ export function ContractReviewer(props: Props) {
                                 <Menu.Label>Application</Menu.Label>
                                 <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
                                     onClick={async () => {
-                                        await completeContractAction(contract.id)
+                                        await actions.completeContractAction(contract.id)
 
 
                                     }}
@@ -156,14 +156,14 @@ export function ContractReviewer(props: Props) {
                                 </Menu.Item>
                                 <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                     onClick={() => {
-                                        reviewContractAction(contract.id)
+                                        actions.reviewContractAction(contract.id)
                                     }}
                                 >
                                     Run AI extraciton
                                 </Menu.Item>
                                 <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
                                     onClick={() => {
-                                        deleteContractExtractedInfo(contract.id, projectId)
+                                        actions.deleteContractExtractedInfo(contract.id, projectId)
                                     }}
                                 >
                                     Clear extracted info
@@ -197,23 +197,30 @@ export function ContractReviewer(props: Props) {
                             </Group>
                         </HoverCard.Dropdown>
                     </HoverCard>
+                    <SegmentedControl
+                        value={leftSegment}
+                        onChange={setLeftSegment}
+                        data={[
+                            { label: 'Extractors', value: 'extractors' },
+                            { label: 'Formatters', value: 'formatters' }
+                        ]} />
                     <ScrollArea
                         offsetScrollbars
                         h={"100%"}
                     >
 
-                        {parslets.map((parslet) => (
+                        {leftSegment == 'extractors' ? parslets.map((parslet) => (
                             <div key={parslet.id}>
                                 {/* <NoteEditor parslet={parslet} editor={editors[parslet.id]} /> */}
                                 <Group justify='space-between'>
 
-                            <Stack gap={0}>
+                                    <Stack gap={0}>
 
-                                    <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
-                                    <JobInfo job={contract.extract_jobs.find(j => j.parslet_id == parslet.id)}/>
-                            </Stack>
+                                        <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
+                                        <JobInfo job={contract.extract_jobs.find(j => j.parslet_id == parslet.id)} />
+                                    </Stack>
                                     <ActionIcon color='gray' size={"sm"} onClick={() => {
-                                        reExtractTopic(contract.id, parslet.id)
+                                        actions.reExtractTopic(contract.id, parslet.id)
                                     }}>
                                         <IconRepeat style={{ width: rem(12) }} />
 
@@ -276,7 +283,17 @@ export function ContractReviewer(props: Props) {
 
                                 </Stack>
                             </div>
-                        ))}
+                        ))
+                            : <Stack>
+                                <Button
+                                onClick={() => {
+                                    actions.runFormatters(contract.id, projectId)
+                                }}
+                                >Run all</Button>
+                                {contract.formatted_info.map((formattedInfo) => (
+                                    <FormattedInfoSwitch formattedInfo={formattedInfo} key={formattedInfo.id}/>
+                                ))}
+                            </Stack>}
                     </ScrollArea>
                 </Stack>
 

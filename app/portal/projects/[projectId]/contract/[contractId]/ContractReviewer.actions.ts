@@ -3,6 +3,7 @@
 import { runContractExtraction, runSingleExtraction } from "@/server/extractionAgent"
 
 import { revalidatePath } from "next/cache"
+import { runAllFormatters } from "@/server/formatAgent"
 import { serverActionClient } from "@/supabase/ServerClients"
 import { sleep } from "@/utils"
 
@@ -28,8 +29,8 @@ export async function completeContractAction(contractId: string) {
 export async function deleteContractExtractedInfo(contractId: string, projectId: string) {
     const supabase = serverActionClient()
 
-    const { error:eiErr } = await supabase.from('extracted_information').delete().eq('contract_id', contractId)
-    const { error:jobErr } = await supabase.from('extract_jobs').delete().eq('contract_id', contractId)
+    const { error: eiErr } = await supabase.from('extracted_information').delete().eq('contract_id', contractId)
+    const { error: jobErr } = await supabase.from('extract_jobs').delete().eq('contract_id', contractId)
 
     revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
@@ -50,4 +51,18 @@ export async function reExtractTopic(contractId: string, parsletId: string) {
     }
 
 
+}
+
+export async function runFormatters(contractId: string, projectId: string) {
+    const supabase = serverActionClient()
+
+
+    try {
+
+        await runAllFormatters(supabase, contractId)
+        revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
+
+    } catch (error) {
+
+    }
 }

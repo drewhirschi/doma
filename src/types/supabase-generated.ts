@@ -219,21 +219,18 @@ export type Database = {
       extract_jobs: {
         Row: {
           contract_id: string
-          id: string
           parslet_id: string
           status: string
           updated_at: string
         }
         Insert: {
           contract_id?: string
-          id?: string
           parslet_id?: string
           status?: string
           updated_at?: string
         }
         Update: {
           contract_id?: string
-          id?: string
           parslet_id?: string
           status?: string
           updated_at?: string
@@ -293,6 +290,60 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
+      }
+      formatted_info: {
+        Row: {
+          contract_id: string
+          created_at: string
+          data: Json | null
+          id: string
+          type: string
+        }
+        Insert: {
+          contract_id?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          type?: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_formats_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contract"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_formats_type_fkey"
+            columns: ["type"]
+            isOneToOne: false
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
+          }
+        ]
+      }
+      formatters: {
+        Row: {
+          display_name: string
+          key: string
+        }
+        Insert: {
+          display_name: string
+          key?: string
+        }
+        Update: {
+          display_name?: string
+          key?: string
+        }
+        Relationships: []
       }
       line_ref: {
         Row: {
