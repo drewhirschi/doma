@@ -1,4 +1,4 @@
-import { Anchor, AspectRatio, Box, Button, Center, Checkbox, Container, Group, Image, SimpleGrid, Space, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
+import { Anchor, AspectRatio, Box, Button, Center, Checkbox, Container, Grid, GridCol, Group, Image, SimpleGrid, Space, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
 
 import Link from "next/link";
 import { ReactNode } from "react";
@@ -94,9 +94,23 @@ export default function HomePage() {
               text="At Parsl you are are highest priority and we love to hear from you. Feel free to contact us through the form on this website and we will do our best to get back to you as soon as possible. Our responsiveness is unbeatable in the industry."
             />
           </SimpleGrid>
-          <Group justify="center" mt={150}>© 2024 Atlas Technology LLC. All rights reserved.</Group>
         </Container>
+
+        
+        <Grid py={"xl"} id="footer">
+          <GridCol span={{ base: 12, md: 6 }}>
+          <Group justify="center" >© 2024 Atlas Technology LLC. All rights reserved.</Group>
+          </GridCol>
+          <GridCol span={{ base: 12, md: 6 }}>
+            <Stack justify="center" align="center">
+              <Text fw={700}>Legal</Text>
+              <Anchor href="/docs/privacy-policy.pdf">Privacy Policy</Anchor>
+              <Anchor href="/docs/terms-of-use.pdf">Terms of Service</Anchor>
+            </Stack>
+          </GridCol>
+        </Grid>
       </Box>
+
 
 
     </Box>

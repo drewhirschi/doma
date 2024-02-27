@@ -22,7 +22,7 @@ export function WaitlistSignup({ submitForm }: { submitForm: (values: any) => Pr
     return (
         <Container size={"xs"} my={60} p="lg" id="schedule">
             <Title>Join our waitlist!</Title>
-            <Text size="sm">Get updates on out progress</Text>
+            <Text size="sm">Get updates on our progress</Text>
             <form
                 onSubmit={form.onSubmit(async (values) => {
                     try {
