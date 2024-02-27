@@ -30,7 +30,12 @@ interface Props {
     pdfUrl: string
     pdfBase64: string
     projectId: string
-    contract: Contract_SB & { formatted_info: FormattedInfo_SB[], extract_jobs: ExtractJob_SB[], annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
+    contract: Contract_SB & {
+        formatted_info: (FormattedInfo_SB & {extracted_information: {id:string}[]})[],
+        extract_jobs: ExtractJob_SB[],
+        annotation: Annotation_SB[],
+        extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[]
+    }
     parslets: ParsletWithNotes[]
     annotations: Annotation_SB[]
 }
@@ -286,12 +291,12 @@ export function ContractReviewer(props: Props) {
                         ))
                             : <Stack>
                                 <Button
-                                onClick={() => {
-                                    actions.runFormatters(contract.id, projectId)
-                                }}
+                                    onClick={() => {
+                                        actions.runFormatters(contract.id, projectId)
+                                    }}
                                 >Run all</Button>
                                 {contract.formatted_info.map((formattedInfo) => (
-                                    <FormattedInfoSwitch formattedInfo={formattedInfo} key={formattedInfo.id}/>
+                                    <FormattedInfoSwitch formattedInfo={formattedInfo} key={formattedInfo.formatter_key} />
                                 ))}
                             </Stack>}
                     </ScrollArea>

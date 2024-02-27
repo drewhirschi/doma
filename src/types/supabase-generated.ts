@@ -291,32 +291,28 @@ export type Database = {
           }
         ]
       }
-      formatted_ei_ref: {
+      fi_ei_refs: {
         Row: {
+          contract_id: string
           extracted_info_id: string
-          formatted_info_id: string
+          formatter_key: string
         }
         Insert: {
+          contract_id?: string
           extracted_info_id?: string
-          formatted_info_id?: string
+          formatter_key?: string
         }
         Update: {
+          contract_id?: string
           extracted_info_id?: string
-          formatted_info_id?: string
+          formatter_key?: string
         }
         Relationships: [
           {
-            foreignKeyName: "public_formatted_ei_ref_extracted_info_id_fkey"
+            foreignKeyName: "public_fi_ei_refs_extracted_info_id_fkey"
             columns: ["extracted_info_id"]
             isOneToOne: false
             referencedRelation: "extracted_information"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_formatted_ei_ref_formatted_info_id_fkey"
-            columns: ["formatted_info_id"]
-            isOneToOne: false
-            referencedRelation: "formatted_info"
             referencedColumns: ["id"]
           }
         ]
@@ -326,22 +322,22 @@ export type Database = {
           contract_id: string
           created_at: string
           data: Json | null
+          formatter_key: string
           id: string
-          type: string
         }
         Insert: {
           contract_id?: string
           created_at?: string
           data?: Json | null
+          formatter_key?: string
           id?: string
-          type?: string
         }
         Update: {
           contract_id?: string
           created_at?: string
           data?: Json | null
+          formatter_key?: string
           id?: string
-          type?: string
         }
         Relationships: [
           {
@@ -353,7 +349,7 @@ export type Database = {
           },
           {
             foreignKeyName: "public_formats_type_fkey"
-            columns: ["type"]
+            columns: ["formatter_key"]
             isOneToOne: false
             referencedRelation: "formatters"
             referencedColumns: ["key"]

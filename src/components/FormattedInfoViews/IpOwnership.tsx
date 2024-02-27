@@ -1,12 +1,13 @@
-import { Badge, Group, Text, Title } from "@mantine/core"
+import { Anchor, Badge, Group, Text, Title } from "@mantine/core"
 
 import { IPOwnershipFormatResponse } from "@/types/formatters"
 
 interface Props {
     data: IPOwnershipFormatResponse
+    extractedInfoRefs: string[]
 }
 
-export function FormattedIpOwnership({ data }: Props) {
+export function FormattedIpOwnership({ data, extractedInfoRefs }: Props) {
 
     function typeBadge(type: IPOwnershipFormatResponse["type"]) {
         switch (type) {
@@ -32,6 +33,9 @@ export function FormattedIpOwnership({ data }: Props) {
                 {data.feedback && <Badge>+Feedback</Badge>}
             </Group>
             <Text>{data.paraphrasing}</Text>
+            {extractedInfoRefs.map((id,index)=> (
+                <Anchor key={id} href={`#${id}`}>[{index+1}]</Anchor>
+            ))}
 
         </div>
     )

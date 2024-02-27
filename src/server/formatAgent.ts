@@ -84,6 +84,7 @@ class IpOwnership implements IFormatter {
     
    
     `;
+    key: string = "ip_ownership"
 
 
 
@@ -109,11 +110,18 @@ class IpOwnership implements IFormatter {
             throw new Error("No response from formatter")
         }
 
-        await sb.from("formatted_info").upsert({
+        const {error:fiErr} = await sb.from("formatted_info").upsert({
             contract_id: contractId,
-            type: "ip_ownership",
+            formatter_key: this.key,
             data: res,
         })
+
+        if (fiErr) {
+            throw new Error(fiErr.message)
+        }
+
+        const refUpsert = await sb.from("fi_ei_refs").upsert( eiq.data.map((ei) => ({formatter_key: this.key, extracted_info_id: ei.id, contract_id: contractId})))
+
 
         console.log("IP Ownership Formatter done.")
         return res
