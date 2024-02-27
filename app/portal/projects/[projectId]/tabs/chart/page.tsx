@@ -13,12 +13,14 @@ export default async function Page({ params }: { params: { projectId: string } }
         supabase.from("project").select("*, contract(*, contract_note(*, parslet(order)))").eq("id", params.projectId).single(),
         supabase.from("parslet").select("*, contract_note(content)").order("order", { ascending: true })
     ])
-
+    
+    
     if (!projectQ.data || !parsletQ.data) {
         console.error(projectQ.error, parsletQ.error)
         throw new Error("Failed to fetch data")
     }
-
+    
+    const formattersq = await supabase.from("formatters").select("*, formatted_info(*)").in("formatted_info.contract_id", [projectQ.data.contract.map((c) => c.id)])
 
     const parslets = parsletQ.data ?? []
 
@@ -33,7 +35,7 @@ export default async function Page({ params }: { params: { projectId: string } }
      
 
 
-        <Chart projectId={params.projectId} parslets={parslets} contracts={projectQ.data?.contract ?? []} />
+        <Chart projectId={params.projectId} parslets={parslets} contracts={projectQ.data?.contract ?? []} formatters={formattersq.data ?? []}/>
 
     );
 }

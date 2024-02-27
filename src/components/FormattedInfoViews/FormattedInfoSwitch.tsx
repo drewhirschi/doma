@@ -5,7 +5,7 @@ export function FormattedInfoSwitch({ formattedInfo }: { formattedInfo: (Formatt
     switch (formattedInfo.formatter_key) {
         case "ip_ownership":
             return (<FormattedIpOwnership
-                data={ formattedInfo.data as IPOwnershipFormatResponse }
+                data={ formattedInfo.data as unknown as IPOwnershipFormatResponse }
                 extractedInfoRefs={formattedInfo.extracted_information.map((ei) => ei.id)}
             />);
         default:

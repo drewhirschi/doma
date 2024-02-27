@@ -32,7 +32,7 @@ export function FormattedIpOwnership({ data, extractedInfoRefs }: Props) {
                 {data.not_present_assignment && <Badge>+Not present assignment</Badge>}
                 {data.feedback && <Badge>+Feedback</Badge>}
             </Group>
-            <Text>{data.paraphrasing}</Text>
+            <Text>{data.summary}</Text>
             {extractedInfoRefs.map((id,index)=> (
                 <Anchor key={id} href={`#${id}`}>[{index+1}]</Anchor>
             ))}

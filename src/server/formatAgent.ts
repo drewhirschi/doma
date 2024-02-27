@@ -1,4 +1,5 @@
-import { Database } from "@/types/supabase-generated";
+import { Database, Json } from "@/types/supabase-generated";
+
 import { IPOwnershipFormatResponse } from "@/types/formatters";
 import OpenAI from "openai";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -47,10 +48,10 @@ interface IFormatter {
     run: (oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string) => Promise<any>;
 }
 
-function getSystemMessage(targetEntity: string) {
+function getSystemMessage(targetEntity: string, formatterInstruction: string) {
 
     return `You are a meticulous M&A lawyer tasked with condensing and formatting key contract information pulled from the Target Entity's contracts. The Target Entity is "${targetEntity}". Counterparty is any party that is not a Target Entity. 
-Do not provide explanations, just respond with JSON according to the schema`
+Do not provide explanations, just respond with JSON according to the schema` + formatterInstruction
 }
 
 
@@ -61,7 +62,7 @@ class IpOwnership implements IFormatter {
         <schema>
     
         <property>
-        <key>paraphasing</key>
+        <key>summary</key>
         <instruction>Paraphrase the assignments that are being granted from the IP ownership specific sections from the contract by providing the assignment language and what material that is being assigned along with the scope.</instruction>
         </property>
 
@@ -91,36 +92,37 @@ class IpOwnership implements IFormatter {
     async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string): Promise<IPOwnershipFormatResponse> {
 
         console.log("Running IP Ownership Formatter")
+        
+        const formatterq = await sb.from("formatters").select("*, parslet(id)").eq("key", this.key).single()
+        const eiq = await sb.from("extracted_information").select("*, contract_line(*)").eq("contract_id", contractId).in("parslet_id", formatterq.data?.parslet.map((p) => p.id) ?? [])
 
-        const IP_OWNERSHIP_EXTRACTOR_ID = "084fc678-f4c0-4e54-9524-0597a3330316"
-        const eiq = await sb.from("extracted_information").select("*, contract_line(*)").eq("contract_id", contractId).eq("parslet_id", IP_OWNERSHIP_EXTRACTOR_ID)
-
+        
         if (eiq.error) {
             throw new Error(eiq.error.message)
         }
 
-        const input = `<contract_extraction topic="ip_ownership">${eiq.data.flatMap((d) => d.contract_line.map((cl) => `<line id=${cl.id}>${cl.text}</line>`)).join("\n")}</contract_extraction>`
+        const input = `<contract_extraction topic=${this.key}>${eiq.data.flatMap((d) => d.contract_line.map((cl) => `<line id=${cl.id}>${cl.text}</line>`)).join("\n")}</contract_extraction>`
 
-        console.log(getSystemMessage("Target Entity") + this.instruction)
-        console.log(input)
+        // console.log(getSystemMessage("Target Entity", this.instruction))
+        // console.log(input)
 
-        const res = await execFormatter<IPOwnershipFormatResponse>(oaiClient, getSystemMessage("Target Entity") + this.instruction, input)
+        const res = await execFormatter<IPOwnershipFormatResponse>(oaiClient, getSystemMessage("Target Entity", this.instruction), input)
 
         if (!res) {
             throw new Error("No response from formatter")
         }
 
-        const {error:fiErr} = await sb.from("formatted_info").upsert({
+        const { error: fiErr } = await sb.from("formatted_info").upsert({
             contract_id: contractId,
             formatter_key: this.key,
-            data: res,
+            data: res as unknown as Json,
         })
 
         if (fiErr) {
             throw new Error(fiErr.message)
         }
 
-        const refUpsert = await sb.from("fi_ei_refs").upsert( eiq.data.map((ei) => ({formatter_key: this.key, extracted_info_id: ei.id, contract_id: contractId})))
+        const refUpsert = await sb.from("fi_ei_refs").upsert(eiq.data.map((ei) => ({ formatter_key: this.key, extracted_info_id: ei.id, contract_id: contractId })))
 
 
         console.log("IP Ownership Formatter done.")
