@@ -5,6 +5,7 @@ import { getCompletedContracts, getInitials, getTotalContracts } from "@/ux/help
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { AddContractsModalButton } from "./ImportModal/AddContractsModal";
+import FileExplorer from "@/components/TreeFileExplorer/TreeFileExplorer";
 import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
 import { PAGE_SIZE } from "./shared";
@@ -12,18 +13,18 @@ import { ReviewerCombobox } from "@/components/ReviewerCombobox";
 import { useDebouncedCallback } from 'use-debounce';
 import { useState } from "react";
 
-function getAgreementTypeColor(type: string) {
+function getAgreementBadge(type: string) {
     switch (type) {
         case 'customer_agreement':
-            return 'teal';
+            return <Badge color='teal'>Customer</Badge>;
         case 'joint_development_agreement':
-            return 'pink';
+            return <Badge color="pink">Joing development</Badge>;
         case 'employee_agreement':
-            return 'orange';
-        case 'license_agreement':
-            return 'indigo';
+            return <Badge color="orange">Employee</Badge>;
+        // case 'license_agreement':
+        //     return 'indigo';
         default:
-            return 'gray';
+            return <Badge color="gray">Unknown</Badge>;
     }
 }
 
@@ -94,9 +95,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                 {contract.npages ?? 1}
             </Table.Td>
             <Table.Td>
-               {contract.tag && <Badge color={getAgreementTypeColor(contract.tag)}>
-                    {contract.tag }
-                </Badge>}
+               {contract.tag && getAgreementBadge(contract.tag)}
             </Table.Td>
             <Table.Td>
                 <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id} />
@@ -185,7 +184,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                                 <Table.Th>Description</Table.Th>
                                 <Table.Th>Completed</Table.Th>
                                 <Table.Th>Pages</Table.Th>
-                                <Table.Th>Type</Table.Th>
+                                <Table.Th>Agreement Type</Table.Th>
                                 <Table.Th>Assigned To</Table.Th>
 
                             </Table.Tr>
@@ -196,7 +195,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
 
             ) :
                 (
-                    <div>coming soon</div>
+                    <FileExplorer projectId={projectId} root={`projects/${projectId}`} tenantId="1a026946-561d-4d35-8fc5-de612378daef" />
                 )}
         </Box>
     )

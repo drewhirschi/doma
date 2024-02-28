@@ -138,7 +138,7 @@ export function ContractReviewer(props: Props) {
             <Panel defaultSize={40} minSize={20} style={{ height: "100dvh" }}>
                 <Stack justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
                     <Group mt={"md"}>
-                        <BackButton href={`/portal/projects/${projectId}/tabs`} style={{ alignSelf: "flex-start" }} />
+                        <BackButton href={`/portal/projects/${projectId}/tabs/overview`} style={{ alignSelf: "flex-start" }} />
                         {savingNotes ? <IconRefresh color="gray" size={20} /> : <IconCloudCheck color="gray" size={20} />}
 
                         <Menu shadow="md" width={200}>

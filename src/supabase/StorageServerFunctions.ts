@@ -31,6 +31,7 @@ export async function unzipTenantFile(supabase: SupabaseClient<Database>, zipFil
             const type = entry.type; // 'Directory' or 'File'
             if (fileName.startsWith("__MACOSX") || fileName.includes(".DS_Store")) {
                 resolve(0)
+                return
             }
 
             const fullPath = path.join(filePathWithoutName, fileName);

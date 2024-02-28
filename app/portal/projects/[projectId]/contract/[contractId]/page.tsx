@@ -6,7 +6,7 @@ export const revalidate = 0
 export const dynamic = 'force-dynamic'
 
 
-export default async function Page({ params }: { params: { id: string, contractId: string } }) {
+export default async function Page({ params }: { params: { projectId: string, contractId: string } }) {
 
     const supabase = serverClient()
 
@@ -54,7 +54,7 @@ export default async function Page({ params }: { params: { id: string, contractI
             pdfUrl={signedUrlQ.data.signedUrl}
             pdfBase64={fileBase64}
             contract={contractQ.data}
-            projectId={params.id}
+            projectId={params.projectId}
             parslets={parsletQ.data ?? []}
             annotations={contractQ.data.annotation ?? []}
         />
