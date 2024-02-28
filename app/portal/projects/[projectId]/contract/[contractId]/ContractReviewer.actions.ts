@@ -56,10 +56,10 @@ export async function reExtractTopic(contractId: string, parsletId: string) {
 export async function runFormatters(contractId: string, projectId: string) {
     const supabase = serverActionClient()
 
-
+    const {data, error} = await supabase.from('project').select().eq('id', projectId).single()
     try {
 
-        await runAllFormatters(supabase, contractId)
+        await runAllFormatters(supabase, contractId, data?.target.join(", ") ?? "No target found")
         revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
     } catch (error) {
