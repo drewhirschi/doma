@@ -42,7 +42,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
     const pathname = usePathname();
     const { replace } = useRouter();
 
-    const [filesSegment, setFilesSegment] = useState('list');
+    const [filesSegment, setFilesSegment] = useState('tree');
 
 
     const debouncedHandleSearch = useDebouncedCallback((value: string) => {
@@ -70,39 +70,41 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
     }
 
 
-    const contractsRow = contracts.map((contract: Contract_SB) => (
-        <Table.Tr key={contract.id}>
+    const contractsRow = contracts
+        .filter(item => !item.name.includes(".emptyFolderPlaceholder"))
+        .map((contract: Contract_SB) => (
+            <Table.Tr key={contract.id}>
 
 
-            <Table.Td>
-                {contract.display_name?.toLowerCase().endsWith(".pdf") ? (
-                    <Anchor href={`/portal/projects/${projectId}/contract/${contract.id}`} component={Link}>
-                        {contract.display_name}
-                    </Anchor>
-                ) : (
-                    <Text>{contract.display_name}</Text>
-                )}
+                <Table.Td>
+                    {contract.display_name?.toLowerCase().endsWith(".pdf") ? (
+                        <Anchor href={`/portal/projects/${projectId}/contract/${contract.id}`} component={Link}>
+                            {contract.display_name}
+                        </Anchor>
+                    ) : (
+                        <Text>{contract.display_name}</Text>
+                    )}
 
-            </Table.Td>
-            <Table.Td>
-                {contract.description}
-            </Table.Td>
-            <Table.Td>
-                {contract.completed ? "Yes" : "No"}
-            </Table.Td>
-            <Table.Td>
-                {/* @ts-ignore */}
-                {contract.npages ?? 1}
-            </Table.Td>
-            <Table.Td>
-               {contract.tag && getAgreementBadge(contract.tag)}
-            </Table.Td>
-            <Table.Td>
-                <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id} />
-            </Table.Td>
+                </Table.Td>
+                <Table.Td>
+                    {contract.description}
+                </Table.Td>
+                <Table.Td>
+                    {contract.completed ? "Yes" : "No"}
+                </Table.Td>
+                <Table.Td>
+                    {/* @ts-ignore */}
+                    {contract.npages ?? 1}
+                </Table.Td>
+                <Table.Td>
+                    {contract.tag && getAgreementBadge(contract.tag)}
+                </Table.Td>
+                <Table.Td>
+                    <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id} />
+                </Table.Td>
 
-        </Table.Tr>
-    ));
+            </Table.Tr>
+        ));
 
     const memberRows = members.map((item) => (
         <Table.Tr key={item.display_name}>
@@ -148,15 +150,17 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                 <Table.Tbody>{memberRows}</Table.Tbody>
             </Table>
             <Space h="lg" />
-            <Group my={"md"}>
+            <Group my={"md"} justify="space-between">
                 <SegmentedControl
                     value={filesSegment}
                     onChange={setFilesSegment}
                     data={[
-                        { value: 'list', label: 'List' },
                         { value: 'tree', label: 'Tree' },
+                        { value: 'list', label: 'List' },
                     ]}
                 />
+                <AddContractsModalButton project={project} />
+
             </Group>
             {filesSegment === 'list' ? (
 
@@ -175,7 +179,6 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                             <Pagination total={contractCount / PAGE_SIZE} value={Number(searchParams.get("page") ?? 1)} onChange={updatePage} />
                         </Group>
 
-                        <AddContractsModalButton project={project} />
                     </Group>
                     <Table >
                         <Table.Thead>
@@ -195,7 +198,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
 
             ) :
                 (
-                    <FileExplorer projectId={projectId} root={`projects/${projectId}`} tenantId="1a026946-561d-4d35-8fc5-de612378daef" />
+                    <FileExplorer projectId={projectId} root={`projects/${projectId}`} tenantId={project.tenant_id} />
                 )}
         </Box>
     )

@@ -1,6 +1,7 @@
 import { Anchor, AspectRatio, Box, Button, Center, Checkbox, Container, Grid, GridCol, Group, Image, SimpleGrid, Space, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
 
 import Link from "next/link";
+import LoginButton from "./LoginButton";
 import { ReactNode } from "react";
 import { WaitlistSignup } from "./WaitlistSignup";
 import axios from "axios";
@@ -24,7 +25,7 @@ export default function HomePage() {
     <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350}>
 
       <Image src="/logo.svg" alt="Parsl logo" height={900} style={{ position: "absolute" }} />
-      <Group justify="flex-end"><Button m={"md"} href="/login" component={Link} variant="subtle">Login</Button></Group>
+      <Group justify="flex-end"><LoginButton/></Group>
       <Container >
         <Center h={832}>
           <Stack>
