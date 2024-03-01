@@ -1,9 +1,9 @@
 "use server"
 
+import { runAllFormatters, runSingleFormatter } from "@/server/formatAgent"
 import { runContractExtraction, runSingleExtraction } from "@/server/extractionAgent"
 
 import { revalidatePath } from "next/cache"
-import { runAllFormatters } from "@/server/formatAgent"
 import { serverActionClient } from "@/supabase/ServerClients"
 import { sleep } from "@/utils"
 
@@ -56,10 +56,23 @@ export async function reExtractTopic(contractId: string, parsletId: string) {
 export async function runFormatters(contractId: string, projectId: string) {
     const supabase = serverActionClient()
 
-    const {data, error} = await supabase.from('project').select().eq('id', projectId).single()
+    const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
     try {
 
         await runAllFormatters(supabase, contractId, data?.target.join(", ") ?? "No target found")
+        revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
+
+    } catch (error) {
+
+    }
+}
+export async function runFormatter(formatterKey: string, contractId: string, projectId: string) {
+    const supabase = serverActionClient()
+
+    const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
+    try {
+
+        await runSingleFormatter(supabase, formatterKey, contractId, data?.target.join(", ") ?? "No target found")
         revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
     } catch (error) {

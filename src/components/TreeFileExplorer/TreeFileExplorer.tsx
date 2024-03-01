@@ -56,11 +56,13 @@
 
 // export default FileExplorer;
 
-import { Anchor, Box, Button, Group, Stack, Table, Text, UnstyledButton } from '@mantine/core';
+import { Anchor, Box, Button, Group, Stack, Table, Text, Title, UnstyledButton } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
+import { IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
 import { browserClient } from '@/supabase/BrowerClients';
+import { s } from 'vitest/dist/reporters-1evA5lom';
 
 interface FileItem {
     id: string;
@@ -125,6 +127,15 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId }
 
     return (
         <Box>
+            <Group>
+
+            {/* <Button
+             variant='subtle'
+              disabled={currentPath == `projects/${projectId}`}
+              onClick={() => setCurrentPath(`projects/${projectId}`)}
+              >/</Button> */}
+            {currentPath.replace(`projects/${projectId}`, "").split('/').filter(pathItem => !!pathItem).map((path, index) => (<Group> <IconChevronRight size={16}/> <Button variant="subtle">{path}</Button></Group>))}
+            </Group>
             <Table highlightOnHover>
                 <Table.Thead>
                     <Table.Tr>

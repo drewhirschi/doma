@@ -3,7 +3,6 @@ import { Database, Json } from "@/types/supabase-generated";
 
 import OpenAI from "openai";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { s } from "vitest/dist/reporters-1evA5lom";
 
 interface IFormatter {
     instruction: string;
@@ -12,7 +11,7 @@ interface IFormatter {
     run: (oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string) => Promise<IFormatResponse>
 }
 
-export async function runSingleFormatter(sb: SupabaseClient<Database>, formatter_key:string,  contractId: string, targetEntityName: string) {
+export async function runSingleFormatter(sb: SupabaseClient<Database>, formatter_key: string, contractId: string, targetEntityName: string) {
     const oaiClient = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
@@ -23,6 +22,12 @@ export async function runSingleFormatter(sb: SupabaseClient<Database>, formatter
         case "agreement_info":
             const agreementInfo = new AgreementInfo()
             return await agreementInfo.run(oaiClient, sb, contractId, targetEntityName)
+        case "term":
+            const term = new Term()
+            return await term.run(oaiClient, sb, contractId, targetEntityName)
+        case "termination":
+            const termination = new Termination()
+            return await termination.run(oaiClient, sb, contractId, targetEntityName)
         default:
             throw new Error("Unknown formatter key")
     }
@@ -32,7 +37,7 @@ export async function runAllFormatters(sb: SupabaseClient<Database>, contractId:
     const oaiClient = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
-    const formatters: IFormatter[] = [new IpOwnership(), new AgreementInfo()]
+    const formatters: IFormatter[] = [new IpOwnership(), new AgreementInfo(), new Term(), new Termination()]
     const results = await Promise.all(formatters.map((f) => f.run(oaiClient, sb, contractId, targetEntityName)))
     return results
 }
@@ -193,3 +198,64 @@ class AgreementInfo implements IFormatter {
         return await runFormatter<AgreementInfoFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
     }
 }
+
+class Term implements IFormatter {
+    instruction: string = `
+        <schema>        
+        <property>
+        <key>summary</key>
+        <instruction>Summarize the term of the agreement along with any renewals from the contract's term sections provided below. If there is no term or renewals put “Silent”. If there is a date, reformat it to be month/day/year. If a contract states an end date or a time frame without automatic renewals that when applied to the date in the Agreement Info is past today's date then label it with “EXPIRED”</instruction>
+        </property>
+        
+        <property>
+        <key>silent</key>
+        <instruction>true or false</instruction>
+        </property>
+        
+        <property>
+        <key>expired</key>
+        <instruction>true or false</instruction>
+        </property>
+        </schema>
+
+        Todays date is ${new Date().toISOString()}
+     
+    `;
+    key: string = "term"
+    name: string = "Term"
+    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<AgreementInfoFormatResponse> {
+
+        return await runFormatter<AgreementInfoFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
+    }
+}
+class Termination implements IFormatter {
+    instruction: string = `
+        <schema>        
+        <property>
+        <key>summary</key>
+        <instruction>
+        Summarize the termination rights of the Counterparty from the contract's termination sections provided below. If a mentioned contract is said to be terminated then put “TERMINATED” followed by that contract's details. If applicable, label the termination right: “CHANGE OF CONTROL TERMINATION: ” if the counterparty can terminate the contract if they are acquired, merge with another company, or change of control. “CONVENIENCE: “ if the counterparty can terminate the contract at any time for any reason or out of convenience.
+Examples: 
+CONVENIENCE: Grubhub may terminate these Terms or suspend or terminate your access to the Site, at any time for any reason or no reason, with or without notice"
+CHANGE OF CONTROL TERMINATION: Either party may terminate this agreement if the other party is acquired by another entity
+TERMINATED: License Agreement dated September 5, 2020
+        </instruction>
+        </property>
+        
+        <property>
+        <key>tag</key>
+        <instruction>choose one of the following: "CONVENIENCE", "CHANGE_OF_CONTROL_TERMINATION", "TERMINATED" </instruction>
+        </property>
+      
+        </schema>
+
+     
+    `;
+    key: string = "termination"
+    name: string = "Termination"
+    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<AgreementInfoFormatResponse> {
+
+        return await runFormatter<AgreementInfoFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
+    }
+}
+

@@ -12,7 +12,8 @@ import { useEffect, useOptimistic, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { BackButton } from "@/components/BackButton";
-import { FormattedInfoSwitch } from '@/components/FormattedInfoViews/FormattedInfoSwitch';
+import { FormatterSwitch } from '@/components/FormattedInfoViews/FormattedInfoSwitch';
+import { FormatterWithInfoAndEi } from '@/types/complex';
 import JobInfo from './JobInfo';
 import { Json } from "@/types/supabase-generated";
 import MetadataItem from '@/components/MetadataItem';
@@ -31,12 +32,13 @@ interface Props {
     pdfBase64: string
     projectId: string
     contract: Contract_SB & {
-        formatted_info: (FormattedInfo_SB & {extracted_information: {id:string}[]})[],
         extract_jobs: ExtractJob_SB[],
         annotation: Annotation_SB[],
         extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[]
     }
     parslets: ParsletWithNotes[]
+    formatters: FormatterWithInfoAndEi[]
+    // formatters: any[]
     annotations: Annotation_SB[]
 }
 
@@ -53,9 +55,9 @@ export interface IContractHighlight {
 
 export function ContractReviewer(props: Props) {
 
-    const { pdfUrl, contract, annotations, projectId, parslets } = props
+    const { pdfUrl, contract, annotations, projectId, parslets, formatters } = props
 
-    const [leftSegment, setLeftSegment] = useState('extractors');
+    const [leftSegment, setLeftSegment] = useState('formatters');
 
 
     const panelRef = useRef<ImperativePanelHandle>(null);
@@ -206,8 +208,8 @@ export function ContractReviewer(props: Props) {
                         value={leftSegment}
                         onChange={setLeftSegment}
                         data={[
+                            { label: 'Formatters', value: 'formatters' },
                             { label: 'Extractors', value: 'extractors' },
-                            { label: 'Formatters', value: 'formatters' }
                         ]} />
                     <ScrollArea
                         offsetScrollbars
@@ -289,15 +291,19 @@ export function ContractReviewer(props: Props) {
                                 </Stack>
                             </div>
                         ))
-                            : <Stack>
+                            : <Stack gap={"lg"}>
                                 <Button
                                     onClick={() => {
                                         actions.runFormatters(contract.id, projectId)
                                     }}
                                 >Run all</Button>
-                                {contract.formatted_info.map((formattedInfo) => (
-                                    <FormattedInfoSwitch formattedInfo={formattedInfo} key={formattedInfo.formatter_key} />
-                                ))}
+                                {formatters.map(f => (
+                                    <FormatterSwitch formatter={f} key={f.key} singleRun={() => {
+                                        actions.runFormatter(f.key, contract.id, projectId)
+                                    
+                                    }} />
+                                ))
+                                }
                             </Stack>}
                     </ScrollArea>
                 </Stack>

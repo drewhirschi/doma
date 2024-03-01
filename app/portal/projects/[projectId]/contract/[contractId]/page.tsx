@@ -2,8 +2,8 @@ import { ContractReviewer } from './ContractReviewer';
 import { getUserTenant } from '@/shared/getUserTenant';
 import { serverClient } from '@/supabase/ServerClients';
 
-export const revalidate = 0
-export const dynamic = 'force-dynamic'
+// export const revalidate = 0
+// export const dynamic = 'force-dynamic'
 
 
 export default async function Page({ params }: { params: { projectId: string, contractId: string } }) {
@@ -18,9 +18,10 @@ export default async function Page({ params }: { params: { projectId: string, co
     }
 
 
-    const [contractQ, parsletQ] = await Promise.all([
-        supabase.from("contract").select("*, annotation(*), extracted_information(*, contract_line(*)), contract_note(content), extract_jobs(*), formatted_info(*, extracted_information(id))").eq("id", params.contractId).single(),
-        supabase.from("parslet").select("*, contract_note(content)").eq("contract_note.contract_id", params.contractId).order("order", { ascending: true })
+    const [contractQ, parsletQ, formattersQ] = await Promise.all([
+        supabase.from("contract").select("*, annotation(*), extracted_information(*, contract_line(*)), contract_note(content), extract_jobs(*)").eq("id", params.contractId).single(),
+        supabase.from("parslet").select("*, contract_note(content)").eq("contract_note.contract_id", params.contractId).order("order", { ascending: true }),
+        supabase.from("formatters").select("*, formatted_info(*, extracted_information(id))").eq("formatted_info.contract_id", params.contractId).order("priority", { ascending: true })
     ])
 
     if (!contractQ.data || !parsletQ.data) {
@@ -56,6 +57,7 @@ export default async function Page({ params }: { params: { projectId: string, co
             contract={contractQ.data}
             projectId={params.projectId}
             parslets={parsletQ.data ?? []}
+            formatters={formattersQ.data ?? []}
             annotations={contractQ.data.annotation ?? []}
         />
 

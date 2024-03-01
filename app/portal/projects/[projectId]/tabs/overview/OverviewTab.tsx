@@ -155,8 +155,8 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                     value={filesSegment}
                     onChange={setFilesSegment}
                     data={[
-                        { value: 'tree', label: 'Tree' },
-                        { value: 'list', label: 'List' },
+                        { value: 'tree', label: 'Files' },
+                        { value: 'list', label: 'Search' },
                     ]}
                 />
                 <AddContractsModalButton project={project} />
