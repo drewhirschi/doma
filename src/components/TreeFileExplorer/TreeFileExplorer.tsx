@@ -134,7 +134,9 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId }
               disabled={currentPath == `projects/${projectId}`}
               onClick={() => setCurrentPath(`projects/${projectId}`)}
               >/</Button> */}
-            {currentPath.replace(`projects/${projectId}`, "").split('/').filter(pathItem => !!pathItem).map((path, index) => (<Group> <IconChevronRight size={16}/> <Button variant="subtle">{path}</Button></Group>))}
+            {currentPath.replace(`projects/${projectId}`, "")
+            .split('/')
+            .filter(pathItem => !!pathItem).map((path, index) => (<Group key={index}> <IconChevronRight size={16}/> <Button variant="subtle">{path}</Button></Group>))}
             </Group>
             <Table highlightOnHover>
                 <Table.Thead>

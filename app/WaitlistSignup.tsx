@@ -1,12 +1,13 @@
 "use client"
 
-import { Anchor, Button, Checkbox, Container, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
+import { Anchor, Button, Checkbox, Container, Group, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
 
+import axios from "axios";
 import { notifications } from "@mantine/notifications";
 import { pixel } from "@/utils";
 import { useForm } from "@mantine/form";
 
-export function WaitlistSignup({ submitForm }: { submitForm: (values: any) => Promise<void> }) {
+export function WaitlistSignup({ buttonText, inputWidth }: { buttonText: string, inputWidth?: number}) {
 
     const form = useForm({
         initialValues: {
@@ -20,45 +21,41 @@ export function WaitlistSignup({ submitForm }: { submitForm: (values: any) => Pr
 
 
     return (
-        <Container size={"xs"} my={60} p="lg" id="schedule">
-            <Title>Join our waitlist!</Title>
-            <Text size="sm">Get updates on our progress</Text>
-            <form
-                onSubmit={form.onSubmit(async (values) => {
-                    try {
 
-                        await submitForm(values)
-                        pixel.event("WaitlistJoin")
-                        form.reset()
-                        notifications.show({
-                            title: "Thank you!",
-                            message: "We'll be in touch soon.",
+        <form
+            onSubmit={form.onSubmit(async (values) => {
+                try {
 
-                        })
-                    } catch (error) {
-                        notifications.show({
-                            title: "Error",
-                            message: "Something went wrong. Please try again later.",
-                            color: "red",
-                        })
-                    }
+                    await axios.post("https://submit-form.com/IkZtiKU2d", {
+                        method: "POST",
+                        body: values,
+                    })
+                    pixel.event("WaitlistJoin")
+                    form.reset()
+                    notifications.show({
+                        title: "Thank you!",
+                        message: "We'll be in touch soon.",
 
-                })}
-            >
-                <Stack mt={"sm"} >
+                    })
+                } catch (error) {
+                    notifications.show({
+                        title: "Error",
+                        message: "Something went wrong. Please try again later.",
+                        color: "red",
+                    })
+                }
 
-                    {/* <TextInput {...form.getInputProps("name")} label="Name" /> */}
-                    <TextInput {...form.getInputProps("email")} label="Email" />
-                    {/* <Textarea {...form.getInputProps("message")} label="Tell us a little about your work" />
-                    <Checkbox {...form.getInputProps("terms", { type: "checkbox" })} label={(<Text size="sm">
-                        {`By checking the box and pressing "Submit", I acknoledge Parsl's `}<Anchor href="/docs/privacy-policy.pdf">Privacy Policy</Anchor>{` and agree to Parsl's `}<Anchor href="/docs/terms-of-use.pdf">Terms of Service</Anchor>.
-                    </Text>)} /> */}
+            })}
+        >
+            <Group mt={"sm"} align="flex-end">
 
-                    <Button style={{ alignSelf: "center" }} type="submit" >
-                        Join
-                    </Button>
-                </Stack>
-            </form>
-        </Container>
+                <TextInput w={inputWidth} {...form.getInputProps("email")} placeholder="Email" />
+
+
+                <Button style={{ alignSelf: "center" }} type="submit" >
+                    {buttonText}
+                </Button>
+            </Group>
+        </form>
     );
 }

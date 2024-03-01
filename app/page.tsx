@@ -25,24 +25,27 @@ export default function HomePage() {
     <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350}>
 
       <Image src="/logo.svg" alt="Parsl logo" height={900} style={{ position: "absolute" }} />
-      <Group justify="flex-end"><LoginButton/></Group>
+      <Group justify="flex-end"><LoginButton /></Group>
       <Container >
         <Center h={832}>
-          <Stack>
-            <Title>Welcome to Parsl</Title>
-            <Group justify="center">
-              <Button component={Link} href={"#schedule"} scroll>
-                Join the waitlist
-              </Button>
+          <Stack align="center" maw={700}>
+
+            <Title style={{ textAlign: 'center' }} size={64}>An AI Legal Assitant for M&A</Title>
+            <Text style={{ textAlign: 'center' }} size="xl">Parsl helps along every step of the way from document intake to purchase agreement drafting.</Text>
+            {/* <Group justify="center"> */}
+              <WaitlistSignup
+                buttonText="Join the waitlist"
+                inputWidth={360}
+              />
               {/* <Button variant="outline" href={"#schedule"} component={Link}>
                 Learn more
               </Button> */}
-            </Group>
+            {/* </Group> */}
           </Stack>
         </Center>
       </Container>
 
-      <Box mb={"xl"} py={60} bg={"dark.7"} mih={500} c={"white"}>
+      {/* <Box mb={"xl"} py={60} bg={"dark.7"} mih={500} c={"white"}>
         <Container>
 
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
@@ -60,18 +63,19 @@ export default function HomePage() {
             </Center>
           </SimpleGrid>
         </Container>
-      </Box>
+      </Box> */}
 
-      <WaitlistSignup submitForm={async (values) => {
-        "use server"
+      {/* <Stack align="center" my={80}>
 
+        <div>
 
-        await axios.post("https://submit-form.com/IkZtiKU2d", {
-          method: "POST",
-          body: values,
-        })
-
-      }} />
+          <Title>Join our waitlist!</Title>
+          <Text size="sm">Get updates on our progress</Text>
+        </div>
+        <WaitlistSignup
+          buttonText="Join"
+        />
+      </Stack> */}
 
       <Box bg={"dark.7"} mih={500} c={"white"}>
 
@@ -79,28 +83,28 @@ export default function HomePage() {
           <Title>How does Parsl...</Title>
           <SimpleGrid mt={"xl"} spacing={"xl"} cols={{ base: 1, sm: 2 }}>
             <DescriptionItem
-              header="Save time?"
-              text="Parsl will boost productivity by saving time performing  manual data entry, reducing your chances of missing important deal information, and allowing you to begin working on the final work product before the manual review is complete. "
+              header="Raise profits?"
+              text="Clients do not want to pay for inefficient first-pass due diligence or the required training, leading you to write off more hours than desired. Parsl leverages AI to prioritize the most important information, meaning you’re less likely to be spending (and writing off) hours spent on reviewing and searching for documents that don’t matter to the deal. This frees up you and your team to spend more time on deal strategy and deliver better client outcomes (the strongest and most straightforward way to grow profits) instead of justifying the time and effort spent, or worse, settling for write-offs."
             />
             <DescriptionItem
-              header="Give me peace of mind?"
-              text="The speed at which AI is progressing is unparalleled.  AI is and continue to dramatically alter the legal industry. We want you to focus on what you do best, delivering quality legal advice. Let us take care of keeping up with all the most recent advances in AI and making sure that you are always using the best LLMs available. "
+              header="Give verifiable results?"
+              text="Parsl does not source results from generalized training data but bases results exclusively on the specific uploaded content. But just like any junior associate’s work it is important to confirm the accuracy of any work product. It has never been easier than with Parsl. No matter the result, with a single click you are taken to cold, hard agreement language that made up the building blocks to Parsl's legal analysis. You no longer need to ask the reviewer to “quickly” find the specific agreement and explain their reasoning to you."
             />
             <DescriptionItem
-              header="Assist me from start to finish?"
-              text="Unlike other tools that stop providing value after pinpointing deal specific agreement language Parsl begins due diligence with the end in mind. Parsl focuses on the end result and works backwards to understand what information needs to be extracted for your final work product. "
+              header="Increase client satisfaction?"
+              text="Parsl goes a step further than mere agreement language extraction by working directly with the client in order to keep them updated and keep the deal moving along. Wow clients with your predictability, accuracy, and ability to solve their issues faster (and typically with a lower cost than expected). Spend less time thinking about the process of due diligence and more time negotiating the purchase agreement."
             />
             <DescriptionItem
-              header="Put me first?"
-              text="At Parsl you are are highest priority and we love to hear from you. Feel free to contact us through the form on this website and we will do our best to get back to you as soon as possible. Our responsiveness is unbeatable in the industry."
+              header="Decrease burnout?"
+              text="Just because you drowned in due diligence when you first got your license doesn’t mean your team should. Parsl sets your team up for success by utilizing AI to fly through the more tedious and painstaking aspects of M&A transactions, so they can focus on more meaningful work, and you can invest more time accelerating their learning — in return, drive faster value for your firm. By letting Parsl take the first pass the cognitive load of decision making is decreased and attorneys are able to save their energy for the more rare but important edge cases."
             />
           </SimpleGrid>
         </Container>
 
-        
+
         <Grid py={"xl"} id="footer">
           <GridCol span={{ base: 12, md: 6 }}>
-          <Group justify="center" >© 2024 Atlas Technology LLC. All rights reserved.</Group>
+            <Group justify="center" >© 2024 Atlas Technology LLC. All rights reserved.</Group>
           </GridCol>
           <GridCol span={{ base: 12, md: 6 }}>
             <Stack justify="center" align="center">
