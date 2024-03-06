@@ -16,7 +16,8 @@ export default async function SettingsPage({ params }: { params: { projectId: st
   if (error) {
     return <div>Error loading project</div>
   }
-
+  
+  // @ts-ignore
   const memberRows = data.profile?.map((item) => (
     <TableTr key={item.display_name}>
       <TableTd>
@@ -35,7 +36,7 @@ export default async function SettingsPage({ params }: { params: { projectId: st
       </TableTd>
 
       <TableTd>
-          <Progress value={40} />
+        <Progress value={40} />
         {/* <Group gap="sm" grow>
           {typeof getCompletedContracts(contracts, item.id) === 'number' && typeof getTotalContracts(contracts, item.id) === 'number' ? (
             <>
