@@ -29,7 +29,6 @@ export default async function Page({ params, searchParams }: { params: { project
 
     const project = projectQ.data
 
-
     let contractQ
     if (query) {
         contractQ = await supabase.from("contract")

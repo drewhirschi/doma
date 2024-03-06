@@ -1,4 +1,4 @@
-import { AgreementInfoFormatResponse, TermFormatResponse, TerminationFormatResponse } from "@/types/formatters"
+import { AgreementInfoFormatResponse, TermFormatResponse, TerminationFormatResponse } from "@/types/formattersTypes"
 import { Anchor, Badge, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core"
 
 import { FormattedInfoWithEiId } from "@/types/complex"

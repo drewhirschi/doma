@@ -1,6 +1,6 @@
 import { Anchor, Badge, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core"
 
-import { AgreementInfoFormatResponse } from "@/types/formatters"
+import { AgreementInfoFormatResponse } from "@/types/formattersTypes"
 import { FormattedInfoWithEiId } from "@/types/complex"
 import MetadataItem from "../MetadataItem"
 

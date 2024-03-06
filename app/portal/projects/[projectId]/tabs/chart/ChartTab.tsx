@@ -1,7 +1,7 @@
 "use client"
 
 import { Anchor, Table, TableScrollContainer, TableTbody, TableTh, TableThead, TableTr } from "@mantine/core";
-import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formatters";
+import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes";
 
 import Link from "next/link";
 import classes from "./Chart.module.css"

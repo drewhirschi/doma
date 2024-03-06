@@ -1,10 +1,11 @@
 import { ActionIcon, Anchor, Group, Stack, Text, Title } from "@mantine/core";
-import { AgreementInfoFormatResponse, IFormatResponse, IPOwnershipFormatResponse } from "@/types/formatters";
+import { AgreementInfoFormatResponse, IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes";
 import { Icon3dRotate, IconPrompt } from "@tabler/icons-react";
 
 import { FormattedAgreementInfo } from "./AgreementInfo";
 import { FormattedGeneric } from "./Generic";
 import { FormattedIpOwnership } from "./IpOwnership"
+import { FormattedSourceCode } from "./SourceCode";
 import { FormattedTerm } from "./Term";
 import { FormattedTermination } from "./Termination";
 import { FormatterWithInfoAndEi } from "@/types/complex";
@@ -28,6 +29,10 @@ export function FormatterSwitch({ formatter, singleRun }: { formatter: Formatter
                     info={formatter.formatted_info[0]} />
             case "termination":
                 return <FormattedTermination
+                    info={formatter.formatted_info[0]}
+                />;
+            case "sourceCode":
+                return <FormattedSourceCode
                     info={formatter.formatted_info[0]}
                 />;
             default:

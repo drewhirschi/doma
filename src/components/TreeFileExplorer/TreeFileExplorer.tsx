@@ -120,23 +120,48 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId }
         }
     };
 
-    const navigateUp = () => {
-        const upOneLevel = currentPath.substring(0, currentPath.lastIndexOf('/'));
-        setCurrentPath(upOneLevel || root);
+   
+
+    const navigateUp = (numFolders: number = 1) => {
+        let upPath = currentPath;
+        for (let i = 0; i < numFolders; i++) {
+            upPath = upPath.substring(0, upPath.lastIndexOf('/'));
+        }
+        setCurrentPath(upPath || root);
     };
+
+    
 
     return (
         <Box>
             <Group>
 
-            {/* <Button
+                {/* <Button
              variant='subtle'
               disabled={currentPath == `projects/${projectId}`}
               onClick={() => setCurrentPath(`projects/${projectId}`)}
               >/</Button> */}
-            {currentPath.replace(`projects/${projectId}`, "")
-            .split('/')
-            .filter(pathItem => !!pathItem).map((path, index) => (<Group key={index}> <IconChevronRight size={16}/> <Button variant="subtle">{path}</Button></Group>))}
+                {currentPath.replace(`projects/${projectId}`, "Home")
+                    .split('/')
+                    // .filter(pathItem => !!pathItem)
+                    // .slice(0, -1)
+                    .map((path, index, array) => {
+
+                        if (index === array.length - 1) {
+
+                            return (<Group key={index}> {index != 0 && <IconChevronRight size={16} />}
+                            {/* <Button variant='transparent' disabled> */}
+                                {path}
+                            {/* </Button>  */}
+                            </Group>)
+                        }
+
+                        return (<Group key={index}>  {index != 0 && <IconChevronRight size={16} />} <UnstyledButton 
+                        onClick={() => navigateUp(array.length - index - 1)}
+                        variant="subtle">{path}</UnstyledButton></Group>)
+                    })
+                    }
+
             </Group>
             <Table highlightOnHover>
                 <Table.Thead>
@@ -148,16 +173,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId }
                     <Text>Loading...</Text>
                 ) : (
                     <>
-                        {currentPath !== root &&
-
-                            <Table.Tr >
-                                <Table.Td>
-                                    <UnstyledButton onClick={navigateUp}>
-                                        ←
-                                    </UnstyledButton>
-                                </Table.Td>
-                            </Table.Tr>
-                        }
+                       
                         {items.map((item) => {
 
                             return (

@@ -16,3 +16,18 @@ export const pixel = {
     },
     FB_PIXEL_ID: "905081251117190",
 }
+
+export function objectToXml(obj: any, rootElement: string = 'root'): string {
+    let xml = `<${rootElement}>`;
+
+    for (const [key, value] of Object.entries(obj)) {
+        if (typeof value === 'object' && value !== null) {
+            xml += objectToXml(value, key); // Recursive call for nested objects
+        } else {
+            xml += `<${key}>${value}</${key}>`;
+        }
+    }
+
+    xml += `</${rootElement}>`;
+    return xml;
+}

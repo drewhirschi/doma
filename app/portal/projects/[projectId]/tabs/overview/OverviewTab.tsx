@@ -106,49 +106,10 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
             </Table.Tr>
         ));
 
-    const memberRows = members.map((item) => (
-        <Table.Tr key={item.display_name}>
-            <Table.Td>
-                <Group gap="sm">
-                    {0 ? (
-                        <Avatar size={40} src={item.avatar_url}></Avatar>
-                    ) : (
-                        <Avatar size={40} color={item.color!}>{getInitials(item.display_name!)}</Avatar>
-                    )}
-                    <div>
-                        <Text fz="sm" fw={500}>
-                            {item.display_name}
-                        </Text>
-                    </div>
-                </Group>
-            </Table.Td>
-
-            <Table.Td>
-                <Group gap="sm" grow>
-                    {typeof getCompletedContracts(contracts, item.id) === 'number' && typeof getTotalContracts(contracts, item.id) === 'number' ? (
-                        <>
-                            <Progress value={(getCompletedContracts(contracts, item.id) / getTotalContracts(contracts, item.id)) * 100} />
-                            {`${getCompletedContracts(contracts, item.id)}`} / {`${getTotalContracts(contracts, item.id)}`}
-                        </>
-                    ) : (
-                        // Display a message if the values are not valid numbers
-                        <Text>Error: Invalid contract values</Text>
-                    )}
-                </Group>
-            </Table.Td>
-        </Table.Tr>
-    ));
+  
     return (
         <Box miw={860} px={"lg"}>
-            <Table verticalSpacing="sm">
-                <Table.Thead>
-                    <Table.Tr>
-                        <Table.Th>Reviewer</Table.Th>
-                        <Table.Th>Progress</Table.Th>
-                    </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>{memberRows}</Table.Tbody>
-            </Table>
+           
             <Space h="lg" />
             <Group my={"md"} justify="space-between">
                 <SegmentedControl

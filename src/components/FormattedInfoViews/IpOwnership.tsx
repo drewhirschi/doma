@@ -1,7 +1,7 @@
 import { Anchor, Badge, Group, Text, Title } from "@mantine/core"
 
 import { FormattedInfoWithEiId } from "@/types/complex"
-import { IPOwnershipFormatResponse } from "@/types/formatters"
+import { IPOwnershipFormatResponse } from "@/types/formattersTypes"
 
 interface Props {
     info?: FormattedInfoWithEiId

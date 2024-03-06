@@ -7,7 +7,7 @@ interface Props {
     info: FormattedInfoWithEiId
 }
 
-export function FormattedGeneric({ info }: Props) {
+export function FormattedSourceCode({ info }: Props) {
 
     if (!info) {
         return <Text>No data</Text>

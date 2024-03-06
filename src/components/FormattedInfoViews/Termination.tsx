@@ -2,7 +2,7 @@ import { Anchor, Badge, Group, SimpleGrid, Stack, Text, Title } from "@mantine/c
 
 import { FormattedInfoWithEiId } from "@/types/complex"
 import MetadataItem from "../MetadataItem"
-import { TerminationFormatResponse } from "@/types/formatters"
+import { TerminationFormatResponse } from "@/types/formattersTypes"
 
 interface Props {
     info?: FormattedInfoWithEiId
