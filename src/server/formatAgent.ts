@@ -75,13 +75,17 @@ export async function runSingleFormatter(sb: SupabaseClient<Database>, formatter
 
 export async function runAllFormatters(sb: SupabaseClient<Database>, contractId: string, targetEntityName: string) {
 
-
-    const results = await Promise.all(Object.keys(FormatterKeys).map((formatter_key) => runSingleFormatter(sb, formatter_key, contractId, targetEntityName)))
-    results.forEach((r, i) => {
-        if (r.error) {
-            console.error(`There was an error running formatter [${Object.keys(FormatterKeys)[i]}] on contract [${contractId}]`, r.error)
+    const results = []
+    for (const formatter_key in FormatterKeys) {
+        const res = await runSingleFormatter(sb, formatter_key, contractId, targetEntityName)
+        if (res.error) {
+            console.error(`There was an error running formatter [${formatter_key}] on contract [${contractId}]`, res.error)
+        } else {
+            results.push(res.ok)
         }
-    })
+    }
+
+    
     return results
 }
 
@@ -156,7 +160,8 @@ async function runFormatter<T>(formatter: IFormatter, oaiClient: OpenAI, sb: Sup
         return rok(undefined)
     }
 
-    const input = `<contract_extraction topic=${formatter.key}>${eiq.data.flatMap((d) => d.contract_line.map((cl) => `<line id=${cl.id}>${cl.text}</line>`)).join("\n")}</contract_extraction>`
+    const input = `<target_entity>${targetEntityName}</target_entity>
+<contract_extraction topic=${formatter.key}>${eiq.data.flatMap((d) => d.contract_line.map((cl) => `<line id=${cl.id}>${cl.text}</line>`)).join("\n")}</contract_extraction>`
 
     // console.log(getSystemMessage("Target Entity", this.instruction))
     // console.log(input)
@@ -534,7 +539,7 @@ SILENT: Agreement is silent on Target's right to assign (including where the agr
             return rok(undefined)
         }
 
-        const formattedAssignabilityPart1 = formattedAssignabilityPart1Resp.ok as  AssignabilityFormatResponse
+        const formattedAssignabilityPart1 = formattedAssignabilityPart1Resp.ok as AssignabilityFormatResponse
 
         const part2Schema = {
             foreign: "Agreement is silent on Target's right to assign in the context of a change of control and governed by non-US law (i.e. NA or SILENT + foreign law). Answer true or false.",

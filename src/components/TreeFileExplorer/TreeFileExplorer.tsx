@@ -1,5 +1,6 @@
 import { Anchor, Box, Button, Group, Stack, Table, Text, Title, UnstyledButton } from '@mantine/core';
 import { useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import { AgreementTypeBadge } from '../AgreementTypeBadge';
 import { IconChevronRight } from '@tabler/icons-react';
@@ -24,10 +25,14 @@ interface FileExplorerProps {
 }
 
 const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, members }) => {
-    const [currentPath, setCurrentPath] = useState<string>(root);
+    const supabase = browserClient()
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const { replace } = useRouter();
+
+    const [currentPath, setCurrentPath] = useState<string>(searchParams.get("path") ?? root);
     const [items, setItems] = useState<FileItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const supabase = browserClient()
 
     useEffect(() => {
         const fetchFiles = async () => {
@@ -68,8 +73,21 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
         fetchFiles();
     }, [currentPath]);
 
+    const updatePathParam = (value: string) => {
+        //@ts-ignore
+        const params = new URLSearchParams(searchParams);
+        if (value) {
+            params.set('path', value);
+        } else {
+            params.delete('path');
+        }
+
+        replace(`${pathname}?${params.toString()}`);
+    }
+
     const handleItemClick = (item: FileItem) => {
         if (item.isDirectory) {
+            updatePathParam(item.path)
             setCurrentPath(item.path);
         } else {
             // Handle file click, e.g., preview or download
@@ -83,6 +101,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
         for (let i = 0; i < numFolders; i++) {
             upPath = upPath.substring(0, upPath.lastIndexOf('/'));
         }
+        updatePathParam(upPath || root)
         setCurrentPath(upPath || root);
     };
 
@@ -109,10 +128,10 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
                 <Table.Td>
                     {item.name.toLowerCase().endsWith(".pdf") ? (
                         <Anchor href={`/portal/projects/${projectId}/contract/${item.id}`} component={Link}>
-                            {'📄 ' + item.name}
+                            {'📄 ' + item.metadata?.display_name ?? item.name}
                         </Anchor>
                     ) : (
-                        <Text>{'📄 ' + item.name}</Text>
+                        <Text>{'📄 ' + item.metadata?.display_name ?? item.name}</Text>
                     )}
                 </Table.Td>
                 <Table.Td>{item.metadata?.description}</Table.Td>

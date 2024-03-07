@@ -76,6 +76,7 @@ export type Database = {
           path_tokens: string[]
           project_id: string
           tag: string | null
+          target: string | null
           tenant_id: string
         }
         Insert: {
@@ -92,6 +93,7 @@ export type Database = {
           path_tokens?: string[]
           project_id: string
           tag?: string | null
+          target?: string | null
           tenant_id: string
         }
         Update: {
@@ -108,6 +110,7 @@ export type Database = {
           path_tokens?: string[]
           project_id?: string
           tag?: string | null
+          target?: string | null
           tenant_id?: string
         }
         Relationships: [
@@ -309,6 +312,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fi_ei_refs_formatted_info_fkey"
+            columns: ["contract_id", "formatter_key"]
+            isOneToOne: false
+            referencedRelation: "formatted_info"
+            referencedColumns: ["contract_id", "formatter_key"]
+          },
+          {
             foreignKeyName: "public_fi_ei_refs_extracted_info_id_fkey"
             columns: ["extracted_info_id"]
             isOneToOne: false
@@ -323,21 +333,18 @@ export type Database = {
           created_at: string
           data: Json | null
           formatter_key: string
-          id: string
         }
         Insert: {
           contract_id?: string
           created_at?: string
           data?: Json | null
           formatter_key?: string
-          id?: string
         }
         Update: {
           contract_id?: string
           created_at?: string
           data?: Json | null
           formatter_key?: string
-          id?: string
         }
         Relationships: [
           {
@@ -356,18 +363,51 @@ export type Database = {
           }
         ]
       }
+      formatter_dependencies: {
+        Row: {
+          extractor_id: string
+          formatter_key: string
+        }
+        Insert: {
+          extractor_id?: string
+          formatter_key: string
+        }
+        Update: {
+          extractor_id?: string
+          formatter_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_formatter_dependencies_extractor_id_fkey"
+            columns: ["extractor_id"]
+            isOneToOne: false
+            referencedRelation: "parslet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_formatter_dependencies_formatter_key_fkey"
+            columns: ["formatter_key"]
+            isOneToOne: false
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
+          }
+        ]
+      }
       formatters: {
         Row: {
           display_name: string
           key: string
+          priority: number
         }
         Insert: {
           display_name: string
           key?: string
+          priority?: number
         }
         Update: {
           display_name?: string
           key?: string
+          priority?: number
         }
         Relationships: []
       }

@@ -9,24 +9,20 @@ interface Props {
 }
 
 export function FormattedTermination({ info }: Props) {
-    const data: TerminationFormatResponse = info?.data as unknown as TerminationFormatResponse
-    if (!info || data.summary === "") {
-        return (
-            <Text>No data</Text>
-        )
-    }
+    const data: TerminationFormatResponse | undefined = info?.data as unknown as TerminationFormatResponse | undefined
+   
 
 
-  
+
 
 
     return (
         <Stack gap={4}>
-            <Text size="sm">{data.summary}</Text>
+            <Text size="sm">{data?.summary}</Text>
 
             <SimpleGrid cols={2} spacing="md">
-                <MetadataItem header="Tag" text={data.tag} />
-                
+                <MetadataItem header="Tag" text={data?.tag ?? ""} />
+
             </SimpleGrid>
         </Stack>
     )

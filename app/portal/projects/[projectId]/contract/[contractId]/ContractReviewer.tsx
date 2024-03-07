@@ -5,13 +5,14 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 
 import * as actions from "./ContractReviewer.actions";
 
-import { ActionIcon, Box, Button, Center, CopyButton, Divider, Flex, Group, HoverCard, Menu, Paper, ScrollArea, SegmentedControl, Skeleton, Stack, Text, Textarea, ThemeIcon, Title, Tooltip, rem } from "@mantine/core";
+import { ActionIcon, Box, Button, Center, CopyButton, Divider, Drawer, Flex, Group, HoverCard, Menu, Paper, ScrollArea, SegmentedControl, Skeleton, Stack, Text, TextInput, Textarea, ThemeIcon, Title, Tooltip, UnstyledButton, rem } from "@mantine/core";
 import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTrash, IconUser } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { BackButton } from "@/components/BackButton";
+import { ContractDetailsDrawer } from './DetailsDrawer';
 import { FormatterSwitch } from '@/components/FormattedInfoViews/FormattedInfoSwitch';
 import { FormatterWithInfoAndEi } from '@/types/complex';
 import JobInfo from './JobInfo';
@@ -22,6 +23,7 @@ import { buildAnnotationFromExtraction } from "./helpers";
 import dynamic from 'next/dynamic'
 import { sleep } from '@/utils';
 import { useDebouncedCallback } from 'use-debounce';
+import { useDisclosure } from '@mantine/hooks';
 
 const PDFView = dynamic(() => import('./pdf'), { ssr: false })
 
@@ -57,6 +59,7 @@ export function ContractReviewer(props: Props) {
     const { pdfUrl, contract, annotations, projectId, parslets, formatters } = props
 
     const [leftSegment, setLeftSegment] = useState('formatters');
+    const [opened, { open: openDetailsDrawer, close }] = useDisclosure(false);
 
 
     const panelRef = useRef<ImperativePanelHandle>(null);
@@ -131,221 +134,230 @@ export function ContractReviewer(props: Props) {
 
 
 
-
+    const backParams = new URLSearchParams()
+    backParams.set('path', contract.path_tokens.slice(0, -1).join("/") ?? "")
+    const backUrl = `/portal/projects/${projectId}/tabs/overview?${backParams.toString()}`
 
     return (
+        <>
 
-        <PanelGroup direction="horizontal">
-            <Panel defaultSize={40} minSize={20} style={{ height: "100dvh" }}>
-                <Stack justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
-                    <Group mt={"md"}>
-                        <BackButton href={`/portal/projects/${projectId}/tabs/overview`} style={{ alignSelf: "flex-start" }} />
-                        {savingNotes ? <IconRefresh color="gray" size={20} /> : <IconCloudCheck color="gray" size={20} />}
+            <PanelGroup direction="horizontal">
+                <Panel defaultSize={40} minSize={20} style={{ height: "100dvh" }}>
+                    <Stack justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
+                        <Group mt={"md"}>
+                            <BackButton href={backUrl} style={{ alignSelf: "flex-start" }} />
+                            {savingNotes ? <IconRefresh color="gray" size={20} /> : <IconCloudCheck color="gray" size={20} />}
 
-                        <Menu shadow="md" width={200}>
-                            <Menu.Target>
-                                <ActionIcon variant="subtle" c={"gray"}>
-                                    <IconDotsVertical />
-                                </ActionIcon>
-                            </Menu.Target>
-
-                            <Menu.Dropdown>
-                                <Menu.Label>Application</Menu.Label>
-                                <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
-                                    onClick={async () => {
-                                        await actions.completeContractAction(contract.id)
-
-
-                                    }}
-                                >
-                                    Mark completed
-                                </Menu.Item>
-                                <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
-                                    onClick={() => {
-                                        actions.reviewContractAction(contract.id)
-                                    }}
-                                >
-                                    Run AI extraciton
-                                </Menu.Item>
-                                <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
-                                    onClick={() => {
-                                        actions.deleteContractExtractedInfo(contract.id, projectId)
-                                    }}
-                                >
-                                    Clear extracted info
-                                </Menu.Item>
-
-                            </Menu.Dropdown>
-                        </Menu>
-                    </Group>
-                    <HoverCard openDelay={500}>
-                        <HoverCard.Target>
-                            <Title order={3}>{contract.display_name}</Title>
-                        </HoverCard.Target>
-                        <HoverCard.Dropdown>
-                            <Group>
-                                <Text>
-                                    <MetadataItem header="Contract ID" text={contract.id} />
-                                </Text>
-                                <CopyButton value={contract.id} timeout={2000}>
-                                    {({ copied, copy }) => (
-                                        <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
-                                            <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
-                                                {copied ? (
-                                                    <IconCheck style={{ width: rem(16) }} />
-                                                ) : (
-                                                    <IconCopy style={{ width: rem(16) }} />
-                                                )}
-                                            </ActionIcon>
-                                        </Tooltip>
-                                    )}
-                                </CopyButton>
-                            </Group>
-                        </HoverCard.Dropdown>
-                    </HoverCard>
-                    <SegmentedControl
-                        value={leftSegment}
-                        onChange={setLeftSegment}
-                        data={[
-                            { label: 'Formatters', value: 'formatters' },
-                            { label: 'Extractors', value: 'extractors' },
-                        ]} />
-                    <ScrollArea
-                        offsetScrollbars
-                        h={"100%"}
-                    >
-
-                        {leftSegment == 'extractors' ? parslets.map((parslet) => (
-                            <div key={parslet.id}>
-                                {/* <NoteEditor parslet={parslet} editor={editors[parslet.id]} /> */}
-                                <Group justify='space-between'>
-
-                                    <Stack gap={0}>
-
-                                        <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
-                                        <JobInfo job={contract.extract_jobs.find(j => j.parslet_id == parslet.id)} />
-                                    </Stack>
-                                    <ActionIcon color='gray' size={"sm"} onClick={() => {
-                                        actions.reExtractTopic(contract.id, parslet.id)
-                                    }}>
-                                        <IconRepeat style={{ width: rem(12) }} />
-
+                            <Menu shadow="md" width={200}>
+                                <Menu.Target>
+                                    <ActionIcon variant="subtle" c={"gray"}>
+                                        <IconDotsVertical />
                                     </ActionIcon>
+                                </Menu.Target>
+
+                                <Menu.Dropdown>
+                                    <Menu.Label>Application</Menu.Label>
+                                    <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={async () => {
+                                            await actions.completeContractAction(contract.id)
+
+
+                                        }}
+                                    >
+                                        Mark completed
+                                    </Menu.Item>
+                                    <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={() => {
+                                            actions.reviewContractAction(contract.id)
+                                        }}
+                                    >
+                                        Run AI extraciton
+                                    </Menu.Item>
+                                    <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={() => {
+                                            actions.deleteContractExtractedInfo(contract.id, projectId)
+                                        }}
+                                    >
+                                        Clear extracted info
+                                    </Menu.Item>
+
+                                </Menu.Dropdown>
+                            </Menu>
+                        </Group>
+                        <HoverCard openDelay={500}>
+                            <HoverCard.Target>
+                                <UnstyledButton
+                                    onClick={() => openDetailsDrawer()}
+                                >
+                                    <Title order={3}>{contract.display_name}</Title>
+                                </UnstyledButton>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown>
+                                <Group>
+                                    <Text>
+                                        <MetadataItem header="Contract ID" text={contract.id} />
+                                    </Text>
+                                    <CopyButton value={contract.id} timeout={2000}>
+                                        {({ copied, copy }) => (
+                                            <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
+                                                <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
+                                                    {copied ? (
+                                                        <IconCheck style={{ width: rem(16) }} />
+                                                    ) : (
+                                                        <IconCopy style={{ width: rem(16) }} />
+                                                    )}
+                                                </ActionIcon>
+                                            </Tooltip>
+                                        )}
+                                    </CopyButton>
                                 </Group>
+                            </HoverCard.Dropdown>
+                        </HoverCard>
+                        <SegmentedControl
+                            value={leftSegment}
+                            onChange={setLeftSegment}
+                            data={[
+                                { label: 'Formatters', value: 'formatters' },
+                                { label: 'Extractors', value: 'extractors' },
+                            ]} />
+                        <ScrollArea
+                            offsetScrollbars
+                            h={"100%"}
+                        >
 
-                                <Textarea
-                                    defaultValue={parslet.contract_note[0]?.content ?? ""}
-                                    autosize
-                                    minRows={2}
-                                    onChange={(event) => debouncedSaveNote(event.currentTarget.value, parslet.id)}
-                                />
-                                <Stack gap={"xs"} mt="sm">
-                                    {highlights
-                                        .filter((highlight) => highlight.parslet_id === parslet.id)
-                                        .map((highlight) => (
-                                            <Flex direction={"row"} wrap={"nowrap"} gap={"xs"} key={highlight.id}>
-                                                <ActionIcon
-                                                    onClick={async () => {
+                            {leftSegment == 'extractors' ? parslets.map((parslet) => (
+                                <div key={parslet.id}>
+                                    {/* <NoteEditor parslet={parslet} editor={editors[parslet.id]} /> */}
+                                    <Group justify='space-between'>
 
-                                                        router.replace(pathname.split("#")[0] + "#" + highlight.id)
-                                                        await sleep(100)
-                                                        window.dispatchEvent(new HashChangeEvent('hashchange'));
+                                        <Stack gap={0}>
+
+                                            <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
+                                            <JobInfo job={contract.extract_jobs.find(j => j.parslet_id == parslet.id)} />
+                                        </Stack>
+                                        <ActionIcon color='gray' size={"sm"} onClick={() => {
+                                            actions.reExtractTopic(contract.id, parslet.id)
+                                        }}>
+                                            <IconRepeat style={{ width: rem(12) }} />
+
+                                        </ActionIcon>
+                                    </Group>
+
+                                    <Textarea
+                                        defaultValue={parslet.contract_note[0]?.content ?? ""}
+                                        autosize
+                                        minRows={2}
+                                        onChange={(event) => debouncedSaveNote(event.currentTarget.value, parslet.id)}
+                                    />
+                                    <Stack gap={"xs"} mt="sm">
+                                        {highlights
+                                            .filter((highlight) => highlight.parslet_id === parslet.id)
+                                            .map((highlight) => (
+                                                <Flex direction={"row"} wrap={"nowrap"} gap={"xs"} key={highlight.id}>
+                                                    <ActionIcon
+                                                        onClick={async () => {
+
+                                                            router.replace(pathname.split("#")[0] + "#" + highlight.id)
+                                                            await sleep(100)
+                                                            window.dispatchEvent(new HashChangeEvent('hashchange'));
 
 
-                                                    }}
-                                                >
+                                                        }}
+                                                    >
 
-                                                    <IconListSearch style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                                                </ActionIcon>
-                                                <ActionIcon variant="outline" color="red"
-                                                    onClick={async () => {
-                                                        setHighlights(highlights.filter((h) => h.id !== highlight.id))
-                                                        await supabase.from("annotation").delete().eq("id", highlight.id!)
-                                                        await supabase.from("extracted_information").delete().eq("id", highlight.id!)
-                                                    }}
-                                                >
-                                                    <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                                                </ActionIcon>
-                                                <HoverCard shadow="md" openDelay={500}>
+                                                        <IconListSearch style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                                                    </ActionIcon>
+                                                    <ActionIcon variant="outline" color="red"
+                                                        onClick={async () => {
+                                                            setHighlights(highlights.filter((h) => h.id !== highlight.id))
+                                                            await supabase.from("annotation").delete().eq("id", highlight.id!)
+                                                            await supabase.from("extracted_information").delete().eq("id", highlight.id!)
+                                                        }}
+                                                    >
+                                                        <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                                                    </ActionIcon>
+                                                    <HoverCard shadow="md" openDelay={500}>
 
-                                                    <HoverCard.Target>
-                                                        <Flex dir='row' wrap={"nowrap"} align="baseline">
-                                                            {highlight.author == "user" && (<ThemeIcon size={"xs"} color="teal">
-                                                                <IconUser style={{ width: '80%', height: '80%' }} />
-                                                            </ThemeIcon>)}
-                                                            <Text key={highlight.parslet_id + parslet.id}>{highlight.content.text}</Text>
-                                                        </Flex>
-                                                    </HoverCard.Target>
-                                                    <HoverCard.Dropdown>
-                                                        <MetadataItem header="y1" text={highlight.position.boundingRect.y1} />
-                                                        <MetadataItem header="y2" text={highlight.position.boundingRect.y2} />
-                                                        {/* Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"} */}
-                                                        <br />
-                                                        EI id: {highlight.id}
-                                                    </HoverCard.Dropdown>
-                                                </HoverCard>
-                                            </Flex>
-                                        ))}
+                                                        <HoverCard.Target>
+                                                            <Flex dir='row' wrap={"nowrap"} align="baseline">
+                                                                {highlight.author == "user" && (<ThemeIcon size={"xs"} color="teal">
+                                                                    <IconUser style={{ width: '80%', height: '80%' }} />
+                                                                </ThemeIcon>)}
+                                                                <Text key={highlight.parslet_id + parslet.id}>{highlight.content.text}</Text>
+                                                            </Flex>
+                                                        </HoverCard.Target>
+                                                        <HoverCard.Dropdown>
+                                                            <MetadataItem header="y1" text={highlight.position.boundingRect.y1} />
+                                                            <MetadataItem header="y2" text={highlight.position.boundingRect.y2} />
+                                                            {/* Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"} */}
+                                                            <br />
+                                                            EI id: {highlight.id}
+                                                        </HoverCard.Dropdown>
+                                                    </HoverCard>
+                                                </Flex>
+                                            ))}
 
-                                </Stack>
-                            </div>
-                        ))
-                            : <Stack gap={"lg"}>
-                                <Button
-                                    onClick={() => {
-                                        actions.runFormatters(contract.id, projectId)
-                                    }}
-                                >Run all</Button>
-                                {formatters
-                                // .filter(f => f.formatted_info.length > 0)
-                                .map(f => (
-                                    <FormatterSwitch formatter={f} key={f.key} singleRun={() => {
-                                        actions.runFormatter(f.key, contract.id, projectId)
-                                    
-                                    }} />
-                                ))
-                                }
-                                {/* <Divider/>
+                                    </Stack>
+                                </div>
+                            ))
+                                : <Stack gap={"lg"}>
+                                    <Button
+                                        onClick={() => {
+                                            actions.runFormatters(contract.id, projectId, contract.target)
+                                        }}
+                                    >Run all</Button>
+                                    {formatters
+                                        // .filter(f => f.formatted_info.length > 0)
+                                        .map(f => (
+                                            <FormatterSwitch formatter={f} key={f.key} singleRun={() => {
+                                                actions.runFormatter(f.key, contract.id, projectId, contract.target)
+
+                                            }} />
+                                        ))
+                                    }
+                                    {/* <Divider/>
                                 {formatters.filter(f => f.formatted_info.length == 0).map(f => (
                                     <Text>{f.display_name}</Text>
                                 ))
                                 } */}
-                            </Stack>}
-                    </ScrollArea>
-                </Stack>
+                                </Stack>}
+                        </ScrollArea>
+                    </Stack>
 
-            </Panel>
-            <PanelResizeHandle style={{ width: "16px" }}>
-                <Center h={'100dvh'}>
-                    <IconGripVertical />
-                </Center>
-            </PanelResizeHandle>
-            <Panel minSize={30} defaultSize={60} ref={panelRef} >
-                <PDFView
-                    pdfUrl={pdfUrl}
-                    pdfBase64={props.pdfBase64}
-                    contract={contract}
-                    parslets={parslets}
-                    highlights={highlights}
-                    handleAddHighlight={handleAddHighlight}
-                    handleRemoveHighlight={(id) => {
-                        setHighlights(highlights.filter((h) => h.id !== id))
-                    }}
-                />
+                </Panel>
+                <PanelResizeHandle style={{ width: "16px" }}>
+                    <Center h={'100dvh'}>
+                        <IconGripVertical />
+                    </Center>
+                </PanelResizeHandle>
+                <Panel minSize={30} defaultSize={60} ref={panelRef} >
+                    <PDFView
+                        pdfUrl={pdfUrl}
+                        pdfBase64={props.pdfBase64}
+                        contract={contract}
+                        parslets={parslets}
+                        highlights={highlights}
+                        handleAddHighlight={handleAddHighlight}
+                        handleRemoveHighlight={(id) => {
+                            setHighlights(highlights.filter((h) => h.id !== id))
+                        }}
+                    />
 
-                {/* <p>
+                    {/* <p>
                     page {1}
                 </p>
                 <Document file={{data:props.pdfBase64}}>
                     <Page pageNumber={1} />
                 </Document> */}
 
-            </Panel>
+                </Panel>
 
 
-        </PanelGroup >
-
-
+            </PanelGroup >
+            <Drawer position="right" offset={8} radius="md" opened={opened} onClose={close} size={"lg"} title="Contract details">
+                <ContractDetailsDrawer contract={contract} />
+            </Drawer>
+        </>
 
     )
 

@@ -53,26 +53,30 @@ export async function reExtractTopic(contractId: string, parsletId: string) {
 
 }
 
-export async function runFormatters(contractId: string, projectId: string) {
+export async function runFormatters(contractId: string, projectId: string, target: string | null | undefined) {
     const supabase = serverActionClient()
 
     const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
+
+    target ??= data?.target.join(", ")
     try {
 
-        await runAllFormatters(supabase, contractId, data?.target.join(", ") ?? "No target found")
+        await runAllFormatters(supabase, contractId, target ?? "No target found")
         revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
     } catch (error) {
 
     }
 }
-export async function runFormatter(formatterKey: string, contractId: string, projectId: string) {
+export async function runFormatter(formatterKey: string, contractId: string, projectId: string, target: string | null | undefined) {
     const supabase = serverActionClient()
 
     const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
+    target ??= data?.target.join(", ")
+
     try {
 
-        await runSingleFormatter(supabase, formatterKey, contractId, data?.target.join(", ") ?? "No target found")
+        await runSingleFormatter(supabase, formatterKey, contractId, target ?? "No target found")
         revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
     } catch (error) {
