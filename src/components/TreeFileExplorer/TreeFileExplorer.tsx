@@ -1,83 +1,29 @@
-// import { useEffect, useState } from 'react';
-
-// import { browserClient } from '@/supabase/BrowerClients';
-// import { createClient } from '@supabase/supabase-js';
-
-// interface FileExplorerProps {
-//     root: string;
-//     tenantId: string;
-// }
-
-// interface File {
-//     name: string;
-//     path: string;
-//     isDirectory: boolean;
-// }
-
-// const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId }) => {
-//     const [files, setFiles] = useState<File[]>([]);
-//     const supabase = browserClient()
-
-//     useEffect(() => {
-//         async function fetchFiles() {
-//             const { data, error } = await supabase.storage.from(tenantId).list(root);
-
-//             if (error) {
-//                 console.error('Error fetching files:', error);
-//             } else {
-//                 setFiles(data.map((file) => ({
-//                     name: file.name,
-//                     path: file.path,
-//                     isDirectory: file.metadata?.is_directory || false,
-//                 })));
-//             }
-//         }
-
-//         fetchFiles();
-//     }, [root]);
-
-//     return (
-//         <div>
-//             <h2>File Explorer</h2>
-//             <ul>
-//                 {files.map((file) => (
-//                     <li key={file.path}>
-//                         {file.isDirectory ? (
-//                             <strong>{file.name}</strong>
-//                         ) : (
-//                             <span>{file.name}</span>
-//                         )}
-//                     </li>
-//                 ))}
-//             </ul>
-//         </div>
-//     );
-// };
-
-// export default FileExplorer;
-
 import { Anchor, Box, Button, Group, Stack, Table, Text, Title, UnstyledButton } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
+import { AgreementTypeBadge } from '../AgreementTypeBadge';
 import { IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
+import { ReviewerCombobox } from '../ReviewerCombobox';
 import { browserClient } from '@/supabase/BrowerClients';
-import { s } from 'vitest/dist/reporters-1evA5lom';
+import classnames from "./FileExplorer.module.css"
 
 interface FileItem {
     id: string;
     name: string;
     path: string;
     isDirectory: boolean;
+    metadata?: Contract_SB
 }
 
 interface FileExplorerProps {
     root: string;
     tenantId: string;
     projectId: string;
+    members: Profile_SB[]
 }
 
-const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId }) => {
+const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, members }) => {
     const [currentPath, setCurrentPath] = useState<string>(root);
     const [items, setItems] = useState<FileItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -87,12 +33,21 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId }
         const fetchFiles = async () => {
             setLoading(true);
             // Assuming 'list' is a method to fetch files; replace with actual Supabase Storage method
-            const { data, error } = await supabase.storage.from(tenantId).list(currentPath, {
-                limit: 100, // Adjust based on your needs
-                offset: 0,
-            });
+            const [{ data, error }, contractq] = await Promise.all([
+                supabase.storage.from(tenantId).list(currentPath, {
+                    limit: 100, // Adjust based on your needs
+                    offset: 0,
+                }),
 
-            if (error) {
+                supabase.from("contract")
+                    .select()
+                    .ilike("name", `${currentPath}/%`)
+                    .not("name", "ilike", `${currentPath}/%/%`)
+            ]);
+
+
+
+            if (error || contractq.error) {
                 console.error('Error fetching files:', error);
                 return;
             }
@@ -103,6 +58,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId }
                 name: item.name,
                 path: `${currentPath}/${item.name}`,
                 isDirectory: item.id == null, // Adjust based on how your data indicates directories
+                metadata: contractq.data.find((contract: Contract_SB) => contract.id == item.id)
             })) ?? [];
 
             setItems(transformedItems);
@@ -120,7 +76,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId }
         }
     };
 
-   
+
 
     const navigateUp = (numFolders: number = 1) => {
         let upPath = currentPath;
@@ -130,71 +86,98 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId }
         setCurrentPath(upPath || root);
     };
 
-    
+    const renderFolder = (item: FileItem) => {
+        return (
+            <>
+                <Table.Td>
+                    <UnstyledButton onClick={() => handleItemClick(item)} className={classnames.folderButton}>
+                        {`📁 ${item.name}`}
+                    </UnstyledButton>
+                </Table.Td>
+                <Table.Td></Table.Td>
+                <Table.Td></Table.Td>
+                <Table.Td></Table.Td>
+                <Table.Td></Table.Td>
+                <Table.Td></Table.Td>
+            </>
+        );
+    };
+
+    const renderFile = (item: FileItem) => {
+        return (
+            <>
+                <Table.Td>
+                    {item.name.toLowerCase().endsWith(".pdf") ? (
+                        <Anchor href={`/portal/projects/${projectId}/contract/${item.id}`} component={Link}>
+                            {'📄 ' + item.name}
+                        </Anchor>
+                    ) : (
+                        <Text>{'📄 ' + item.name}</Text>
+                    )}
+                </Table.Td>
+                <Table.Td>{item.metadata?.description}</Table.Td>
+                <Table.Td> {item.metadata?.completed ? "Yes" : "No"}</Table.Td>
+                <Table.Td>{item.metadata?.npages ?? 1}</Table.Td>
+                <Table.Td>{item.metadata?.tag && <AgreementTypeBadge type={item.metadata?.tag}/>}</Table.Td>
+                <Table.Td>
+                    <ReviewerCombobox projectMembers={members} selectedProfileId={item.metadata?.assigned_to} contractId={item.id} />
+                </Table.Td>
+            </>
+        );
+    };
+
+
+
+
 
     return (
         <Box>
             <Group>
 
-                {/* <Button
-             variant='subtle'
-              disabled={currentPath == `projects/${projectId}`}
-              onClick={() => setCurrentPath(`projects/${projectId}`)}
-              >/</Button> */}
+
                 {currentPath.replace(`projects/${projectId}`, "Home")
                     .split('/')
-                    // .filter(pathItem => !!pathItem)
-                    // .slice(0, -1)
+
                     .map((path, index, array) => {
 
                         if (index === array.length - 1) {
 
                             return (<Group key={index}> {index != 0 && <IconChevronRight size={16} />}
-                            {/* <Button variant='transparent' disabled> */}
-                                {path}
-                            {/* </Button>  */}
+                                <Text className={classnames.lastPathSegment}>{path}</Text>
                             </Group>)
                         }
 
-                        return (<Group key={index}>  {index != 0 && <IconChevronRight size={16} />} <UnstyledButton 
-                        onClick={() => navigateUp(array.length - index - 1)}
-                        variant="subtle">{path}</UnstyledButton></Group>)
+                        return (<Group key={index}>  {index != 0 && <IconChevronRight size={16} />} <UnstyledButton
+                            onClick={() => navigateUp(array.length - index - 1)}
+                            className={classnames.pathButton}
+                        >{path}</UnstyledButton></Group>)
                     })
-                    }
+                }
 
             </Group>
             <Table highlightOnHover>
                 <Table.Thead>
                     <Table.Tr>
                         <Table.Th>Name</Table.Th>
+                        <Table.Th>Description</Table.Th>
+                        <Table.Th>Completed</Table.Th>
+                        <Table.Th>Pages</Table.Th>
+                        <Table.Th>Agreement Type</Table.Th>
+                        <Table.Th>Assigned To</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>{loading ? (
                     <Text>Loading...</Text>
                 ) : (
                     <>
-                       
+
                         {items.map((item) => {
 
                             return (
                                 <Table.Tr key={item.id}>
-                                    <Table.Td>
-                                        {item.isDirectory ?
-                                            <UnstyledButton onClick={() => handleItemClick(item)}>
-                                                {`📁 ${item.name}`}
-                                            </UnstyledButton>
-                                            :
+                                    {item.isDirectory ? renderFolder(item) : renderFile(item)}
 
-                                            item.name.toLowerCase().endsWith(".pdf") ? (
-                                                <Anchor href={`/portal/projects/${projectId}/contract/${item.id}`} component={Link}>
-                                                    {'📄 ' + item.name}
-                                                </Anchor>
-                                            ) : (
-                                                <Text>{'📄 ' + item.name}</Text>
-                                            )
-                                        }
 
-                                    </Table.Td>
                                 </Table.Tr>
 
                             )

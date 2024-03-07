@@ -1,4 +1,5 @@
 import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } from 'openai/resources/index.js';
+import { IResp, rerm, rok } from '@/utils';
 
 import { Database } from '@/types/supabase';
 import { ExtractJobStatus } from '@/types/enums';
@@ -24,30 +25,7 @@ Your output should be a JSON object with a schema that matches the following: {d
 
 In the schema, the property "lines" should state the start and end of the lines the information came from like "33-48"`
 
-interface IRespError {
-    message?: string,
-    [key: string]: any;
 
-}
-interface ISuccessResp<TOK> {
-    ok: TOK;
-    error?: never;
-}
-
-interface IErrorResp<TError = IRespError> {
-    ok?: never;
-    error: TError;
-}
-
-type IResp<TOK = any, TError = IRespError> = ISuccessResp<TOK> | IErrorResp<TError>;
-
-function rok<T>(ok: T): IResp<T> {
-    return { ok }
-}
-
-function rerm<TError = any>(message: string, anyErrorData: TError): IResp<any, TError> {
-    return { error: { message, ...anyErrorData } }
-}
 
 
 
@@ -291,7 +269,7 @@ export function parseRefLines(refLines: string) {
 }
 
 
-async function setJobStatus(supabase: SupabaseClient<Database>, contractId:string, extractorId:string, status: ExtractJobStatus) {
+async function setJobStatus(supabase: SupabaseClient<Database>, contractId: string, extractorId: string, status: ExtractJobStatus) {
     const { error } = await supabase.from('extract_jobs').update({ status, updated_at: new Date().toISOString() }).eq('contract_id', contractId).eq('parslet_id', extractorId)
     if (error) {
         console.error('Error updating job status:', error);

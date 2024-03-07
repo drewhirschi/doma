@@ -5,9 +5,11 @@ import { Icon3dRotate, IconPrompt } from "@tabler/icons-react";
 import { FormattedAgreementInfo } from "./AgreementInfo";
 import { FormattedGeneric } from "./Generic";
 import { FormattedIpOwnership } from "./IpOwnership"
+import { FormattedPaymentTerms } from "./PaymentTerm";
 import { FormattedSourceCode } from "./SourceCode";
 import { FormattedTerm } from "./Term";
 import { FormattedTermination } from "./Termination";
+import { FormatterKeys } from "@/types/enums";
 import { FormatterWithInfoAndEi } from "@/types/complex";
 import { IconWifi0 } from "@tabler/icons-react";
 
@@ -16,25 +18,39 @@ export function FormatterSwitch({ formatter, singleRun }: { formatter: Formatter
     const body = () => {
 
         switch (formatter.key) {
-            case "agreement_info":
+            case FormatterKeys.agreementInfo:
                 return (<FormattedAgreementInfo
                     info={formatter.formatted_info[0]}
                 />);
-            case "ip_ownership":
+            case FormatterKeys.ipOwnership:
                 return (<FormattedIpOwnership
                     info={formatter.formatted_info[0]}
                 />);
-            case "term":
+            case FormatterKeys.term:
                 return <FormattedTerm
                     info={formatter.formatted_info[0]} />
-            case "termination":
+            case FormatterKeys.termination:
                 return <FormattedTermination
                     info={formatter.formatted_info[0]}
                 />;
-            case "sourceCode":
+            case FormatterKeys.license:
+            case FormatterKeys.sourceCode:
                 return <FormattedSourceCode
                     info={formatter.formatted_info[0]}
                 />;
+                case FormatterKeys.paymentTerms:
+                return <FormattedPaymentTerms
+                    info={formatter.formatted_info[0]}
+                />;
+
+            case FormatterKeys.nonSolicit:
+            case FormatterKeys.nonCompete:
+            case FormatterKeys.nonHire:
+            case FormatterKeys.trojans:
+            case FormatterKeys.effectsOfTransaction:
+            case FormatterKeys.mostFavoredNation:
+            case FormatterKeys.governingLaw:
+            case FormatterKeys.assignability:
             default:
                 return <FormattedGeneric
                     info={formatter.formatted_info[0]}

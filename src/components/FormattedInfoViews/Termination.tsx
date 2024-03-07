@@ -9,13 +9,13 @@ interface Props {
 }
 
 export function FormattedTermination({ info }: Props) {
-    if (!info) {
+    const data: TerminationFormatResponse = info?.data as unknown as TerminationFormatResponse
+    if (!info || data.summary === "") {
         return (
             <Text>No data</Text>
         )
     }
 
-    const data: TerminationFormatResponse = info?.data as unknown as TerminationFormatResponse
 
   
 

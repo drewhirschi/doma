@@ -22,12 +22,12 @@ function SelectOption({ avatar, color, initials, name }: { avatar: string, color
     );
 }
 
-export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers }: { projectMembers: any[], selectedProfileId: string | null, contractId: string }) {
+export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers }: { projectMembers: any[], selectedProfileId?: string | null, contractId: string }) {
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
 
-    const [selectedMemberId, setSelectedMemberId] = useState<string | null>(selectedProfileId);
+    const [selectedMemberId, setSelectedMemberId] = useState<string>(selectedProfileId || "");
 
     const supabase = browserClient()
 

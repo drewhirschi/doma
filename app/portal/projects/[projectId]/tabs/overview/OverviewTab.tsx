@@ -5,6 +5,7 @@ import { getCompletedContracts, getInitials, getTotalContracts } from "@/ux/help
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { AddContractsModalButton } from "./ImportModal/AddContractsModal";
+import { AgreementTypeBadge } from "@/components/AgreementTypeBadge";
 import FileExplorer from "@/components/TreeFileExplorer/TreeFileExplorer";
 import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
@@ -12,21 +13,6 @@ import { PAGE_SIZE } from "./shared";
 import { ReviewerCombobox } from "@/components/ReviewerCombobox";
 import { useDebouncedCallback } from 'use-debounce';
 import { useState } from "react";
-
-function getAgreementBadge(type: string) {
-    switch (type) {
-        case 'customer_agreement':
-            return <Badge color='teal'>Customer</Badge>;
-        case 'joint_development_agreement':
-            return <Badge color="pink">Joing development</Badge>;
-        case 'employee_agreement':
-            return <Badge color="orange">Employee</Badge>;
-        // case 'license_agreement':
-        //     return 'indigo';
-        default:
-            return <Badge color="gray">Unknown</Badge>;
-    }
-}
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[] }
@@ -93,11 +79,10 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                     {contract.completed ? "Yes" : "No"}
                 </Table.Td>
                 <Table.Td>
-                    {/* @ts-ignore */}
                     {contract.npages ?? 1}
                 </Table.Td>
                 <Table.Td>
-                    {contract.tag && getAgreementBadge(contract.tag)}
+                    {contract.tag && <AgreementTypeBadge type={contract.tag} />}
                 </Table.Td>
                 <Table.Td>
                     <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id} />
@@ -159,7 +144,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
 
             ) :
                 (
-                    <FileExplorer projectId={projectId} root={`projects/${projectId}`} tenantId={project.tenant_id} />
+                    <FileExplorer members={members} projectId={projectId} root={`projects/${projectId}`} tenantId={project.tenant_id} />
                 )}
         </Box>
     )

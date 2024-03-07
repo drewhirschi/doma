@@ -5,7 +5,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 
 import * as actions from "./ContractReviewer.actions";
 
-import { ActionIcon, Box, Button, Center, CopyButton, Flex, Group, HoverCard, Menu, Paper, ScrollArea, SegmentedControl, Skeleton, Stack, Text, Textarea, ThemeIcon, Title, Tooltip, rem } from "@mantine/core";
+import { ActionIcon, Box, Button, Center, CopyButton, Divider, Flex, Group, HoverCard, Menu, Paper, ScrollArea, SegmentedControl, Skeleton, Stack, Text, Textarea, ThemeIcon, Title, Tooltip, rem } from "@mantine/core";
 import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTrash, IconUser } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useEffect, useOptimistic, useRef, useState } from "react";
@@ -38,7 +38,6 @@ interface Props {
     }
     parslets: ParsletWithNotes[]
     formatters: FormatterWithInfoAndEi[]
-    // formatters: any[]
     annotations: Annotation_SB[]
 }
 
@@ -297,13 +296,20 @@ export function ContractReviewer(props: Props) {
                                         actions.runFormatters(contract.id, projectId)
                                     }}
                                 >Run all</Button>
-                                {formatters.map(f => (
+                                {formatters
+                                // .filter(f => f.formatted_info.length > 0)
+                                .map(f => (
                                     <FormatterSwitch formatter={f} key={f.key} singleRun={() => {
                                         actions.runFormatter(f.key, contract.id, projectId)
                                     
                                     }} />
                                 ))
                                 }
+                                {/* <Divider/>
+                                {formatters.filter(f => f.formatted_info.length == 0).map(f => (
+                                    <Text>{f.display_name}</Text>
+                                ))
+                                } */}
                             </Stack>}
                     </ScrollArea>
                 </Stack>
