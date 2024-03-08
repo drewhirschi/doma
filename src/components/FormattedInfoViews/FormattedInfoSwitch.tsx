@@ -9,9 +9,9 @@ import { FormattedPaymentTerms } from "./PaymentTerm";
 import { FormattedSourceCode } from "./SourceCode";
 import { FormattedTerm } from "./Term";
 import { FormattedTermination } from "./Termination";
+import { FormattedTrojans } from "./Trojans";
 import { FormatterKeys } from "@/types/enums";
 import { FormatterWithInfoAndEi } from "@/types/complex";
-import { IconWifi0 } from "@tabler/icons-react";
 
 export function FormatterSwitch({ formatter, singleRun }: { formatter: FormatterWithInfoAndEi, singleRun: (key: string) => void }) {
 
@@ -38,7 +38,7 @@ export function FormatterSwitch({ formatter, singleRun }: { formatter: Formatter
                 return <FormattedSourceCode
                     info={formatter.formatted_info[0]}
                 />;
-                case FormatterKeys.paymentTerms:
+            case FormatterKeys.paymentTerms:
                 return <FormattedPaymentTerms
                     info={formatter.formatted_info[0]}
                 />;
@@ -47,6 +47,9 @@ export function FormatterSwitch({ formatter, singleRun }: { formatter: Formatter
             case FormatterKeys.nonCompete:
             case FormatterKeys.nonHire:
             case FormatterKeys.trojans:
+                return <FormattedTrojans
+                    info={formatter.formatted_info[0]}
+                />;
             case FormatterKeys.effectsOfTransaction:
             case FormatterKeys.mostFavoredNation:
             case FormatterKeys.governingLaw:

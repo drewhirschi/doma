@@ -58,6 +58,6 @@ export function rok<T>(ok: T): IResp<T> {
     return { ok }
 }
 
-export function rerm<TError = any>(message: string, anyErrorData: TError): IResp<any, TError> {
+export function rerm<TError = any>(message: string, anyErrorData: TError, errorCode?:string): IResp<any, TError> {
     return { error: { message, ...anyErrorData } }
 }

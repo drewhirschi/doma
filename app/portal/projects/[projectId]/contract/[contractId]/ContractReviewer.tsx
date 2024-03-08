@@ -21,6 +21,7 @@ import MetadataItem from '@/components/MetadataItem';
 import { browserClient } from "@/supabase/BrowerClients";
 import { buildAnnotationFromExtraction } from "./helpers";
 import dynamic from 'next/dynamic'
+import { notifications } from '@mantine/notifications';
 import { sleep } from '@/utils';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDisclosure } from '@mantine/hooks';
@@ -156,31 +157,54 @@ export function ContractReviewer(props: Props) {
                                 </Menu.Target>
 
                                 <Menu.Dropdown>
-                                    <Menu.Label>Application</Menu.Label>
                                     <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={async () => {
                                             await actions.completeContractAction(contract.id)
-
-
                                         }}
-                                    >
+                                        >
                                         Mark completed
                                     </Menu.Item>
+                                    <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={async () => {
+                                            try {
+
+                                                await actions.describeAndTag(contract.id, projectId, contract.target)
+                                            } catch (error) {
+                                                console.error(error)
+                                                notifications.show({
+                                                    title: "Error",
+                                                    message: "There was an error. Please try again later.",
+                                                    color: "red"
+                                                })
+                                            }
+                                        }}
+                                        >
+                                        Run description
+                                    </Menu.Item>
+                                    
+                                        <Menu.Label>AI</Menu.Label>
                                     <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
                                             actions.reviewContractAction(contract.id)
                                         }}
-                                    >
-                                        Run AI extraciton
+                                        >
+                                        Run extraciton
                                     </Menu.Item>
                                     <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
                                             actions.deleteContractExtractedInfo(contract.id, projectId)
                                         }}
-                                    >
+                                        >
                                         Clear extracted info
                                     </Menu.Item>
 
+                                    <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={() => {
+                                            actions.runFormatters(contract.id, projectId, contract.target)
+                                        }}
+                                        >
+                                        Run formatters
+                                    </Menu.Item>
                                 </Menu.Dropdown>
                             </Menu>
                         </Group>
@@ -301,11 +325,7 @@ export function ContractReviewer(props: Props) {
                                 </div>
                             ))
                                 : <Stack gap={"lg"}>
-                                    <Button
-                                        onClick={() => {
-                                            actions.runFormatters(contract.id, projectId, contract.target)
-                                        }}
-                                    >Run all</Button>
+                                   
                                     {formatters
                                         // .filter(f => f.formatted_info.length > 0)
                                         .map(f => (

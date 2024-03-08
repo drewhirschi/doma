@@ -1,6 +1,8 @@
-import { Button, Stack, TextInput } from "@mantine/core";
+import { Box, Button, Group, Select, Stack, Text, TextInput, Textarea } from "@mantine/core";
 
+import { AgreementTypeBadge } from "@/components/AgreementTypeBadge";
 import MetadataItem from "@/components/MetadataItem";
+import { agreementsTypes } from "@/server/categoryAgent";
 import { browserClient } from "@/supabase/BrowerClients";
 import { notifications } from "@mantine/notifications";
 import { useForm } from '@mantine/form';
@@ -18,6 +20,8 @@ export function ContractDetailsDrawer({ contract }: ContractDetailsDrawerProps) 
         initialValues: {
             display_name: contract.display_name ?? '',
             target: contract.target ?? '',
+            description: contract.description ?? '',
+            tag: contract.tag ?? ''
         },
 
     });
@@ -26,33 +30,49 @@ export function ContractDetailsDrawer({ contract }: ContractDetailsDrawerProps) 
 
 
     return (
-        <form onSubmit={form.onSubmit(async (values) => {
-            setIsLoading(true)
-            const { data, error } = await sb.from("contract").update({
-                display_name: values.display_name,
-                target: values.target
-            }).eq("id", contract.id)
-            setIsLoading(false)
+        <Stack>
 
-            if (error) {
-                notifications.show({
-                    title: "Error",
-                    message: error.message,
-                    color: "red"
-                })
-            }
-        })}>
+            <MetadataItem header="Id" text={contract.id} />
 
-            <Stack >
-                <MetadataItem header="Id" text={contract.id} />
-                <TextInput label="Name"
-                    {...form.getInputProps('display_name')}
-                />
-                <TextInput label="Target"
-                    {...form.getInputProps('target')} />
-                <Button style={{ alignSelf: "flex-end" }} type="submit" loading={isLoading} disabled={isLoading}>Save</Button>
-            </Stack>
-        </form>
+            <form onSubmit={form.onSubmit(async (values) => {
+                setIsLoading(true)
+                const { data, error } = await sb.from("contract").update({
+                    display_name: values.display_name,
+                    target: values.target,
+                    description: values.description,
+                    tag: values.tag
+                }).eq("id", contract.id)
+                setIsLoading(false)
+
+                if (error) {
+                    notifications.show({
+                        title: "Error",
+                        message: error.message,
+                        color: "red"
+                    })
+                }
+            })}>
+
+                <Stack >
+                    <Textarea label="Description"
+                        {...form.getInputProps('description')}
+                    />
+
+                    <Select
+                        {...form.getInputProps('tag')}
+                        label="Type"
+                        placeholder="None selected"
+                        data={Object.keys(agreementsTypes).map((key) => ({ value: key, label: key.split("_").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ") }))}
+                    />
+                    <TextInput label="Name"
+                        {...form.getInputProps('display_name')}
+                    />
+                    <TextInput label="Target"
+                        {...form.getInputProps('target')} />
+                    <Button style={{ alignSelf: "flex-end" }} type="submit" loading={isLoading} disabled={isLoading}>Save</Button>
+                </Stack>
+            </form>
+        </Stack>
     );
 
 

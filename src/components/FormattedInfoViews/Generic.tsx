@@ -21,7 +21,7 @@ export function FormattedGeneric({ info }: Props) {
     return (
         <Stack>
 
-            <Text>{data.summary}</Text>
+            <Text style={{whiteSpace:"pre-wrap"}}>{data.summary}</Text>
             <Group gap={2}>
 
                 {extractedInfoRefs.map((id, index) => (

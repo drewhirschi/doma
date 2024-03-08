@@ -3,6 +3,7 @@
 import { runAllFormatters, runSingleFormatter } from "@/server/formatAgent"
 import { runContractExtraction, runSingleExtraction } from "@/server/extractionAgent"
 
+import { categorize } from "@/server/categoryAgent"
 import { revalidatePath } from "next/cache"
 import { serverActionClient } from "@/supabase/ServerClients"
 import { sleep } from "@/utils"
@@ -43,12 +44,9 @@ export async function reExtractTopic(contractId: string, parsletId: string) {
 
     const { data, error } = await supabase.from('extracted_information').delete().eq('contract_id', contractId).eq('parslet_id', parsletId)
 
-    try {
 
-        await runSingleExtraction(supabase, contractId, parsletId)
-    } catch (error) {
+    await runSingleExtraction(supabase, contractId, parsletId)
 
-    }
 
 
 }
@@ -59,14 +57,11 @@ export async function runFormatters(contractId: string, projectId: string, targe
     const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
 
     target ??= data?.target.join(", ")
-    try {
 
-        await runAllFormatters(supabase, contractId, target ?? "No target found")
-        revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
+     runAllFormatters(supabase, contractId, target ?? "No target found")
+    // revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
-    } catch (error) {
 
-    }
 }
 export async function runFormatter(formatterKey: string, contractId: string, projectId: string, target: string | null | undefined) {
     const supabase = serverActionClient()
@@ -74,12 +69,27 @@ export async function runFormatter(formatterKey: string, contractId: string, pro
     const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
     target ??= data?.target.join(", ")
 
-    try {
 
-        await runSingleFormatter(supabase, formatterKey, contractId, target ?? "No target found")
-        revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
+    await runSingleFormatter(supabase, formatterKey, contractId, target ?? "No target found")
+    revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
-    } catch (error) {
 
+}
+
+export async function describeAndTag(contractId: string, projectId: string, target: string | null | undefined) {
+    const supabase = serverActionClient()
+
+    const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
+
+    target ??= data?.target.join(", ")
+
+
+    const res = await categorize(supabase, contractId, projectId, target ?? "No target found")
+
+    if (res.error) {
+        throw new Error(res.error.message)
     }
+    revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
+
+
 }

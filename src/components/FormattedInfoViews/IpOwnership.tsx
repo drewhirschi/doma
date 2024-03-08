@@ -1,7 +1,7 @@
 import { Anchor, Badge, Group, Text, Title } from "@mantine/core"
+import { IPOwnershipFormatResponse, IpOwnershipType } from "@/types/formattersTypes"
 
 import { FormattedInfoWithEiId } from "@/types/complex"
-import { IPOwnershipFormatResponse } from "@/types/formattersTypes"
 
 interface Props {
     info?: FormattedInfoWithEiId
@@ -22,13 +22,13 @@ export function FormattedIpOwnership({ info }: Props) {
 
     const extractedInfoRefs = info.extracted_information.map(ei => ei.id)
 
-    function typeBadge(type: IPOwnershipFormatResponse["type"]) {
+    function typeBadge(type: IpOwnershipType) {
         switch (type) {
-            case "INBOUND":
+            case IpOwnershipType.INBOUND:
                 return <Badge color="blue">Inbound</Badge>
-            case "OUTBOUND":
+            case IpOwnershipType.OUTBOUND:
                 return <Badge color="green">Outbound</Badge>
-            case "JOINT_OWNERSHIP":
+            case IpOwnershipType.JOINT_OWNERSHIP:
                 return <Badge color="orange">Joint ownership</Badge>
 
             default:

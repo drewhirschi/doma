@@ -26,12 +26,12 @@ export function FormattedAgreementInfo({ info }: Props) {
         <Stack gap={4}>
             <Text size="sm">{data.summary}</Text>
 
-            <SimpleGrid cols={2} spacing="md">
+            {/* <SimpleGrid cols={2} spacing="md">
                 <MetadataItem header="Title" text={data.title} />
                 <MetadataItem header="Effective date" text={data.effective_date} />
                 <MetadataItem header="Target" text={data.target_entity} />
                 <MetadataItem header="Counter party" text={data.counter_party} />
-            </SimpleGrid>
+            </SimpleGrid> */}
         </Stack>
     )
 }

@@ -46,7 +46,8 @@
     "type-fest": "^4.9.0",
     "unzipper": "^0.10.14",
     "use-debounce": "^10.0.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/bun": "^1.0.3",

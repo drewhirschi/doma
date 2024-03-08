@@ -20,7 +20,10 @@ export default async function Page({ params }: { params: { projectId: string } }
         throw new Error("Failed to fetch data")
     }
     
-    const formattersq = await supabase.from("formatters").select("*, formatted_info(*)").in("formatted_info.contract_id", [projectQ.data.contract.map((c) => c.id)])
+    const formattersq = await supabase.from("formatters")
+    .select("*, formatted_info(*)")
+    .in("formatted_info.contract_id", [projectQ.data.contract.map((c) => c.id)])
+    .order("priority", { ascending: true })
 
     const parslets = parsletQ.data ?? []
 

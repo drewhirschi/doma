@@ -26,8 +26,9 @@ export function FormattedTerm({ info }: Props) {
             <Text size="sm">{data.summary}</Text>
 
             <SimpleGrid cols={2} spacing="md">
-                <MetadataItem header="Expired" text={data.expired ? "Yes" : "No"} />
-                <MetadataItem header="Silent" text={data.silent ? "Yes" : "No"} />
+                <MetadataItem header="Expire date" text={data?.expireDate ? new Date(data.expireDate).toLocaleDateString() : "No Date"} />
+                <MetadataItem header="Expired" text={data?.expired ? "Yes" : "No"} />
+                <MetadataItem header="Silent" text={data?.silent ? "Yes" : "No"} />
                 
             </SimpleGrid>
         </Stack>
