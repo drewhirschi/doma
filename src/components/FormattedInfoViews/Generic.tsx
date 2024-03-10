@@ -9,19 +9,17 @@ interface Props {
 
 export function FormattedGeneric({ info }: Props) {
 
-    if (!info) {
-        return <Text>No data</Text>
-    }
+    
 
-    const data: IFormatResponse = info.data as unknown as IFormatResponse
+    const data: IFormatResponse = info?.data as unknown as IFormatResponse
 
-    const extractedInfoRefs = info.extracted_information.map(ei => ei.id)
+    const extractedInfoRefs = info?.extracted_information?.map(ei => ei.id) ?? []
 
 
     return (
         <Stack>
 
-            <Text style={{whiteSpace:"pre-wrap"}}>{data.summary}</Text>
+            <Text style={{whiteSpace:"pre-wrap"}}>{data?.summary}</Text>
             <Group gap={2}>
 
                 {extractedInfoRefs.map((id, index) => (

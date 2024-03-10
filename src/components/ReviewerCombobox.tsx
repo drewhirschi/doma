@@ -1,9 +1,8 @@
-import { Avatar, Combobox, Flex, Group, Input, InputBase, Text, useCombobox } from "@mantine/core";
+import { Avatar, Box, Combobox, Flex, Group, Input, InputBase, Text, useCombobox } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 import { browserClient } from "@/supabase/BrowerClients";
 import { getInitials } from "@/ux/helper";
-import { updateContractAssignment } from "./RevierCombobox.action";
 
 function SelectOption({ avatar, color, initials, name }: { avatar: string, color: string, initials: string, name: string, }) {
     return (
@@ -13,16 +12,14 @@ function SelectOption({ avatar, color, initials, name }: { avatar: string, color
             ) : (
                 <Avatar size={32} color={color!}>{getInitials(name!)}</Avatar>
             )}
-            <div>
-                <Text fz="sm" fw={500} truncate="end">
-                    {name}
-                </Text>
-            </div>
+            <Text fz="sm" fw={500} truncate="end">
+                {name}
+            </Text>
         </Flex>
     );
 }
 
-export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers }: { projectMembers: any[], selectedProfileId?: string | null, contractId: string }) {
+export function ReviewerCombobox({ selectedProfileId, projectMembers, handleUpdate }: { projectMembers: any[], handleUpdate: (memberId: string) => void, selectedProfileId?: string | null }) {
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
@@ -60,7 +57,8 @@ export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers
             onOptionSubmit={async (val) => {
                 setSelectedMemberId(val)
                 combobox.closeDropdown();
-                updateContractAssignment(val, contractId)
+                // updateContractAssignment(val, contractId)
+                handleUpdate(val)
             }}
         >
             <Combobox.Target>

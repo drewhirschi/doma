@@ -1,8 +1,8 @@
 import { Box, Button, Group, Select, Stack, Text, TextInput, Textarea } from "@mantine/core";
 
 import { AgreementTypeBadge } from "@/components/AgreementTypeBadge";
+import { AgreementTypes } from "@/types/enums";
 import MetadataItem from "@/components/MetadataItem";
-import { agreementsTypes } from "@/server/categoryAgent";
 import { browserClient } from "@/supabase/BrowerClients";
 import { notifications } from "@mantine/notifications";
 import { useForm } from '@mantine/form';
@@ -62,7 +62,7 @@ export function ContractDetailsDrawer({ contract }: ContractDetailsDrawerProps) 
                         {...form.getInputProps('tag')}
                         label="Type"
                         placeholder="None selected"
-                        data={Object.keys(agreementsTypes).map((key) => ({ value: key, label: key.split("_").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ") }))}
+                        data={Object.values(AgreementTypes).map((key) => ({ value: key, label: key.split("_").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ") }))}
                     />
                     <TextInput label="Name"
                         {...form.getInputProps('display_name')}

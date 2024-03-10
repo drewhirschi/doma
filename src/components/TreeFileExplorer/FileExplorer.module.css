@@ -13,3 +13,7 @@
   padding: 4px 8px;
   
 }
+
+.folderText:hover {
+  text-decoration: underline;
+}

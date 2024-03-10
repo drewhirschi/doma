@@ -1,16 +1,18 @@
 "use client"
 
-import { Anchor, Avatar, Badge, Box, Button, Combobox, Container, Group, Input, InputBase, Pagination, Progress, SegmentedControl, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
+import { Anchor, Avatar, Badge, Box, Button, Combobox, Container, Divider, Group, Input, InputBase, Pagination, Progress, SegmentedControl, Select, Space, Table, Text, TextInput, rem } from "@mantine/core";
 import { getCompletedContracts, getInitials, getTotalContracts } from "@/ux/helper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { AddContractsModalButton } from "./ImportModal/AddContractsModal";
 import { AgreementTypeBadge } from "@/components/AgreementTypeBadge";
+import { AssignContractsModalButton } from "./AssignModal";
 import FileExplorer from "@/components/TreeFileExplorer/TreeFileExplorer";
 import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
 import { PAGE_SIZE } from "./shared";
 import { ReviewerCombobox } from "@/components/ReviewerCombobox";
+import { browserClient } from "@/supabase/BrowerClients";
 import { useDebouncedCallback } from 'use-debounce';
 import { useState } from "react";
 
@@ -27,6 +29,9 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
+
+    const [selectedRows, setSelectedRows] = useState<string[]>([]);
+
 
     const [filesSegment, setFilesSegment] = useState('tree');
 
@@ -63,7 +68,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
 
 
                 <Table.Td>
-                    {contract.display_name?.toLowerCase().endsWith(".pdf") ? (
+                    {contract.name?.toLowerCase().endsWith(".pdf") ? (
                         <Anchor href={`/portal/projects/${projectId}/contract/${contract.id}`} component={Link}>
                             {contract.display_name}
                         </Anchor>
@@ -85,16 +90,20 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                     {contract.tag && <AgreementTypeBadge type={contract.tag} />}
                 </Table.Td>
                 <Table.Td>
-                    <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} contractId={contract.id} />
+                    <ReviewerCombobox projectMembers={members} selectedProfileId={contract.assigned_to} handleUpdate={async (memberId) => {
+                        const supabase = browserClient()
+
+                        await supabase.from("contract").update({ assigned_to: memberId }).eq("id", contract.id)
+                    }} />
                 </Table.Td>
 
             </Table.Tr>
         ));
 
-  
+
     return (
         <Box miw={860} px={"lg"}>
-           
+
             <Space h="lg" />
             <Group my={"md"} justify="space-between">
                 <SegmentedControl
@@ -105,7 +114,10 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                         { value: 'list', label: 'Search' },
                     ]}
                 />
-                <AddContractsModalButton project={project} />
+                <Group>
+                    <AssignContractsModalButton selectedRows={selectedRows} members={members} pathname={pathname} />
+                    <AddContractsModalButton project={project} />
+                </Group>
 
             </Group>
             {filesSegment === 'list' ? (
@@ -144,7 +156,16 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
 
             ) :
                 (
-                    <FileExplorer members={members} projectId={projectId} root={`projects/${projectId}`} tenantId={project.tenant_id} />
+                    <FileExplorer
+                        members={members}
+                        projectId={projectId}
+                        root={`projects/${projectId}`}
+                        tenantId={project.tenant_id}
+                        setSelectedRows={setSelectedRows}
+                        selectedRows={selectedRows}
+
+                    />
+                    // <div>Tree</div>
                 )}
         </Box>
     )

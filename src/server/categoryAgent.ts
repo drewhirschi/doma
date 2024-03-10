@@ -1,31 +1,32 @@
 import { IResp, rerm, rok } from "@/utils";
 
+import { AgreementTypes } from "@/types/enums";
 import { Database } from "@/types/supabase-generated";
 import OpenAI from "openai";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { generateAgentResponse } from "./formatAgent";
 import { z } from "zod"
 
-export const agreementsTypes = {
-    customer_agreement: "outbound terms of service, terms and conditions, master services agreement (whether for software, hardware or SaaS) or professional services agreement where Target Entity is providing services to their customers",
-    supply_agreement: "inbound vendor, supplier or services agreements, including any inbound terms of service, terms and conditions, master services agreement (whether for software, hardware or SaaS) or professional services agreement where Target Entity is the customer",
-    distribution_agreement: "Agreement related to distributor, reseller, sales rep, value added reseller, or similar services. Indicate whether inbound (Target Entity is receiving) or outbound (Target Entity is providing)",
-    non_disclosure_agreement: "Confidentiality agreement",
-    contractor_agreement: "Target Entity hires an independent, individual contractor",
-    employee_agreement: "Agreement regards Target Entity employee relationship",
-    intercompany_agreement: "agreement is between relates solely to the Target Entity, could be agreement between affiliates",
-    joint_development_agreement: "parties jointly develop something",
-    collaboration_agreements: "Partnership agreements, collaboration agreements or joint ventures",
-    data_processing_agreement: "governs how data is processed",
-    settlement_agreement: "Settlement or other resolution of claim or conflict",
-    standards_setting_bodies_agreements: "",
-    advertising_agreement: "Advertising insertion order/terms and conditions",
-    publishing_agreement: "Agreement with a publisher or ad agency",
-    marketing_inbound_agreement: "Inbound marketing agreement",
-    marketing_outbound_agreement: "Outbound marketing agreement",
-    marketing_joint_agreement: "Joint marketing agreement",
-    marketing_cross_agreement: "Cross marketing agreement",
-    unknown: "Document does not fit any of the above categories",
+export const agreementsTypeInstructions = {
+    [AgreementTypes.Customer]: "outbound terms of service, terms and conditions, master services agreement (whether for software, hardware or SaaS) or professional services agreement where Target Entity is providing services to their customers",
+    [AgreementTypes.Supply]: "inbound vendor, supplier or services agreements, including any inbound terms of service, terms and conditions, master services agreement (whether for software, hardware or SaaS) or professional services agreement where Target Entity is the customer",
+    [AgreementTypes.Distribution]: "Agreement related to distributor, reseller, sales rep, value added reseller, or similar services. Indicate whether inbound (Target Entity is receiving) or outbound (Target Entity is providing)",
+    [AgreementTypes.NonDisclosure]: "Confidentiality agreement",
+    [AgreementTypes.Contractor]: "Target Entity hires an independent, individual contractor",
+    [AgreementTypes.Employee]: "Agreement regards Target Entity employee relationship",
+    [AgreementTypes.Intercompany]: "agreement is between relates solely to the Target Entity, could be agreement between affiliates",
+    [AgreementTypes.JointDevelopment]: "parties jointly develop something",
+    [AgreementTypes.Collaboration]: "Partnership agreements, collaboration agreements or joint ventures",
+    [AgreementTypes.DataProcessing]: "governs how data is processed",
+    [AgreementTypes.Settlement]: "Settlement or other resolution of claim or conflict",
+    [AgreementTypes.StandardsSettingBodies]: "",
+    [AgreementTypes.Advertising]: "Advertising insertion order/terms and conditions",
+    [AgreementTypes.Publishing]: "Agreement with a publisher or ad agency",
+    [AgreementTypes.MarketingInbound]: "Inbound marketing agreement",
+    [AgreementTypes.MarketingOutbound]: "Outbound marketing agreement",
+    [AgreementTypes.MarketingJoint]: "Joint marketing agreement",
+    [AgreementTypes.MarketingCross]: "Cross marketing agreement",
+    [AgreementTypes.Unknown]: "Document does not fit any of the above categories",
 };
 
 export async function categorize(sb: SupabaseClient<Database>, contractId: string, projectId: string, target: string): Promise<IResp<any>> {
@@ -58,11 +59,11 @@ For the description, respond with a brief description of the document, what it i
 For the tag, respond with the key of the tag (text only, not </>) that best fits and nothing more from these options:
 
 <tags>
-${Object.entries(agreementsTypes).map(([key, value]) => `<${key} description="${value}"/>`).join("\n")}
+${Object.entries(agreementsTypeInstructions).map(([key, value]) => `<${key} description="${value}"/>`).join("\n")}
 </tags>`
 
     const shape = z.object({
-        tag: z.string({ required_error: "Tag is required" }),
+        tag: z.nativeEnum(AgreementTypes),
         description: z.string({ required_error: "Description is required" }),
     })
 

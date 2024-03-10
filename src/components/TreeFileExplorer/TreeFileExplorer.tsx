@@ -1,4 +1,4 @@
-import { Anchor, Box, Button, Group, Stack, Table, Text, Title, UnstyledButton } from '@mantine/core';
+import { Anchor, Box, Button, Checkbox, Group, Stack, Table, Text, Title, UnstyledButton } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -22,9 +22,11 @@ interface FileExplorerProps {
     tenantId: string;
     projectId: string;
     members: Profile_SB[]
+    selectedRows: string[];
+    setSelectedRows: (rows: string[]) => void;
 }
 
-const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, members }) => {
+const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, members, selectedRows, setSelectedRows }) => {
     const supabase = browserClient()
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -33,6 +35,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
     const [currentPath, setCurrentPath] = useState<string>(searchParams.get("path") ?? root);
     const [items, setItems] = useState<FileItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+
 
     useEffect(() => {
         const fetchFiles = async () => {
@@ -58,8 +61,8 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
             }
 
             // Transform fetched data to FileItem format, assuming data has fields indicating if an item is a directory
-            const transformedItems = data?.filter(item => !item.name.includes(".emptyFolderPlaceholder")).map((item) => ({
-                id: item.id,
+            const transformedItems = data?.filter(item => !item.name.includes(".emptyFolderPlaceholder")).map((item, idx) => ({
+                id: item.id ?? idx.toString(),
                 name: item.name,
                 path: `${currentPath}/${item.name}`,
                 isDirectory: item.id == null, // Adjust based on how your data indicates directories
@@ -87,6 +90,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
 
     const handleItemClick = (item: FileItem) => {
         if (item.isDirectory) {
+            setSelectedRows([])
             updatePathParam(item.path)
             setCurrentPath(item.path);
         } else {
@@ -105,11 +109,28 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
         setCurrentPath(upPath || root);
     };
 
+    const selectCell = (item: FileItem) => (
+        <Table.Td>
+            <Checkbox
+                aria-label="Select row"
+                checked={selectedRows.includes(item.path)}
+                onChange={(event) =>
+                    setSelectedRows(
+                        event.currentTarget.checked
+                            ? [...selectedRows, item.path]
+                            : selectedRows.filter((id) => id !== item.path)
+                    )
+                }
+            />
+        </Table.Td>
+    )
+
     const renderFolder = (item: FileItem) => {
         return (
             <>
+                {selectCell(item)}
                 <Table.Td>
-                    <UnstyledButton onClick={() => handleItemClick(item)} className={classnames.folderButton}>
+                    <UnstyledButton onClick={() => handleItemClick(item)} className={classnames.folderText}>
                         {`📁 ${item.name}`}
                     </UnstyledButton>
                 </Table.Td>
@@ -125,21 +146,28 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
     const renderFile = (item: FileItem) => {
         return (
             <>
+                {selectCell(item)}
                 <Table.Td>
                     {item.name.toLowerCase().endsWith(".pdf") ? (
                         <Anchor href={`/portal/projects/${projectId}/contract/${item.id}`} component={Link}>
                             {'📄 ' + item.metadata?.display_name ?? item.name}
                         </Anchor>
                     ) : (
-                        <Text>{'📄 ' + item.metadata?.display_name ?? item.name}</Text>
+                        <>
+                            {'📄 ' + item.metadata?.display_name ?? item.name}
+                        </>
                     )}
                 </Table.Td>
                 <Table.Td>{item.metadata?.description}</Table.Td>
                 <Table.Td> {item.metadata?.completed ? "Yes" : "No"}</Table.Td>
                 <Table.Td>{item.metadata?.npages ?? 1}</Table.Td>
-                <Table.Td>{item.metadata?.tag && <AgreementTypeBadge type={item.metadata?.tag}/>}</Table.Td>
+                <Table.Td>{item.metadata?.tag && <AgreementTypeBadge type={item.metadata?.tag} />}</Table.Td>
                 <Table.Td>
-                    <ReviewerCombobox projectMembers={members} selectedProfileId={item.metadata?.assigned_to} contractId={item.id} />
+                    <ReviewerCombobox projectMembers={members} selectedProfileId={item.metadata?.assigned_to} handleUpdate={(async (memberId) => {
+                        const supabase = browserClient()
+
+                        await supabase.from("contract").update({ assigned_to: memberId }).eq("id", item.id)
+                    })} />
                 </Table.Td>
             </>
         );
@@ -174,9 +202,18 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
                 }
 
             </Group>
-            <Table highlightOnHover>
+            <Table
+            //  highlightOnHover
+            >
                 <Table.Thead>
                     <Table.Tr>
+                        <Table.Th> <Checkbox
+                            aria-label="Select all rows"
+                            checked={selectedRows.length === items.length && items.length > 0}
+                            onChange={(event) =>
+                                setSelectedRows(selectedRows.length == 0 ? items.map((item) => item.path) : [])
+                            }
+                        /></Table.Th>
                         <Table.Th>Name</Table.Th>
                         <Table.Th>Description</Table.Th>
                         <Table.Th>Completed</Table.Th>
@@ -193,7 +230,14 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
                         {items.map((item) => {
 
                             return (
-                                <Table.Tr key={item.id}>
+                                <Table.Tr key={item.id} onClick={() => {
+                                    // console.log(`clicked ${item.name}`)
+                                    // setSelectedRows(
+                                    //     !selectedRows.includes(item.id)
+                                    //         ? [...selectedRows, item.id]
+                                    //         : selectedRows.filter((id) => id !== item.id)
+                                    // )
+                                }}>
                                     {item.isDirectory ? renderFolder(item) : renderFile(item)}
 
 
