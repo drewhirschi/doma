@@ -5,7 +5,6 @@ import "dotenv/config"
 import { execExtractor, parseRefLines, buildXmlContract } from '@/server/extractionAgent'
 
 import { fullAccessServiceClient } from '@/supabase/ServerClients'
-import { a } from "vitest/dist/suite-ghspeorC"
 import { getAnnotationContractLines } from "./lineRefAnnotation"
 import { ChatCompletionMessage } from "openai/resources"
 

@@ -21,7 +21,7 @@ export default function LoginButton() {
             }
         })
       
-    }, [])
+    }, [supabase.auth])
 
     return (
         <Button m={"md"} href={nextUrl} component={Link} variant="subtle">Login</Button>
