@@ -10,21 +10,6 @@ export const GenericFormatResponseShape = z.object({
 
 export type GenericFormatResponse = z.infer<typeof GenericFormatResponseShape>;
 
-
-export enum IpOwnershipType {
-    "INBOUND", "OUTBOUND", "JOINT_OWNERSHIP"
-}
-export const IPOwnershipShape = z.object({
-    summary: z.string({ required_error: "Summary is required" }),
-    type: z.nativeEnum(IpOwnershipType),
-    not_present_assignment: z.boolean(),
-    feedback: z.boolean(),
-});
-
-export type IPOwnershipFormatResponse = z.infer<typeof IPOwnershipShape>;
-
-
-
 export const AgreementInfoShape = z.object({
     summary: z.string({ required_error: "Summary is required" }),
     title: z.string({ required_error: "Title is required" }),
@@ -35,11 +20,20 @@ export const AgreementInfoShape = z.object({
 
 export type AgreementInfoFormatResponse = z.infer<typeof AgreementInfoShape>;
 
+
+
+
+
 export const TermShape = z.object({
-    summary: z.string({ required_error: "Summary is required" }),
-    silent: z.boolean(),
-    expired: z.boolean(),
-    expireDate: z.string().nullable()
+    summary: z.string()
+    .describe("Summarize the term of the agreement along with any renewals from the contract's term sections provided below."),
+    silent: z.boolean()
+    .describe("Silent if there is no term or renewals"),
+    expired: z.boolean()
+    .describe("Expired if a contract states an end date or a time frame without automatic renewals that when applied to the date in the Agreement Info is past today's date."),
+    expireDate: z.date({description:""})
+    .nullable()
+    .describe("This should be the date the agreement was signed"),
 });
 export type TermFormatResponse = z.infer<typeof TermShape>;
 
@@ -55,9 +49,6 @@ export const TerminationShape = z.object({
 });
 
 export type TerminationFormatResponse = z.infer<typeof TerminationShape>;
-
-
-
 
 
 enum PaymentTermsDirection {
@@ -106,6 +97,19 @@ export const SourceCodeFormatResponseShape = z.object({
 
 export type SourceCodeFormatResponse = z.infer<typeof SourceCodeFormatResponseShape>;
 
+export enum IpOwnershipType {
+    INBOUND = "INBOUND", 
+    OUTBOUND = "OUTBOUND",
+    JOINT =  "JOINT_OWNERSHIP"
+}
+export const IPOwnershipShape = z.object({
+    summary: z.string({ required_error: "Summary is required" }),
+    type: z.nativeEnum(IpOwnershipType),
+    not_present_assignment: z.boolean(),
+    feedback: z.boolean(),
+});
+
+export type IPOwnershipFormatResponse = z.infer<typeof IPOwnershipShape>;
 
 export const TrojanShape = z.object({
     summary: z.string(),
