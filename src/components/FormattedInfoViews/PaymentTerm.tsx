@@ -10,20 +10,18 @@ interface Props {
 
 export function FormattedPaymentTerms({ info }: Props) {
 
-    if (!info) {
-        return <Text>No data</Text>
-    }
+   
 
-    const data: PaymentTermsFormatResponse = info.data as unknown as PaymentTermsFormatResponse
+    const data = info.data as unknown as PaymentTermsFormatResponse | undefined
 
-    const extractedInfoRefs = info.extracted_information.map(ei => ei.id)
+    const extractedInfoRefs = info?.extracted_information?.map(ei => ei.id) ?? []
 
 
     return (
         <Stack>
 
-            <Text>{data.summary}</Text>
-            <MetadataItem header="Direction" text={data.direction}/>
+            <Text>{data?.summary}</Text>
+            <MetadataItem header="Direction" text={data?.direction ?? ""}/>
 
             <Group gap={2}>
 

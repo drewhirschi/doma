@@ -1,6 +1,7 @@
 import { Anchor, Badge, Group, Stack, Text, Title } from "@mantine/core"
 import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes"
 
+import { EIReferenceLinks } from "./EIReferences"
 import { FormattedInfoWithEiId } from "@/types/complex"
 
 interface Props {
@@ -20,12 +21,7 @@ export function FormattedGeneric({ info }: Props) {
         <Stack>
 
             <Text style={{whiteSpace:"pre-wrap"}}>{data?.summary}</Text>
-            <Group gap={2}>
-
-                {extractedInfoRefs.map((id, index) => (
-                    <Anchor key={id} href={`#${id}`}>[{index + 1}]</Anchor>
-                ))}
-            </Group>
+            <EIReferenceLinks ids={extractedInfoRefs} />
 
         </Stack>
     )

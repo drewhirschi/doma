@@ -1,4 +1,4 @@
-import { Anchor, Badge, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core"
+import { Anchor, Badge, Group, Select, SimpleGrid, Stack, Text, TextInput, Title } from "@mantine/core"
 
 import { AgreementInfoFormatResponse } from "@/types/formattersTypes"
 import { FormattedInfoWithEiId } from "@/types/complex"
@@ -11,27 +11,21 @@ interface Props {
 }
 
 export function FormattedAgreementInfo({ info }: Props) {
-    if (!info) {
-        return (
-            <Text>No data</Text>
-        )
-    }
+
 
     const data: AgreementInfoFormatResponse = info?.data as unknown as AgreementInfoFormatResponse
-
-  
 
 
     return (
         <Stack gap={4}>
             <Text size="sm">{data.summary}</Text>
 
-            {/* <SimpleGrid cols={2} spacing="md">
-                <MetadataItem header="Title" text={data.title} />
-                <MetadataItem header="Effective date" text={data.effective_date} />
-                <MetadataItem header="Target" text={data.target_entity} />
-                <MetadataItem header="Counter party" text={data.counter_party} />
-            </SimpleGrid> */}
+            <SimpleGrid cols={2} spacing="md">
+                <TextInput label="Title" value={data.title}/>
+                <TextInput label="Effective date" value={data.effective_date}/>
+                <TextInput label="Target" value={data.target_entity}/>
+                <TextInput label="Counter party" value={data.counter_party}/>
+            </SimpleGrid>
         </Stack>
     )
 }
