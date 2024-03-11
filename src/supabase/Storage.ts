@@ -62,3 +62,26 @@ export async function uploadTenantFile(supabase: SupabaseClient, fileName: strin
 }
 
 
+export async function rFindFilenames(supabase: SupabaseClient, bucket: string, path: string, files: string[]) {
+
+    const { data, error } = await supabase.storage.from(bucket).list(path)
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
+    if (data) {
+        for (const file of data) {
+            //if it doesn't have an id then it's a folder
+            if (!file.id) {
+                await rFindFilenames(supabase, bucket, `${path}/${file.name}`, files)
+            } else {
+                files.push(`${path}/${file.name}`)
+            }
+        }
+    }
+
+    return files
+}
+
+

@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       annotation: {
@@ -66,39 +66,51 @@ export interface Database {
           assigned_to: string | null
           completed: boolean
           created_at: string
+          description: string | null
           display_name: string | null
           id: string
           in_scope: boolean
           linified: boolean
           name: string
+          npages: number
           path_tokens: string[]
           project_id: string
+          tag: string | null
+          target: string | null
           tenant_id: string
         }
         Insert: {
           assigned_to?: string | null
           completed?: boolean
           created_at?: string
+          description?: string | null
           display_name?: string | null
           id?: string
           in_scope?: boolean
           linified?: boolean
           name: string
+          npages?: number
           path_tokens?: string[]
           project_id: string
+          tag?: string | null
+          target?: string | null
           tenant_id: string
         }
         Update: {
           assigned_to?: string | null
           completed?: boolean
           created_at?: string
+          description?: string | null
           display_name?: string | null
           id?: string
           in_scope?: boolean
           linified?: boolean
           name?: string
+          npages?: number
           path_tokens?: string[]
           project_id?: string
+          tag?: string | null
+          target?: string | null
           tenant_id?: string
         }
         Relationships: [
@@ -122,6 +134,7 @@ export interface Database {
         Row: {
           contract_id: string
           id: number
+          ntokens: number
           page: number
           page_height: number
           page_width: number
@@ -135,6 +148,7 @@ export interface Database {
         Insert: {
           contract_id: string
           id: number
+          ntokens?: number
           page?: number
           page_height?: number
           page_width?: number
@@ -148,6 +162,7 @@ export interface Database {
         Update: {
           contract_id?: string
           id?: number
+          ntokens?: number
           page?: number
           page_height?: number
           page_width?: number
@@ -204,6 +219,42 @@ export interface Database {
           }
         ]
       }
+      extract_jobs: {
+        Row: {
+          contract_id: string
+          parslet_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contract_id?: string
+          parslet_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contract_id?: string
+          parslet_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_extract_jobs_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contract"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_extract_jobs_extractor_id_fkey"
+            columns: ["parslet_id"]
+            isOneToOne: false
+            referencedRelation: "parslet"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       extracted_information: {
         Row: {
           contract_id: string
@@ -243,6 +294,123 @@ export interface Database {
           }
         ]
       }
+      fi_ei_refs: {
+        Row: {
+          contract_id: string
+          extracted_info_id: string
+          formatter_key: string
+        }
+        Insert: {
+          contract_id?: string
+          extracted_info_id?: string
+          formatter_key?: string
+        }
+        Update: {
+          contract_id?: string
+          extracted_info_id?: string
+          formatter_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fi_ei_refs_formatted_info_fkey"
+            columns: ["contract_id", "formatter_key"]
+            isOneToOne: false
+            referencedRelation: "formatted_info"
+            referencedColumns: ["contract_id", "formatter_key"]
+          },
+          {
+            foreignKeyName: "public_fi_ei_refs_extracted_info_id_fkey"
+            columns: ["extracted_info_id"]
+            isOneToOne: false
+            referencedRelation: "extracted_information"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      formatted_info: {
+        Row: {
+          contract_id: string
+          created_at: string
+          data: Json | null
+          formatter_key: string
+        }
+        Insert: {
+          contract_id?: string
+          created_at?: string
+          data?: Json | null
+          formatter_key?: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          data?: Json | null
+          formatter_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_formats_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contract"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_formats_type_fkey"
+            columns: ["formatter_key"]
+            isOneToOne: false
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
+          }
+        ]
+      }
+      formatter_dependencies: {
+        Row: {
+          extractor_id: string
+          formatter_key: string
+        }
+        Insert: {
+          extractor_id?: string
+          formatter_key: string
+        }
+        Update: {
+          extractor_id?: string
+          formatter_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_formatter_dependencies_extractor_id_fkey"
+            columns: ["extractor_id"]
+            isOneToOne: false
+            referencedRelation: "parslet"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_formatter_dependencies_formatter_key_fkey"
+            columns: ["formatter_key"]
+            isOneToOne: false
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
+          }
+        ]
+      }
+      formatters: {
+        Row: {
+          display_name: string
+          key: string
+          priority: number
+        }
+        Insert: {
+          display_name: string
+          key?: string
+          priority?: number
+        }
+        Update: {
+          display_name?: string
+          key?: string
+          priority?: number
+        }
+        Relationships: []
+      }
       line_ref: {
         Row: {
           contract_id: string
@@ -261,7 +429,7 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "line_ref_contract_id_line_id_fkey"
+            foreignKeyName: "line_ref_contract_line_fkey"
             columns: ["contract_id", "line_id"]
             isOneToOne: false
             referencedRelation: "contract_line"
@@ -283,9 +451,10 @@ export interface Database {
           examples: string[]
           id: string
           instruction: string
+          key: string
           order: number
           schema: string | null
-          tenant_id: string
+          tenant_id: string | null
         }
         Insert: {
           created_at?: string
@@ -293,9 +462,10 @@ export interface Database {
           examples?: string[]
           id?: string
           instruction?: string
+          key?: string
           order?: number
           schema?: string | null
-          tenant_id: string
+          tenant_id?: string | null
         }
         Update: {
           created_at?: string
@@ -303,9 +473,10 @@ export interface Database {
           examples?: string[]
           id?: string
           instruction?: string
+          key?: string
           order?: number
           schema?: string | null
-          tenant_id?: string
+          tenant_id?: string | null
         }
         Relationships: [
           {
@@ -320,38 +491,45 @@ export interface Database {
       profile: {
         Row: {
           avatar_url: string | null
-          color: string | null
+          color: string
           created_at: string
           display_name: string | null
           email: string
           email_confirmed_at: string | null
           id: string
           invited_at: string | null
-          tenant_id: string
+          tenant_id: string | null
         }
         Insert: {
           avatar_url?: string | null
-          color?: string | null
+          color?: string
           created_at?: string
           display_name?: string | null
           email: string
           email_confirmed_at?: string | null
-          id?: string
+          id: string
           invited_at?: string | null
-          tenant_id: string
+          tenant_id?: string | null
         }
         Update: {
           avatar_url?: string | null
-          color?: string | null
+          color?: string
           created_at?: string
           display_name?: string | null
           email?: string
           email_confirmed_at?: string | null
           id?: string
           invited_at?: string | null
-          tenant_id?: string
+          tenant_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "profile_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profile_tenant_id_fkey"
             columns: ["tenant_id"]
@@ -495,6 +673,16 @@ export interface Database {
       is_user_assigned_to_project: {
         Args: {
           project_id_param: string
+        }
+        Returns: boolean
+      }
+      random_color: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      user_tenant_owns_contract: {
+        Args: {
+          contract_id: string
         }
         Returns: boolean
       }

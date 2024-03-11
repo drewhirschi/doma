@@ -1,0 +1,19 @@
+.pathButton:hover {
+  background-color: #f0f0f0;
+  border-radius: 8px;
+}
+
+.pathButton {
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.lastPathSegment {
+  padding: 4px 8px;
+  
+}
+
+.folderText:hover {
+  text-decoration: underline;
+}

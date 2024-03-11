@@ -7,6 +7,7 @@ export default async function Page() {
 
     const supabase = serverClient()
     const projectFetch = await supabase.from("project").select("*, profile(*), contract(completed)")
+    .returns<(Project_SB & {profile:Profile_SB[], contract: {completed:boolean}[]})[]>()
     const userFetch = await supabase.from("profile").select("*")
 
     if (!projectFetch.data || !userFetch.data) {
@@ -17,7 +18,7 @@ export default async function Page() {
     return (
         <Container mt="xl">
             <ProjectGrid
-                projects={projectFetch.data}
+                projects={projectFetch.data }
                 users={userFetch.data}
             />
         </Container>

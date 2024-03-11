@@ -8,6 +8,7 @@ interface Props {
   workerSrc: string;
 
   url: string;
+  pdfBase64: string;
   beforeLoad: JSX.Element;
   errorMessage?: JSX.Element;
   children: (pdfDocument: PDFDocumentProxy) => JSX.Element;
@@ -62,7 +63,7 @@ export class PdfLoader extends Component<Props, State> {
 
   load() {
     const { ownerDocument = document } = this.documentRef.current || {};
-    const { url, cMapUrl, cMapPacked, workerSrc } = this.props;
+    const { pdfBase64, cMapUrl, cMapPacked, workerSrc } = this.props;
     const { pdfDocument: discardedDocument } = this.state;
     this.setState({ pdfDocument: null, error: null });
 
@@ -73,12 +74,14 @@ export class PdfLoader extends Component<Props, State> {
     Promise.resolve()
       .then(() => discardedDocument && discardedDocument.destroy())
       .then(() => {
-        if (!url) {
+        if (!pdfBase64) {
           return;
         }
 
+
         return getDocument({
-          ...this.props,
+          // url,
+          data: atob(pdfBase64),
           ownerDocument,
           cMapUrl,
           cMapPacked,

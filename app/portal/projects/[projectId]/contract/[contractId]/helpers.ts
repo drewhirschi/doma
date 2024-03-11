@@ -60,7 +60,11 @@ export function buildAnnotationFromExtraction(ei: ExtractedInformation_SB & { co
         return {
             position: buildScaledPostionFromContractLines(ei.contract_line),
             id: ei.id,
-            text: ei.data as string,
-            parslet_id: ei.parslet_id
+            content: {
+
+                text: ei.data as string,
+            },
+            parslet_id: ei.parslet_id,
+            author: "agent"
         }
 }

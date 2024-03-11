@@ -1,4 +1,3 @@
-import { ScaledPosition } from "react-pdf-highlighter"
 import type {Database} from "./supabase"
 
 declare global {
@@ -9,6 +8,13 @@ declare global {
     type Profile_SB = Database['public']['Tables']['profile']['Row']
     type Parslet_SB = Database['public']['Tables']['parslet']['Row']
     type ExtractedInformation_SB = Database['public']['Tables']['extracted_information']['Row']
-    
+    type ContractNote_SB = Database['public']['Tables']['contract_note']['Row']
+    type ExtractJob_SB = Database['public']['Tables']['extract_jobs']['Row']
+    type FormattedInfo_SB = Database['public']['Tables']['formatted_info']['Row']
+    type Formatter_SB = Database['public']['Tables']['formatters']['Row']
+
+    interface Window {
+        fbq: any;
+    }
     
 }

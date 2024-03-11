@@ -1,57 +1,102 @@
 "use client"
 
-import { ActionIcon, Button, Center, Flex, Group, HoverCard, Menu, Paper, ScrollArea, Skeleton, Stack, Text, Textarea, rem } from "@mantine/core";
-import {
-    AreaHighlight,
-    Highlight,
-    PdfHighlighter,
-    PdfLoader,
-    Popup,
-    Position,
-    ScaledPosition,
-    Tip
-} from "@/components/PdfViewer";
-import { IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconSettings, IconTrash } from "@tabler/icons-react";
+import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+
+import * as actions from "./ContractReviewer.actions";
+
+import { ActionIcon, Box, Button, Center, CopyButton, Divider, Drawer, Flex, Group, HoverCard, Menu, Paper, ScrollArea, SegmentedControl, Skeleton, Stack, Text, TextInput, Textarea, ThemeIcon, Title, Tooltip, UnstyledButton, rem } from "@mantine/core";
+import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTrash, IconUser } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useEffect, useOptimistic, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { BackButton } from "@/components/BackButton";
+import { ContractDetailsDrawer } from './DetailsDrawer';
+import { FormatterSwitch } from '@/components/FormattedInfoViews/FormattedInfoSwitch';
+import { FormatterWithInfoAndEi } from '@/types/complex';
+import JobInfo from './JobInfo';
 import { Json } from "@/types/supabase-generated";
+import MetadataItem from '@/components/MetadataItem';
 import { browserClient } from "@/supabase/BrowerClients";
 import { buildAnnotationFromExtraction } from "./helpers";
-import { reviewContractAction } from "./ContractReviewer.actions";
+import dynamic from 'next/dynamic'
+import { notifications } from '@mantine/notifications';
+import { sleep } from '@/utils';
 import { useDebouncedCallback } from 'use-debounce';
-import { useRouter } from "next/navigation";
-import { v4 as uuidv4 } from 'uuid';
+import { useDisclosure } from '@mantine/hooks';
 
-type ParsletWithNotes = Parslet_SB & { contract_note: { content: string }[] }
+const PDFView = dynamic(() => import('./pdf'), { ssr: false })
+
+
+export type ParsletWithNotes = Parslet_SB & { contract_note: { content: string }[] }
 interface Props {
     pdfUrl: string
+    pdfBase64: string
     projectId: string
-    contract: Contract_SB & { annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
+    contract: Contract_SB & {
+        extract_jobs: ExtractJob_SB[],
+        annotation: Annotation_SB[],
+        extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[]
+    }
     parslets: ParsletWithNotes[]
+    formatters: FormatterWithInfoAndEi[]
     annotations: Annotation_SB[]
 }
 
-
-
-
+export interface IContractHighlight {
+    position: any;
+    id: string;
+    content: {
+        text?: string;
+        image?: string;
+    };
+    parslet_id: string;
+    author: string;
+}
 
 export function ContractReviewer(props: Props) {
 
-    const { pdfUrl, contract, annotations, projectId } = props
+    const { pdfUrl, contract, annotations, projectId, parslets, formatters } = props
 
+    const [leftSegment, setLeftSegment] = useState('formatters');
+    const [opened, { open: openDetailsDrawer, close }] = useDisclosure(false);
 
 
     const panelRef = useRef<ImperativePanelHandle>(null);
 
-    const [parslets, setParslets] = useState<(ParsletWithNotes & { lastUsed?: Date })[]>(props.parslets)
+
     const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
-    const [highlights, setHighlights] = useState<{ position: any, id: string, text: string, parslet_id: string }[]>([...annotations, ...extractionsHighlights])
+
+    const [highlights, setHighlights] = useState<IContractHighlight[]>([...annotations.map(a => ({ ...a, author: "user", content: { text: a.text } })), ...extractionsHighlights,])
     const [savingNotes, setSavingNotes] = useState(false)
     const supabase = browserClient()
 
+    // const editors = parslets.reduce((acc: { [key: string]: Editor }, parslet: ParsletWithNotes) => {
+    //     const editor = useEditor({
+    //         extensions: [StarterKit,
+    //             Hyperlink.configure({
+    //                 hyperlinkOnPaste: false,
+    //                 openOnClick: true,
+    //                 modals: {
+    //                     previewHyperlink: linkPreviewToolTip,
+    //                     setHyperlink: setHyperlinkModal,
+    //                 },
+    //             }),
+    //         ],
+    //         content: parslet.contract_note[0]?.content ?? "",
+    //     });
+    //     if (editor) {
+    //         acc[parslet.id] = editor
+    //     }
+    //     return acc
+    // }, {})
+
+
+
+
     const router = useRouter()
+    const pathname = usePathname()
 
     const debouncedSaveNote = useDebouncedCallback(async (value: string, parsletId: string) => {
 
@@ -64,77 +109,16 @@ export function ContractReviewer(props: Props) {
         })
         setSavingNotes(false)
 
-    }, 1200)
-
-    let scrollViewerTo = (highlight: any) => { }
-
-    function scrollToHighlightFromHash() {
-        const highlight = highlights.find((h) => h.id == window.location.hash.slice(1));
-
-        if (highlight) {
-            console.log("scrolling to", highlight)
-            scrollViewerTo(highlight);
-        }
-    };
-
-    useEffect(() => {
-        window.addEventListener(
-            "hashchange",
-            scrollToHighlightFromHash,
-            false
-        );
-
-        return () => {
-            window.removeEventListener(
-                "hashchange",
-                scrollToHighlightFromHash,
-                false
-            );
-        };
-    }, [])
+    }, 600)
 
 
+    async function handleAddHighlight(highlight: { position: any, text: string, parslet_id: string }) {
+        const { position, text, parslet_id: parsletId } = highlight
+        const id: string = window.crypto.randomUUID()
 
 
-
-    function HighlightPopup({ id, closeMenu, annotations }: { id: string, closeMenu: () => void, annotations: any[] }) {
-
-        const annotation = annotations.find((a) => a.id === id)
-        return (
-            <Paper shadow="lg" w={200} withBorder
-                p={"xs"}>
-                <Text fw={700} mb={"sm"}>{parslets.find(p => p.id == annotation?.parslet_id)?.display_name}</Text>
-                {/* <Text>
-                    {annotation?.text ?? ""}
-                </Text> */}
-                <Button
-                    fullWidth
-                    variant="subtle"
-                    color="red"
-                    rightSection={(<IconTrash />)}
-                    onClick={async () => {
-                        setHighlights(highlights.filter((h) => h.id !== id))
-                        closeMenu()
-                        await supabase.from("extracted_information").delete().eq("id", id)
-                        await supabase.from("annotation").delete().eq("id", id)
-
-                    }}
-                >
-                    Delete
-                </Button>
-
-            </Paper>
-        )
-
-    }
-
-
-
-    async function addHighlight(parsletId: string, text: string | undefined, position: ScaledPosition,) {
-
-        const id: string = uuidv4()
-
-        setHighlights([{ text: text ?? "", position, id, parslet_id: parsletId }, ...highlights])
+        setHighlights([{ content: { text: text ?? "" }, position, id, parslet_id: parsletId, author: "user" }, ...highlights])
+        // editors[parsletId].commands.insertContent(`<br/> <a href="${pathname}#${id}">${text}</a>`, { parseOptions: {} })
         const { data, error } = await supabase.from("annotation").insert({
             id,
             parslet_id: parsletId,
@@ -150,243 +134,250 @@ export function ContractReviewer(props: Props) {
     }
 
 
-    const resetHash = () => {
-        document.location.hash = "";
-    };
 
-    const pdfHighlights = highlights.map((h) => ({ position: h.position! as ScaledPosition, content: { text: h.text }, id: h.id! }))
+    const backParams = new URLSearchParams()
+    backParams.set('path', contract.path_tokens.slice(0, -1).join("/") ?? "")
+    const backUrl = `/portal/projects/${projectId}/tabs/overview?${backParams.toString()}`
+
     return (
+        <>
 
-        <PanelGroup direction="horizontal">
-            <Panel defaultSize={40} minSize={20} style={{ height: "100dvh" }}>
-                <Stack justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
-                    <Group mt={"md"}>
-                        <BackButton href={`/portal/projects/${projectId}/tabs`} style={{ alignSelf: "flex-start" }} />
-                        <Menu shadow="md" width={200}>
-                            <Menu.Target>
-                                <ActionIcon variant="subtle" c={"gray"}>
-                                    <IconDotsVertical />
-                                </ActionIcon>
-                            </Menu.Target>
+            <PanelGroup direction="horizontal">
+                <Panel defaultSize={40} minSize={20} style={{ height: "100dvh" }}>
+                    <Stack justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
+                        <Group mt={"md"}>
+                            <BackButton href={backUrl} style={{ alignSelf: "flex-start" }} />
+                            {savingNotes ? <IconRefresh color="gray" size={20} /> : <IconCloudCheck color="gray" size={20} />}
 
-                            <Menu.Dropdown>
-                                <Menu.Label>Application</Menu.Label>
-                                <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
-                                    onClick={() => {
-                                        reviewContractAction(contract.id)
-                                    }}
+                            <Menu shadow="md" width={200}>
+                                <Menu.Target>
+                                    <ActionIcon variant="subtle" c={"gray"}>
+                                        <IconDotsVertical />
+                                    </ActionIcon>
+                                </Menu.Target>
+
+                                <Menu.Dropdown>
+                                    <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={async () => {
+                                            await actions.completeContractAction(contract.id)
+                                        }}
+                                        >
+                                        Mark completed
+                                    </Menu.Item>
+                                    <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={async () => {
+                                            try {
+
+                                                await actions.describeAndTag(contract.id, projectId, contract.target)
+                                            } catch (error) {
+                                                console.error(error)
+                                                notifications.show({
+                                                    title: "Error",
+                                                    message: "There was an error. Please try again later.",
+                                                    color: "red"
+                                                })
+                                            }
+                                        }}
+                                        >
+                                        Run description
+                                    </Menu.Item>
+                                    
+                                        <Menu.Label>AI</Menu.Label>
+                                    <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={() => {
+                                            actions.reviewContractAction(contract.id)
+                                        }}
+                                        >
+                                        Run extraciton
+                                    </Menu.Item>
+                                    <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={() => {
+                                            actions.deleteContractExtractedInfo(contract.id, projectId)
+                                        }}
+                                        >
+                                        Clear extracted info
+                                    </Menu.Item>
+
+                                    <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={() => {
+                                            actions.runFormatters(contract.id, projectId, contract.target)
+                                        }}
+                                        >
+                                        Run formatters
+                                    </Menu.Item>
+                                </Menu.Dropdown>
+                            </Menu>
+                        </Group>
+                        <HoverCard openDelay={500}>
+                            <HoverCard.Target>
+                                <UnstyledButton
+                                    onClick={() => openDetailsDrawer()}
                                 >
-                                    Run AI
-                                </Menu.Item>
-
-                            </Menu.Dropdown>
-                        </Menu>
-                    </Group>
-                    <ScrollArea
-                        offsetScrollbars
-                        h={"100%"}
-                    >
-
-                        {parslets.map((parslet) => (
-                            <div key={parslet.id}>
-                                <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
-                                <Textarea
-                                    defaultValue={parslet.contract_note[0]?.content ?? ""}
-                                    autosize
-                                    minRows={2}
-                                    onChange={(event) => debouncedSaveNote(event.currentTarget.value, parslet.id)}
-                                />
-                                <ul>
-                                    {highlights
-                                        .filter((highlight) => highlight.parslet_id === parslet.id)
-                                        .map((highlight) => (
-                                            <Flex direction={"row"} wrap={"nowrap"} gap={"sm"} key={highlight.id}>
-                                                <ActionIcon
-                                                    onClick={() => {
-
-                                                        // router.replace("#" + highlight.id)
-                                                        scrollViewerTo(highlight)
-
-                                                    }}
-                                                >
-
-                                                    <IconListSearch style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                                    <Title order={3}>{contract.display_name}</Title>
+                                </UnstyledButton>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown>
+                                <Group>
+                                    <Text>
+                                        <MetadataItem header="Contract ID" text={contract.id} />
+                                    </Text>
+                                    <CopyButton value={contract.id} timeout={2000}>
+                                        {({ copied, copy }) => (
+                                            <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
+                                                <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
+                                                    {copied ? (
+                                                        <IconCheck style={{ width: rem(16) }} />
+                                                    ) : (
+                                                        <IconCopy style={{ width: rem(16) }} />
+                                                    )}
                                                 </ActionIcon>
-                                                <ActionIcon variant="outline" color="red"
-                                                    onClick={async () => {
-                                                        setHighlights(highlights.filter((h) => h.id !== highlight.id))
-                                                        await supabase.from("annotation").delete().eq("id", highlight.id!)
-                                                        await supabase.from("extracted_information").delete().eq("id", highlight.id!)
-                                                    }}
-                                                >
-                                                    <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                                                </ActionIcon>
-                                                <HoverCard shadow="md" openDelay={500}>
+                                            </Tooltip>
+                                        )}
+                                    </CopyButton>
+                                </Group>
+                            </HoverCard.Dropdown>
+                        </HoverCard>
+                        <SegmentedControl
+                            value={leftSegment}
+                            onChange={setLeftSegment}
+                            data={[
+                                { label: 'Formatters', value: 'formatters' },
+                                { label: 'Extractors', value: 'extractors' },
+                            ]} />
+                        <ScrollArea
+                            offsetScrollbars
+                            h={"100%"}
+                        >
 
-                                                    <HoverCard.Target>
-                                                        <Text key={highlight.parslet_id + parslet.id}>{highlight.text}</Text>
-                                                    </HoverCard.Target>
-                                                    <HoverCard.Dropdown>
-                                                        {/* {
-                                                        JSON.stringify(highlight.position)
-                                                    } */}
-                                                        Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"}
-                                                        {/* Page: {highlight.position.pageNumber} */}
-                                                    </HoverCard.Dropdown>
-                                                </HoverCard>
-                                            </Flex>
-                                        ))}
+                            {leftSegment == 'extractors' ? parslets.map((parslet) => (
+                                <div key={parslet.id}>
+                                    {/* <NoteEditor parslet={parslet} editor={editors[parslet.id]} /> */}
+                                    <Group justify='space-between'>
 
-                                </ul>
-                            </div>
-                        ))}
-                    </ScrollArea>
-                </Stack>
+                                        <Stack gap={0}>
 
-            </Panel>
-            <PanelResizeHandle style={{ width: "16px" }}>
-                <Center h={'100dvh'}>
-                    <IconGripVertical />
-                </Center>
-            </PanelResizeHandle>
-            <Panel minSize={30} defaultSize={60} ref={panelRef} >
-                <div
-                    style={{
-                        height: "100dvh",
-                        position: "relative",
-                    }}
-                >
+                                            <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
+                                            <JobInfo job={contract.extract_jobs.find(j => j.parslet_id == parslet.id)} />
+                                        </Stack>
+                                        <ActionIcon color='gray' size={"sm"} onClick={() => {
+                                            actions.reExtractTopic(contract.id, parslet.id)
+                                        }}>
+                                            <IconRepeat style={{ width: rem(12) }} />
 
-                    <PdfLoader
+                                        </ActionIcon>
+                                    </Group>
 
-                        url={pdfUrl}
-                        beforeLoad={
-                            <div>
+                                    <Textarea
+                                        defaultValue={parslet.contract_note[0]?.content ?? ""}
+                                        autosize
+                                        minRows={2}
+                                        onChange={(event) => debouncedSaveNote(event.currentTarget.value, parslet.id)}
+                                    />
+                                    <Stack gap={"xs"} mt="sm">
+                                        {highlights
+                                            .filter((highlight) => highlight.parslet_id === parslet.id)
+                                            .map((highlight) => (
+                                                <Flex direction={"row"} wrap={"nowrap"} gap={"xs"} key={highlight.id}>
+                                                    <ActionIcon
+                                                        onClick={async () => {
 
-                                <Skeleton p="sm" height={8} radius="xl" mt={"xl"} />
-                                {Array.from({ length: 25 }).map((_, i) => (
-                                    <Skeleton key={i} p="sm" height={8} radius="xl" mt={"lg"} />
-                                ))}
-
-                            </div>
-                        }
-                    >
-                        {(pdfDocument) => {
-
-                            pdfDocument.getPage(1).then((page) => {
-                                console.log("first page view port", { width: page.getViewport().viewBox[2], height: page.getViewport().viewBox[3] })
-                            })
-                            return (
-
-                                <PdfHighlighter
-                                    pdfDocument={pdfDocument}
-                                    highlights={pdfHighlights}
-                                    enableAreaSelection={(event) => event.altKey}
-                                    onScrollChange={resetHash}
-                                    pdfScaleValue="page-width"
-                                    // pdfScaleValue="1"
-                                    scrollRef={(scrollTo) => {
-                                        scrollViewerTo = scrollTo;
-                                        // scrollToHighlightFromHash();
-                                    }}
-                                    onSelectionFinished={(
-                                        position,
-                                        content,
-                                        hideTipAndSelection,
-                                        transformSelection
-                                    ) => {
-                                        console.log("scaled hightlight", position)
-
-                                        return (
+                                                            router.replace(pathname.split("#")[0] + "#" + highlight.id)
+                                                            await sleep(100)
+                                                            window.dispatchEvent(new HashChangeEvent('hashchange'));
 
 
-                                            <Paper shadow="md" w={200} p={"md"}>
+                                                        }}
+                                                    >
 
+                                                        <IconListSearch style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                                                    </ActionIcon>
+                                                    <ActionIcon variant="outline" color="red"
+                                                        onClick={async () => {
+                                                            setHighlights(highlights.filter((h) => h.id !== highlight.id))
+                                                            await supabase.from("annotation").delete().eq("id", highlight.id!)
+                                                            await supabase.from("extracted_information").delete().eq("id", highlight.id!)
+                                                        }}
+                                                    >
+                                                        <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                                                    </ActionIcon>
+                                                    <HoverCard shadow="md" openDelay={500}>
 
+                                                        <HoverCard.Target>
+                                                            <Flex dir='row' wrap={"nowrap"} align="baseline">
+                                                                {highlight.author == "user" && (<ThemeIcon size={"xs"} color="teal">
+                                                                    <IconUser style={{ width: '80%', height: '80%' }} />
+                                                                </ThemeIcon>)}
+                                                                <Text key={highlight.parslet_id + parslet.id}>{highlight.content.text}</Text>
+                                                            </Flex>
+                                                        </HoverCard.Target>
+                                                        <HoverCard.Dropdown>
+                                                            <MetadataItem header="y1" text={highlight.position.boundingRect.y1} />
+                                                            <MetadataItem header="y2" text={highlight.position.boundingRect.y2} />
+                                                            {/* Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"} */}
+                                                            <br />
+                                                            EI id: {highlight.id}
+                                                        </HoverCard.Dropdown>
+                                                    </HoverCard>
+                                                </Flex>
+                                            ))}
 
-                                                <Stack gap={"sm"}>
-                                                    <Text c="dimmed" size="sm">Recent</Text>
-                                                    <Button.Group orientation="vertical">
+                                    </Stack>
+                                </div>
+                            ))
+                                : <Stack gap={"lg"}>
+                                   
+                                    {formatters
+                                        // .filter(f => f.formatted_info.length > 0)
+                                        .map(f => (
+                                            <FormatterSwitch formatter={f} key={f.key} singleRun={() => {
+                                                actions.runFormatter(f.key, contract.id, projectId, contract.target)
 
-                                                        {[...parslets].sort((a, b) => (b.lastUsed?.getTime() ?? 0) - (a.lastUsed?.getTime() ?? 0))
-                                                            .map((parslet) => (
-                                                                <Button
-                                                                    size="sm"
-                                                                    c="black"
-                                                                    color="gray"
-                                                                    variant="subtle"
-                                                                    key={parslet.id}
-                                                                    onClick={() => {
-                                                                        addHighlight(parslet.id, content.text, position);
-                                                                        hideTipAndSelection(); setParslets(parslets.map((p) => {
-                                                                            if (p.id === parslet.id) {
-                                                                                return { ...p, lastUsed: new Date() };
-                                                                            }
-                                                                            return p;
-                                                                        }))
+                                            }} />
+                                        ))
+                                    }
+                                    {/* <Divider/>
+                                {formatters.filter(f => f.formatted_info.length == 0).map(f => (
+                                    <Text>{f.display_name}</Text>
+                                ))
+                                } */}
+                                </Stack>}
+                        </ScrollArea>
+                    </Stack>
 
-
-                                                                    }}
-                                                                    leftSection={<IconMessageCircle style={{ width: rem(14), height: rem(14) }} />}
-                                                                >
-
-                                                                    {parslet.display_name}
-                                                                </Button>
-                                                            ))}
-                                                    </Button.Group>
-
-                                                </Stack>
-
-
-
-
-
-                                            </Paper>
-                                        )
-                                    }}
-                                    highlightTransform={(
-                                        highlight,
-                                        index,
-                                        setTip,
-                                        hideTip,
-                                        viewportToScaled,
-                                        screenshot,
-                                        isScrolledTo
-                                    ) => {
-
-
-                                        return (
-                                            <Popup
-                                                popupContent={<HighlightPopup id={highlight.id} closeMenu={hideTip} annotations={highlights} />}
-                                                onMouseOver={(popupContent) =>
-                                                    setTip(highlight, (highlight) => popupContent)
-                                                }
-                                                onMouseOut={hideTip}
-
-                                                key={index}
-
-                                            >
-                                                <Highlight
-                                                    isScrolledTo={isScrolledTo}
-                                                    position={highlight.position}
-                                                    onClick={() => { }}
-                                                    comment={{ emoji: "", text: "" }}
-                                                />
-                                            </Popup>
-                                        );
-                                    }}
-                                />
-                            )
+                </Panel>
+                <PanelResizeHandle style={{ width: "16px" }}>
+                    <Center h={'100dvh'}>
+                        <IconGripVertical />
+                    </Center>
+                </PanelResizeHandle>
+                <Panel minSize={30} defaultSize={60} ref={panelRef} >
+                    <PDFView
+                        pdfUrl={pdfUrl}
+                        pdfBase64={props.pdfBase64}
+                        contract={contract}
+                        parslets={parslets}
+                        highlights={highlights}
+                        handleAddHighlight={handleAddHighlight}
+                        handleRemoveHighlight={(id) => {
+                            setHighlights(highlights.filter((h) => h.id !== id))
                         }}
-                    </PdfLoader>
-                </div>
+                    />
 
-            </Panel>
+                    {/* <p>
+                    page {1}
+                </p>
+                <Document file={{data:props.pdfBase64}}>
+                    <Page pageNumber={1} />
+                </Document> */}
+
+                </Panel>
 
 
-        </PanelGroup >
-
-
+            </PanelGroup >
+            <Drawer position="right" offset={8} radius="md" opened={opened} onClose={close} size={"lg"} title="Contract details">
+                <ContractDetailsDrawer contract={contract} />
+            </Drawer>
+        </>
 
     )
 

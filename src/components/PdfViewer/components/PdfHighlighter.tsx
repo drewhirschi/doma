@@ -379,7 +379,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     const pageViewport = this.viewer.getPageView(pageNumber - 1).viewport;
 
-    const scrollMargin = 10;
+    const scrollMargin = 60;
 
     this.viewer.scrollPageIntoView({
       pageNumber,

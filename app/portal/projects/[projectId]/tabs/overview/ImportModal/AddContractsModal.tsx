@@ -71,7 +71,7 @@ export function AddContractsModalButton({ project }: Props) {
         setActiveStep(WizSteps.UNZIP);
 
         try {
-            await unzipFile(`projects/${project.id}/${files[0]?.name}`);
+            await unzipFile(`projects/${project.id}/${files[0]?.name}`, project.id);
             setUploadStatus(WizStatus.UNZIP_SUCCESS);
         } catch (error) {
             setUploadStatus(WizStatus.UNZIPPING_ERROR);
@@ -134,7 +134,7 @@ export function AddContractsModalButton({ project }: Props) {
                                     onDrop={(files) => setFiles(files)}
                                     onReject={(files) => console.log('rejected files', files)}
                                     maxSize={5 * 1024 ** 3}
-                                    accept={['application/zip']}
+                                    accept={['application/zip', "application/x-zip-compressed"]}
                                     multiple={false}
                                 >
                                     <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>
@@ -248,18 +248,18 @@ export function AddContractsModalButton({ project }: Props) {
 
                         <Button type="submit" disabled={files?.length < 1}
                             loading={uploadStatus === WizStatus.UPLOADING}
-                            onClick={uploadAndUnpackFiles}
-                        >Upload</Button>
+                            onClick={uploadStatus === WizStatus.IDLE ? uploadAndUnpackFiles : closeModal}
+                        >{uploadStatus === WizStatus.IDLE ? "Upload" : "Close"}</Button>
 
 
-                        <Button variant="default" onClick={prevStep}>Back</Button>
-                        <Button onClick={nextStep}>Next step</Button>
+                        {/* <Button variant="default" onClick={prevStep}>Back</Button>
+                        <Button onClick={nextStep}>Next step</Button> */}
                     </Group>
 
                 </Stack>
             </Modal>
 
-            <Button onClick={openModal}>Add</Button>
+            <Button onClick={openModal}>Import</Button>
         </>
     );
 }

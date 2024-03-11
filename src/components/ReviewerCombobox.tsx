@@ -1,33 +1,30 @@
-import { Avatar, Combobox, Group, Input, InputBase, Text, useCombobox } from "@mantine/core";
+import { Avatar, Box, Combobox, Flex, Group, Input, InputBase, Text, useCombobox } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 import { browserClient } from "@/supabase/BrowerClients";
 import { getInitials } from "@/ux/helper";
-import { updateContractAssignment } from "./RevierCombobox.action";
 
 function SelectOption({ avatar, color, initials, name }: { avatar: string, color: string, initials: string, name: string, }) {
     return (
-        <Group gap="sm" >
+        <Flex wrap={"nowrap"} gap="sm" >
             {initials === "?" ? (
                 <Avatar size={32} src={null}></Avatar>
             ) : (
                 <Avatar size={32} color={color!}>{getInitials(name!)}</Avatar>
             )}
-            <div>
-                <Text fz="sm" fw={500} truncate="end">
-                    {name}
-                </Text>
-            </div>
-        </Group>
+            <Text fz="sm" fw={500} truncate="end">
+                {name}
+            </Text>
+        </Flex>
     );
 }
 
-export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers }: { projectMembers: any[], selectedProfileId: string, contractId: string }) {
+export function ReviewerCombobox({ selectedProfileId, projectMembers, handleUpdate }: { projectMembers: any[], handleUpdate: (memberId: string) => void, selectedProfileId?: string | null }) {
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
 
-    const [selectedMemberId, setSelectedMemberId] = useState<string | null>(selectedProfileId);
+    const [selectedMemberId, setSelectedMemberId] = useState<string>(selectedProfileId || "");
 
     const supabase = browserClient()
 
@@ -60,7 +57,8 @@ export function ReviewerCombobox({ selectedProfileId, contractId, projectMembers
             onOptionSubmit={async (val) => {
                 setSelectedMemberId(val)
                 combobox.closeDropdown();
-                updateContractAssignment(val, contractId)
+                // updateContractAssignment(val, contractId)
+                handleUpdate(val)
             }}
         >
             <Combobox.Target>
