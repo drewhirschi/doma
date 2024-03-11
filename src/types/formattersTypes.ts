@@ -1,5 +1,9 @@
+import { FormattedInfoWithEiId } from "./complex";
 import { z } from "zod";
 
+export interface FormatterViewProps {
+    info: FormattedInfoWithEiId | undefined
+}
 export interface IFormatResponse {
     summary: string;
 }

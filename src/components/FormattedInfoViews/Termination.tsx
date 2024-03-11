@@ -1,14 +1,10 @@
 import { Anchor, Badge, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core"
+import { FormatterViewProps, TerminationFormatResponse } from "@/types/formattersTypes"
 
 import { FormattedInfoWithEiId } from "@/types/complex"
 import MetadataItem from "../MetadataItem"
-import { TerminationFormatResponse } from "@/types/formattersTypes"
 
-interface Props {
-    info?: FormattedInfoWithEiId
-}
-
-export function FormattedTermination({ info }: Props) {
+export function FormattedTermination({ info }: FormatterViewProps) {
     const data: TerminationFormatResponse | undefined = info?.data as unknown as TerminationFormatResponse | undefined
    
 

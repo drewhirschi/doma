@@ -22,10 +22,10 @@ export function FormatterSwitch({ formatter, singleRun }: { formatter: Formatter
                 return (<FormattedAgreementInfo
                     info={formatter.formatted_info[0]}
                 />);
-            case FormatterKeys.ipOwnership:
-                return (<FormattedIpOwnership
-                    info={formatter.formatted_info[0]}
-                />);
+            // case FormatterKeys.ipOwnership:
+            //     return (<FormattedIpOwnership
+            //         info={formatter.formatted_info[0]}
+            //     />);
             case FormatterKeys.term:
                 return <FormattedTerm
                     info={formatter.formatted_info[0]} />
@@ -33,19 +33,19 @@ export function FormatterSwitch({ formatter, singleRun }: { formatter: Formatter
                 return <FormattedTermination
                     info={formatter.formatted_info[0]}
                 />;
-            case FormatterKeys.license:
+            // case FormatterKeys.license:
             case FormatterKeys.sourceCode:
                 return <FormattedSourceCode
                     info={formatter.formatted_info[0]}
                 />;
-            case FormatterKeys.paymentTerms:
-                return <FormattedPaymentTerms
-                    info={formatter.formatted_info[0]}
-                />;
+            // case FormatterKeys.paymentTerms:
+            //     return <FormattedPaymentTerms
+            //         info={formatter.formatted_info[0]}
+            //     />;
 
-            case FormatterKeys.nonSolicit:
-            case FormatterKeys.nonCompete:
-            case FormatterKeys.nonHire:
+            // case FormatterKeys.nonSolicit:
+            // case FormatterKeys.nonCompete:
+            // case FormatterKeys.nonHire:
             case FormatterKeys.trojans:
                 return <FormattedTrojans
                     info={formatter.formatted_info[0]}

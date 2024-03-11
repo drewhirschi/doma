@@ -1,14 +1,10 @@
 import { Anchor, Badge, Group, Stack, Text, Title } from "@mantine/core"
-import { IFormatResponse, PaymentTermsFormatResponse } from "@/types/formattersTypes"
+import { FormatterViewProps, IFormatResponse, PaymentTermsFormatResponse } from "@/types/formattersTypes"
 
 import { FormattedInfoWithEiId } from "@/types/complex"
 import MetadataItem from "../MetadataItem"
 
-interface Props {
-    info: FormattedInfoWithEiId
-}
-
-export function FormattedTrojans({ info }: Props) {
+export function FormattedTrojans({ info }: FormatterViewProps) {
 
     
 
