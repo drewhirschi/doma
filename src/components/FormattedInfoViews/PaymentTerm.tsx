@@ -12,7 +12,7 @@ export function FormattedPaymentTerms({ info }: Props) {
 
    
 
-    const data = info.data as unknown as PaymentTermsFormatResponse | undefined
+    const data = info?.data as unknown as PaymentTermsFormatResponse | undefined
 
     const extractedInfoRefs = info?.extracted_information?.map(ei => ei.id) ?? []
 
