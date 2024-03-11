@@ -13,14 +13,14 @@ interface Props {
 export function FormattedTerm({ info }: Props) {
   
 
-    const data: TermFormatResponse = info?.data as unknown as TermFormatResponse
+    const data = info?.data as unknown as TermFormatResponse | undefined
 
   
 
 
     return (
         <Stack gap={4}>
-            <Text size="sm">{data.summary}</Text>
+            <Text size="sm">{data?.summary}</Text>
             <EIReferenceLinks ids={info?.extracted_information?.map(ei => ei.id) ?? []} />
 
 
