@@ -1,3 +1,5 @@
+import {z} from 'zod';
+
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => {
         setTimeout(resolve, ms);
@@ -60,4 +62,45 @@ export function rok<T>(ok: T): IResp<T> {
 
 export function rerm<TError = any>(message: string, anyErrorData: TError, errorCode?:string): IResp<any, TError> {
     return { error: { message, ...anyErrorData } }
+}
+
+
+function zodFieldToXML(key: string, field: any, indentLevel: number = 2): string {
+    let xmlStr = '';
+    let indent = ' '.repeat(indentLevel);
+    let fieldType = field._def.typeName;
+    let description = field.description;
+
+    if (fieldType === 'ZodObject') {
+        xmlStr += `${indent}<object name="${key}" ${description ? `description=${description}` : ""}>\n`;
+        Object.keys(field.shape).forEach((innerKey) => {
+            xmlStr += zodFieldToXML(innerKey, field.shape[innerKey], indentLevel + 2);
+        });
+        xmlStr += `${indent}</object>\n`;
+
+    } else if (fieldType == 'ZodNullable') {
+        const innerType = field._def.innerType._def.typeName;
+        xmlStr = `${indent}<field name="${key}" type="${innerType}" nullable ${description ? `description="${description}"`: ""}/>\n`;
+    } else if (fieldType == 'ZodArray') {
+        const innerType = field._def.type._def.typeName;
+        xmlStr = `${indent}<array name="${key}" type="${innerType}" ${description ? `description="${description}"`: ""}/>\n`;
+
+    } else {
+        xmlStr = `${indent}<field name="${key}" type="${fieldType}" ${description ? `description="${description}"`: ""}/>\n`;
+    }
+
+    return xmlStr;
+}
+
+export function zodObjectToXML(schema: z.ZodTypeAny): string {
+    //@ts-ignore
+    const fields = schema.shape;
+    let xmlStr = `<schema>\n`;
+
+    Object.keys(fields).forEach((key) => {
+        xmlStr += zodFieldToXML(key, fields[key]);
+    });
+
+    xmlStr += '</schema>';
+    return xmlStr;
 }
