@@ -36,7 +36,7 @@ export function FormattedTermination({ info, handleSave }: FormatterViewProps) {
         })}>
 
             <Stack gap={"lg"}>
-                {form.values?.items.map((d, i) => (
+                {form.values?.items?.map((d, i) => (
                     <Box key={"termination" + i.toString()} p="sm"
                     // style={{ border: "solid 1px" }}
                     >
@@ -50,7 +50,7 @@ export function FormattedTermination({ info, handleSave }: FormatterViewProps) {
                                 <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
                             </ActionIcon>
                         </Group>
-                        <Textarea name="summary"
+                        <Textarea autosize name="summary"
                             {...form.getInputProps(`items.${i}.summary`)}
                         />
                         <Select label="Type"

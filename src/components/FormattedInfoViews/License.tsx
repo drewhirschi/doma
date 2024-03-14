@@ -36,7 +36,7 @@ export function FormattedLicense({ info, handleSave }: FormatterViewProps) {
         })}>
 
             <Stack gap={"lg"}>
-                {form.values?.items.map((d, i) => (
+                {form.values?.items?.map((d, i) => (
                     <Box key={"license" + i.toString()} p="sm"
                     // style={{ border: "solid 1px" }}
                     >
@@ -59,9 +59,9 @@ export function FormattedLicense({ info, handleSave }: FormatterViewProps) {
                             {...form.getInputProps(`items.${i}.exclusive`, { type: "checkbox" })}
                         />
                         <SimpleGrid cols={2} spacing="md">
-                            <MultiSelect label="Type"
+                            <Select label="Type"
                                 data={Object.keys(LicenseSuffix)}
-                                {...form.getInputProps(`items.${i}.suffix`)}
+                                {...form.getInputProps(`items.${i}.type`)}
                             />
                             <Select label="Direction"
                                 data={Object.keys(LicenseDirection)}

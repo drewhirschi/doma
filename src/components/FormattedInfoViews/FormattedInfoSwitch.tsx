@@ -2,7 +2,9 @@ import { ActionIcon, Anchor, Group, Stack, Text, Title } from "@mantine/core";
 import { AgreementInfoFormatResponse, IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes";
 import { Icon3dRotate, IconPrompt } from "@tabler/icons-react";
 
+import { ErrorBoundary } from "react-error-boundary";
 import { FormattedAgreementInfo } from "./AgreementInfo";
+import { FormattedAssignability } from "./Assignability";
 import { FormattedGeneric } from "./Generic";
 import { FormattedIpOwnership } from "./IpOwnership"
 import { FormattedLicense } from "./License";
@@ -64,10 +66,15 @@ export function FormatterSwitch({ formatter, singleRun, handleSave }: { formatte
                     handleSave={handleSave}
                     info={formatter.formatted_info[0]}
                 />;
-            case FormatterKeys.effectsOfTransaction:
-            case FormatterKeys.mostFavoredNation:
-            case FormatterKeys.governingLaw:
+            // case FormatterKeys.effectsOfTransaction:
+            // case FormatterKeys.mostFavoredNation:
             case FormatterKeys.assignability:
+                return <FormattedAssignability
+                    handleSave={handleSave}
+                    info={formatter.formatted_info[0]}
+
+                />
+            case FormatterKeys.governingLaw:
             default:
                 return <FormattedGeneric
                     handleSave={handleSave}
@@ -89,7 +96,9 @@ export function FormatterSwitch({ formatter, singleRun, handleSave }: { formatte
                     <IconPrompt size={16} />
                 </ActionIcon>
             </Group>
-            {body()}
+            <ErrorBoundary fallback={<div>Something went wrong</div>}>
+                {body()}
+            </ErrorBoundary>
         </Stack>
 
     )

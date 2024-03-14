@@ -22,11 +22,14 @@ export const pixel = {
 export function objectToXml(obj: any, rootElement: string = 'root'): string {
     let xml = `<${rootElement}>`;
 
-    for (const [key, value] of Object.entries(obj)) {
-        if (typeof value === 'object' && value !== null) {
-            xml += objectToXml(value, key); // Recursive call for nested objects
-        } else {
-            xml += `<${key}>${value}</${key}>`;
+    if (obj) {
+
+        for (const [key, value] of Object.entries(obj)) {
+            if (typeof value === 'object' && value !== null) {
+                xml += objectToXml(value, key);
+            } else {
+                xml += `<${key}>${value}</${key}>`;
+            }
         }
     }
 
@@ -95,7 +98,7 @@ function zodFieldToXML(key: string, field: any, indentLevel: number = 2): string
     return xmlStr;
 }
 
-export function zodSchemaToXML(schema: z.ZodTypeAny): string {
+export function zodObjectToXML(schema: z.ZodTypeAny): string {
     let xmlStr = `<schema>\n`;
 
     //@ts-ignore

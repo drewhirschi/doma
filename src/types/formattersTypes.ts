@@ -19,8 +19,8 @@ export const AgreementInfoShape = z.object({
     title: z.string(),
     counter_party: z.string().nullable(),
     target_entity: z.string(),
-    effective_date: z.date().nullable()
-        .describe("What date did or will the agreement go into effect?"),
+    effective_date: z.coerce.date().nullable()
+        .describe("What date did or will the agreement go into effect? Put the date in UTC."),
     summary: z.string({ required_error: "Summary is required" })
         .describe(`Summarize in the following format by replacing the brackets with the specified information if provided: "[Title] between [Counterparty] and [Target Entity] dated [Effective Date]". If there are amendments, addendums, or statements of work add the following wording with the brackets filled in with the applicable information: ", as amended [list amendment dates], including [Statement(s) of Work/Addend(um)/(a)] dated [list dates] [(as amended [list dates])]`),
 });
@@ -94,11 +94,11 @@ export const LicenseShape = z.object({
         INBOUND: License is directed to the Target Entity.
         OUTBOUND: License is given by the Target Entity.
         CROSS_LICENSE: License is both given by and directed to the Target Entity.`),
-        suffix: z.nativeEnum(LicenseSuffix).nullable()
+        type: z.nativeEnum(LicenseSuffix).nullable()
             .describe(`Add these suffixes to the provided categories if applicable: 
         "PATENT" for a Patent license. 
         "TRADEMARK" for a Trademark license. 
-        "SOURCE CODE LICENSE" for a Source Code license, not an object code license. 
+        "SOURCE_CODE_LICENSE" for a Source Code license, not an object code license. 
         "EXCLUSIVE" if a license is Exclusive. 
         "FEEDBACK" if the license is for using feedback, comments, or suggestions and not for software.`),
         exclusive: z.boolean().nullable(),
@@ -174,14 +174,24 @@ export const TrojanShape = z.object({
 });
 export type TrojanFormatResponse = z.infer<typeof TrojanShape>;
 
-enum AssignabilitySuffix {
+
+export const GoverningLawShape = z.object({
+    summary: z.string().describe("From the governing law sections from the contract provide the jurisdiction that governs. Possibly it will have multiple jurisdictions depending on a condition such as location of the Target or Entity. List the jurisdictions and the conditions for each."),
+});
+
+export type GoverningLawFormatResponse = z.infer<typeof GoverningLawShape>;
+
+
+export enum AssignabilitySuffix {
     EXPRESS = "EXPRESS",
     NOTICE = "NOTICE",
     FOREIGN = "FOREIGN",
     SQL = "SQL",
 }
 
-enum AssignabilityTag {
+
+
+export enum AssignabilityType {
     AFFILIATE = "AFFILIATE",
     AFREE = "AFREE",
     ACOMP = "ACOMP",
@@ -195,9 +205,23 @@ enum AssignabilityTag {
 
 
 export const AssignabilityShape = z.object({
-    summary: z.string({}),
-    tag: z.nativeEnum(AssignabilityTag),
-    suffix: z.array(z.nativeEnum(AssignabilitySuffix)),
+    summary: z.string().describe("Summaraize the assignability clauses."),
+    type: z.nativeEnum(AssignabilityType).nullable()
+        .describe(`AFFILIATE: Agreement is expressly assignable by Target to an affiliate.
+AFREE: Agreement expressly assignable by Target without restriction by its terms (no mention of a change of control).
+ACOMP: Agreement expressly assignable by Target without restriction by its terms (no mention of a change of control), except that Target may not assign to a competitor of the Counterparty.
+COC: Agreement is not assignable by Target, including in connection with a change of control either because the agreement prohibits assignment in the context of a change of control or it is implied.
+COC (IMPLIED): Agreement is not assignable by either party, but the Counterparty may assign in connection with a merger.
+CFREE: Agreement is freely assignable by Target but only in the context of a change of control.
+CTERM: the counterparty may terminate in connection with a change of control involving Target.
+CCOMP: Agreement expressly restricts Target's right to assign to a competitor in the context of a change of control (e.g., either party may assign this agreement in connection with a merger that does not involve a competitor of the other party).
+NA: Agreement is not assignable by Target with no mention of a change of control. 
+SILENT: Agreement is silent on Target's right to assign (including where the agreement includes express language governing Counterparty's right to assign). `),
+    suffix: z.array(z.nativeEnum(AssignabilitySuffix))
+    .describe(`"EXPRESS" = The Agreement expressly provides that a change of control causes or gives rise to an assignment by Target (e.g., a merger or acquisition will be “deemed to cause” an assignment of the agreement). 
+    "NOTICE" = A permitted assignment requires written notice.
+    "FOREIGN" = Agreement is silent on Target's right to assign in the context of a change of control and governed by non-US law (i.e. NA or SILENT + foreign law).
+    "SQL" = Agreement is silent or prohibits assignment in connection with a change of control, includes an inbound IP license that is not expressly transferable, and is not governed by Delaware law (e.g., COC, NA, or SILENT plus an inbound IP assignment that is not expressly transferable and is governed by New York law).`),
 });
 export type AssignabilityFormatResponse = z.infer<typeof AssignabilityShape>;
 

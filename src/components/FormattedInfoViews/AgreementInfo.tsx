@@ -43,12 +43,13 @@ export function FormattedAgreementInfo({ info, handleSave }: FormatterViewProps)
 
 
             <Stack gap={4}>
-                <Textarea {...form.getInputProps('summary')}/>
+                <Textarea autosize {...form.getInputProps('summary')}/>
 
                 <SimpleGrid cols={2} spacing="md">
                     <TextInput label="Title" {...form.getInputProps('title')}/>
                     <DatePickerInput
                     firstDayOfWeek={0}
+                    
                         label="Effective date"
                         placeholder="No date"
                         clearable

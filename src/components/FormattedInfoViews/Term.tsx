@@ -53,7 +53,7 @@ export function FormattedTerm({ info, handleSave }: FormatterViewProps) {
         })}>
 
             <Stack gap={4}>
-                <Textarea {...form.getInputProps('summary')} />
+                <Textarea autosize {...form.getInputProps('summary')} />
                 <EIReferenceLinks ids={info?.extracted_information?.map(ei => ei.id) ?? []} />
 
 

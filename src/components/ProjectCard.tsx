@@ -48,9 +48,9 @@ export default function ProjectCard({ project }: Props) {
     return <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Card.Section>
             <Image
-                src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-8.png"
+                src="/images/resized_project_image.jpeg"
                 height={160}
-                alt="Norway"
+                alt="An ai image of a gavil"
             />
         </Card.Section>
 
