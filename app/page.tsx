@@ -5,6 +5,7 @@ import LoginButton from "./LoginButton";
 import { ReactNode } from "react";
 import { WaitlistSignup } from "./WaitlistSignup";
 import axios from "axios";
+import classes from './page.module.css';
 import { pixel } from "@/utils";
 import { redirect } from "next/navigation";
 
@@ -30,31 +31,41 @@ export default function HomePage() {
         <Center h={832}>
           <Stack align="center" maw={700}>
 
-            <Title style={{ textAlign: 'center' }} size={64}>An AI Legal Assitant for M&A</Title>
-            <Text style={{ textAlign: 'center' }} size="xl">Parsl helps along every step of the way from document intake to purchase agreement drafting.</Text>
-            {/* <Group justify="center"> */}
-              <WaitlistSignup
-                buttonText="Join the waitlist"
-                inputWidth={360}
-              />
-              {/* <Button variant="outline" href={"#schedule"} component={Link}>
-                Learn more
-              </Button> */}
-            {/* </Group> */}
+            <Title style={{ textAlign: 'center' }} size={64}>An AI-Powered Legal M&A Platform</Title>
+            <Text style={{ textAlign: 'center' }} size="xl">Parsl automates processes all the way from document intake to purchase agreement drafting.</Text>
+            <WaitlistSignup
+              buttonText="Join the Waitlist"
+              inputWidth={360}
+            />
+
           </Stack>
         </Center>
       </Container>
 
-      {/* <Box mb={"xl"} py={60} bg={"dark.7"} mih={500} c={"white"}>
+      <Box py={60} bg={"#1382B2"} mih={500} c={"white"}>
         <Container>
+          <Stack gap={"sm"} align="center">
+
+            <Title >Achieve better outcomes, faster.</Title>
+            <Text size="xl">Parsl gets the small stuff out of the way so that you can focus on adding strategic value.</Text>
+            <iframe src="https://dnjsol-my.sharepoint.com/personal/ezra_parslai_com/_layouts/15/embed.aspx?UniqueId=5c3e33f0-1ab8-4328-8da5-72fdbcc2daed&embed=%7B%22ust%22%3Atrue%2C%22hv%22%3A%22CopyEmbedCode%22%7D&referrer=StreamWebApp&referrerScenario=EmbedDialog.Create" width="640" height="360" frameBorder="0" scrolling="no" allowFullScreen title="Parsl Demo 3.14.2024.mp4"></iframe>
+          </Stack>
+        </Container>
+      </Box>
+
+
+      <Box mb={"xl"} py={60} bg={"dark.7"} mih={500} c={"white"}>
+        <Container className={classes.responsiveContainer}>
 
           <SimpleGrid cols={{ base: 1, sm: 2 }}>
 
 
             <Image src="/images/annica_and_patrick.png" alt="frustrated lawyers" h={300} fit="contain" />
-            <Center h={300} >
-              <Text maw={400} size="xl">Do you ever feel like Annica and Patrick who were just assigned a new batch of contracts to review from scratch?</Text>
-            </Center>
+            <Stack >
+              <Title order={3}>Comprehensive due diligence report, done in hours not weeks</Title>
+
+              <Text maw={400} size="xl">Parsl revolutionizes turnaround times by allowing you to deliver actionable issue analysis to your clients within 24 hours, leaving clients impressed with your agility. Verify the auto generated due diligence report results by referencing the original contract language with a click of a mouse. </Text>
+            </Stack>
 
 
             <Image fit="contain" src="/images/sarah_celebrating.png" alt="celebrating lawyer" h={300} />
@@ -63,7 +74,7 @@ export default function HomePage() {
             </Center>
           </SimpleGrid>
         </Container>
-      </Box> */}
+      </Box>
 
       {/* <Stack align="center" my={80}>
 

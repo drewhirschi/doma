@@ -54,7 +54,7 @@ export function FormattedAssignability({ info, handleSave }: FormatterViewProps)
                     />
                     <MultiSelect
                         label="Tags"
-                        placeholder="N/A"
+                        // placeholder="N/A"
                         {...form.getInputProps('suffix')}
                         clearable
                         data={Object.keys(AssignabilitySuffix)}

@@ -10,7 +10,9 @@ import { useState } from "react";
 export function FormattedTermination({ info, handleSave }: FormatterViewProps) {
     const data = info?.data as unknown as TerminationFormatResponse | undefined
     const form = useForm({
-        initialValues: data,
+        initialValues: {
+            items: data?.items ?? []
+        },
     });
     const [loading, setLoading] = useState(false);
 
