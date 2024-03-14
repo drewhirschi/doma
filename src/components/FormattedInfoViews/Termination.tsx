@@ -37,7 +37,7 @@ export function FormattedTermination({ info, handleSave }: FormatterViewProps) {
 
             <Stack gap={"lg"}>
                 {form.values?.items.map((d, i) => (
-                    <Box p="sm"
+                    <Box key={"termination" + i.toString()} p="sm"
                     // style={{ border: "solid 1px" }}
                     >
                         <Group justify="space-between">

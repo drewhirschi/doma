@@ -37,7 +37,7 @@ export function FormattedLicense({ info, handleSave }: FormatterViewProps) {
 
             <Stack gap={"lg"}>
                 {form.values?.items.map((d, i) => (
-                    <Box p="sm"
+                    <Box key={"license" + i.toString()} p="sm"
                     // style={{ border: "solid 1px" }}
                     >
                         <Group justify="space-between">

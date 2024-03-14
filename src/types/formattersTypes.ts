@@ -157,9 +157,12 @@ export enum PaymentTermsDirection {
 
 export const PaymentTermsShape = z.object({
     items: z.object({
-        summary: z.string(),
-        direction: z.nativeEnum(PaymentTermsDirection),
-        royalty: z.boolean(),
+        summary: z.string()
+            .describe(`Summarize and label the payment obligations from the payment term sections provided below. `),
+        direction: z.nativeEnum(PaymentTermsDirection)
+            .describe(`"INBOUND: " if it is directed to the Target Entity or "OUTBOUND"if it is given by the Target Entity. `),
+        royalty: z.boolean()
+            .describe(`True if the payment is a royalty. Otherwise false.`),
     }).array(),
 });
 

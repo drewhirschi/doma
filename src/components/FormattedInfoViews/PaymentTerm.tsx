@@ -43,7 +43,7 @@ export function FormattedPaymentTerms({ info, handleSave }: FormatterViewProps) 
         })}>
             <Stack>
                 {form.values?.items?.map((d, i) => (
-                    <Box p="sm"
+                    <Box key={"payment" + i.toString()} p="sm"
                     // style={{ border: "solid 1px" }}
                     >
                         <Group justify="space-between">
