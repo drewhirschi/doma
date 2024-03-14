@@ -1,14 +1,10 @@
 import { Anchor, Badge, Group, Stack, Text, Title } from "@mantine/core"
-import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes"
+import { FormatterViewProps, IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes"
 
 import { EIReferenceLinks } from "./EIReferences"
 import { FormattedInfoWithEiId } from "@/types/complex"
 
-interface Props {
-    info: FormattedInfoWithEiId
-}
-
-export function FormattedGeneric({ info }: Props) {
+export function FormattedGeneric({ info }: FormatterViewProps) {
 
     
 

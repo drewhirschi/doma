@@ -1,5 +1,5 @@
-import { ActionIcon, Anchor, Badge, Box, Button, Group, Select, Stack, Text, Textarea, Title } from "@mantine/core"
-import { FormatterViewProps, TerminationFormatResponse, TerminationTag } from "@/types/formattersTypes"
+import { ActionIcon, Anchor, Badge, Box, Button, Checkbox, Group, MultiSelect, Select, SimpleGrid, Stack, Text, Textarea, Title } from "@mantine/core"
+import { FormatterViewProps, LicenseDirection, LicenseFormatResponse, LicenseSuffix, TerminationFormatResponse, TerminationTag } from "@/types/formattersTypes"
 
 import { IconTrash } from "@tabler/icons-react";
 import MetadataItem from "../MetadataItem"
@@ -7,8 +7,8 @@ import { notifications } from "@mantine/notifications";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 
-export function FormattedTermination({ info, handleSave }: FormatterViewProps) {
-    const data = info?.data as unknown as TerminationFormatResponse | undefined
+export function FormattedLicense({ info, handleSave }: FormatterViewProps) {
+    const data = info?.data as unknown as LicenseFormatResponse | undefined
     const form = useForm({
         initialValues: data,
     });
@@ -53,13 +53,25 @@ export function FormattedTermination({ info, handleSave }: FormatterViewProps) {
                         <Textarea name="summary"
                             {...form.getInputProps(`items.${i}.summary`)}
                         />
-                        <Select label="Type"
-                            {...form.getInputProps(`items.${i}.tag`)}
-                            data={[
-                                { value: TerminationTag.CONVENIENCE, label: "Convenience" },
-                                { value: TerminationTag.CHANGE_OF_CONTROL_TERMINATION, label: "Change of control termination" },
-                                { value: TerminationTag.TERMINATED, label: "Terminated" }
-                            ]} />
+                        <Checkbox
+                        mt={"sm"}
+                        label="Exclusive"
+                            {...form.getInputProps(`items.${i}.exclusive`, { type: "checkbox" })}
+                        />
+                        <SimpleGrid cols={2} spacing="md">
+                            <MultiSelect label="Type"
+                                data={Object.keys(LicenseSuffix)}
+                                {...form.getInputProps(`items.${i}.suffix`)}
+                            />
+                            <Select label="Direction"
+                                data={Object.keys(LicenseDirection)}
+                                {...form.getInputProps(`items.${i}.direction`)}
+                            />
+                            {/* <Select label="Exclusive"
+                                data={['Yes', "No"]}
+                                {...form.getInputProps(`items.${i}.exclusive`)}
+                            /> */}
+                        </SimpleGrid>
                     </Box>
 
                 )) ?? []}

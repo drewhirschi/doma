@@ -1,14 +1,14 @@
-import { Anchor, Badge, Group, Text } from "@mantine/core"
-import { IPOwnershipFormatResponse, IpOwnershipType } from "@/types/formattersTypes"
+import { ActionIcon, Anchor, Badge, Box, Button, Checkbox, Group, Select, SimpleGrid, Stack, Text, Textarea, Title } from "@mantine/core"
+import { FormatterViewProps, IPOwnershipFormatResponse, IpOwnershipType } from "@/types/formattersTypes"
 
+import { EIReferenceLinks } from "./EIReferences"
 import { FormattedInfoWithEiId } from "@/types/complex"
+import { IconTrash } from "@tabler/icons-react"
+import { notifications } from "@mantine/notifications"
+import { useForm } from "@mantine/form"
+import { useState } from "react"
 
-interface Props {
-    info?: FormattedInfoWithEiId
-
-}
-
-export function FormattedIpOwnership({ info }: Props) {
+export function FormattedIpOwnership({ info, handleSave }: FormatterViewProps) {
 
 
 
@@ -17,36 +17,85 @@ export function FormattedIpOwnership({ info }: Props) {
 
 
     const extractedInfoRefs = info?.extracted_information?.map(ei => ei.id) ?? []
+    const form = useForm({
+        initialValues: {
+            items: data?.items ?? []
+        },
+    });
+    const [loading, setLoading] = useState(false);
 
-    function typeBadge(type: IpOwnershipType | undefined) {
-        if (!type)
-            return <Badge color="gray">Unknown type</Badge>
-            
-        switch (type) {
-            case IpOwnershipType.INBOUND:
-                return <Badge color="blue">Inbound</Badge>
-            case IpOwnershipType.OUTBOUND:
-                return <Badge color="green">Outbound</Badge>
-            case IpOwnershipType.JOINT:
-                return <Badge color="orange">Joint ownership</Badge>
-
-            default:
-                return <Badge color="gray">Unknown type</Badge>
-        }
-    }
 
     return (
-        <div>
-            <Text>{data?.summary}</Text>
-            <Group>
-                {typeBadge(data?.type)}
-                {data?.not_present_assignment && <Badge>+Not present assignment</Badge>}
-                {data?.feedback && <Badge>+Feedback</Badge>}
-            </Group>
-            {extractedInfoRefs.map((id, index) => (
-                <Anchor key={id} href={`#${id}`}>[{index + 1}]</Anchor>
-            ))}
+        <form onSubmit={form.onSubmit(async (values) => {
+            setLoading(true)
+            try {
+                await handleSave(values)
+                form.resetDirty()
+            } catch (e) {
+                console.error(e)
+                notifications.show({
+                    title: "Failed to save",
+                    message: "An error occurred while saving the data",
+                    color: "red"
+                })
+            }
+            setLoading(false)
+        })}>
+            <Stack>
+                {form.values?.items?.map((d, i) => (
+                    <Box p="sm"
+                    // style={{ border: "solid 1px" }}
+                    >
+                        <Group justify="space-between">
+                            <Title order={4}>Item {i + 1}</Title>
+                            <ActionIcon variant="subtle" color="gray" onClick={() => {
 
-        </div>
+                                form.removeListItem("items", i)
+                            }}>
+
+                                <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                            </ActionIcon>
+                        </Group>
+                        <Textarea
+                            // label="Summary"
+                            {...form.getInputProps(`items.${i}.summary`)}
+                        />
+                        <SimpleGrid cols={2} spacing="md">
+                            <Select
+                                label="Direction"
+                                {...form.getInputProps(`items.${i}.direction`)}
+                                data={[{ label: "Inbound", value: IpOwnershipType.INBOUND }, { label: "Outbound", value: IpOwnershipType.OUTBOUND }, { label: "Joint ownership", value: IpOwnershipType.JOINT }]}
+                            />
+
+
+                        </SimpleGrid>
+                        <SimpleGrid cols={2} spacing="md" mt={"sm"}>
+
+                            <Checkbox
+                                label="Not present assignment"
+                                {...form.getInputProps(`items.${i}.not_present_assignment`, { type: "checkbox" })}
+                            />
+                            <Checkbox
+                                label="Feedback"
+                                {...form.getInputProps(`items.${i}.feedback`, { type: "checkbox" })}
+                            />
+
+                        </SimpleGrid>
+                    </Box>
+
+                )) ?? []}
+
+                <EIReferenceLinks ids={extractedInfoRefs} />
+
+                <Group justify="flex-end">
+
+                    <Button size="xs" variant="default" onClick={() => {
+                        form.insertListItem('items', { summary: "", tag: null });
+
+                    }}>Add</Button>
+                    <Button loading={loading} size="xs" type="submit" disabled={!form.isDirty() || loading} color="blue">Save</Button>
+                </Group>
+            </Stack>
+        </form>
     )
 }

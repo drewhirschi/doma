@@ -1,4 +1,4 @@
-import {z} from 'zod';
+import { z } from 'zod';
 
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => {
@@ -36,7 +36,7 @@ export function objectToXml(obj: any, rootElement: string = 'root'): string {
 
 export function isEmptyObject(obj: object): boolean {
     return Object.keys(obj).length === 0;
-  }
+}
 
 
 export interface IRespError {
@@ -60,7 +60,7 @@ export function rok<T>(ok: T): IResp<T> {
     return { ok }
 }
 
-export function rerm<TError = any>(message: string, anyErrorData: TError, errorCode?:string): IResp<any, TError> {
+export function rerm<TError = any>(message: string, anyErrorData: TError, errorCode?: string): IResp<any, TError> {
     return { error: { message, ...anyErrorData } }
 }
 
@@ -80,23 +80,26 @@ function zodFieldToXML(key: string, field: any, indentLevel: number = 2): string
 
     } else if (fieldType == 'ZodNullable') {
         const innerType = field._def.innerType._def.typeName;
-        xmlStr = `${indent}<field name="${key}" type="${innerType}" nullable ${description ? `description="${description}"`: ""}/>\n`;
+        xmlStr = `${indent}<field name="${key}" type="${innerType}" nullable ${description ? `description="${description}"` : ""}/>\n`;
     } else if (fieldType == 'ZodArray') {
-        const innerType = field._def.type._def.typeName;
-        xmlStr = `${indent}<array name="${key}" type="${innerType}" ${description ? `description="${description}"`: ""}/>\n`;
+        const innerShape = field._def.type;
+        xmlStr = `${indent}<array name="${key}" ${description ? `description="${description}"` : ""}>\n`;
+
+        xmlStr += zodFieldToXML('arrayItem', innerShape, indentLevel + 2);
+        xmlStr += `${indent}</array>\n`;
 
     } else {
-        xmlStr = `${indent}<field name="${key}" type="${fieldType}" ${description ? `description="${description}"`: ""}/>\n`;
+        xmlStr = `${indent}<field name="${key}" type="${fieldType}" ${description ? `description="${description}"` : ""}/>\n`;
     }
 
     return xmlStr;
 }
 
-export function zodObjectToXML(schema: z.ZodTypeAny): string {
-    //@ts-ignore
-    const fields = schema.shape;
+export function zodSchemaToXML(schema: z.ZodTypeAny): string {
     let xmlStr = `<schema>\n`;
 
+    //@ts-ignore
+    const fields = schema.shape;
     Object.keys(fields).forEach((key) => {
         xmlStr += zodFieldToXML(key, fields[key]);
     });

@@ -58,7 +58,7 @@ export async function runFormatters(contractId: string, projectId: string, targe
 
     target ??= data?.target.join(", ")
 
-     runAllFormatters(supabase, contractId, target ?? "No target found")
+    runAllFormatters(supabase, contractId, target ?? "No target found")
     // revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
 

@@ -1,18 +1,18 @@
 import { AgreementInfoFormatResponse, AgreementInfoShape, AssignabilityFormatResponse, AssignabilityShape, GenericFormatResponse, GenericFormatResponseShape, IPOwnershipFormatResponse, IPOwnershipShape, LicenseFormatResponse, LicenseShape, PaymentTermsFormatResponse, PaymentTermsShape, SourceCodeFormatResponse, SourceCodeFormatResponseShape, TermFormatResponse, TermShape, TerminationFormatResponse, TerminationShape, TrojanShape } from "@/types/formattersTypes";
 import { Database, Json } from "@/types/supabase-generated";
-import { IResp, ISuccessResp, isEmptyObject, objectToXml, rerm, rok } from "@/utils";
-import { UnknownKeysParam, ZodObject, ZodTypeAny } from "zod";
+import { IResp, ISuccessResp, isEmptyObject, objectToXml, rerm, rok, zodSchemaToXML } from "@/utils";
+import { UnknownKeysParam, ZodAny, ZodObject, ZodTypeAny } from "zod";
 
 import { FormatterKeys } from "@/types/enums";
 import OpenAI from "openai";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { z } from "zod"
 
-interface IFormatter {
+interface IFormatter<T> {
     instruction: string;
-    responseShape: ZodObject<any>
+    responseShape: ZodTypeAny
     key: string;
-    name: string;
-    run: (oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string) => Promise<IResp<GenericFormatResponse | null>>
+    run: (oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string) => Promise<IResp<T | null>>
 }
 
 
@@ -104,7 +104,7 @@ export async function runSingleFormatter(sb: SupabaseClient<Database>, formatter
             break;
 
         default:
-            throw new Error("Unknown formatter key")
+            res = rerm("Formatter not found", { formatter_key })
     }
     if (res.error) {
         console.error(`There was an error running formatter [${formatter_key}] on contract [${contractId}]`, res.error)
@@ -129,7 +129,7 @@ export async function runAllFormatters(sb: SupabaseClient<Database>, contractId:
     return results
 }
 
-export async function generateAgentResponse<T>(oaiClient: OpenAI, sysMessage: string, input: string, responseShape: ZodObject<any>): Promise<IResp<T | null>> {
+export async function generateAgentResponse<T>(oaiClient: OpenAI, sysMessage: string, input: string, responseShape: ZodTypeAny): Promise<IResp<T | null>> {
 
 
     const res = await oaiClient.chat.completions.create({
@@ -153,9 +153,10 @@ export async function generateAgentResponse<T>(oaiClient: OpenAI, sysMessage: st
         const json = JSON.parse(res.choices[0].message.content);
         const parse = responseShape.safeParse(json)
         if (!parse.success) {
+            console.error(parse.error)
             return rerm("Incorrect shape", parse.error, "bad_shape")
         }
-        return rok(json as T | null);
+        return rok(json as z.infer<typeof responseShape> | null);
     } catch (error) {
         return rerm("Error parsing formatter response", { error })
     }
@@ -177,13 +178,13 @@ function getSystemMessage(targetEntity: string, formatterInstruction: string) {
 
     return `You are a meticulous M&A lawyer tasked with condensing and formatting key contract information pulled from the Target Entity's contracts.
     The Target Entity is "${targetEntity}". Counterparty is any party that is not a Target Entity. If only one party is named and the other party is given a generic title such as "you", "contracting party", "licensor" then that generic title should be assumed as the Target Entity.
-Do not provide explanations, just respond with JSON according to the schema.` + formatterInstruction
+Do not provide explanations, just respond with JSON according to the schema.\n` + formatterInstruction
 }
 
 
-async function runFormatter<T>(formatter: IFormatter, oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<T | null>> {
+async function runFormatter<T>(formatter: IFormatter<T>, oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<T | null>> {
 
-    console.log(`Running ${formatter.name} Formatter`)
+    console.log(`Running ${formatter.key} Formatter`)
 
     const formatterq = await sb.from("formatters")
         .select("*, parslet(id)")
@@ -200,7 +201,7 @@ async function runFormatter<T>(formatter: IFormatter, oaiClient: OpenAI, sb: Sup
 
     //if there isn't any extracted info there is nothing to format.
     if (eiq.data.length === 0) {
-        console.log(`Skipping ${formatter.name} formatter, there are no related extractions.`)
+        console.log(`Skipping ${formatter.key} formatter, there are no related extractions.`)
         return rok(null)
     }
 
@@ -209,14 +210,14 @@ async function runFormatter<T>(formatter: IFormatter, oaiClient: OpenAI, sb: Sup
     // console.log(getSystemMessage("Target Entity", this.instruction))
     // console.log(input)
 
-    const res = await generateAgentResponse<T>(oaiClient, getSystemMessage(targetEntityName, formatter.instruction), input, formatter.responseShape)
+    const res = await generateAgentResponse(oaiClient, getSystemMessage(targetEntityName, formatter.instruction), input, formatter.responseShape)
 
     if (res.error) {
         return res
     }
 
     if (res.ok == null) {
-        console.warn(`No data from ${formatter.name} formatter`)
+        console.warn(`No data from ${formatter.key} formatter`)
         return rok(null)
     }
 
@@ -233,78 +234,78 @@ async function runFormatter<T>(formatter: IFormatter, oaiClient: OpenAI, sb: Sup
     const refUpsert = await sb.from("fi_ei_refs").upsert(eiq.data.map((ei) => ({ formatter_key: formatter.key, extracted_info_id: ei.id, contract_id: contractId })))
 
 
-    console.log(`Finished ${formatter.name} formatter`)
+    console.log(`Finished ${formatter.key} formatter`)
     return res as IResp<T>
 
 }
 
 
-class AgreementInfo implements IFormatter {
-    instruction: string = `
-        <schema>
-    
-        <property>
-        <key>title</key>
-        <instruction></instruction>
-        </property>
 
-        <property>
-        <key>counter_party</key>
-        <instruction></instruction>
-        </property>
-        
-        <property>
-        <key>target_entity</key>
-        <instruction></instruction>
-        </property>
-        
-        <property>
-        <key>effective_date</key>
-        <instruction></instruction>
-        </property>
-        
-        <property>
-        <key>summary</key>
-        <instruction>Summarize in the following format by replacing the brackets with the specified information if provided: "[Title] between [Counterparty] and [Target Entity] dated [Effective Date]". If there are amendments, addendums, or statements of work add the following wording with the brackets filled in with the applicable information: ", as amended [list amendment dates], including [Statement(s) of Work/Addend(um)/(a)] dated [list dates] [(as amended [list dates])]</instruction>
-        </property>
-        </schema>
-     
-    `;
+
+class AgreementInfo implements IFormatter<AgreementInfoFormatResponse> {
+    instruction = zodSchemaToXML(AgreementInfoShape)
     key: string = FormatterKeys.agreementInfo
     name: string = "Agreement Info"
     responseShape = AgreementInfoShape
-    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<AgreementInfoFormatResponse | null>> {
+    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string) {
 
         return await runFormatter<AgreementInfoFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
     }
 }
 
-class IpOwnership implements IFormatter {
-    instruction: string = `
-        <schema>
-    
-        <property>
-        <key>summary</key>
-        <instruction>Paraphrase the assignments that are being granted from the IP ownership specific sections from the contract by providing the assignment language and what material that is being assigned along with the scope.</instruction>
-        </property>
 
-        <property>
-        <key>type</key>
-        <instruction>Chose one option, "INBOUND" if it is directed to the Target Entity, "OUTBOUND" if it is given by the Target Entity, or "JOINT_OWNERSHIP" if it is owned by both the Target Entity and the counterparty.</instruction>
-        </property>
-        
-        <property>
-        <key>not_present_assignment</key>
-        <instruction>true if the language states a future promise rather than present assignment for example “shall own” or “agrees to assign”. Otherwise false.</instruction>
-        </property>
-        
-        <property>
-        <key>feedback</key>
-        <instruction>true if the assignment is for feedback, comments, or suggestions only. Otherwise false.</instruction>
-        </property>
-        </schema>
-     
-    `;
+
+
+
+class Term implements IFormatter<TermFormatResponse>{
+    instruction: string = zodSchemaToXML(TermShape) + `Todays date is ${new Date().toISOString()}`;
+    key: string = FormatterKeys.term
+
+    responseShape = TermShape
+    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<TermFormatResponse | null>> {
+
+        return await runFormatter<TermFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
+    }
+}
+class Termination implements IFormatter<TerminationFormatResponse> {
+   
+    instruction: string = zodSchemaToXML(TerminationShape)
+    key: string = FormatterKeys.termination
+    responseShape = TerminationShape
+    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<TerminationFormatResponse | null>> {
+
+        return await runFormatter<TerminationFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
+    }
+}
+class License implements IFormatter<LicenseFormatResponse> {
+    
+    instruction: string = zodSchemaToXML(LicenseShape)
+    key: string = FormatterKeys.license
+    name: string = "License"
+    responseShape = LicenseShape
+    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<LicenseFormatResponse | null>> {
+
+        return await runFormatter<LicenseFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
+    }
+}
+
+class SourceCode implements IFormatter<SourceCodeFormatResponse> {
+
+   
+
+    instruction: string = zodSchemaToXML(SourceCodeFormatResponseShape)
+
+    key: string = FormatterKeys.sourceCode
+    name: string = "Source Code"
+    responseShape = SourceCodeFormatResponseShape
+    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<SourceCodeFormatResponse | null>> {
+
+        return await runFormatter<SourceCodeFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
+    }
+}
+
+class IpOwnership implements IFormatter<IPOwnershipFormatResponse> {
+    instruction: string = zodSchemaToXML(IPOwnershipShape)
     key: string = FormatterKeys.ipOwnership
     name: string = "IP Ownership"
     responseShape = IPOwnershipShape
@@ -315,101 +316,6 @@ class IpOwnership implements IFormatter {
 
 
 
-}
-
-
-
-class Term implements IFormatter {
-    instruction: string = `
-        <schema>        
-        <property>
-        <key>summary</key>
-        <instruction>Summarize the term of the agreement along with any renewals from the contract's term sections provided below. If there is no term or renewals put “Silent”. If there is a date, reformat it to be month/day/year. If a contract states an end date or a time frame without automatic renewals that when applied to the date in the Agreement Info is past today's date then label it with “EXPIRED”</instruction>
-        </property>
-        
-        <property>
-        <key>silent</key>
-        <instruction>true or false</instruction>
-        </property>
-        
-        <property>
-        <key>expired</key>
-        <instruction>true or false</instruction>
-        </property>
-        </schema>
-
-        Todays date is ${new Date().toISOString()}
-     
-    `;
-    key: string = FormatterKeys.term
-    name: string = "Term"
-
-    responseShape = TermShape
-    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<TermFormatResponse | null>> {
-
-        return await runFormatter<TermFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
-    }
-}
-class Termination implements IFormatter {
-    data: {
-        [Property in keyof TerminationFormatResponse]: string;
-    } = {
-            summary: `Summarize the termination rights of the Counterparty from the contract's termination sections provided below. If a mentioned contract is said to be terminated then put “TERMINATED” followed by that contract's details. If applicable, label the termination right: “CHANGE OF CONTROL TERMINATION: ” if the counterparty can terminate the contract if they are acquired, merge with another company, or change of control. “CONVENIENCE: “ if the counterparty can terminate the contract at any time for any reason or out of convenience.
-            Examples: 
-            CONVENIENCE: Grubhub may terminate these Terms or suspend or terminate your access to the Site, at any time for any reason or no reason, with or without notice"
-            CHANGE OF CONTROL TERMINATION: Either party may terminate this agreement if the other party is acquired by another entity
-            TERMINATED: License Agreement dated September 5, 2020`,
-            tag: `choose one of the following: "CONVENIENCE", "CHANGE_OF_CONTROL_TERMINATION", "TERMINATED"`
-        }
-    instruction: string = buildInstruction(this.data)
-    key: string = FormatterKeys.termination
-    name: string = "Termination"
-    responseShape = TerminationShape
-    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<TerminationFormatResponse | null>> {
-
-        return await runFormatter<TerminationFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
-    }
-}
-class License implements IFormatter {
-    data: {
-        [Property in keyof LicenseFormatResponse]: string;
-    } = {
-            summary: `Paraphrase the licenses that are being granted from the license specific sections from the contract by providing the material that is being licensed, the scope, and the rights granted. Label them with "INBOUND: " if it is directed to the Target Entity, "OUTBOUND: " if it is given by the Target Entity, or "CROSS LICENSE: " if it is both given by and directed to the Target Entity. 
-            Add these suffixes to the provided categories if applicable: "PATENT" for a Patent license. "TRADEMARK" for a Trademark license. "SOURCE CODE LICENSE" for a Source Code license, not an object code license. "EXCLUSIVE" if a license is Exclusive. "FEEDBACK" if the license is for using feedback, comments, or suggestions and not for software.`,
-            direction: `choose one of the following: "INBOUND" or "OUTBOUND" or "CROSS_LICENSE"`,
-            suffix: `choose one of the following:  "PATENT", "TRADEMARK", "SOURCE_CODE_LICENSE", "EXCLUSIVE", "FEEDBACK", or "" if non apply.`
-
-        }
-    instruction: string = buildInstruction(this.data)
-    key: string = FormatterKeys.license
-    name: string = "License"
-    responseShape = LicenseShape
-    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<LicenseFormatResponse | null>> {
-
-        return await runFormatter<LicenseFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
-    }
-}
-
-class SourceCode implements IFormatter {
-
-    data: {
-        [Property in keyof SourceCodeFormatResponse]: string;
-    } = {
-            content: `Describe the materials being placed into escrow.`,
-            releaseConditions: `What are all the conditions giving rise to release of materials?`,
-            license: `Describe the license granted to the materials after they have been released.`,
-            summary: `leave blank.`
-        }
-
-    instruction: string = buildInstruction(this.data)
-
-    key: string = FormatterKeys.sourceCode
-    name: string = "Source Code"
-    responseShape = SourceCodeFormatResponseShape
-    async run(oaiClient: OpenAI, sb: SupabaseClient<Database>, contractId: string, targetEntityName: string): Promise<IResp<SourceCodeFormatResponse | null>> {
-
-        return await runFormatter<SourceCodeFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
-    }
 }
 
 class PaymentTerms implements IFormatter {

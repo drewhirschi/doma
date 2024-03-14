@@ -161,7 +161,7 @@ export function ContractReviewer(props: Props) {
                                         onClick={async () => {
                                             await actions.completeContractAction(contract.id)
                                         }}
-                                        >
+                                    >
                                         Mark completed
                                     </Menu.Item>
                                     <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
@@ -178,31 +178,41 @@ export function ContractReviewer(props: Props) {
                                                 })
                                             }
                                         }}
-                                        >
+                                    >
                                         Run description
                                     </Menu.Item>
-                                    
-                                        <Menu.Label>AI</Menu.Label>
+
+                                    <Menu.Label>AI</Menu.Label>
                                     <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
                                             actions.reviewContractAction(contract.id)
                                         }}
-                                        >
+                                    >
                                         Run extraciton
                                     </Menu.Item>
                                     <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
                                             actions.deleteContractExtractedInfo(contract.id, projectId)
                                         }}
-                                        >
+                                    >
                                         Clear extracted info
                                     </Menu.Item>
 
                                     <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
-                                            actions.runFormatters(contract.id, projectId, contract.target)
+                                            try {
+
+                                                actions.runFormatters(contract.id, projectId, contract.target)
+                                            } catch (e) {
+                                                notifications.show({
+                                                    title: "Error",
+                                                    message: "There was an error. Please try again later.",
+                                                    color: "red"
+                                                })
+                                                console.error(e)
+                                            }
                                         }}
-                                        >
+                                    >
                                         Run formatters
                                     </Menu.Item>
                                 </Menu.Dropdown>
@@ -325,14 +335,21 @@ export function ContractReviewer(props: Props) {
                                 </div>
                             ))
                                 : <Stack gap={"lg"}>
-                                   
+
                                     {formatters
                                         // .filter(f => f.formatted_info.length > 0)
                                         .map(f => (
                                             <FormatterSwitch formatter={f} key={f.key} singleRun={() => {
                                                 actions.runFormatter(f.key, contract.id, projectId, contract.target)
 
-                                            }} />
+                                            }}
+                                            handleSave={async (info) => {
+                                                const res = await supabase.from("formatted_info")
+                                                .upsert({data:info, contract_id:contract.id, formatter_key:f.key})
+                                                .eq("contract_id", contract.id)
+                                                .eq("formatter_key", f.key)
+                                            }}
+                                            />
                                         ))
                                     }
                                     {/* <Divider/>
