@@ -45,7 +45,7 @@ export default function ProjectCard({ project }: Props) {
     const totalContracts = project.contract.length
 
 
-    return <Card shadow="sm" padding="lg" radius="md" withBorder>
+    return <Card shadow="sm" padding="lg" radius="md" withBorder w={360}>
         <Card.Section>
             <Image
                 src="/images/resized_project_image.jpeg"
