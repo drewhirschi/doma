@@ -26,7 +26,7 @@ export function ProjectGrid({ projects, users }: Props) {
                 {projects.map((project: Project_SB) => (
                     // <Grid.Col key={project.id} span={{ base: 12, md: 6, lg: 4 }}>
                         // @ts-ignore 
-                        <ProjectCard project={project} />
+                        <ProjectCard key={project.id} project={project} />
                     // </Grid.Col>
                 ))}
 
