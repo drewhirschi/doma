@@ -38,7 +38,7 @@ export function FormattedGeneric({ info, handleSave }: FormatterViewProps) {
         })}>
             <Stack gap={0}>
 
-                <Textarea autosize style={{ whiteSpace: "pre-wrap" }} />
+                <Textarea autosize style={{ whiteSpace: "pre-wrap" }} {...form.getInputProps('summary')} />
                 {extractedInfoRefs.length > 0 && <EIReferenceLinks ids={extractedInfoRefs} />}
                 <Button loading={loading} size="xs" style={{alignSelf: "flex-end"}} mt={"sm"} type="submit" disabled={!form.isDirty()} color="blue">Save</Button>
 
