@@ -31,8 +31,8 @@ export default function HomePage() {
         <Center h={832}>
           <Stack align="center" maw={700}>
 
-            <Title style={{ textAlign: 'center' }} size={64}>An AI-Powered Legal M&A Platform</Title>
-            <Text style={{ textAlign: 'center' }} size="xl">Parsl automates processes all the way from document intake to purchase agreement drafting.</Text>
+            <Title style={{ textAlign: 'center' }} size={64}>Parsl</Title>
+            <Text style={{ textAlign: 'center' }} size="xl">Accurate Legal Due Diligence for Technology Focused M&A</Text>
             <WaitlistSignup
               buttonText="Join the Waitlist"
               inputWidth={360}
@@ -46,8 +46,8 @@ export default function HomePage() {
         <Container>
           <Stack gap={"sm"} align="center">
 
-            <Title >Achieve better outcomes, faster.</Title>
-            <Text size="xl">Parsl gets the small stuff out of the way so that you can focus on adding strategic value.</Text>
+            <Title>Optimize you time</Title>
+            <Text size="xl">Parsl automates common tedious tasks so you and your team only need to spend time and resources on the rare edge cases that require a human touch.</Text>
             <div
               className={classes.videoIframe}
 
@@ -74,9 +74,9 @@ export default function HomePage() {
 
 
           <Stack >
-            <Title order={3}>Comprehensive due diligence report, done in hours not weeks</Title>
+            <Title order={3}>Get critical results in record speed</Title>
 
-            <Text size="xl">Parsl revolutionizes turnaround times by allowing you to deliver actionable issue analysis to your clients within 24 hours, leaving clients impressed with your agility. Verify the auto generated due diligence report results by referencing the original contract language with a click of a mouse. </Text>
+            <Text size="xl">Parsl revolutionizes turnaround times by delivering a comprehensive and actionable issue analysis within 24 hours. Gain the upper hand in setting the terms of the deal by identifying and solving issues early.</Text>
           </Stack>
 
 
@@ -92,9 +92,9 @@ export default function HomePage() {
 
             <Image src="/images/product/agreement_view.png" alt="frustrated lawyers" h={260} fit="contain" />
             <Stack >
-              <Title order={3}>Second-level reviews, simplified</Title>
+              <Title order={3}>Achieve better outcomes by doing less</Title>
 
-              <Text size="xl">Utilize AI to fly through the more tedious and painstaking aspects of M&A transactions, so your team can focus on more meaningful work — in return, decrease associate burnout and drive faster value for your firm.</Text>
+              <Text size="xl">Achieve higher accuracy in finding key information by merging the unique strengths of manual and automated review by performing AI-assisted due diligence. With Parsl it has never been easier to verify AI results. All decisions are provided with linked references to the original contract language from which AI decisions were made. Understand and confirm the logic with a click of a mouse.</Text>
             </Stack>
 
 
@@ -107,9 +107,9 @@ export default function HomePage() {
 
 
           <Stack >
-            <Title order={3}>Automatic disclosure schedule population, yes please</Title>
+            <Title order={3}>Enhanced purchase agreement drafting and negotiation</Title>
 
-            <Text size="xl">Just upload the disclosure schedule and watch them auto populate with the required agreement information. Simply run a new search when changes are made and have the new results copied to your clipboard for quick use.</Text>
+            <Text size="xl">Easily access granular contract data to auto generate disclosure schedules, inform your purchase agreement drafting, and negotiate with data on your side.</Text>
           </Stack>
 
 
@@ -126,7 +126,7 @@ export default function HomePage() {
             <Stack >
               <Title order={3}>Streamline your team’s process from end-to-end</Title>
 
-              <Text size="xl">Whether you’re reviewing by yourself, or managing dozens of others, Parsl makes it easy. Assign documents to reviewers, manage supplemental requests, escalate problems, and much more.</Text>
+              <Text size="xl">Increase efficiency and streamline communication using an all-in-one platform. Whether you’re reviewing by yourself, or managing dozens of others, Parsl makes it easy. Assign documents to reviewers, manage supplemental requests, escalate problems, and much more.</Text>
             </Stack>
 
 
