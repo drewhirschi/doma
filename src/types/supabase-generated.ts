@@ -13,28 +13,37 @@ export type Database = {
         Row: {
           contract_id: string
           created_at: string
+          formatter_item_id: number | null
+          formatter_key: string | null
           id: string
-          parslet_id: string
+          is_user: boolean
+          parslet_id: string | null
           position: Json
-          tenant_id: string
+          tenant_id: string | null
           text: string
         }
         Insert: {
           contract_id: string
           created_at?: string
+          formatter_item_id?: number | null
+          formatter_key?: string | null
           id?: string
-          parslet_id: string
+          is_user?: boolean
+          parslet_id?: string | null
           position: Json
-          tenant_id?: string
+          tenant_id?: string | null
           text: string
         }
         Update: {
           contract_id?: string
           created_at?: string
+          formatter_item_id?: number | null
+          formatter_key?: string | null
           id?: string
-          parslet_id?: string
+          is_user?: boolean
+          parslet_id?: string | null
           position?: Json
-          tenant_id?: string
+          tenant_id?: string | null
           text?: string
         }
         Relationships: [
@@ -44,6 +53,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contract"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "annotation_formatted_info_fkey"
+            columns: ["contract_id", "formatter_key", "formatter_item_id"]
+            isOneToOne: false
+            referencedRelation: "formatted_info"
+            referencedColumns: ["contract_id", "formatter_key", "id"]
           },
           {
             foreignKeyName: "annotation_parslet_id_fkey"
@@ -58,7 +74,14 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tenant"
             referencedColumns: ["id"]
-          }
+          },
+          {
+            foreignKeyName: "public_annotation_formatter_key_fkey"
+            columns: ["formatter_key"]
+            isOneToOne: false
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
+          },
         ]
       }
       contract: {
@@ -127,7 +150,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "project"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       contract_line: {
@@ -142,6 +165,7 @@ export type Database = {
           x_scale: number
           x1: number
           x2: number
+          y: number | null
           y1: number
           y2: number
         }
@@ -156,6 +180,7 @@ export type Database = {
           x_scale?: number
           x1?: number
           x2?: number
+          y?: number | null
           y1?: number
           y2?: number
         }
@@ -170,6 +195,7 @@ export type Database = {
           x_scale?: number
           x1?: number
           x2?: number
+          y?: number | null
           y1?: number
           y2?: number
         }
@@ -180,43 +206,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contract"
             referencedColumns: ["id"]
-          }
-        ]
-      }
-      contract_note: {
-        Row: {
-          content: string
-          contract_id: string
-          created_at: string
-          parslet_id: string
-        }
-        Insert: {
-          content?: string
-          contract_id: string
-          created_at?: string
-          parslet_id: string
-        }
-        Update: {
-          content?: string
-          contract_id?: string
-          created_at?: string
-          parslet_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contract_note_contract_id_fkey"
-            columns: ["contract_id"]
-            isOneToOne: false
-            referencedRelation: "contract"
-            referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "contract_note_parslet_id_fkey"
-            columns: ["parslet_id"]
-            isOneToOne: false
-            referencedRelation: "parslet"
-            referencedColumns: ["id"]
-          }
         ]
       }
       extract_jobs: {
@@ -252,79 +242,43 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parslet"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
-      extracted_information: {
+      format_jobs: {
         Row: {
           contract_id: string
-          created_at: string
-          data: Json
-          id: string
-          parslet_id: string
+          formatter_key: string
+          status: string
+          updated_at: string
         }
         Insert: {
-          contract_id: string
-          created_at?: string
-          data: Json
-          id?: string
-          parslet_id: string
+          contract_id?: string
+          formatter_key: string
+          status?: string
+          updated_at: string
         }
         Update: {
           contract_id?: string
-          created_at?: string
-          data?: Json
-          id?: string
-          parslet_id?: string
+          formatter_key?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "extracted_information_contract_id_fkey"
+            foreignKeyName: "public_format_jobs_contract_id_fkey"
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "contract"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "extracted_information_parslet_id_fkey"
-            columns: ["parslet_id"]
+            foreignKeyName: "public_format_jobs_formatter_key_fkey"
+            columns: ["formatter_key"]
             isOneToOne: false
-            referencedRelation: "parslet"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      fi_ei_refs: {
-        Row: {
-          contract_id: string
-          extracted_info_id: string
-          formatter_key: string
-        }
-        Insert: {
-          contract_id?: string
-          extracted_info_id?: string
-          formatter_key?: string
-        }
-        Update: {
-          contract_id?: string
-          extracted_info_id?: string
-          formatter_key?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fi_ei_refs_formatted_info_fkey"
-            columns: ["contract_id", "formatter_key"]
-            isOneToOne: false
-            referencedRelation: "formatted_info"
-            referencedColumns: ["contract_id", "formatter_key"]
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
           },
-          {
-            foreignKeyName: "public_fi_ei_refs_extracted_info_id_fkey"
-            columns: ["extracted_info_id"]
-            isOneToOne: false
-            referencedRelation: "extracted_information"
-            referencedColumns: ["id"]
-          }
         ]
       }
       formatted_info: {
@@ -333,18 +287,21 @@ export type Database = {
           created_at: string
           data: Json | null
           formatter_key: string
+          id: number
         }
         Insert: {
           contract_id?: string
           created_at?: string
           data?: Json | null
           formatter_key?: string
+          id?: number
         }
         Update: {
           contract_id?: string
           created_at?: string
           data?: Json | null
           formatter_key?: string
+          id?: number
         }
         Relationships: [
           {
@@ -360,7 +317,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "formatters"
             referencedColumns: ["key"]
-          }
+          },
         ]
       }
       formatter_dependencies: {
@@ -390,7 +347,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "formatters"
             referencedColumns: ["key"]
-          }
+          },
         ]
       }
       formatters: {
@@ -413,18 +370,18 @@ export type Database = {
       }
       line_ref: {
         Row: {
+          annotation_id: string
           contract_id: string
-          extracted_info_id: string
           line_id: number
         }
         Insert: {
+          annotation_id: string
           contract_id: string
-          extracted_info_id: string
           line_id: number
         }
         Update: {
+          annotation_id?: string
           contract_id?: string
-          extracted_info_id?: string
           line_id?: number
         }
         Relationships: [
@@ -436,12 +393,12 @@ export type Database = {
             referencedColumns: ["contract_id", "id"]
           },
           {
-            foreignKeyName: "line_ref_extracted_info_id_fkey"
-            columns: ["extracted_info_id"]
+            foreignKeyName: "public_line_ref_annotation_id_fkey"
+            columns: ["annotation_id"]
             isOneToOne: false
-            referencedRelation: "extracted_information"
+            referencedRelation: "annotation"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       parslet: {
@@ -485,7 +442,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tenant"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       profile: {
@@ -536,7 +493,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tenant"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       project: {
@@ -583,7 +540,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tenant"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       project_assignment: {
@@ -613,7 +570,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "project"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       tenant: {
@@ -696,14 +653,16 @@ export type Database = {
   }
 }
 
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -711,67 +670,67 @@ export type Tables<
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
-      Database["public"]["Views"])
-  ? (Database["public"]["Tables"] &
-      Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
-  : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
     : never
-  : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof Database["public"]["Enums"]
+    | keyof PublicSchema["Enums"]
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never
+    : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-  ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-  : never
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never

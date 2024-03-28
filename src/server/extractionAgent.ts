@@ -3,9 +3,11 @@ import { IResp, rerm, rok } from '@/utils';
 
 import { Database } from '@/types/supabase';
 import { ExtractJobStatus } from '@/types/enums';
+import { Json } from '@/types/supabase-generated';
 import OpenAI from 'openai';
 import PQueue from 'p-queue';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { buildScaledPostionFromContractLines } from '@/helpers';
 import { sleep } from '@/utils';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -165,6 +167,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
             content.data = JSON.parse(responseMessage.content!).data.map((d: { text: string, lines: string }) => ({ ...d, id: uuidv4() }))
         } catch (error) {
             console.error("Failed to parse: ", responseMessage.content)
+            await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
             throw error
         }
 
@@ -184,16 +187,32 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
 
 async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractionData: RawExtractionData[]) {
+   
+
+
+    const linesq = await supabase.from('contract_line').select().eq('contract_id', contractId)
+    
     const { error: insertError } = await supabase
-        .from('extracted_information')
-        .insert(extractionData.map((d) => (
-            {
+        .from('annotation')
+        .insert(extractionData.map((d) => {
+
+            const { start, end } = parseRefLines(d.lines)
+            const relatedLines = linesq.data?.filter((l) => l.id >= start && l.id <= end) ?? []
+            const position = buildScaledPostionFromContractLines(relatedLines) as unknown as Json
+
+            const newAnnotation = {
                 id: d.id,
+                contract_id: contractId,
                 parslet_id: extractor.id,
-                data: d.text,
-                contract_id: contractId
+                text: d.text,
+                position,
+                formatter_key: null,
+                formatter_item_idx: null,
+                is_user: false
             }
-        )));
+
+            return newAnnotation
+        }));
 
     if (insertError) {
         console.error('Error inserting data:', insertError);
@@ -201,6 +220,8 @@ async function saveExtraction(supabase: SupabaseClient<Database>, contractId: st
     } else {
         console.log(`Inserted ${extractionData.length} ${extractor.display_name} extractions successfully`);
     }
+
+   
 
 
 
@@ -281,7 +302,7 @@ async function createExtractionJob(supabase: SupabaseClient<Database>, contractI
     const job = await supabase.from("extract_jobs").upsert({
         contract_id: contractId,
         parslet_id: extractorId,
-        status: "pending",
+        status: ExtractJobStatus.PENDING,
         updated_at: new Date().toISOString()
     }).select().single()
 

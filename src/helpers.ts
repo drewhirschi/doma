@@ -33,7 +33,7 @@ function calculateBoundingRect(rects: Rect[]): Rect | null {
     return { x1: minX1, x2: maxX2, y1: minY1, y2: maxY2, width, height, pageNumber };
 }
 
-function buildScaledPostionFromContractLines(contractLines: ContractLine_SB[]): ScaledPosition {
+export function buildScaledPostionFromContractLines(contractLines: ContractLine_SB[]): ScaledPosition {
     const rects = contractLines.map((rect: ContractLine_SB) => ({
         x1: rect.x1,
         x2: rect.x2,
@@ -55,16 +55,3 @@ function buildScaledPostionFromContractLines(contractLines: ContractLine_SB[]): 
 }
 
 
-export function buildAnnotationFromExtraction(ei: ExtractedInformation_SB & { contract_line: ContractLine_SB[] }) {
-       
-        return {
-            position: buildScaledPostionFromContractLines(ei.contract_line),
-            id: ei.id,
-            content: {
-
-                text: ei.data as string,
-            },
-            parslet_id: ei.parslet_id,
-            author: "agent"
-        }
-}

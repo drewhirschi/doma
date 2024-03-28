@@ -118,7 +118,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   highlightRoots: {
     [page: number]: { reactRoot: Root; container: Element };
   } = {};
-  unsubscribe = () => {};
+  unsubscribe = () => { };
 
   constructor(props: Props<T_HT>) {
     super(props);
@@ -179,7 +179,6 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
       new PDFViewer({
         container: this.containerNodeRef!.current!,
         eventBus: this.eventBus,
-        // enhanceTextSelection: true, // deprecated. https://github.com/mozilla/pdf.js/issues/9943#issuecomment-409369485
         textLayerMode: 2,
         removePageBorders: true,
         linkService: this.linkService,
@@ -389,7 +388,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         ...pageViewport.convertToPdfPoint(
           0,
           scaledToViewport(boundingRect, pageViewport, usePdfCoordinates).top -
-            scrollMargin
+          scrollMargin
         ),
         0,
       ],
@@ -549,7 +548,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
   debouncedScaleValue: () => void = debounce(this.handleScaleValue, 500);
 
   render() {
-    const { onSelectionFinished, enableAreaSelection } = this.props;
+    // const { onSelectionFinished, enableAreaSelection } = this.props;
 
     return (
       <div onPointerDown={this.onMouseDown}>
@@ -560,7 +559,8 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         >
           <div className="pdfViewer" />
           {this.renderTip()}
-          {typeof enableAreaSelection === "function" ? (
+          {/* not supporting area highlights for now */}
+          {/* {typeof enableAreaSelection === "function" ? (
             <MouseSelection
               onDragStart={() => this.toggleTextSelection(true)}
               onDragEnd={() => this.toggleTextSelection(false)}
@@ -625,7 +625,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
                 );
               }}
             />
-          ) : null}
+          ) : null} */}
         </div>
       </div>
     );

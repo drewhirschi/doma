@@ -10,7 +10,7 @@ declare global {
     type ExtractedInformation_SB = Database['public']['Tables']['extracted_information']['Row']
     type ContractNote_SB = Database['public']['Tables']['contract_note']['Row']
     type ExtractJob_SB = Database['public']['Tables']['extract_jobs']['Row']
-    type FormattedInfo_SB = Database['public']['Tables']['formatted_info']['Row']
+    type FormattedInfo_SB<T = any> = Database['public']['Tables']['formatted_info']['Row'] & {data: T}
     type Formatter_SB = Database['public']['Tables']['formatters']['Row']
 
     interface Window {

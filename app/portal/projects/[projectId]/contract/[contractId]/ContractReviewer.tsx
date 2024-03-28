@@ -8,25 +8,22 @@ import * as actions from "./ContractReviewer.actions";
 import { ActionIcon, Box, Button, Center, CopyButton, Divider, Drawer, Flex, Group, HoverCard, Menu, Paper, ScrollArea, SegmentedControl, Skeleton, Stack, Text, TextInput, Textarea, ThemeIcon, Title, Tooltip, UnstyledButton, rem } from "@mantine/core";
 import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTrash, IconUser } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { useEffect, useOptimistic, useRef, useState } from "react";
+import { use, useEffect, useOptimistic, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { BackButton } from "@/components/BackButton";
 import { ContractDetailsDrawer } from './DetailsDrawer';
 import { FormatterSwitch } from '@/components/FormattedInfoViews/FormattedInfoSwitch';
-import { FormatterWithInfoAndEi } from '@/types/complex';
-import JobInfo from './JobInfo';
-import { Json } from "@/types/supabase-generated";
+import { FormatterWithInfo } from '@/types/complex';
 import MetadataItem from '@/components/MetadataItem';
+import { ScaledPosition } from '@/components/PdfViewer';
 import { browserClient } from "@/supabase/BrowerClients";
-import { buildAnnotationFromExtraction } from "./helpers";
 import dynamic from 'next/dynamic'
 import { notifications } from '@mantine/notifications';
-import { sleep } from '@/utils';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDisclosure } from '@mantine/hooks';
 
-const PDFView = dynamic(() => import('./pdf'), { ssr: false })
+const PDFView = dynamic(() => import('./pdf'), { ssr: false, loading: () => <p>Loading...</p> })
 
 
 export type ParsletWithNotes = Parslet_SB & { contract_note: { content: string }[] }
@@ -36,61 +33,37 @@ interface Props {
     projectId: string
     contract: Contract_SB & {
         extract_jobs: ExtractJob_SB[],
-        annotation: Annotation_SB[],
-        extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[]
+        // annotation: Annotation_SB[],
+        annotation: (Annotation_SB & { contract_line: ContractLine_SB[] })[]
     }
-    parslets: ParsletWithNotes[]
-    formatters: FormatterWithInfoAndEi[]
+    parslets: Parslet_SB[]
+    formatters: FormatterWithInfo[]
     annotations: Annotation_SB[]
 }
 
-export interface IContractHighlight {
-    position: any;
-    id: string;
-    content: {
-        text?: string;
-        image?: string;
-    };
-    parslet_id: string;
-    author: string;
-}
+
 
 export function ContractReviewer(props: Props) {
 
-    const { pdfUrl, contract, annotations, projectId, parslets, formatters } = props
+    const { pdfUrl, contract, annotations, projectId, parslets } = props
 
-    const [leftSegment, setLeftSegment] = useState('formatters');
+    const [formatters, setFormatters] = useState(props.formatters)
+
+
+    // const [leftSegment, setLeftSegment] = useState('formatters');
     const [opened, { open: openDetailsDrawer, close }] = useDisclosure(false);
 
 
     const panelRef = useRef<ImperativePanelHandle>(null);
 
 
-    const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
+    // const extractionsHighlights = contract.extracted_information.map(buildAnnotationFromExtraction)
 
-    const [highlights, setHighlights] = useState<IContractHighlight[]>([...annotations.map(a => ({ ...a, author: "user", content: { text: a.text } })), ...extractionsHighlights,])
+    const [highlights, setHighlights] = useState<Annotation_SB[]>(annotations)
     const [savingNotes, setSavingNotes] = useState(false)
     const supabase = browserClient()
 
-    // const editors = parslets.reduce((acc: { [key: string]: Editor }, parslet: ParsletWithNotes) => {
-    //     const editor = useEditor({
-    //         extensions: [StarterKit,
-    //             Hyperlink.configure({
-    //                 hyperlinkOnPaste: false,
-    //                 openOnClick: true,
-    //                 modals: {
-    //                     previewHyperlink: linkPreviewToolTip,
-    //                     setHyperlink: setHyperlinkModal,
-    //                 },
-    //             }),
-    //         ],
-    //         content: parslet.contract_note[0]?.content ?? "",
-    //     });
-    //     if (editor) {
-    //         acc[parslet.id] = editor
-    //     }
-    //     return acc
-    // }, {})
+
 
 
 
@@ -98,39 +71,174 @@ export function ContractReviewer(props: Props) {
     const router = useRouter()
     const pathname = usePathname()
 
-    const debouncedSaveNote = useDebouncedCallback(async (value: string, parsletId: string) => {
 
-        console.log("saving note", value, parsletId)
-        setSavingNotes(true)
-        const { data, error } = await supabase.from("contract_note").upsert({
-            contract_id: contract.id,
-            parslet_id: parsletId,
-            content: value
+
+
+    async function handleSaveFormattedItems(formatterKey: string, infos: FormattedInfo_SB<any>[]) {
+
+        const res = await supabase.from("formatted_info")
+            .upsert(infos.map((fi) => ({
+                contract_id: contract.id,
+                data: fi.data,
+                formatter_key: formatterKey,
+                id: fi.id
+            })))
+        if (res.error) {
+            notifications.show({
+                title: "Error",
+                message: "There was an error. Please try again later.",
+                color: "red"
+            })
+        }
+    }
+
+
+    async function handleRemoveFormattedItem(formatterKey: string, id: number) {
+        const annotationIds = highlights.filter(h => h.formatter_key == formatterKey && h.formatter_item_id == id).map(h => h.id)
+        await Promise.all(annotationIds.map(async (id) => handleRemoveHighlight(id)))
+
+        const res = await supabase.from("formatted_info")
+            .delete()
+            .eq("id", id)
+            .eq("formatter_key", formatterKey)
+            .eq("contract_id", contract.id)
+
+        setFormatters(prevFormatters => {
+            const formatter = prevFormatters.find(f => f.key === f.key)
+            if (formatter) {
+                formatter.formatted_info = formatter.formatted_info.filter(fi => fi.id !== id)
+            }
+            return prevFormatters
+
         })
-        setSavingNotes(false)
 
-    }, 600)
+        if (res.error) {
+            notifications.show({
+                title: "Error",
+                message: "There was an error. Please try again later.",
+                color: "red"
+            })
+        }
+    }
+
+    async function handleRemoveHighlight(id: string) {
+        const res = await supabase.from("annotation")
+            .delete()
+            .eq("id", id)
+
+        setHighlights(prevHighlights => prevHighlights.filter(h => h.id !== id))
+
+        if (res.error) {
+            notifications.show({
+                title: "Error",
+                message: "There was an error. Please try again later.",
+                color: "red"
+            })
+        }
+    }
+
+    async function handleAddHighlight(highlight: { position: ScaledPosition, text: string, formatterKey: string, itemIndex: number }) {
+        const { position, text, formatterKey, itemIndex } = highlight
 
 
-    async function handleAddHighlight(highlight: { position: any, text: string, parslet_id: string }) {
-        const { position, text, parslet_id: parsletId } = highlight
         const id: string = window.crypto.randomUUID()
 
+        console.log(formatters)
 
-        setHighlights([{ content: { text: text ?? "" }, position, id, parslet_id: parsletId, author: "user" }, ...highlights])
-        // editors[parsletId].commands.insertContent(`<br/> <a href="${pathname}#${id}">${text}</a>`, { parseOptions: {} })
-        const { data, error } = await supabase.from("annotation").insert({
+        const newAnnotation: Omit<Annotation_SB, 'tenant_id' | 'created_at'> = {
             id,
-            parslet_id: parsletId,
+            formatter_key: formatterKey,
+            formatter_item_id: itemIndex ?? null,
             contract_id: contract.id,
             text: text ?? "",
-            position: position as unknown as Json,
-
-        })
-
-        if (error) {
-            //remove highlight from state
+            position: position,
+            parslet_id: null,
+            is_user: true,
         }
+
+        setHighlights(prevState => [...prevState, newAnnotation as Annotation_SB])
+
+        try {
+
+            const formattedInfo = formatters.find(f => f.key == formatterKey)?.formatted_info.find(fi => fi.id == itemIndex)
+
+            let inputData = ""
+            if (!formattedInfo) {
+                const placeholder = {
+                    contract_id: contract.id,
+                    data: {},
+                    formatter_key: formatterKey,
+                    id: itemIndex,
+                    created_at: new Date().toISOString()
+                }
+                setFormatters((prevState) => {
+                    return prevState.map(formatter => {
+                        if (formatter.key === formatterKey && !formatter.formatted_info.includes(placeholder)) {
+                            formatter.formatted_info.push(placeholder)
+                        }
+                        return formatter
+                    })
+
+
+                })
+                const fiInsertRes = await supabase.from("formatted_info").insert(placeholder).throwOnError()
+            } else {
+
+                inputData += `<currentState>${JSON.stringify(formattedInfo.data)}</currentState>\n`
+            }
+            inputData += `<newData>${text}</newData>`
+
+            // @ts-ignore
+            const annotationInsertRes = await supabase.from("annotation").insert(newAnnotation).throwOnError()
+
+
+
+
+
+
+            const formattedInfoRes = await actions.format(formatterKey, contract.id, projectId, contract.target, inputData)
+
+            if (formattedInfoRes.error) {
+                // @ts-ignore
+                throw new Error(formattedInfoRes.error.message)
+            }
+
+
+            if (formattedInfoRes.ok.length > 0) {
+                setFormatters((prevState) => {
+                    return prevState.map(formatter => {
+                        if (formatter.key === formatterKey) {
+                            formatter.formatted_info[itemIndex].data = formattedInfoRes.ok[0]
+                        }
+                        return formatter
+                    })
+                })
+                const upsertRes = await supabase.from("formatted_info").update({ data: formattedInfoRes.ok[0] })
+                    .eq("id", itemIndex)
+                    .eq("formatter_key", formatterKey)
+                    .eq("contract_id", contract.id)
+                    .throwOnError()
+            }
+
+
+
+
+
+        } catch (error) {
+            notifications.show({
+                title: "Error",
+                message: "There was an error. Please try again later.",
+                color: "red"
+            })
+        }
+
+
+
+
+
+
+
+
     }
 
 
@@ -228,9 +336,7 @@ export function ContractReviewer(props: Props) {
                             </HoverCard.Target>
                             <HoverCard.Dropdown>
                                 <Group>
-                                    <Text>
-                                        <MetadataItem header="Contract ID" text={contract.id} />
-                                    </Text>
+                                    <MetadataItem header="Contract ID" text={contract.id} />
                                     <CopyButton value={contract.id} timeout={2000}>
                                         {({ copied, copy }) => (
                                             <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
@@ -247,117 +353,36 @@ export function ContractReviewer(props: Props) {
                                 </Group>
                             </HoverCard.Dropdown>
                         </HoverCard>
-                        <SegmentedControl
-                            value={leftSegment}
-                            onChange={setLeftSegment}
-                            data={[
-                                { label: 'Formatters', value: 'formatters' },
-                                { label: 'Extractors', value: 'extractors' },
-                            ]} />
+                        <Divider />
                         <ScrollArea
                             offsetScrollbars
                             h={"100%"}
                         >
 
-                            {leftSegment == 'extractors' ? parslets.map((parslet) => (
-                                <div key={parslet.id}>
-                                    {/* <NoteEditor parslet={parslet} editor={editors[parslet.id]} /> */}
-                                    <Group justify='space-between'>
 
-                                        <Stack gap={0}>
+                            <Stack gap={"lg"}>
 
-                                            <Text size="lg" mt={"lg"} fw={700}>{parslet.display_name}</Text>
-                                            <JobInfo job={contract.extract_jobs.find(j => j.parslet_id == parslet.id)} />
-                                        </Stack>
-                                        <ActionIcon color='gray' size={"sm"} onClick={() => {
-                                            actions.reExtractTopic(contract.id, parslet.id)
-                                        }}>
-                                            <IconRepeat style={{ width: rem(12) }} />
-
-                                        </ActionIcon>
-                                    </Group>
-
-                                    <Textarea
-                                        defaultValue={parslet.contract_note[0]?.content ?? ""}
-                                        autosize
-                                        minRows={2}
-                                        onChange={(event) => debouncedSaveNote(event.currentTarget.value, parslet.id)}
-                                    />
-                                    <Stack gap={"xs"} mt="sm">
-                                        {highlights
-                                            .filter((highlight) => highlight.parslet_id === parslet.id)
-                                            .map((highlight) => (
-                                                <Flex direction={"row"} wrap={"nowrap"} gap={"xs"} key={highlight.id}>
-                                                    <ActionIcon
-                                                        onClick={async () => {
-
-                                                            router.replace(pathname.split("#")[0] + "#" + highlight.id)
-                                                            await sleep(100)
-                                                            window.dispatchEvent(new HashChangeEvent('hashchange'));
-
-
-                                                        }}
-                                                    >
-
-                                                        <IconListSearch style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                                                    </ActionIcon>
-                                                    <ActionIcon variant="outline" color="red"
-                                                        onClick={async () => {
-                                                            setHighlights(highlights.filter((h) => h.id !== highlight.id))
-                                                            await supabase.from("annotation").delete().eq("id", highlight.id!)
-                                                            await supabase.from("extracted_information").delete().eq("id", highlight.id!)
-                                                        }}
-                                                    >
-                                                        <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                                                    </ActionIcon>
-                                                    <HoverCard shadow="md" openDelay={500}>
-
-                                                        <HoverCard.Target>
-                                                            <Flex dir='row' wrap={"nowrap"} align="baseline">
-                                                                {highlight.author == "user" && (<ThemeIcon size={"xs"} color="teal">
-                                                                    <IconUser style={{ width: '80%', height: '80%' }} />
-                                                                </ThemeIcon>)}
-                                                                <Text key={highlight.parslet_id + parslet.id}>{highlight.content.text}</Text>
-                                                            </Flex>
-                                                        </HoverCard.Target>
-                                                        <HoverCard.Dropdown>
-                                                            <MetadataItem header="y1" text={highlight.position.boundingRect.y1} />
-                                                            <MetadataItem header="y2" text={highlight.position.boundingRect.y2} />
-                                                            {/* Bounding: {JSON.stringify(highlight.position.boundingRect) ?? "no bounding rect"} */}
-                                                            <br />
-                                                            EI id: {highlight.id}
-                                                        </HoverCard.Dropdown>
-                                                    </HoverCard>
-                                                </Flex>
-                                            ))}
-
-                                    </Stack>
-                                </div>
-                            ))
-                                : <Stack gap={"lg"}>
-
-                                    {formatters
-                                        // .filter(f => f.formatted_info.length > 0)
-                                        .map(f => (
-                                            <FormatterSwitch formatter={f} key={f.key} singleRun={() => {
-                                                actions.runFormatter(f.key, contract.id, projectId, contract.target)
+                                {formatters
+                                    // .filter(f => f.formatted_info.length > 0)
+                                    .map(f => (
+                                        <FormatterSwitch
+                                            annotations={highlights.filter(h => h.formatter_key == f.key)}
+                                            removeAnnotation={handleRemoveHighlight}
+                                            removeItem={async (id) => handleRemoveFormattedItem(f.key, id)}
+                                            handleSave={async (items: FormattedInfo_SB[]) => handleSaveFormattedItems(f.key, items)}
+                                            formatter={f}
+                                            contractId={contract.id}
+                                            key={f.key}
+                                            singleRun={() => {
+                                                // actions.format(f.key, contract.id, projectId, contract.target)
 
                                             }}
-                                            handleSave={async (info) => {
-                                                const res = await supabase.from("formatted_info")
-                                                .upsert({data:info, contract_id:contract.id, formatter_key:f.key})
-                                                .eq("contract_id", contract.id)
-                                                .eq("formatter_key", f.key)
-                                            }}
-                                            />
-                                        ))
-                                    }
-                                    {/* <Divider/>
-                                {formatters.filter(f => f.formatted_info.length == 0).map(f => (
-                                    <Text>{f.display_name}</Text>
-                                ))
-                                } */}
-                                </Stack>}
+
+                                        />
+                                    ))
+                                }
+
+                            </Stack>
                         </ScrollArea>
                     </Stack>
 
@@ -372,20 +397,13 @@ export function ContractReviewer(props: Props) {
                         pdfUrl={pdfUrl}
                         pdfBase64={props.pdfBase64}
                         contract={contract}
-                        parslets={parslets}
+                        formatters={formatters}
                         highlights={highlights}
                         handleAddHighlight={handleAddHighlight}
-                        handleRemoveHighlight={(id) => {
-                            setHighlights(highlights.filter((h) => h.id !== id))
-                        }}
+                        handleRemoveHighlight={handleRemoveHighlight}
                     />
 
-                    {/* <p>
-                    page {1}
-                </p>
-                <Document file={{data:props.pdfBase64}}>
-                    <Page pageNumber={1} />
-                </Document> */}
+
 
                 </Panel>
 

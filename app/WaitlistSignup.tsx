@@ -14,6 +14,9 @@ export function WaitlistSignup({ buttonText, inputWidth }: { buttonText: string,
             email: "",
         },
 
+        validate: {
+            email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+          },
     })
 
 

@@ -222,10 +222,8 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
                         <Table.Th>Assigned To</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
-                <Table.Tbody>{loading ? (
-                    <Text>Loading...</Text>
-                ) : (
-                    <>
+               
+                    <Table.Tbody>
 
                         {items.map((item) => {
 
@@ -245,9 +243,11 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
 
                             )
                         })}
-                    </>
-                )}</Table.Tbody>
+                    </Table.Tbody>
+                
             </Table>
+            {loading && (
+                    <Text>Loading...</Text>)}
 
         </Box>
     );

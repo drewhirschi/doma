@@ -1,12 +1,14 @@
 "use server"
 
-import { runAllFormatters, runSingleFormatter } from "@/server/formatAgent"
+import { IResp, sleep } from "@/utils"
+import { formatPipeline, getDataFormatted, pipelineRunFormatter } from "@/server/formatAgent"
 import { runContractExtraction, runSingleExtraction } from "@/server/extractionAgent"
 
 import { categorize } from "@/server/categoryAgent"
+import { getFormatterShape } from "@/shared/getFormatterShape"
 import { revalidatePath } from "next/cache"
 import { serverActionClient } from "@/supabase/ServerClients"
-import { sleep } from "@/utils"
+import { zodObjectToXML } from "@/zodUtils"
 
 export async function reviewContractAction(contractId: string) {
     const supabase = serverActionClient()
@@ -30,7 +32,7 @@ export async function completeContractAction(contractId: string) {
 export async function deleteContractExtractedInfo(contractId: string, projectId: string) {
     const supabase = serverActionClient()
 
-    const { error: eiErr } = await supabase.from('extracted_information').delete().eq('contract_id', contractId)
+    const { error: eiErr } = await supabase.from('annotation').delete().eq('contract_id', contractId).eq('is_user', false)
     const { error: jobErr } = await supabase.from('extract_jobs').delete().eq('contract_id', contractId)
 
     revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
@@ -58,21 +60,22 @@ export async function runFormatters(contractId: string, projectId: string, targe
 
     target ??= data?.target.join(", ")
 
-    runAllFormatters(supabase, contractId, target ?? "No target found")
+    formatPipeline(supabase, contractId, target ?? "No target found")
     // revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
 
 }
-export async function runFormatter(formatterKey: string, contractId: string, projectId: string, target: string | null | undefined) {
+export async function format(formatterKey: string, contractId: string, projectId: string, target: string | null | undefined, dataInput:string) : Promise<IResp<any[]>> {
     const supabase = serverActionClient()
 
     const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
     target ??= data?.target.join(", ")
 
 
-    await runSingleFormatter(supabase, formatterKey, contractId, target ?? "No target found")
-    revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
+    const res = await getDataFormatted(zodObjectToXML(getFormatterShape(formatterKey)), getFormatterShape(formatterKey), target ?? "No target found", dataInput)
+    // revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
+    return res
 
 }
 

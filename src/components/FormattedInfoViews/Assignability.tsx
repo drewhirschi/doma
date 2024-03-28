@@ -2,17 +2,15 @@ import { AgreementInfoFormatResponse, AssignabilitySuffix, AssignabilityType, Fo
 import { Anchor, Badge, Button, Group, MultiSelect, Select, SimpleGrid, Stack, Text, Textarea, Title } from "@mantine/core"
 
 import { DatePickerInput } from "@mantine/dates"
-import { EIReferenceLinks } from "./EIReferences"
-import { FormattedInfoWithEiId } from "@/types/complex"
 import MetadataItem from "../MetadataItem"
 import { notifications } from "@mantine/notifications"
 import { useForm } from '@mantine/form';
 import { useState } from "react"
 
-export function FormattedAssignability({ info, handleSave }: FormatterViewProps) {
+export function FormattedAssignability({ info, handleSave, annotations, removeAnnotation  }: FormatterViewProps) {
 
 
-    const data = info?.data as unknown as TermFormatResponse | undefined
+    const data = info.map(i => i.data) as TermFormatResponse[]
     const form = useForm({
         initialValues: data,
     });
@@ -40,7 +38,6 @@ export function FormattedAssignability({ info, handleSave }: FormatterViewProps)
 
             <Stack gap={4}>
                 <Textarea {...form.getInputProps('summary')} />
-                <EIReferenceLinks ids={info?.extracted_information?.map(ei => ei.id) ?? []} />
 
 
                 <SimpleGrid cols={2} spacing="md">

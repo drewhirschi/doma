@@ -8,33 +8,41 @@ import {
     ScaledPosition,
     Tip
 } from "@/components/PdfViewer";
-import { Button, Paper, ScrollArea, Skeleton, Stack, Text, TextInput, rem } from "@mantine/core";
-import { IconMessageCircle, IconTrash } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { Button, MantineProvider, NavLink, Paper, ScrollArea, Skeleton, Stack, Text, TextInput, rem } from "@mantine/core";
+import { ElementType, useEffect, useState } from "react";
+import { IconFingerprint, IconGauge, IconMessageCircle, IconTrash } from "@tabler/icons-react";
 import { usePathname, useRouter } from "next/navigation";
 
-import { IContractHighlight } from "./ContractReviewer";
+import { DummyMenu } from "@/components/DummyMenu";
+import { FormatterWithInfo } from "@/types/complex";
 import { browserClient } from "@/supabase/BrowerClients";
+import { getFormatterShape } from "@/shared/getFormatterShape";
+import { hasItemsChild } from "@/zodUtils";
 
 interface Props {
     pdfUrl: string
     pdfBase64: string
-    contract: Contract_SB & { annotation: Annotation_SB[], extracted_information: (ExtractedInformation_SB & { contract_line: ContractLine_SB[] })[] }
-    parslets: Parslet_SB[]
-    highlights: IContractHighlight[]
-    handleAddHighlight: (highlight: { position: any,  text: string, parslet_id: string }) => void
+    contract: Contract_SB & { annotation: (Annotation_SB & { contract_line: ContractLine_SB[] })[] }
+    highlights: Annotation_SB[]
+    handleAddHighlight: (highlight: { position: any, text: string, formatterKey: string, itemIndex: number }) => void
     handleRemoveHighlight: (id: string) => void
+    formatters: FormatterWithInfo[]
+
 }
 
-export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, parslets, handleAddHighlight }: Props) {
+export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, handleAddHighlight, formatters }: Props) {
     const supabase = browserClient()
     const router = useRouter()
     const pathname = usePathname()
 
+    useEffect(() => {
+        console.log("formatters", formatters)
+        
+    }, [formatters])
+
     const [parsletSearchTerm, setParsletSearchTerm] = useState("")
 
     function HighlightPopup({ id, closeMenu, annotations }: { id: string, closeMenu: () => void, annotations: any[] }) {
-        const supabase = browserClient()
 
         const annotation = annotations.find((a) => a.id === id)
         return (
@@ -42,11 +50,10 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                 shadow="lg"
                 w={200}
                 withBorder
-                p={"xs"}>
-                <Text fw={700} mb={"sm"}>{parslets.find(p => p.id == annotation?.parslet_id)?.display_name ?? "Extractor not found"}</Text>
-                {/* <Text>
-                    {annotation?.text ?? ""}
-                </Text> */}
+                p={"xs"}
+            >
+                {/* <Text fw={700} mb={"sm"}>{parslets.find(p => p.id == annotation?.parslet_id)?.display_name ?? "Extractor not found"}</Text> */}
+
                 <Button
                     fullWidth
                     variant="subtle"
@@ -55,13 +62,14 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                     onClick={async () => {
                         handleRemoveHighlight(id)
                         closeMenu()
-                        await supabase.from("extracted_information").delete().eq("id", id)
-                        await supabase.from("annotation").delete().eq("id", id)
 
                     }}
                 >
                     Delete
                 </Button>
+
+
+
 
             </Paper>
         )
@@ -128,110 +136,119 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
 
                     return (
+                        <MantineProvider>
 
-                        <PdfHighlighter<IContractHighlight>
-                            pdfDocument={pdfDocument}
-                            highlights={highlights}
-                            enableAreaSelection={(event) => event.altKey}
-                            onScrollChange={resetHash}
-                            pdfScaleValue="page-width"
-                            // pdfScaleValue=".75"
-                            scrollRef={(scrollTo) => {
-                                scrollViewerTo = scrollTo;
-                            }}
-                            onSelectionFinished={(
-                                position,
-                                content,
-                                hideTipAndSelection,
-                                transformSelection
-                            ) => {
-                                console.log({position, content})
-                                return (
-
-
-                                    <Paper shadow="md" p={"md"}>
+                            <PdfHighlighter<Annotation_SB>
+                                pdfDocument={pdfDocument}
+                                highlights={highlights}
+                                enableAreaSelection={(event) => event.altKey}
+                                onScrollChange={resetHash}
+                                pdfScaleValue="page-width"
+                                // pdfScaleValue=".75"
+                                scrollRef={(scrollTo) => {
+                                    scrollViewerTo = scrollTo;
+                                }}
+                                onSelectionFinished={(
+                                    position,
+                                    content,
+                                    hideTipAndSelection,
+                                    transformSelection
+                                ) => {
+                                    console.log({ position, content })
+                                    return (
 
 
-                                        <ScrollArea h={300} type="always" >
-                                            {/* <TextInput
-                                                placeholder="Search"
-                                                value={parsletSearchTerm}
-                                                onChange={(e) => {console.log(e.currentTarget.value); setParsletSearchTerm(e.currentTarget.value)}}
-                                            /> */}
-                                            <Button.Group orientation="vertical">
+                                        <Paper
+                                            shadow="md"
+                                            pt={"md"}
+                                            pl={"sm"}
+                                        //   pr={"xs"}
 
-                                                {parslets
-                                                    // .filter((parslet) => parsletSearchTerm ? parslet.display_name.toLowerCase().includes(parsletSearchTerm.toLowerCase()) : true)
-                                                    .map((parslet) => (
-                                                        <Button
-                                                            size="sm"
-                                                            c="black"
-                                                            color="gray"
-                                                            variant="subtle"
-                                                            key={parslet.id}
-                                                            onClick={() => {
-                                                                handleAddHighlight({parslet_id: parslet.id, text: content.text ?? "", position});
-                                                                hideTipAndSelection();
-                                                                // setParsletSearchTerm("")
+                                        >
+                                            Topics
+                                            <ScrollArea
+                                                h={300}
+                                                w={220}
+                                                type="always"
+                                                pr={"sm"}
+                                            >
+
+                                                {formatters.map((formatter, i) => {
+
+                                                    const props = {
+                                                        label: formatter.display_name,
+                                                        childrenOffset: 28,
+
+                                                    }
+                                                    const handleClick = (itemIndex: number) => {
+                                                        handleAddHighlight({ formatterKey: formatter.key, text: content.text ?? "", position, itemIndex: itemIndex });
+                                                        hideTipAndSelection();
+
+                                                    }
+                                                    if (hasItemsChild(getFormatterShape(formatter.key))) return (
+                                                        <NavLink key={i} {...props} component="button">
+                                                            {Array.from({ length: formatter.formatted_info.length }).map((_, j) => (
+                                                                <NavLink key={`${i}.${j}`} label={`Item ${j + 1}`} component="button" onClick={() => handleClick(formatter.formatted_info[j].id)} />
+                                                            ))}
+                                                            <NavLink key={i} label={`New item`} component="button" onClick={() => handleClick(formatter.formatted_info.length == 0 ? 0 : Math.max(...formatter.formatted_info.map(fi => fi.id)) + 1)} />
+
+                                                        </NavLink>
+                                                    ); else return (
+                                                        <NavLink
+                                                            key={i}
+                                                            {...props}
+                                                            component="button"
+                                                            onClick={() => handleClick(0)}
+                                                        />
+                                                    );
+                                                }
+                                                )}
+
+                                            </ScrollArea>
+                                        </Paper>
+                                    )
+                                }}
+                                highlightTransform={(
+                                    highlight,
+                                    index,
+                                    setTip,
+                                    hideTip,
+                                    viewportToScaled,
+                                    screenshot,
+                                    isScrolledTo
+                                ) => {
 
 
-                                                            }}
-                                                            leftSection={<IconMessageCircle style={{ width: rem(14), height: rem(14) }} />}
-                                                        >
+                                    return (
+                                        <Popup
+                                            popupContent={
+                                                <HighlightPopup
+                                                    id={highlight.id}
+                                                    closeMenu={hideTip}
+                                                    annotations={highlights}
 
-                                                            {parslet.display_name}
-                                                        </Button>
-                                                    ))}
-                                            </Button.Group>
-                                        </ScrollArea>
+                                                />}
+                                            onMouseOver={(popupContent) =>
+                                                setTip(highlight, (highlight) => popupContent)
+                                            }
+                                            onMouseOut={hideTip}
 
+                                            key={index}
 
+                                        >
 
+                                            <Highlight
+                                                isScrolledTo={isScrolledTo}
+                                                position={highlight.position}
+                                                onClick={() => { }}
+                                                isUserHighlight={highlight.is_user}
+                                            />
+                                        </Popup>
+                                    );
+                                }}
+                            />
+                        </MantineProvider>
 
-
-
-
-                                    </Paper>
-                                )
-                            }}
-                            highlightTransform={(
-                                highlight,
-                                index,
-                                setTip,
-                                hideTip,
-                                viewportToScaled,
-                                screenshot,
-                                isScrolledTo
-                            ) => {
-
-
-                                return (
-                                    <Popup
-                                        popupContent={
-                                            <HighlightPopup
-                                                id={highlight.id}
-                                                closeMenu={hideTip}
-                                                annotations={highlights}
-
-                                            />}
-                                        onMouseOver={(popupContent) =>
-                                            setTip(highlight, (highlight) => popupContent)
-                                        }
-                                        onMouseOut={hideTip}
-
-                                        key={index}
-
-                                    >
-                                        <Highlight
-                                            isScrolledTo={isScrolledTo}
-                                            position={highlight.position}
-                                            onClick={() => { }}
-                                            isUserHighlight={highlight.author === "user"}
-                                        />
-                                    </Popup>
-                                );
-                            }}
-                        />
                     )
                 }}
             </PdfLoader>

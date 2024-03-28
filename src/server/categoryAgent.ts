@@ -44,9 +44,7 @@ export async function categorize(sb: SupabaseClient<Database>, contractId: strin
         return { str: acc.str + line.text + " ", n: acc.n + line.ntokens }
     }, { str: "", n: 0 })
 
-    const oaiClient = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-    });
+   
 
     
 
@@ -67,10 +65,17 @@ ${Object.entries(agreementsTypeInstructions).map(([key, value]) => `<${key} desc
         description: z.string({ required_error: "Description is required" }),
     })
 
-    const response = await generateAgentResponse<z.infer<typeof shape>>(oaiClient, systemMessage, first500Tokens.str, shape)
-
-    if (response.error || !response.ok) {
+    const response = await generateAgentResponse(systemMessage, first500Tokens.str)
+    
+    if (response.error) {
         return response
+    }
+
+    const parse = shape.safeParse(response.ok)
+
+    if (!parse.success) {
+        console.error("Failed to parse ", response.ok, parse.error.errors)
+        return rerm("Incorrect shape", parse.error, "bad_shape")
     }
 
     const contractUpdate = await sb.from("contract").update({ "description": response.ok.description, "tag": response.ok.tag }).eq("id", contractId)

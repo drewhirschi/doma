@@ -35,6 +35,13 @@ export interface ScaledPosition {
   usePdfCoordinates?: boolean;
 }
 
+export interface IHighlight {
+  id: string;
+  text?: string;
+  position: ScaledPosition;
+
+}
+
 export interface Content {
   text?: string;
   image?: string;
@@ -44,16 +51,13 @@ export interface HighlightContent {
   content: Content;
 }
 
-export interface NewHighlight extends HighlightContent {
-  position: ScaledPosition;
-}
 
-export interface IHighlight extends NewHighlight {
-  id: string;
-}
+
+
 
 export interface ViewportHighlight extends HighlightContent {
   position: Position;
+
 }
 
 export interface Viewport {
