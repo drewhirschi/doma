@@ -1,45 +1,16 @@
-import { Anchor, Badge, Button, Group, Stack, Text, Textarea, Title } from "@mantine/core"
-import { FormatterViewProps, IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes"
+import { GenericFormatResponse, } from "@/types/formattersTypes"
+import { Textarea } from "@mantine/core"
+import { ViewProps } from "./FormattedItemSingle"
 
-import { notifications } from "@mantine/notifications"
-import { useForm } from "@mantine/form"
-import { useState } from "react"
-
-export function FormattedGeneric({ info, handleSave, annotations, removeAnnotation }: FormatterViewProps) {
+export function FormattedGeneric({ form }: ViewProps<GenericFormatResponse>) {
 
 
 
-    // const data = info[0].data as unknown as IFormatResponse
-
-    // const form = useForm({
-    //     initialValues: data,
-    // });
-    // const [loading, setLoading] = useState(false);
 
     return (
-        // <form onSubmit={form.onSubmit(async (values) => {
-        //     setLoading(true)
-        //     try {
 
-        //         await handleSave([values])
-        //         form.resetDirty()
-        //     } catch (e) {
-        //         console.error(e)
-        //         notifications.show({
-        //             title: "Failed to save",
-        //             message: "An error occurred while saving the data",
-        //             color: "red"
-        //         })
-        //     }
-        //     setLoading(false)
-        // })}>
-        //     <Stack gap={0}>
 
-        //         <Textarea autosize style={{ whiteSpace: "pre-wrap" }} {...form.getInputProps('summary')} />
-        //         <Button loading={loading} size="xs" style={{alignSelf: "flex-end"}} mt={"sm"} type="submit" disabled={!form.isDirty()} color="blue">Save</Button>
+        <Textarea autosize style={{ whiteSpace: "pre-wrap" }} {...form.getInputProps('summary')} />
 
-        //     </Stack>
-        // </form>
-        <p> fix me</p>
     )
 }

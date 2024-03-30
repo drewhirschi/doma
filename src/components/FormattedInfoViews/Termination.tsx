@@ -1,5 +1,5 @@
 import { Box, Select, Textarea, } from "@mantine/core"
-import { FormatterViewProps, TerminationItemShape, TerminationTag } from "@/types/formattersTypes"
+import { TerminationItemShape, TerminationTag } from "@/types/formattersTypes"
 
 import { ItemViewProps } from "./FormattedItemList";
 import { UseFormReturnType } from "@mantine/form";

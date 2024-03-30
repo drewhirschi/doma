@@ -1,24 +1,27 @@
-import { GetInputProps } from "@mantine/form/lib/types";
-import { Select } from "@mantine/core";
+import { Select, SelectProps } from "@mantine/core";
 
-function strToNullableBool(str: string | null | undefined) {
+function strToNullableBool(str: string | null) {
     if (str === "true") return true
     if (str === "false") return false
     return null
 }
 
+interface BoolSelectProps extends Omit<SelectProps, 'onChange'> {
+    onChange: (value: boolean | null) => void;
+  }
 
-export function BoolSelect({ formInputProps }: { formInputProps: GetInputProps<any> }) {
-
+export function BoolSelect(props:BoolSelectProps) {
 
 
     return (
         <Select
-            label="Expired"
             placeholder="N/A"
-            {...formInputProps}
-            
+            {...props}
+            onChange={(value) => {
+                props.onChange(strToNullableBool(value))
+            }}
             clearable
             data={[{ label: "Yes", value: 'true' }, { label: "No", value: 'false' },]}
-        />)
+        />
+    )
 }

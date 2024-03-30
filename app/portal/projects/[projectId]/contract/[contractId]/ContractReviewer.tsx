@@ -252,7 +252,7 @@ export function ContractReviewer(props: Props) {
 
             <PanelGroup direction="horizontal">
                 <Panel defaultSize={40} minSize={20} style={{ height: "100dvh" }}>
-                    <Stack justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
+                    <Stack pb={"lg"} justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
                         <Group mt={"md"}>
                             <BackButton href={backUrl} style={{ alignSelf: "flex-start" }} />
                             {savingNotes ? <IconRefresh color="gray" size={20} /> : <IconCloudCheck color="gray" size={20} />}
@@ -357,6 +357,7 @@ export function ContractReviewer(props: Props) {
                         <ScrollArea
                             offsetScrollbars
                             h={"100%"}
+                            // pl={"xs"}
                         >
 
 

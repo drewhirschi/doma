@@ -6,7 +6,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedAgreementInfo } from "./AgreementInfo";
 import { FormattedAssignability } from "./Assignability";
 import { FormattedGeneric } from "./Generic";
-import { FormattedInfoView } from "./FormattedItemView";
+import { FormattedInfoView } from "./FormattedItemSingle";
 import { FormattedIpOwnership } from "./IpOwnership"
 import { FormattedItemList } from "./FormattedItemList";
 import { FormattedLicense } from "./License";
@@ -15,7 +15,6 @@ import { FormattedSourceCode } from "./SourceCode";
 import { FormattedSummaryList } from "./SummaryList";
 import { FormattedTerm } from "./Term";
 import { FormattedTermination } from "./Termination";
-import { FormattedTrojans } from "./Trojans";
 import { FormatterKeys } from "@/types/enums";
 import { FormatterWithInfo } from "@/types/complex";
 import { UnknownFormatter } from "./UnknownFormatter";
@@ -46,26 +45,19 @@ export function FormatterSwitch({ formatter, singleRun, handleSave, annotations,
 
             case FormatterKeys.termination:
                 return FormattedTermination
-            // case FormatterKeys.license:
-            //     return <FormattedLicense
-            //         handleSave={handleSave}
-            //         info={formatter.formatted_info}
-            //     />;
-            // case FormatterKeys.sourceCode:
-            //     return <FormattedSourceCode
-            //         handleSave={handleSave}
-            //         info={formatter.formatted_info}
-            //     />;
-            // case FormatterKeys.ipOwnership:
-            //     return (<FormattedIpOwnership
-            //         info={formatter.formatted_info}
-            //         handleSave={handleSave}
-            //     />);
-            // case FormatterKeys.paymentTerms:
-            //     return <FormattedPaymentTerms
-            //         handleSave={handleSave}
-            //         info={formatter.formatted_info}
-            //     />;
+
+            case FormatterKeys.license:
+                return FormattedLicense
+
+            case FormatterKeys.sourceCode:
+                return FormattedSourceCode
+
+            case FormatterKeys.ipOwnership:
+                return FormattedIpOwnership
+
+            case FormatterKeys.paymentTerms:
+                return FormattedPaymentTerms
+
 
             //warranties needs custom
             // limitaion of liability needs custom    
@@ -74,32 +66,22 @@ export function FormatterSwitch({ formatter, singleRun, handleSave, annotations,
             //needs custome
 
 
+            case FormatterKeys.convenantNotToSue:
+            case FormatterKeys.mostFavoredNation:
+            case FormatterKeys.nonSolicitHire:
+            case FormatterKeys.rightOfFirstRefusal:
 
-            // case FormatterKeys.mostFavoredNation:
-            // case FormatterKeys.nonSolicitHire:
-            // case FormatterKeys.rightOfFirstRefusal:
 
 
+            case FormatterKeys.nonCompete:
+            case FormatterKeys.trojans:
+            case FormatterKeys.effectsOfTransaction:
+                return FormattedSummaryList
+            case FormatterKeys.governingLaw:
+                return FormattedGeneric
 
-            // case FormatterKeys.nonCompete:
-            // case FormatterKeys.trojans:
-            // case FormatterKeys.effectsOfTransaction:
-            //     return <FormattedSummaryList
-            //         handleSave={handleSave}
-            //         info={formatter.formatted_info}
-            //         annotations={annotations}
-            //         removeAnnotation={removeAnnotation}
-            //     />;
-
-            // case FormatterKeys.assignability:
-            //     return <FormattedAssignability
-            //         handleSave={handleSave}
-            //         info={formatter.formatted_info}
-            //         annotations={annotations}
-            //         removeAnnotation={removeAnnotation}
-
-            //     />
-            // case FormatterKeys.governingLaw:
+            case FormatterKeys.assignability:
+                return FormattedAssignability
             default:
                 return UnknownFormatter
         }
@@ -118,13 +100,15 @@ export function FormatterSwitch({ formatter, singleRun, handleSave, annotations,
                 contractId={contractId}
                 //@ts-ignore
                 ItemView={insideView()}
-                />;
-            } else {
-                return <FormattedInfoView
+            />;
+        } else {
+            return <FormattedInfoView
                 handleSave={handleSave}
                 info={formatter.formatted_info}
                 annotations={annotations}
                 removeAnnotation={removeAnnotation}
+                formatterKey={formatter.key}
+                contractId={contractId}
                 //@ts-ignore
                 ItemView={insideView()}
             />

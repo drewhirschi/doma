@@ -103,7 +103,7 @@ ${ei.text}
 
         default:
             const shape = getFormatterShape(formatter_key)
-            res = await getDataFormatted(formatter_key, zodObjectToXML(shape), shape, sb, contractId, targetEntityName, input)
+            res = await getDataFormatted(zodObjectToXML(shape), shape, targetEntityName, input)
             break;
     }
     return res

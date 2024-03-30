@@ -19,30 +19,44 @@ export interface FormatterViewWrapperProps {
     annotations: Annotation_SB[]
     removeAnnotation: (id: string) => void
     ItemView: React.ComponentType<ViewProps<any>>
+    formatterKey: string
+    contractId: string
 }
 
-export function FormattedInfoView({ info, handleSave, annotations, removeAnnotation, ItemView }: FormatterViewWrapperProps) {
+export function FormattedInfoView({ info, handleSave, annotations, removeAnnotation, ItemView, formatterKey, contractId }: FormatterViewWrapperProps) {
     const data = info[0]?.data
     const form = useForm({
         initialValues: data
-      
+
     });
     useEffect(() => {
         form.setInitialValues(data)
     }, [data])
-   
+
 
 
     const debouncedSave = useDebouncedCallback(async () => {
 
-        console.log("saving", [{...info[0], data: form.values}])
-
-        await handleSave([{...info[0], data: form.values}])
+        if (info[0] === undefined) {
+            info.push({
+                contract_id: contractId,
+                formatter_key: formatterKey,
+                data: {},
+                created_at: new Date().toISOString(),
+                id: 0
+            })
+        }
         
+        
+        info[0].data = form.values
+
+
+        await handleSave(info)
+
 
     }, 600)
 
-    async function handleChildFormChange()  {
+    async function handleChildFormChange() {
         try {
             console.log('got change')
             debouncedSave()

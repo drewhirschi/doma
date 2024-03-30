@@ -240,16 +240,16 @@ async function saveExtraction(supabase: SupabaseClient<Database>, contractId: st
         return refs
     })
 
-    const { error: insertRelaitonshipError } = await supabase
-        .from('line_ref')
-        .insert(eiRefs);
+    // const { error: insertRelaitonshipError } = await supabase
+    //     .from('line_ref')
+    //     .insert(eiRefs);
 
 
-    if (insertRelaitonshipError) {
-        console.error('Error inserting data:', insertRelaitonshipError);
-    } else {
-        console.log(`Inserted ${eiRefs.length} line references`);
-    }
+    // if (insertRelaitonshipError) {
+    //     console.error('Error inserting data:', insertRelaitonshipError);
+    // } else {
+    //     console.log(`Inserted ${eiRefs.length} line references`);
+    // }
 
 }
 

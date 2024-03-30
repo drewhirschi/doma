@@ -35,6 +35,7 @@ export interface ListFormatterViewProps {
 
 export function FormattedItemList({ info, handleSave, annotations, removeAnnotation, formatterKey, contractId, removeItem, ItemView }: ListFormatterViewProps) {
     const form = useForm({
+        name: formatterKey,
         initialValues: {
             infos: info
         },
@@ -76,7 +77,7 @@ export function FormattedItemList({ info, handleSave, annotations, removeAnnotat
 
             <Stack gap={"lg"}>
                 {form.values?.infos.map((info, i) => (
-                    <Box key={"termination" + i.toString()} p="sm"
+                    <Box key={formatterKey + i.toString()} p="sm"
                     >
                         <Group justify="space-between">
                             <Title order={4}>Item {i + 1}</Title>
@@ -95,6 +96,7 @@ export function FormattedItemList({ info, handleSave, annotations, removeAnnotat
                             annotations={annotations.filter(a => a.formatter_item_id === info.id)}
                             removeAnnotation={removeAnnotation}
                         />
+                        {/* @ts-ignore */}
                         {<ItemView index={i} form={form} onChange={handleChildFormChange} />}
                     </Box>
 
@@ -108,10 +110,7 @@ export function FormattedItemList({ info, handleSave, annotations, removeAnnotat
                             formatter_key: formatterKey,
                             created_at: new Date().toISOString(),
                             id: info.length == 0 ? 0 : Math.max(...info.map(fi => fi.id)) + 1,
-                            data: {
-                                summary: "",
-                                tag: null
-                            }
+                            data: { }
 
                         }
                         form.insertListItem('infos', newItem);

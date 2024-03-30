@@ -2,7 +2,7 @@ import { Anchor, Badge, Button, SimpleGrid, Stack, Text, TextInput, Textarea, Ti
 
 import { AgreementInfoFormatResponse } from "@/types/formattersTypes"
 import { DatePickerInput } from "@mantine/dates";
-import { ViewProps } from "./FormattedItemView";
+import { ViewProps } from "./FormattedItemSingle";
 
 export function FormattedAgreementInfo({ form, onChange }: ViewProps<AgreementInfoFormatResponse>) {
     
