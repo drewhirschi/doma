@@ -136,8 +136,8 @@ export function ContractReviewer(props: Props) {
         }
     }
 
-    async function handleAddHighlight(highlight: { position: ScaledPosition, text: string, formatterKey: string, itemIndex: number }) {
-        const { position, text, formatterKey, itemIndex } = highlight
+    async function handleAddHighlight(highlight: { position: ScaledPosition, text: string, formatterKey: string, itemId: number }) {
+        const { position, text, formatterKey, itemId: itemIndex } = highlight
 
 
         const id: string = window.crypto.randomUUID()
@@ -205,9 +205,9 @@ export function ContractReviewer(props: Props) {
 
             if (formattedInfoRes.ok.length > 0) {
                 setFormatters((prevState) => {
-                    const updatedFormatters =  prevState.map(formatter => {
-                        if (formatter.key === formatterKey) {
-                            formatter.formatted_info[itemIndex].data = formattedInfoRes.ok[0]
+                    const updatedFormatters = prevState.map(formatter => {
+                        if (formatter.key === formatterKey &&  formatter.formatted_info.find(fi => fi.id == itemIndex)) {
+                            formatter.formatted_info.find(fi => fi.id == itemIndex)!.data = formattedInfoRes.ok[0]
                         }
                         return formatter
                     })
@@ -358,7 +358,7 @@ export function ContractReviewer(props: Props) {
                         <ScrollArea
                             offsetScrollbars
                             h={"100%"}
-                            // pl={"xs"}
+                        // pl={"xs"}
                         >
 
 

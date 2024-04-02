@@ -10,7 +10,6 @@ import { revalidatePath } from "next/cache"
 import { serverActionClient } from "@/supabase/ServerClients"
 import { zodObjectToXML } from "@/zodUtils"
 
-// import {} from 'openai'
 export async function reviewContractAction(contractId: string) {
     const supabase = serverActionClient()
 

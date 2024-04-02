@@ -23,7 +23,7 @@ interface Props {
     pdfBase64: string
     contract: Contract_SB & { annotation: (Annotation_SB & { contract_line: ContractLine_SB[] })[] }
     highlights: Annotation_SB[]
-    handleAddHighlight: (highlight: { position: any, text: string, formatterKey: string, itemIndex: number }) => void
+    handleAddHighlight: (highlight: { position: any, text: string, formatterKey: string, itemId: number }) => void
     handleRemoveHighlight: (id: string) => void
     formatters: FormatterWithInfo[]
 
@@ -180,7 +180,7 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
                                                     }
                                                     const handleClick = (itemIndex: number) => {
-                                                        handleAddHighlight({ formatterKey: formatter.key, text: content.text ?? "", position, itemIndex: itemIndex });
+                                                        handleAddHighlight({ formatterKey: formatter.key, text: content.text ?? "", position, itemId: itemIndex });
                                                         hideTipAndSelection();
 
                                                     }
