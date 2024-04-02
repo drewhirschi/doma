@@ -1,6 +1,4 @@
-import { ActionIcon, Anchor, Group, Stack, Text, Title } from "@mantine/core";
-import { AgreementInfoFormatResponse, IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes";
-import { Icon3dRotate, IconPrompt } from "@tabler/icons-react";
+import { Group, Loader, Stack, Text, Title } from "@mantine/core";
 
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedAgreementInfo } from "./AgreementInfo";
@@ -18,8 +16,6 @@ import { FormattedTermination } from "./Termination";
 import { FormatterKeys } from "@/types/enums";
 import { FormatterWithInfo } from "@/types/complex";
 import { UnknownFormatter } from "./UnknownFormatter";
-import { getFormatterShape } from "@/shared/getFormatterShape";
-import { hasItemsChild } from "@/zodUtils";
 
 interface Props {
     formatter: FormatterWithInfo,
@@ -28,11 +24,11 @@ interface Props {
     annotations: Annotation_SB[]
     removeAnnotation: (id: string) => Promise<void>
     removeItem: (id: number) => Promise<void>
-
+    isLoading: boolean
     contractId: string
 }
 
-export function FormatterSwitch({ formatter, singleRun, handleSave, annotations, removeAnnotation, contractId, removeItem }: Props) {
+export function FormatterSwitch({ formatter, isLoading, handleSave, annotations, removeAnnotation, contractId, removeItem }: Props) {
 
     const insideView = () => {
 
@@ -89,7 +85,7 @@ export function FormatterSwitch({ formatter, singleRun, handleSave, annotations,
 
     function body() {
 
-        if (hasItemsChild(getFormatterShape(formatter.key))) {
+        if (formatter.hitems) {
             return <FormattedItemList
                 handleSave={handleSave}
                 info={formatter.formatted_info}
@@ -119,6 +115,7 @@ export function FormatterSwitch({ formatter, singleRun, handleSave, annotations,
         <Stack gap={4}>
             <Group>
                 <Title order={3}>{formatter.display_name}</Title>
+                {isLoading && <Loader size="xs"/>}
                 {/* <ActionIcon size={"sm"}
                     onClick={() => {
                         singleRun(formatter.key)

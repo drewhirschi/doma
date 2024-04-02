@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache"
 import { serverActionClient } from "@/supabase/ServerClients"
 import { zodObjectToXML } from "@/zodUtils"
 
+// import {} from 'openai'
 export async function reviewContractAction(contractId: string) {
     const supabase = serverActionClient()
 
@@ -72,7 +73,7 @@ export async function format(formatterKey: string, contractId: string, projectId
     target ??= data?.target.join(", ")
 
 
-    const res = await getDataFormatted(zodObjectToXML(getFormatterShape(formatterKey)), getFormatterShape(formatterKey), target ?? "No target found", dataInput)
+    const res = await getDataFormatted(zodObjectToXML(getFormatterShape(formatterKey)), getFormatterShape(formatterKey), target ?? "No target found", dataInput, "gpt-3.5-turbo")
     // revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
     return res

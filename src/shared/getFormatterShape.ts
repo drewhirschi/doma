@@ -1,14 +1,11 @@
-import { AgreementInfoShape, AssignabilityShape, CovenantNotToSueShape, EffectsOfTransactionShape, GoverningLawShape, IPOwnershipShape, IndemnitiesShape, LicenseShape, LimitationOfLiabilityShape, MostFavoredNationShape, NonCompeteShape, NonSolicitHireShape, PaymentTermsShape, RightOfFirstRefusalShape, SourceCodeShape, TermShape, TerminationShape, TrojanShape, WarrantyShape } from "@/types/formattersTypes";
+import { AgreementInfoShape, AssignabilityShape, CovenantNotToSueShape, EffectsOfTransactionShape, GoverningLawShape, IPOwnershipItemShape, IPOwnershipShape, IndemnitiesShape, LicenseItemShape, LicenseShape, LimitationOfLiabilityShape, MostFavoredNationShape, NonCompeteShape, NonSolicitHireShape, PaymentTermsItemShape, PaymentTermsShape, RightOfFirstRefusalShape, SourceCodeShape, TermShape, TerminationShape, TrojanShape, WarrantyShape } from "@/types/formattersTypes";
 
 import { FormatterKeys } from "@/types/enums";
 import { z } from "zod";
 
 export function getFormatterShape(formatterKey: string) {
-    
-    switch (formatterKey) {
-        case FormatterKeys.ipOwnership:
-           return IPOwnershipShape
 
+    switch (formatterKey) {
         case FormatterKeys.agreementInfo:
             return AgreementInfoShape
 
@@ -19,13 +16,19 @@ export function getFormatterShape(formatterKey: string) {
             return TerminationShape
 
         case FormatterKeys.license:
-            return LicenseShape
+            // return LicenseShape
+            return LicenseItemShape
 
         case FormatterKeys.sourceCode:
             return SourceCodeShape
 
+        case FormatterKeys.ipOwnership:
+            // return IPOwnershipShape
+            return IPOwnershipItemShape
+
         case FormatterKeys.paymentTerms:
-            return PaymentTermsShape
+            // return PaymentTermsShape
+            return PaymentTermsItemShape
 
         case FormatterKeys.convenantNotToSue:
             return CovenantNotToSueShape
@@ -35,7 +38,7 @@ export function getFormatterShape(formatterKey: string) {
 
         case FormatterKeys.nonSolicitHire:
             return NonSolicitHireShape
-           
+
         case FormatterKeys.rightOfFirstRefusal:
             return RightOfFirstRefusalShape
 
@@ -62,9 +65,10 @@ export function getFormatterShape(formatterKey: string) {
 
         case FormatterKeys.assignability:
             return AssignabilityShape
-            
+
 
         default:
+            console.warn(`Formatter key ${formatterKey} not found`)
             return z.object({})
     }
 }

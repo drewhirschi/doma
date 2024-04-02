@@ -17,7 +17,6 @@ import { DummyMenu } from "@/components/DummyMenu";
 import { FormatterWithInfo } from "@/types/complex";
 import { browserClient } from "@/supabase/BrowerClients";
 import { getFormatterShape } from "@/shared/getFormatterShape";
-import { hasItemsChild } from "@/zodUtils";
 
 interface Props {
     pdfUrl: string
@@ -185,10 +184,10 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                                         hideTipAndSelection();
 
                                                     }
-                                                    if (hasItemsChild(getFormatterShape(formatter.key))) return (
+                                                    if (formatter.hitems) return (
                                                         <NavLink key={i} {...props} component="button">
-                                                            {Array.from({ length: formatter.formatted_info.length }).map((_, j) => (
-                                                                <NavLink key={`${i}.${j}`} label={`Item ${j + 1}`} component="button" onClick={() => handleClick(formatter.formatted_info[j].id)} />
+                                                            {formatter.formatted_info.map((fi, j) => (
+                                                                <NavLink key={`${i}.${j}`} label={`Item ${j + 1}`} component="button" onClick={() => handleClick(fi.id)} />
                                                             ))}
                                                             <NavLink key={i} label={`New item`} component="button" onClick={() => handleClick(formatter.formatted_info.length == 0 ? 0 : Math.max(...formatter.formatted_info.map(fi => fi.id)) + 1)} />
 

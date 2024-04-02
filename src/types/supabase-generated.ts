@@ -353,16 +353,19 @@ export type Database = {
       formatters: {
         Row: {
           display_name: string
+          hitems: boolean
           key: string
           priority: number
         }
         Insert: {
           display_name: string
+          hitems?: boolean
           key?: string
           priority?: number
         }
         Update: {
           display_name?: string
+          hitems?: boolean
           key?: string
           priority?: number
         }

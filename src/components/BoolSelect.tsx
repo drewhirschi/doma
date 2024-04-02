@@ -21,6 +21,8 @@ export function BoolSelect(props:BoolSelectProps) {
                 props.onChange(strToNullableBool(value))
             }}
             clearable
+            value={props.value?.toString()}
+            // @ts-ignore
             data={[{ label: "Yes", value: 'true' }, { label: "No", value: 'false' },]}
         />
     )

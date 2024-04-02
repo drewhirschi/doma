@@ -125,11 +125,12 @@ export async function formatPipeline(sb: SupabaseClient<Database>, contractId: s
     return results
 }
 
-export async function generateAgentResponse(sysMessage: string, input: string): Promise<IResp<any>> {
+export async function generateAgentResponse(sysMessage: string, input: string, model = "gpt-4-turbo-preview"): Promise<IResp<any>> {
     const oaiClient = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
 
+    try {
     const res = await oaiClient.chat.completions.create({
         messages: [{
             role: 'system',
@@ -139,12 +140,11 @@ export async function generateAgentResponse(sysMessage: string, input: string): 
             role: "user",
             content: input
         }],
-        model: 'gpt-4-turbo-preview',
+        model,
         temperature: 0,
         response_format: { 'type': "json_object" }
     });
 
-    try {
         if (!res.choices[0].message.content) {
             return rerm("No formatter message content", {})
         }
@@ -152,7 +152,7 @@ export async function generateAgentResponse(sysMessage: string, input: string): 
 
         return rok(json);
     } catch (error) {
-        return rerm("Error parsing formatter response", { error })
+        return rerm("Error generating agent response", { error })
     }
 
 }
@@ -166,11 +166,11 @@ Do not provide explanations, just respond with JSON according to the schema. Whe
 }
 
 //should this be allows to return multipl items? might want to have a versino for single and multiple
-export async function getDataFormatted(instruction: string, responseShape: ZodObject<any>, targetEntityName: string, dataInput: string): Promise<IResp<any[]>> {
+export async function getDataFormatted(instruction: string, responseShape: ZodObject<any>, targetEntityName: string, dataInput: string, model?: string | "gpt-3.5-turbo"): Promise<IResp<any[]>> {
 
 
 
-    const res = await generateAgentResponse(getSystemMessage(targetEntityName, instruction), dataInput)
+    const res = await generateAgentResponse(getSystemMessage(targetEntityName, instruction), dataInput, model)
 
     if (res.error) {
         return res

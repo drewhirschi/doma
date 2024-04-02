@@ -61,6 +61,7 @@ export function ContractReviewer(props: Props) {
 
     const [highlights, setHighlights] = useState<Annotation_SB[]>(annotations)
     const [savingNotes, setSavingNotes] = useState(false)
+    const [loadingFormatters, setLoadingFormatters] = useState<string[]>([])
     const supabase = browserClient()
 
 
@@ -68,8 +69,6 @@ export function ContractReviewer(props: Props) {
 
 
 
-    const router = useRouter()
-    const pathname = usePathname()
 
 
 
@@ -195,9 +194,9 @@ export function ContractReviewer(props: Props) {
 
 
 
-
+            setLoadingFormatters((prevState) => prevState.concat([formatterKey]))
             const formattedInfoRes = await actions.format(formatterKey, contract.id, projectId, contract.target, inputData)
-
+            setLoadingFormatters((prevState) => prevState.filter(f => f !== formatterKey))
             if (formattedInfoRes.error) {
                 // @ts-ignore
                 throw new Error(formattedInfoRes.error.message)
@@ -206,13 +205,15 @@ export function ContractReviewer(props: Props) {
 
             if (formattedInfoRes.ok.length > 0) {
                 setFormatters((prevState) => {
-                    return prevState.map(formatter => {
+                    const updatedFormatters =  prevState.map(formatter => {
                         if (formatter.key === formatterKey) {
                             formatter.formatted_info[itemIndex].data = formattedInfoRes.ok[0]
                         }
                         return formatter
                     })
+                    return updatedFormatters
                 })
+                console.log(formatters)
                 const upsertRes = await supabase.from("formatted_info").update({ data: formattedInfoRes.ok[0] })
                     .eq("id", itemIndex)
                     .eq("formatter_key", formatterKey)
@@ -373,6 +374,7 @@ export function ContractReviewer(props: Props) {
                                             handleSave={async (items: FormattedInfo_SB[]) => handleSaveFormattedItems(f.key, items)}
                                             formatter={f}
                                             contractId={contract.id}
+                                            isLoading={loadingFormatters.includes(f.key)}
                                             key={f.key}
                                             singleRun={() => {
                                                 // actions.format(f.key, contract.id, projectId, contract.target)

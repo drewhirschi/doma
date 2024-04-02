@@ -1,12 +1,9 @@
-import { Anchor, Badge, Button, SimpleGrid, Stack, Text, TextInput, Textarea, Title } from "@mantine/core"
 import { UseFormReturnType, useForm } from '@mantine/form';
-import { useEffect, useState } from "react";
 
-import { AgreementInfoFormatResponse } from "@/types/formattersTypes"
 import { AnnotationsList } from "./AnnotationsList";
-import { DatePickerInput } from "@mantine/dates";
 import { notifications } from "@mantine/notifications";
 import { useDebouncedCallback } from "use-debounce";
+import { useEffect } from "react";
 
 export interface ViewProps<T> {
     form: UseFormReturnType<T>
@@ -30,7 +27,7 @@ export function FormattedInfoView({ info, handleSave, annotations, removeAnnotat
 
     });
     useEffect(() => {
-        form.setInitialValues(data)
+        form.setValues(data)
     }, [data])
 
 

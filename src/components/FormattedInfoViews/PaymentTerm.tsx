@@ -17,12 +17,13 @@ export function FormattedPaymentTerms({ form, index, onChange }: ItemViewProps<z
         <Stack>
             <Textarea
                 // label="Summary"
-                {...form.getInputProps(`items.${index}.data.summary`)}
+                {...form.getInputProps(`infos.${index}.data.summary`)}
+                autosize
             />
             <SimpleGrid cols={2} spacing="md" style={{ alignItems: "center" }}>
                 <Select
                     label="Direction"
-                    {...form.getInputProps(`items.${index}.data.direction`)}
+                    {...form.getInputProps(`infos.${index}.data.direction`)}
                     data={Object.keys(PaymentTermsDirection).map(k => ({ value: k, label: k.charAt(0) + k.slice(1).toLowerCase() }))}
                 />
 

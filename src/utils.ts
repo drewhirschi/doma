@@ -68,3 +68,28 @@ export function rerm<TError = any>(message: string, anyErrorData: TError, errorC
 }
 
 
+
+
+
+export function rangeToStringWithNewLines(range: Range): string {
+    const fragment = range.cloneContents();
+    const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    let text = '';
+    let currentNode: Node | null = walker.currentNode;
+  
+    while (currentNode) {
+      if (currentNode.nodeType === Node.TEXT_NODE) {
+        text += currentNode.textContent;
+      } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
+        const element = currentNode as Element;
+        // Check if the element is a block-level element
+        if (['DIV', 'P', 'BR'].includes(element.tagName)) {
+          text += '\n'; // Add a newline for block-level elements
+        }
+      }
+      currentNode = walker.nextNode();
+    }
+  
+    return text;
+  }
+  

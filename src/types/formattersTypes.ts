@@ -168,7 +168,7 @@ export const PaymentTermsItemShape = z.object({
     summary: z.string()
         .describe(`Summarize and label the payment obligations from the payment term sections provided below. `),
     direction: z.nativeEnum(PaymentTermsDirection)
-        .describe(`"INBOUND: " if it is directed to the Target Entity or "OUTBOUND"if it is given by the Target Entity. `),
+        .describe(`"INBOUND" if it is directed to the Target Entity or "OUTBOUND" if it is given by the Target Entity. `),
     royalty: z.boolean()
         .describe(`True if the payment is a royalty. Otherwise false.`),
 })
