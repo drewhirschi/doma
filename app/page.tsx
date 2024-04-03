@@ -146,7 +146,11 @@ export default function HomePage() {
         </div>
         <WaitlistSignup
           buttonText="Join the Waitlist"
-        />
+        /> 
+        <div>
+
+        For questions or comments, please email <Anchor  href="mailto:ezra@parslai.com">ezra@parslai.com</Anchor>
+        </div>
       </Stack>
 
       <Box bg={"dark.7"} mih={500} c={"white"}>
