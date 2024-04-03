@@ -10,7 +10,7 @@ export function AnnotationsList({ annotations, removeAnnotation }: Props) {
     return (
         <Stack gap={2} >
 
-            {annotations.map((ann) => (
+            {annotations.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).map((ann) => (
 
                 <AnnotationReference
                     key={ann.id}

@@ -65,15 +65,21 @@ export async function runFormatters(contractId: string, projectId: string, targe
 
 
 }
-export async function format(formatterKey: string, contractId: string, projectId: string, target: string | null | undefined, dataInput:string) : Promise<IResp<any[]>> {
+export async function format(formatterKey: string, contractId: string, projectId: string, dataInput: string): Promise<IResp<any[]>> {
     const supabase = serverActionClient()
 
-    const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
-    target ??= data?.target.join(", ")
+    // const projectq = await supabase.from('project').select().eq('id', projectId).single()
+    const formatterq = await supabase.from('formatters').select().eq('key', formatterKey).single()
+    const contractq = await supabase.from('contract').select("*, formatted_info(*)").eq('id', contractId).single()
+
+    if (formatterq.error) {
+        return { error: formatterq.error }
+    } else if (contractq.error) {
+        return { error: contractq.error }
+    }
 
 
-    const res = await getDataFormatted(zodObjectToXML(getFormatterShape(formatterKey)), getFormatterShape(formatterKey), target ?? "No target found", dataInput, "gpt-3.5-turbo")
-    // revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
+    const res = await getDataFormatted(formatterq.data, contractq.data, dataInput, true)
 
     return res
 

@@ -1,12 +1,13 @@
-import { AgreementInfoFormatResponse, AgreementInfoShape, AssignabilityFormatResponse, AssignabilityShape, CovenantNotToSueFormatResponse, CovenantNotToSueShape, EffectsOfTransactionFormatResponse, EffectsOfTransactionShape, GenericFormatResponse, GenericFormatResponseShape, GoverningLawFormatResponse, GoverningLawShape, IPOwnershipFormatResponse, IPOwnershipShape, IndemnitiesFormatResponse, IndemnitiesShape, LicenseFormatResponse, LicenseShape, LimitationOfLiabilityFormatResponse, LimitationOfLiabilityShape, MostFavoredNationFormatResponse, MostFavoredNationShape, NonSolicitHireFormatResponse, NonSolicitHireShape, PaymentTermsFormatResponse, PaymentTermsShape, RightOfFirstRefusalFormatResponse, RightOfFirstRefusalShape, SourceCodeFormatResponse, SourceCodeShape, TermFormatResponse, TermShape, TerminationFormatResponse, TerminationShape, TrojanFormatResponse, TrojanShape, WarrantyFormatResponse, WarrantyShape } from "@/types/formattersTypes";
 import { Database, Json } from "@/types/supabase-generated";
 import { IResp, ISuccessResp, isEmptyObject, objectToXml, rerm, rok } from "@/utils";
 import { ZodObject, ZodTypeAny } from "zod";
 import { hasItemsChild, zodObjectToXML } from "@/zodUtils";
 
+import { ContractWithFormattedInfo } from "@/types/complex";
 import { FormatterKeys } from "@/types/enums";
 import OpenAI from "openai";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { buildListShape } from "@/types/formattersTypes";
 import { getFormatterShape } from "@/shared/getFormatterShape";
 import { z } from "zod"
 
@@ -20,7 +21,7 @@ interface IFormatter<T> {
 
 
 export async function pipelineRunFormatter(sb: SupabaseClient<Database>, formatter_key: string, contractId: string, targetEntityName: string): Promise<IResp<any | null>> {
-   
+
 
 
 
@@ -65,48 +66,7 @@ ${ei.text}
 
 
 
-    let res
-    switch (formatter_key) {
-
-        case FormatterKeys.term:
-            input += `Todays date is ${new Date().toISOString()}`;
-
-        case FormatterKeys.assignability:
-            // const assignability = new Assignability()
-            // res = await assignability.run(oaiClient, sb, contractId, targetEntityName)
-
-            // const fiDeps = await sb.from("formatted_info").select("*").eq("contract_id", contractId).eq("formatter_key", "governingLaw").eq("formatter_key", "license")
-
-            // if (fiDeps.error) {
-            //     return rerm("Error fetching related formatted info.", fiDeps.error)
-            // }
-    
-    
-            // const input = `
-            // ${objectToXml(fiDeps.data.find((fi) => fi.formatter_key === "governingLaw")?.data, "governingLaw")}
-            // ${objectToXml(fiDeps.data.find((fi) => fi.formatter_key === "license")?.data, "license")}`
-    
-            // this.instruction += input
-    
-            // const formattedAssignability = await runFormatterFromClass<AssignabilityFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
-    
-            // if (formattedAssignability.ok) {
-            //     const parse = TrojanShape.safeParse(formattedAssignability.ok)
-            //     if (!parse.success) {
-            //         return rerm("Error parsing assignability format", parse.error)
-            //     }
-            // }
-    
-            // return formattedAssignability
-            res = rerm("Not implemented", { formatter_key })
-            break;
-
-        default:
-            const shape = getFormatterShape(formatter_key)
-            res = await getDataFormatted(zodObjectToXML(shape), shape, targetEntityName, input)
-            break;
-    }
-    return res
+    return rok({})
 }
 
 export async function formatPipeline(sb: SupabaseClient<Database>, contractId: string, targetEntityName: string) {
@@ -131,19 +91,19 @@ export async function generateAgentResponse(sysMessage: string, input: string, m
     });
 
     try {
-    const res = await oaiClient.chat.completions.create({
-        messages: [{
-            role: 'system',
-            content: sysMessage
-        },
-        {
-            role: "user",
-            content: input
-        }],
-        model,
-        temperature: 0,
-        response_format: { 'type': "json_object" }
-    });
+        const res = await oaiClient.chat.completions.create({
+            messages: [{
+                role: 'system',
+                content: sysMessage
+            },
+            {
+                role: "user",
+                content: input
+            }],
+            model,
+            temperature: 0,
+            response_format: { 'type': "json_object" }
+        });
 
         if (!res.choices[0].message.content) {
             return rerm("No formatter message content", {})
@@ -158,19 +118,90 @@ export async function generateAgentResponse(sysMessage: string, input: string, m
 }
 
 
-function getSystemMessage(targetEntity: string, formatterInstruction: string) {
 
-    return `You are a meticulous M&A lawyer tasked with condensing and formatting key contract information pulled from the Target Entity's contracts.
-The Target Entity is "${targetEntity}". Counterparty is any party that is not a Target Entity. If only one party is named and the other party is given a generic title such as "you", "contracting party", "licensor" then that generic title should be assumed as the Target Entity.
-Do not provide explanations, just respond with JSON according to the schema. When a field is nullable, you must respond with the type or null.\n` + formatterInstruction
+
+
+export async function buildInstruction(formatter: Formatter_SB, contract: ContractWithFormattedInfo, singleMode: boolean): Promise<string> {
+
+    const agreementInfo = contract.formatted_info.find((fi) => fi.formatter_key === FormatterKeys.agreementInfo)
+
+    const agreementInfoStr = (!!agreementInfo && !isEmptyObject(agreementInfo.data))
+        ? objectToXml(agreementInfo.data, "agreementInfo")
+        : `The Target Entity is "${contract.target}". Counterparty is any party that is not a Target Entity.`
+
+    const schema = (singleMode || formatter.hitems)
+        ? getFormatterShape(formatter.key)
+        : buildListShape(getFormatterShape(formatter.key))
+
+
+    let inst = `You are a meticulous M&A lawyer tasked with condensing and formatting key contract information pulled from the Target Entity's contracts.
+
+        ${agreementInfoStr}
+       
+        
+        Do not provide explanations, just respond with JSON according to the schema. When a field is nullable, you must respond with the type or null.
+        
+        ${zodObjectToXML(schema)}`
+
+    let additionalInstructions = ""
+
+    switch (formatter.key) {
+
+        case FormatterKeys.term:
+            additionalInstructions += `Todays date is ${new Date().toISOString()}`;
+
+        //     case FormatterKeys.assignability:
+        //         // const assignability = new Assignability()
+        //         // res = await assignability.run(oaiClient, sb, contractId, targetEntityName)
+
+        //         // const fiDeps = await sb.from("formatted_info").select("*").eq("contract_id", contractId).eq("formatter_key", "governingLaw").eq("formatter_key", "license")
+
+        //         // if (fiDeps.error) {
+        //         //     return rerm("Error fetching related formatted info.", fiDeps.error)
+        //         // }
+
+
+        //         // const input = `
+        //         // ${objectToXml(fiDeps.data.find((fi) => fi.formatter_key === "governingLaw")?.data, "governingLaw")}
+        //         // ${objectToXml(fiDeps.data.find((fi) => fi.formatter_key === "license")?.data, "license")}`
+
+        //         // this.instruction += input
+
+        //         // const formattedAssignability = await runFormatterFromClass<AssignabilityFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
+
+        //         // if (formattedAssignability.ok) {
+        //         //     const parse = TrojanShape.safeParse(formattedAssignability.ok)
+        //         //     if (!parse.success) {
+        //         //         return rerm("Error parsing assignability format", parse.error)
+        //         //     }
+        //         // }
+
+        //         // return formattedAssignability
+        //         res = rerm("Not implemented", { formatter_key })
+        //         break;
+
+        // default:
+        //     const shape = getFormatterShape(formatter_key)
+        //     res = await getDataFormatted(zodObjectToXML(shape), shape, targetEntityName, input)
+        //     break;
+    }
+
+    if (additionalInstructions !== "")
+        inst += `<additionalInfo>\n${additionalInstructions}\n</additionalInfo>`
+
+    return inst
 }
 
 //should this be allows to return multipl items? might want to have a versino for single and multiple
-export async function getDataFormatted(instruction: string, responseShape: ZodObject<any>, targetEntityName: string, dataInput: string, model?: string | "gpt-3.5-turbo"): Promise<IResp<any[]>> {
+export async function getDataFormatted(formatter: Formatter_SB, contract: ContractWithFormattedInfo, dataInput: string, singleMode: boolean): Promise<IResp<any[]>> {
 
+    if (!contract.target) {
+        return rerm("Please set the target", {})
+    }
 
+    const instruction = await buildInstruction(formatter, contract, singleMode)
 
-    const res = await generateAgentResponse(getSystemMessage(targetEntityName, instruction), dataInput, model)
+    const res = await generateAgentResponse(instruction, dataInput)
 
     if (res.error) {
         return res
@@ -181,13 +212,14 @@ export async function getDataFormatted(instruction: string, responseShape: ZodOb
         return rok([])
     }
 
+    const responseShape = getFormatterShape(formatter.key)
     const parse = responseShape.safeParse(res.ok)
     if (!parse.success) {
         console.error("Failed to parse ", res.ok, parse.error.errors)
         return rerm("Incorrect shape", parse.error, "bad_shape")
     }
 
-    const formattedData:z.infer<typeof responseShape> = parse.data
+    const formattedData: z.infer<typeof responseShape> = parse.data
     return rok([formattedData])
 
 
@@ -220,6 +252,8 @@ export async function getDataFormatted(instruction: string, responseShape: ZodOb
     // return rok() 
 
 }
+
+
 
 
 

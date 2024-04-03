@@ -1,6 +1,11 @@
 import { ItemViewProps } from "@/components/FormattedInfoViews/FormattedItemList";
 import { z } from "zod";
 
+export function buildListShape(itemShape: z.ZodObject<any>, options?: { itemsDescription: string }) {
+    return z.object({
+        items: itemShape.array().describe(options?.itemsDescription ?? ""),
+    });
+}
 export interface IFormatResponse {
     summary: string;
 }
@@ -22,7 +27,11 @@ export type SummaryListFormatResponse = z.infer<typeof SummaryListShape>;
 export const AgreementInfoShape = z.object({
     title: z.string(),
     counter_party: z.string().nullable(),
+    alternate_counter_party_names: z.string().array()
+    .describe("list of any other names the counterparty is referred to as. These are often mentioned right aftet the counterparty's name in the agreement."),
     target_entity: z.string(),
+    alternate_target_entity_names: z.string().array()
+    .describe("list of any other names the target entity is referred to as. These are often mentioned right aftet the target's name in the agreement.  If only one party is named and the other party is given a generic title such as 'you', 'contracting party', 'licensor' then that generic title should be assumed as the Target Entity."),
     effective_date: z.coerce.date().nullable()
         .describe("What date did or will the agreement go into effect? Format the date as YYYY/MM/DD"),
     summary: z.string({ required_error: "Summary is required" })
@@ -191,40 +200,34 @@ export type CovenantNotToSueFormatResponse = z.infer<typeof CovenantNotToSueShap
 
 
 export const MostFavoredNationShape = z.object({
-    items: z.object({
         summary: z.string().describe("Summarzie the MFN clause."),
-    }).array().describe("List of Most Favored Nation clauses."),
 });
+
+// buildListShape(MostFavoredNationShape, {itemsDescription: "List of Most Favored Nation clauses."})
 
 export type MostFavoredNationFormatResponse = z.infer<typeof MostFavoredNationShape>;
 
 
 
 export const NonSolicitHireShape = z.object({
-    items: z.object({
         summary: z.string().describe("Summarize the non-solicitation of hire clause."),
-    }).array().describe("List of summaries of non-solicitation of hire clauses."),
 });
-export type NonSolicitHireFormatResponse = z.infer<typeof NonSolicitHireShape>;
+buildListShape(NonSolicitHireShape, { itemsDescription: "List of summaries of non-solicitation of hire clauses." })
 
 
 
 export const RightOfFirstRefusalShape = z.object({
-    items: z.object({
         summary: z.string().describe("Summarize the right of first refusal clause."),
-    }).array().describe("List of summaries of right of first refusal clauses."),
 });
-export type RightOfFirstRefusalFormatResponse = z.infer<typeof RightOfFirstRefusalShape>;
+// export type RightOfFirstRefusalFormatResponse = z.infer<typeof RightOfFirstRefusalShape>;
 
 
 
 export const WarrantyShape = z.object({
-    items: z.object({
         summary: z.string().describe("Summarize the warranty"),
         noWaiver: z.boolean().describe("False if it says either “as is” or something along the lines of 'disclaims warranties'."),
-    }).array().describe("List of summaries of warranty."),
 });
-export type WarrantyFormatResponse = z.infer<typeof WarrantyShape>;
+// export type WarrantyFormatResponse = z.infer<typeof WarrantyShape>;
 
 
 

@@ -195,7 +195,7 @@ export function ContractReviewer(props: Props) {
 
 
             setLoadingFormatters((prevState) => prevState.concat([formatterKey]))
-            const formattedInfoRes = await actions.format(formatterKey, contract.id, projectId, contract.target, inputData)
+            const formattedInfoRes = await actions.format(formatterKey, contract.id, projectId, inputData)
             setLoadingFormatters((prevState) => prevState.filter(f => f !== formatterKey))
             if (formattedInfoRes.error) {
                 // @ts-ignore
