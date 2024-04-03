@@ -15,7 +15,7 @@ export function FormattedAssignability({ form, onChange }: ViewProps<z.infer<typ
     
 
             <Stack gap={4}>
-                <Textarea {...form.getInputProps('summary')} />
+                <Textarea autosize {...form.getInputProps('summary')} />
 
 
                 <SimpleGrid cols={2} spacing="md">

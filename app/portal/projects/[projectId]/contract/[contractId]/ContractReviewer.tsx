@@ -226,6 +226,8 @@ export function ContractReviewer(props: Props) {
 
 
         } catch (error) {
+            setLoadingFormatters((prevState) => prevState.filter(f => f !== formatterKey))
+
             notifications.show({
                 title: "Error",
                 message: "There was an error. Please try again later.",

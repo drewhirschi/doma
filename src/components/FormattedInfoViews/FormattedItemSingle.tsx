@@ -67,6 +67,9 @@ export function FormattedInfoView({ info, handleSave, annotations, removeAnnotat
         }
     }
 
+    if (info[0] === undefined) {
+        return null
+    }
 
 
     return (

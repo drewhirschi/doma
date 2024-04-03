@@ -9,6 +9,7 @@ import OpenAI from "openai";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { buildListShape } from "@/types/formattersTypes";
 import { getFormatterShape } from "@/shared/getFormatterShape";
+import { serverActionClient } from "@/supabase/ServerClients";
 import { z } from "zod"
 
 interface IFormatter<T> {
@@ -150,40 +151,12 @@ export async function buildInstruction(formatter: Formatter_SB, contract: Contra
         case FormatterKeys.term:
             additionalInstructions += `Todays date is ${new Date().toISOString()}`;
 
-        //     case FormatterKeys.assignability:
-        //         // const assignability = new Assignability()
-        //         // res = await assignability.run(oaiClient, sb, contractId, targetEntityName)
+        case FormatterKeys.assignability:
 
-        //         // const fiDeps = await sb.from("formatted_info").select("*").eq("contract_id", contractId).eq("formatter_key", "governingLaw").eq("formatter_key", "license")
+            additionalInstructions += `
+            ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === "governingLaw")?.data, "governingLaw")}
+            ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === "license")?.data, "license")}`
 
-        //         // if (fiDeps.error) {
-        //         //     return rerm("Error fetching related formatted info.", fiDeps.error)
-        //         // }
-
-
-        //         // const input = `
-        //         // ${objectToXml(fiDeps.data.find((fi) => fi.formatter_key === "governingLaw")?.data, "governingLaw")}
-        //         // ${objectToXml(fiDeps.data.find((fi) => fi.formatter_key === "license")?.data, "license")}`
-
-        //         // this.instruction += input
-
-        //         // const formattedAssignability = await runFormatterFromClass<AssignabilityFormatResponse>(this, oaiClient, sb, contractId, targetEntityName)
-
-        //         // if (formattedAssignability.ok) {
-        //         //     const parse = TrojanShape.safeParse(formattedAssignability.ok)
-        //         //     if (!parse.success) {
-        //         //         return rerm("Error parsing assignability format", parse.error)
-        //         //     }
-        //         // }
-
-        //         // return formattedAssignability
-        //         res = rerm("Not implemented", { formatter_key })
-        //         break;
-
-        // default:
-        //     const shape = getFormatterShape(formatter_key)
-        //     res = await getDataFormatted(zodObjectToXML(shape), shape, targetEntityName, input)
-        //     break;
     }
 
     if (additionalInstructions !== "")

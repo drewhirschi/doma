@@ -114,7 +114,10 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
     return (
         <Stack gap={4}>
             <Group>
-                <Title order={3}>{formatter.display_name}</Title>
+                <Title 
+                order={3}
+                c={formatter.formatted_info.length == 0 ? "gray" : "black"}
+                >{formatter.display_name}</Title>
                 {isLoading && <Loader size="xs"/>}
                 {/* <ActionIcon size={"sm"}
                     onClick={() => {

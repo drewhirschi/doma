@@ -101,7 +101,7 @@ export function FormattedItemList({ info, handleSave, annotations, removeAnnotat
                     </Box>
 
                 )) ?? []}
-                <Group justify="flex-end">
+                {/* <Group justify="flex-end">
 
                     <Button size="xs" variant="default" onClick={() => {
 
@@ -116,7 +116,7 @@ export function FormattedItemList({ info, handleSave, annotations, removeAnnotat
                         form.insertListItem('infos', newItem);
 
                     }}>Add</Button>
-                </Group>
+                </Group> */}
 
             </Stack>
         </form >

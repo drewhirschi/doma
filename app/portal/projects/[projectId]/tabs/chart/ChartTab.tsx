@@ -3,15 +3,15 @@
 import { Anchor, Table, TableScrollContainer, TableTbody, TableTh, TableThead, TableTr } from "@mantine/core";
 import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes";
 
+import { FormattedInfoView } from "./FormattedInfoView";
 import Link from "next/link";
 import classes from "./Chart.module.css"
 import { serverClient } from "@/supabase/ServerClients";
 
 interface Props {
     projectId: string
-    parslets: any[]
-    contracts: (Contract_SB & { contract_note: ContractNote_SB[] })[]
-    formatters: (Formatter_SB & { formatted_info: FormattedInfo_SB[] })[]
+    contracts: (Contract_SB)[]
+    formatters: (Formatter_SB & { formatted_info: (FormattedInfo_SB & { annotation: Annotation_SB[] })[] })[]
 }
 
 export default function Chart(props: Props) {
@@ -26,7 +26,11 @@ export default function Chart(props: Props) {
                 </Table.Td>
                 {props.formatters.map((formatter, i) => (
                     <Table.Td className={classes.tabledata} key={formatter.key + contract.id}>
-                        {(formatter.formatted_info.find((fi) => fi.contract_id == contract.id)?.data as unknown as IFormatResponse)?.summary ?? ""}
+                        {/* {(formatter.formatted_info.find((fi) => fi.contract_id == contract.id)?.data as unknown as IFormatResponse)?.summary ?? ""} */}
+                        <FormattedInfoView
+                            projectId={props.projectId}
+                            infoArray={formatter.formatted_info.filter(fi => fi.contract_id == contract.id)}
+                        />
                     </Table.Td>
                 ))}
             </Table.Tr>

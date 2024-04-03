@@ -114,7 +114,6 @@ export const LicenseItemShape = z.object({
     "PATENT" for a Patent license. 
     "TRADEMARK" for a Trademark license. 
     "SOURCE_CODE_LICENSE" for a Source Code license, not an object code license. 
-    "EXCLUSIVE" if a license is Exclusive. 
     "FEEDBACK" if the license is for using feedback, comments, or suggestions and not for software.`),
     exclusive: z.boolean().nullable(),
     lineRefs: z.number().array()
