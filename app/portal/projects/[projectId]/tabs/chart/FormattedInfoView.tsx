@@ -1,4 +1,14 @@
-import { AgreementInfoFormatResponse, AssignabilityShape, IPOwnershipItemShape, IpOwnershipType, LicenseDirection, LicenseItemShape, LicenseSuffix, PaymentTermsDirection, PaymentTermsItemShape } from "@/types/formattersTypes";
+import {
+    AgreementInfoFormatResponse,
+    AssignabilityShape,
+    IPOwnershipItemShape,
+    IpOwnershipType,
+    LicenseDirection,
+    LicenseItemShape,
+    LicenseSuffix,
+    PaymentTermsDirection,
+    PaymentTermsItemShape
+} from "@/types/formattersTypes";
 import { Anchor, Badge } from "@mantine/core";
 
 import { FormatterKeys } from "@/types/enums";
@@ -63,7 +73,7 @@ export function FormattedInfoView(props: Props) {
 
         return props.infoArray.map((info) => {
             const data = info.data as z.infer<typeof LicenseItemShape>
-            return <div>
+            return <div key={info.formatter_key + info.id}>
                 {data.exclusive && <Badge color="gray" mx={2}>Exclusive</Badge>}
                 {data.direction && <Badge color={directionColor(data.direction)} mx={2}>{formatKey(data.direction)}</Badge>}
                 {data.type && <Badge color={typeColor(data.type)} mx={2}>{formatKey(data.type)}</Badge>}
@@ -93,7 +103,7 @@ export function FormattedInfoView(props: Props) {
 
         return props.infoArray.map((info) => {
             const data = info.data as z.infer<typeof IPOwnershipItemShape>
-            return <div>
+            return <div key={info.formatter_key + info.id}>
                 {data.not_present_assignment && <Badge color="gray" mx={2}>No present assignment</Badge>}
                 {data.feedback && <Badge color="gray" mx={2}>Feedback</Badge>}
                 {data.direction && <Badge color={directionColor(data.direction)} mx={2}>{formatKey(data.direction)}</Badge>}
@@ -117,7 +127,7 @@ export function FormattedInfoView(props: Props) {
         }
         return props.infoArray.map((info) => {
             const data = info.data as z.infer<typeof PaymentTermsItemShape>
-            return <div>
+            return <div key={info.formatter_key + info.id}>
                 {data.royalty && <Badge color="yellow" mx={2}>Feedback</Badge>}
                 {data.direction && <Badge color={directionColor(data.direction)} mx={2}>{formatKey(data.direction)}</Badge>}
 
