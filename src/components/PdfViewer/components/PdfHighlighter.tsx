@@ -36,7 +36,7 @@ import debounce from "lodash.debounce";
 import getAreaAsPng from "../lib/get-area-as-png";
 import getBoundingRect from "../lib/get-bounding-rect";
 import getClientRects from "../lib/get-client-rects";
-import {rangeToStringWithNewLines} from "@/utils"
+import { rangeToStringWithNewLines } from "@/utils"
 
 export type T_ViewportHighlight<T_HT> = { position: Position } & T_HT;
 
@@ -510,8 +510,9 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     };
 
     const content = {
-      text: range.toString(),
-      textWithNewLines: rangeToStringWithNewLines(range),
+      // text: range.toString(),
+      text: rangeToStringWithNewLines(range),
+
     };
     const scaledPosition = this.viewportPositionToScaled(viewportPosition);
 
