@@ -17,6 +17,7 @@ import { DummyMenu } from "@/components/DummyMenu";
 import { FormatterWithInfo } from "@/types/complex";
 import { browserClient } from "@/supabase/BrowerClients";
 import { getFormatterShape } from "@/shared/getFormatterShape";
+import { theme } from "../../../../../../theme";
 
 interface Props {
     pdfUrl: string
@@ -34,10 +35,9 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
     const router = useRouter()
     const pathname = usePathname()
 
-    useEffect(() => {
-        console.log("formatters", formatters)
+    // useEffect(() => {
         
-    }, [formatters])
+    // }, [formatters])
 
     const [parsletSearchTerm, setParsletSearchTerm] = useState("")
 
@@ -135,7 +135,7 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
 
                     return (
-                        <MantineProvider>
+                        <MantineProvider theme={theme}>
 
                             <PdfHighlighter<Annotation_SB>
                                 pdfDocument={pdfDocument}
@@ -219,30 +219,31 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
 
                                     return (
-                                        <Popup
-                                            popupContent={
-                                                <HighlightPopup
-                                                    id={highlight.id}
-                                                    closeMenu={hideTip}
-                                                    annotations={highlights}
+                                        // <Popup
+                                        //     popupContent={
+                                        //         <HighlightPopup
+                                        //             id={highlight.id}
+                                        //             closeMenu={hideTip}
+                                        //             annotations={highlights}
 
-                                                />}
-                                            onMouseOver={(popupContent) =>
-                                                setTip(highlight, (highlight) => popupContent)
-                                            }
-                                            onMouseOut={hideTip}
+                                        //         />}
+                                        //     onMouseOver={(popupContent) =>
+                                        //         setTip(highlight, (highlight) => popupContent)
+                                        //     }
+                                        //     onMouseOut={hideTip}
 
-                                            key={index}
+                                        //     key={index}
 
-                                        >
+                                        // >
 
                                             <Highlight
+                                                key={highlight.id}
                                                 isScrolledTo={isScrolledTo}
                                                 position={highlight.position}
-                                                onClick={() => { }}
+                                                onClick={() => handleRemoveHighlight(highlight.id)}
                                                 isUserHighlight={highlight.is_user}
                                             />
-                                        </Popup>
+                                        // {/* </Popup> */}
                                     );
                                 }}
                             />

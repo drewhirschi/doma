@@ -23,7 +23,7 @@ import { notifications } from '@mantine/notifications';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDisclosure } from '@mantine/hooks';
 
-const PDFView = dynamic(() => import('./pdf'), { ssr: false, loading: () => <p>Loading...</p> })
+const PDFView = dynamic(() => import('./PdfView'), { ssr: false, loading: () => <p>Loading...</p> })
 
 
 export type ParsletWithNotes = Parslet_SB & { contract_note: { content: string }[] }
@@ -329,14 +329,14 @@ export function ContractReviewer(props: Props) {
                                 </Menu.Dropdown>
                             </Menu>
                         </Group>
-                        <HoverCard openDelay={500}>
-                            <HoverCard.Target>
+                        {/* <HoverCard openDelay={500}>
+                            <HoverCard.Target> */}
                                 <UnstyledButton
                                     onClick={() => openDetailsDrawer()}
                                 >
                                     <Title order={3}>{contract.display_name}</Title>
                                 </UnstyledButton>
-                            </HoverCard.Target>
+                            {/* </HoverCard.Target>
                             <HoverCard.Dropdown>
                                 <Group>
                                     <MetadataItem header="Contract ID" text={contract.id} />
@@ -355,7 +355,7 @@ export function ContractReviewer(props: Props) {
                                     </CopyButton>
                                 </Group>
                             </HoverCard.Dropdown>
-                        </HoverCard>
+                        </HoverCard> */}
                         <Divider />
                         <ScrollArea
                             offsetScrollbars

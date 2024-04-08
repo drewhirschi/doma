@@ -32,7 +32,7 @@ export function ContractDetailsDrawer({ contract }: ContractDetailsDrawerProps) 
     return (
         <Stack>
 
-            <MetadataItem header="Id" text={contract.id} />
+            <MetadataItem header="Id" text={contract.id} copyButton/>
 
             <form onSubmit={form.onSubmit(async (values) => {
                 setIsLoading(true)

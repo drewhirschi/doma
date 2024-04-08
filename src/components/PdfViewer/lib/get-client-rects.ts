@@ -39,11 +39,20 @@ const getClientRects = (
         clientRect.width < pageRect.width &&
         clientRect.height < pageRect.height
       ) {
+        // const highlightedRect = {
+        //   top: clientRect.top + page.node.scrollTop - pageRect.top,
+        //   left: clientRect.left + page.node.scrollLeft - pageRect.left,
+        //   width: clientRect.width,
+        //   height: clientRect.height,
+        //   pageNumber: page.number,
+        // } as LTWHP;
+        
+        //underline instead of highlight
         const highlightedRect = {
-          top: clientRect.top + page.node.scrollTop - pageRect.top,
+          top: clientRect.bottom - clientRect.height * 0.2 + page.node.scrollTop - pageRect.top,
           left: clientRect.left + page.node.scrollLeft - pageRect.left,
           width: clientRect.width,
-          height: clientRect.height,
+          height: clientRect.height * 0.1,
           pageNumber: page.number,
         } as LTWHP;
 

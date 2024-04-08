@@ -8,6 +8,7 @@ import { AddContractsModalButton } from "./ImportModal/AddContractsModal";
 import { AgreementTypeBadge } from "@/components/AgreementTypeBadge";
 import { AssignContractsModalButton } from "./AssignModal";
 import FileExplorer from "@/components/TreeFileExplorer/TreeFileExplorer";
+import { FilterPopover } from "./Filter";
 import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
 import { PAGE_SIZE } from "./shared";
@@ -135,6 +136,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                                 onChange={(event) => debouncedHandleSearch(event.currentTarget.value)}
                             />
                             <Pagination total={contractCount / PAGE_SIZE} value={Number(searchParams.get("page") ?? 1)} onChange={updatePage} />
+                            <FilterPopover />
                         </Group>
 
                     </Group>
