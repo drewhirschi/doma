@@ -19,7 +19,7 @@ export default async function Page({ params }: { params: { projectId: string, co
 
 
     const [contractQ, parsletQ, formattersQ] = await Promise.all([
-        supabase.from("contract").select("*, annotation(*, contract_line(*)), extract_jobs(*)").eq("id", params.contractId).single(),
+        supabase.from("contract").select("*, annotation(*), extract_jobs(*)").eq("id", params.contractId).single(),
         supabase.from("parslet").select("*").order("order", { ascending: true }),
         supabase.from("formatters").select("*, formatted_info(*)").eq("formatted_info.contract_id", params.contractId)
         .order("priority", { ascending: true })
