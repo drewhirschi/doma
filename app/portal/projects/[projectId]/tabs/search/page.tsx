@@ -1,21 +1,25 @@
-import { Avatar, Box, Button, Container, Grid, Group, Select, SimpleGrid, Space, Table, Tabs, TabsList, TabsPanel, TabsTab, Text, Title, rem } from '@mantine/core';
-import { IconAlertCircle, IconChevronLeft, IconFileArrowLeft, IconHome, IconMessageCircle, IconPhoto, IconSettings } from '@tabler/icons-react';
-import { RedirectType, redirect, } from 'next/navigation';
+import { Anchor, Avatar, Box, Button, Container, Grid, Group, Pagination, Select, SimpleGrid, Space, Table, Tabs, TabsList, TabsPanel, TabsTab, Text, TextInput, Title, rem } from '@mantine/core';
+import { IconAlertCircle, IconChevronLeft, IconFileArrowLeft, IconHome, IconMessageCircle, IconPhoto, IconSearch, IconSettings } from '@tabler/icons-react';
+import { RedirectType, redirect, useRouter, } from 'next/navigation';
 
 import { BackButton } from '@/components/BackButton';
+import { FilterPopover } from '../overview/Filter';
 import Link from 'next/link';
-import OverviewTab from './OverviewTab';
-import { PAGE_SIZE } from '../search/shared';
+import { PAGE_SIZE } from './shared';
 import { ProjectTabs } from '../ProjectTabs';
+import { SearchTab } from './SearchTab';
 import { getUserTenant } from '@/shared/getUserTenant';
 import { serverClient } from '@/supabase/ServerClients';
+import { useDebouncedCallback } from 'use-debounce';
 
 export default async function Page({ params, searchParams }: { params: { projectId: string }, searchParams: { query: string, page: number } }) {
 
     const query = searchParams?.query || '';
-    const page = Number(searchParams?.page)-1 || 0;
+    const page = Number(searchParams?.page) - 1 || 0;
 
     const supabase = serverClient()
+
+    
 
     let projectQ = await supabase.from("project")
         .select("*, profile(*)")
@@ -48,10 +52,8 @@ export default async function Page({ params, searchParams }: { params: { project
         throw new Error("Failed to fetch contracts")
     }
 
+    return <SearchTab  project={project} contracts={contractQ.data} contractCount={contractQ.count ?? 0}/>
 
-    return (
-        // @ts-ignore
-        <OverviewTab project={project} contracts={contractQ.data ?? []}  contractCount={contractQ.count!}/>
-    );
+   
 };
 

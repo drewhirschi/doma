@@ -2,7 +2,10 @@ import { Anchor, Box, Button, Checkbox, Group, Stack, Table, Text, Title, Unstyl
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
+import { AddContractsModalButton } from '../../../app/portal/projects/[projectId]/tabs/overview/ImportModal/AddContractsModal';
 import { AgreementTypeBadge } from '../AgreementTypeBadge';
+import { AssignContractsModalButton } from '../../../app/portal/projects/[projectId]/tabs/overview/AssignModal';
+import { ContractReviewerLink } from '../PdfViewer/components/ContractReveiwerLink';
 import { IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
 import { ReviewerCombobox } from '../ReviewerCombobox';
@@ -19,14 +22,15 @@ interface FileItem {
 
 interface FileExplorerProps {
     root: string;
+    project: Project_SB
+
     tenantId: string;
-    projectId: string;
     members: Profile_SB[]
     selectedRows: string[];
     setSelectedRows: (rows: string[]) => void;
 }
 
-const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, members, selectedRows, setSelectedRows }) => {
+const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, project, members, selectedRows, setSelectedRows }) => {
     const supabase = browserClient()
     const searchParams = useSearchParams();
     const pathname = usePathname();
@@ -149,9 +153,14 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
                 {selectCell(item)}
                 <Table.Td>
                     {item.name.toLowerCase().endsWith(".pdf") ? (
-                        <Anchor href={`/portal/projects/${projectId}/contract/${item.id}`} component={Link}>
+                        <ContractReviewerLink
+                            contractId={item.id}
+                            projectId={project.id}
+                            from={'overview'}
+                        >
                             {'📄 ' + item.metadata?.display_name ?? item.name}
-                        </Anchor>
+                        </ContractReviewerLink>
+
                     ) : (
                         <>
                             {'📄 ' + item.metadata?.display_name ?? item.name}
@@ -179,27 +188,32 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
 
     return (
         <Box>
-            <Group>
+            <Group my={"md"} justify="space-between">
+                <Group>
 
+                    {currentPath.replace(`projects/${project.id}`, "Home")
+                        .split('/')
 
-                {currentPath.replace(`projects/${projectId}`, "Home")
-                    .split('/')
+                        .map((path, index, array) => {
 
-                    .map((path, index, array) => {
+                            if (index === array.length - 1) {
 
-                        if (index === array.length - 1) {
+                                return (<Group key={index}> {index != 0 && <IconChevronRight size={16} />}
+                                    <Text className={classnames.lastPathSegment}>{path}</Text>
+                                </Group>)
+                            }
 
-                            return (<Group key={index}> {index != 0 && <IconChevronRight size={16} />}
-                                <Text className={classnames.lastPathSegment}>{path}</Text>
-                            </Group>)
-                        }
-
-                        return (<Group key={index}>  {index != 0 && <IconChevronRight size={16} />} <UnstyledButton
-                            onClick={() => navigateUp(array.length - index - 1)}
-                            className={classnames.pathButton}
-                        >{path}</UnstyledButton></Group>)
-                    })
-                }
+                            return (<Group key={index}>  {index != 0 && <IconChevronRight size={16} />} <UnstyledButton
+                                onClick={() => navigateUp(array.length - index - 1)}
+                                className={classnames.pathButton}
+                            >{path}</UnstyledButton></Group>)
+                        })
+                    }
+                </Group>
+                <Group>
+                    <AssignContractsModalButton selectedRows={selectedRows} members={members} pathname={pathname} />
+                    <AddContractsModalButton project={project} />
+                </Group>
 
             </Group>
             <Table
@@ -222,32 +236,32 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, projectId, 
                         <Table.Th>Assigned To</Table.Th>
                     </Table.Tr>
                 </Table.Thead>
-               
-                    <Table.Tbody>
 
-                        {items.map((item) => {
+                <Table.Tbody>
 
-                            return (
-                                <Table.Tr key={item.id} onClick={() => {
-                                    // console.log(`clicked ${item.name}`)
-                                    // setSelectedRows(
-                                    //     !selectedRows.includes(item.id)
-                                    //         ? [...selectedRows, item.id]
-                                    //         : selectedRows.filter((id) => id !== item.id)
-                                    // )
-                                }}>
-                                    {item.isDirectory ? renderFolder(item) : renderFile(item)}
+                    {items.map((item) => {
+
+                        return (
+                            <Table.Tr key={item.id} onClick={() => {
+                                // console.log(`clicked ${item.name}`)
+                                // setSelectedRows(
+                                //     !selectedRows.includes(item.id)
+                                //         ? [...selectedRows, item.id]
+                                //         : selectedRows.filter((id) => id !== item.id)
+                                // )
+                            }}>
+                                {item.isDirectory ? renderFolder(item) : renderFile(item)}
 
 
-                                </Table.Tr>
+                            </Table.Tr>
 
-                            )
-                        })}
-                    </Table.Tbody>
-                
+                        )
+                    })}
+                </Table.Tbody>
+
             </Table>
             {loading && (
-                    <Text>Loading...</Text>)}
+                <Text>Loading...</Text>)}
 
         </Box>
     );

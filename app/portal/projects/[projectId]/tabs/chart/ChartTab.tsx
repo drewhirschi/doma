@@ -3,6 +3,7 @@
 import { Anchor, Table, TableScrollContainer, TableTbody, TableTh, TableThead, TableTr } from "@mantine/core";
 import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes";
 
+import { ContractReviewerLink } from "@/components/PdfViewer/components/ContractReveiwerLink";
 import { FormattedInfoView } from "./FormattedInfoView";
 import Link from "next/link";
 import classes from "./Chart.module.css"
@@ -21,8 +22,11 @@ export default function Chart(props: Props) {
         return (
             <Table.Tr key={`row_${contract.id}`}>
                 <Table.Td >
-                    <Anchor href={`/portal/projects/${props.projectId}/contract/${contract.id}`} component={Link}>{contract.display_name}</Anchor>
-
+                    <ContractReviewerLink
+                        contractId={contract.id}
+                        projectId={props.projectId}
+                        from={'chart'}
+                    >{contract.display_name ?? ""}</ContractReviewerLink>
                 </Table.Td>
                 {props.formatters.map((formatter, i) => (
                     <Table.Td className={classes.tabledata} key={formatter.key + contract.id}>

@@ -94,6 +94,13 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                 pdfScaleValue="page-width"
                                 // pdfScaleValue=".75"
                                 scrollRef={(scrollTo) => {
+                                    const hash = window.location.hash.slice(1);
+                                    const selectedHighlight = highlights.find(
+                                        (highlight) => highlight.id === hash
+                                    );
+                                    if (selectedHighlight) {
+                                        scrollTo(selectedHighlight);
+                                    }
                                     scrollViewerTo = scrollTo;
                                 }}
                                 onSelectionFinished={(
@@ -149,23 +156,6 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
 
                                     return (
-                                        // <Popup
-                                        //     popupContent={
-                                        //         <HighlightPopup
-                                        //             id={highlight.id}
-                                        //             closeMenu={hideTip}
-                                        //             annotations={highlights}
-
-                                        //         />}
-                                        //     onMouseOver={(popupContent) =>
-                                        //         setTip(highlight, (highlight) => popupContent)
-                                        //     }
-                                        //     onMouseOut={hideTip}
-
-                                        //     key={index}
-
-                                        // >
-
                                         <Highlight
                                             key={highlight.id}
                                             isScrolledTo={isScrolledTo}
@@ -173,7 +163,6 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                             onClick={() => handleRemoveHighlight(highlight.id)}
                                             isUserHighlight={highlight.is_user}
                                         />
-                                        // {/* </Popup> */}
                                     );
                                 }}
                             />

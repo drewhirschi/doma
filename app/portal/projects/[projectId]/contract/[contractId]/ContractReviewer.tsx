@@ -9,18 +9,16 @@ import { ActionIcon, Box, Button, Center, CopyButton, Divider, Drawer, Flex, Gro
 import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTrash, IconUser } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { use, useEffect, useOptimistic, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { BackButton } from "@/components/BackButton";
 import { ContractDetailsDrawer } from './DetailsDrawer';
 import { FormatterSwitch } from '@/components/FormattedInfoViews/FormattedInfoSwitch';
 import { FormatterWithInfo } from '@/types/complex';
-import MetadataItem from '@/components/MetadataItem';
 import { ScaledPosition } from '@/components/PdfViewer';
 import { browserClient } from "@/supabase/BrowerClients";
 import dynamic from 'next/dynamic'
 import { notifications } from '@mantine/notifications';
-import { useDebouncedCallback } from 'use-debounce';
 import { useDisclosure } from '@mantine/hooks';
 
 const PDFView = dynamic(() => import('./PdfView'), { ssr: false, loading: () => <p>Loading...</p> })
@@ -47,6 +45,7 @@ export function ContractReviewer(props: Props) {
 
     const { pdfUrl, contract, annotations, projectId, parslets } = props
 
+    const searchParams = useSearchParams()
     const [formatters, setFormatters] = useState(props.formatters)
 
 
@@ -248,7 +247,7 @@ export function ContractReviewer(props: Props) {
 
     const backParams = new URLSearchParams()
     backParams.set('path', contract.path_tokens.slice(0, -1).join("/") ?? "")
-    const backUrl = `/portal/projects/${projectId}/tabs/overview?${backParams.toString()}`
+    const backUrl = `/portal/projects/${projectId}/tabs/${searchParams.get("from") ?? "overview"}?${backParams.toString()}`
 
     return (
         <>

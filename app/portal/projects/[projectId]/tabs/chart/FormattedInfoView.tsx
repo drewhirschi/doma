@@ -11,6 +11,7 @@ import {
 } from "@/types/formattersTypes";
 import { Anchor, Badge } from "@mantine/core";
 
+import { ContractReviewerLink } from "@/components/PdfViewer/components/ContractReveiwerLink";
 import { FormatterKeys } from "@/types/enums";
 import { formatKey } from "@/utils";
 import { z } from "zod";
@@ -24,10 +25,13 @@ interface Props {
 
 function getAnnotationLinks(annotations: Annotation_SB[], projectId: string, contractId: string) {
 
-    return annotations.map((ann, i) => <Anchor
+    return annotations.map((ann, i) => <ContractReviewerLink
         key={ann.id}
-        href={`/portal/projects/${projectId}/contract/${contractId}#${ann.id}`}
-    >[{i + 1}]</Anchor>)
+        projectId={projectId}
+        contractId={contractId}
+        from={"chart"}
+        annotationId={ann.id}
+    >[{i + 1}]</ContractReviewerLink>)
 }
 
 export function FormattedInfoView(props: Props) {
