@@ -22,7 +22,7 @@ import { theme } from "../../../../../../theme";
 interface Props {
     pdfUrl: string
     pdfBase64: string
-    contract: Contract_SB & { annotation: (Annotation_SB & { contract_line: ContractLine_SB[] })[] }
+    contract: Contract_SB
     highlights: Annotation_SB[]
     handleAddHighlight: (highlight: { position: any, text: string, formatterKey: string, itemId: number }) => void
     handleRemoveHighlight: (id: string) => void

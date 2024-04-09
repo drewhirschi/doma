@@ -136,7 +136,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                                 onChange={(event) => debouncedHandleSearch(event.currentTarget.value)}
                             />
                             <Pagination total={contractCount / PAGE_SIZE} value={Number(searchParams.get("page") ?? 1)} onChange={updatePage} />
-                            <FilterPopover />
+                            <FilterPopover projectId={projectId} />
                         </Group>
 
                     </Group>

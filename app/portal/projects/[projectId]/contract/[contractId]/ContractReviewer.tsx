@@ -34,7 +34,7 @@ interface Props {
     contract: Contract_SB & {
         extract_jobs: ExtractJob_SB[],
         // annotation: Annotation_SB[],
-        annotation: (Annotation_SB & { contract_line: ContractLine_SB[] })[]
+        // annotation: (Annotation_SB & { contract_line: ContractLine_SB[] })[]
     }
     parslets: Parslet_SB[]
     formatters: FormatterWithInfo[]

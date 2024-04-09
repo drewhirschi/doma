@@ -371,7 +371,7 @@ export type Database = {
         }
         Relationships: []
       }
-      line_ref: {
+      line_extractions: {
         Row: {
           annotation_id: string
           contract_id: string
