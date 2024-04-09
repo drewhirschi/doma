@@ -21,7 +21,7 @@
 }
 
 .Highlight__part__user {
-  opacity: 0.7;
+  /* opacity: 0.7; */
   background: rgba(255, 226, 143, 1);
   
 }

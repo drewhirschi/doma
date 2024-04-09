@@ -1,23 +1,14 @@
 import {
-    AreaHighlight,
     Highlight,
     PdfHighlighter,
     PdfLoader,
-    Popup,
-    Position,
-    ScaledPosition,
-    Tip
 } from "@/components/PdfViewer";
-import { Button, MantineProvider, NavLink, Paper, ScrollArea, Skeleton, Stack, Text, TextInput, rem } from "@mantine/core";
-import { ElementType, useEffect, useState } from "react";
-import { IconFingerprint, IconGauge, IconMessageCircle, IconTrash } from "@tabler/icons-react";
-import { usePathname, useRouter } from "next/navigation";
+import { MantineProvider, Paper, ScrollArea, Skeleton, Text } from "@mantine/core";
 
-import { DummyMenu } from "@/components/DummyMenu";
 import { FormatterWithInfo } from "@/types/complex";
-import { browserClient } from "@/supabase/BrowerClients";
-import { getFormatterShape } from "@/shared/getFormatterShape";
+import { SelectFormatterButton } from "./SelectFormatterButton";
 import { theme } from "../../../../../../theme";
+import { useEffect } from "react";
 
 interface Props {
     pdfUrl: string
@@ -31,49 +22,7 @@ interface Props {
 }
 
 export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, handleAddHighlight, formatters }: Props) {
-    const supabase = browserClient()
-    const router = useRouter()
-    const pathname = usePathname()
 
-    // useEffect(() => {
-        
-    // }, [formatters])
-
-    const [parsletSearchTerm, setParsletSearchTerm] = useState("")
-
-    function HighlightPopup({ id, closeMenu, annotations }: { id: string, closeMenu: () => void, annotations: any[] }) {
-
-        const annotation = annotations.find((a) => a.id === id)
-        return (
-            <Paper
-                shadow="lg"
-                w={200}
-                withBorder
-                p={"xs"}
-            >
-                {/* <Text fw={700} mb={"sm"}>{parslets.find(p => p.id == annotation?.parslet_id)?.display_name ?? "Extractor not found"}</Text> */}
-
-                <Button
-                    fullWidth
-                    variant="subtle"
-                    color="red"
-                    rightSection={(<IconTrash />)}
-                    onClick={async () => {
-                        handleRemoveHighlight(id)
-                        closeMenu()
-
-                    }}
-                >
-                    Delete
-                </Button>
-
-
-
-
-            </Paper>
-        )
-
-    }
 
     let scrollViewerTo = (highlight: any) => { }
 
@@ -157,49 +106,29 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                     return (
 
 
-                                        <Paper
-                                            shadow="md"
-                                            pt={"md"}
-                                            pl={"sm"}
-                                        //   pr={"xs"}
-
-                                        >
-                                            Topics
+                                        <Paper shadow="md">
+                                            <Text ml={"sm"}>Topics</Text>
                                             <ScrollArea
                                                 h={300}
-                                                w={220}
+                                                w={240}
                                                 type="always"
                                                 pr={"sm"}
                                             >
 
-                                                {formatters.map((formatter, i) => {
+                                                {formatters.map((formatter) => {
 
-                                                    const props = {
-                                                        label: formatter.display_name,
-                                                        childrenOffset: 28,
 
-                                                    }
                                                     const handleClick = (itemIndex: number) => {
                                                         handleAddHighlight({ formatterKey: formatter.key, text: content.text ?? "", position, itemId: itemIndex });
                                                         hideTipAndSelection();
 
                                                     }
-                                                    if (formatter.hitems) return (
-                                                        <NavLink key={i} {...props} component="button">
-                                                            {formatter.formatted_info.map((fi, j) => (
-                                                                <NavLink key={`${i}.${j}`} label={`Item ${j + 1}`} component="button" onClick={() => handleClick(fi.id)} />
-                                                            ))}
-                                                            <NavLink key={i} label={`New item`} component="button" onClick={() => handleClick(formatter.formatted_info.length == 0 ? 0 : Math.max(...formatter.formatted_info.map(fi => fi.id)) + 1)} />
+                                                    return <SelectFormatterButton
+                                                        formatter={formatter}
+                                                        handleClick={handleClick}
+                                                    />
 
-                                                        </NavLink>
-                                                    ); else return (
-                                                        <NavLink
-                                                            key={i}
-                                                            {...props}
-                                                            component="button"
-                                                            onClick={() => handleClick(0)}
-                                                        />
-                                                    );
+
                                                 }
                                                 )}
 
@@ -236,13 +165,13 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
                                         // >
 
-                                            <Highlight
-                                                key={highlight.id}
-                                                isScrolledTo={isScrolledTo}
-                                                position={highlight.position}
-                                                onClick={() => handleRemoveHighlight(highlight.id)}
-                                                isUserHighlight={highlight.is_user}
-                                            />
+                                        <Highlight
+                                            key={highlight.id}
+                                            isScrolledTo={isScrolledTo}
+                                            position={highlight.position}
+                                            onClick={() => handleRemoveHighlight(highlight.id)}
+                                            isUserHighlight={highlight.is_user}
+                                        />
                                         // {/* </Popup> */}
                                     );
                                 }}
