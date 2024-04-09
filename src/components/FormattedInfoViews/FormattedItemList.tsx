@@ -45,7 +45,7 @@ export function FormattedItemList({ info, handleSave, annotations, removeAnnotat
             infos: info
         })
 
-    }, [info])
+    }, [info, form])
 
   
     const debouncedSave = useDebouncedCallback(async () => {

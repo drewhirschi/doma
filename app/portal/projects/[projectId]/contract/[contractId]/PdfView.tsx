@@ -124,6 +124,7 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
                                                     }
                                                     return <SelectFormatterButton
+                                                        key={formatter.key}
                                                         formatter={formatter}
                                                         handleClick={handleClick}
                                                     />
