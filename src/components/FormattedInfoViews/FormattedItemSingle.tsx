@@ -28,7 +28,7 @@ export function FormattedInfoView({ info, handleSave, annotations, removeAnnotat
     });
     useEffect(() => {
         form.setValues(data)
-    }, [data, form])
+    }, [data])
 
 
 
