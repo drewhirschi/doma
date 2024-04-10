@@ -141,7 +141,6 @@ export function ContractReviewer(props: Props) {
 
         const id: string = window.crypto.randomUUID()
 
-        console.log(formatters)
 
         const newAnnotation: Omit<Annotation_SB, 'tenant_id' | 'created_at'> = {
             id,
@@ -212,7 +211,6 @@ export function ContractReviewer(props: Props) {
                     })
                     return updatedFormatters
                 })
-                console.log(formatters)
                 const upsertRes = await supabase.from("formatted_info").update({ data: formattedInfoRes.ok[0] })
                     .eq("id", itemIndex)
                     .eq("formatter_key", formatterKey)

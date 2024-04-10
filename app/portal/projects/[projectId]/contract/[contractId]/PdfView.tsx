@@ -4,11 +4,12 @@ import {
     PdfLoader,
 } from "@/components/PdfViewer";
 import { MantineProvider, Paper, ScrollArea, Skeleton, Text } from "@mantine/core";
+import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { FormatterWithInfo } from "@/types/complex";
 import { SelectFormatterButton } from "./SelectFormatterButton";
 import { theme } from "../../../../../../theme";
-import { useEffect } from "react";
 
 interface Props {
     pdfUrl: string
@@ -24,36 +25,28 @@ interface Props {
 export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, handleAddHighlight, formatters }: Props) {
 
 
-    let scrollViewerTo = (highlight: any) => { }
+    const pathname = usePathname()
+    const router = useRouter()
+    const [focusedHighlightId, setFocusedHighlightId] = useState<string | undefined>()
 
-    function scrollToHighlightFromHash() {
-        const highlight = highlights.find((h) => h.id == window.location.hash.slice(1));
-
-        if (highlight) {
-            console.log("scrolling to", highlight)
-            scrollViewerTo(highlight);
-        }
-    };
-
+    const scrollToHighlightFromHash = () => {
+       
+            setFocusedHighlightId(window.location.hash.slice(1));
+        
+    }
+    
     useEffect(() => {
-        window.addEventListener(
-            "hashchange",
-            scrollToHighlightFromHash,
-            false
-        );
-
+    
+        window.addEventListener("hashchange", scrollToHighlightFromHash, false);
+    
         return () => {
-            window.removeEventListener(
-                "hashchange",
-                scrollToHighlightFromHash,
-                false
-            );
+            window.removeEventListener("hashchange", scrollToHighlightFromHash, false);
         };
-    }, [])
+    }, []);
 
 
     const resetHash = () => {
-        // router.replace(pathname.split("#")[0])
+        router.replace(pathname.split("#")[0])
     };
 
 
@@ -93,16 +86,18 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                 onScrollChange={resetHash}
                                 pdfScaleValue="page-width"
                                 // pdfScaleValue=".75"
-                                scrollRef={(scrollTo) => {
-                                    const hash = window.location.hash.slice(1);
-                                    const selectedHighlight = highlights.find(
-                                        (highlight) => highlight.id === hash
-                                    );
-                                    if (selectedHighlight) {
-                                        scrollTo(selectedHighlight);
-                                    }
-                                    scrollViewerTo = scrollTo;
-                                }}
+                                // scrolledToHighlight={scrollToHighlightFromHash}
+                                // scrollRef={(scrollTo) => {
+                                //     const hash = window.location.hash.slice(1);
+                                //     const selectedHighlight = highlights.find(
+                                //         (highlight) => highlight.id === hash
+                                //     );
+                                //     if (selectedHighlight) {
+                                //         scrollTo(selectedHighlight);
+                                //     }
+                                //     scrollViewerTo = scrollTo;
+                                // }}
+                                focusedHighlightId={focusedHighlightId}
                                 onSelectionFinished={(
                                     position,
                                     content,

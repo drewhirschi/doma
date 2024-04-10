@@ -18,6 +18,11 @@ export function SelectFormatterButton(props: { formatter: FormatterWithInfo, han
 
     }
 
+    let newItemId = 0
+    if (formatter.hitems) {
+       newItemId = formatter.formatted_info.length == 0 ? 0 : Math.max(...formatter.formatted_info.map(fi => fi.id)) + 1
+    }
+
     return <Box>
         <Button.Group maw={220}>
 
@@ -25,7 +30,7 @@ export function SelectFormatterButton(props: { formatter: FormatterWithInfo, han
                 {...buttonProps}
 
 
-                onClick={() => handleClick(formatter.formatted_info.length == 0 ? 0 : Math.max(...formatter.formatted_info.map(fi => fi.id)) + 1)}
+                onClick={() => handleClick(newItemId)}
             >{formatter.display_name}</Button>
             {formatter.hitems && formatter.formatted_info.length > 0 &&
 
