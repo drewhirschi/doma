@@ -7,16 +7,16 @@ import { notifications } from "@mantine/notifications";
 import { pixel } from "@/utils";
 import { useForm } from "@mantine/form";
 
-export function WaitlistSignup({ buttonText, inputWidth }: { buttonText: string, inputWidth?: number}) {
+export function WaitlistSignup({ buttonText, inputWidth }: { buttonText: string, inputWidth?: number }) {
 
     const form = useForm({
         initialValues: {
-            // name: "",
             email: "",
-            // message: "",
-            // terms: false,
         },
 
+        validate: {
+            email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+          },
     })
 
 

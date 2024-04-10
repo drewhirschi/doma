@@ -1,52 +1,55 @@
-import { Anchor, Badge, Group, Text } from "@mantine/core"
-import { IPOwnershipFormatResponse, IpOwnershipType } from "@/types/formattersTypes"
+import { ActionIcon, Anchor, Badge, Box, Button, Checkbox, Group, Select, SimpleGrid, Stack, Text, Textarea, Title } from "@mantine/core"
+import { IPOwnershipFormatResponse, IPOwnershipItemShape, IpOwnershipType } from "@/types/formattersTypes"
 
-import { FormattedInfoWithEiId } from "@/types/complex"
+import { BoolSelect } from "../BoolSelect"
+import { ItemViewProps } from "./FormattedItemList"
+import { z } from "zod"
 
-interface Props {
-    info?: FormattedInfoWithEiId
-
-}
-
-export function FormattedIpOwnership({ info }: Props) {
+export function FormattedIpOwnership({ form, index, onChange }: ItemViewProps<z.infer<typeof IPOwnershipItemShape>>) {
 
 
 
 
-    const data = info?.data as unknown as IPOwnershipFormatResponse | undefined
 
 
-    const extractedInfoRefs = info?.extracted_information?.map(ei => ei.id) ?? []
-
-    function typeBadge(type: IpOwnershipType | undefined) {
-        if (!type)
-            return <Badge color="gray">Unknown type</Badge>
-            
-        switch (type) {
-            case IpOwnershipType.INBOUND:
-                return <Badge color="blue">Inbound</Badge>
-            case IpOwnershipType.OUTBOUND:
-                return <Badge color="green">Outbound</Badge>
-            case IpOwnershipType.JOINT:
-                return <Badge color="orange">Joint ownership</Badge>
-
-            default:
-                return <Badge color="gray">Unknown type</Badge>
-        }
-    }
 
     return (
-        <div>
-            <Text>{data?.summary}</Text>
-            <Group>
-                {typeBadge(data?.type)}
-                {data?.not_present_assignment && <Badge>+Not present assignment</Badge>}
-                {data?.feedback && <Badge>+Feedback</Badge>}
-            </Group>
-            {extractedInfoRefs.map((id, index) => (
-                <Anchor key={id} href={`#${id}`}>[{index + 1}]</Anchor>
-            ))}
 
-        </div>
+
+        <Box>
+
+            <Textarea
+                // label="Summary"
+                {...form.getInputProps(`infos.${index}.data.summary`)}
+                autosize
+            />
+            <SimpleGrid cols={2} spacing="md">
+                <Select
+                    label="Direction"
+                    {...form.getInputProps(`infos.${index}.data.direction`)}
+                    data={[{ label: "Inbound", value: IpOwnershipType.INBOUND }, { label: "Outbound", value: IpOwnershipType.OUTBOUND }, { label: "Joint ownership", value: IpOwnershipType.JOINT }]}
+                />
+
+                <BoolSelect
+                    label="Not present assignment"
+                    {...form.getInputProps(`infos.${index}.data.not_present_assignment`)}
+                    onChange={(value) => {
+                        form.setFieldValue(`infos.${index}.data.not_present_assignment`, value)
+                        onChange()
+                    }}
+                />
+                <BoolSelect
+                    label="Feedback"
+                    {...form.getInputProps(`infos.${index}.data.feedback`)}
+                    onChange={(value) => {
+                        form.setFieldValue(`infos.${index}.data.feedback`, value)
+                        onChange()
+                    }}
+                />
+
+            </SimpleGrid>
+
+        </Box>
+
     )
 }

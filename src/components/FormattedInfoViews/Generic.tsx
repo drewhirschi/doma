@@ -1,28 +1,16 @@
-import { Anchor, Badge, Group, Stack, Text, Title } from "@mantine/core"
-import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes"
+import { GenericFormatResponse, } from "@/types/formattersTypes"
+import { Textarea } from "@mantine/core"
+import { ViewProps } from "./FormattedItemSingle"
 
-import { EIReferenceLinks } from "./EIReferences"
-import { FormattedInfoWithEiId } from "@/types/complex"
+export function FormattedGeneric({ form }: ViewProps<GenericFormatResponse>) {
 
-interface Props {
-    info: FormattedInfoWithEiId
-}
 
-export function FormattedGeneric({ info }: Props) {
-
-    
-
-    const data: IFormatResponse = info?.data as unknown as IFormatResponse
-
-    const extractedInfoRefs = info?.extracted_information?.map(ei => ei.id) ?? []
 
 
     return (
-        <Stack>
 
-            <Text style={{whiteSpace:"pre-wrap"}}>{data?.summary}</Text>
-            <EIReferenceLinks ids={extractedInfoRefs} />
 
-        </Stack>
+        <Textarea autosize style={{ whiteSpace: "pre-wrap" }} {...form.getInputProps('summary')} />
+
     )
 }

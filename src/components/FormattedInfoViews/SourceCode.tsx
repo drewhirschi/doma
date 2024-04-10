@@ -1,28 +1,36 @@
-import { Anchor, Badge, Group, Stack, Text, Title } from "@mantine/core"
-import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes"
+import { Anchor, Badge, Button, Group, Stack, Text, Textarea, Title } from "@mantine/core"
 
-import { EIReferenceLinks } from "./EIReferences"
-import { FormattedInfoWithEiId } from "@/types/complex"
+import { SourceCodeFormatResponse } from "@/types/formattersTypes"
+import { ViewProps } from "./FormattedItemSingle"
 
-interface Props {
-    info: FormattedInfoWithEiId
-}
+export function FormattedSourceCode({ form, onChange }: ViewProps<SourceCodeFormatResponse>) {
 
-export function FormattedSourceCode({ info }: Props) {
 
-    
-    const data = info?.data as unknown as IFormatResponse | undefined
+     
 
-    const extractedInfoRefs = info?.extracted_information?.map(ei => ei.id) ?? []
+
+  
 
 
     return (
-        <Stack>
-            
-            <Text>{data?.summary}</Text>
-            <EIReferenceLinks ids={extractedInfoRefs} />
+
+       
+            <Stack>
+
+                <Textarea
+                    label="Content"
+                    {...form.getInputProps('content')}
+                />
+                <Textarea
+                    label="Release conditions"
+                    {...form.getInputProps('releaseConditions')}
+                />
+                <Textarea
+                    label="License"
+                    {...form.getInputProps('license')}
+                />
 
 
-        </Stack>
+            </Stack>
     )
 }

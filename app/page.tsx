@@ -5,6 +5,7 @@ import LoginButton from "./LoginButton";
 import { ReactNode } from "react";
 import { WaitlistSignup } from "./WaitlistSignup";
 import axios from "axios";
+import classes from './page.module.css';
 import { pixel } from "@/utils";
 import { redirect } from "next/navigation";
 
@@ -30,56 +31,131 @@ export default function HomePage() {
         <Center h={832}>
           <Stack align="center" maw={700}>
 
-            <Title style={{ textAlign: 'center' }} size={64}>An AI Legal Assitant for M&A</Title>
-            <Text style={{ textAlign: 'center' }} size="xl">Parsl helps along every step of the way from document intake to purchase agreement drafting.</Text>
-            {/* <Group justify="center"> */}
-              <WaitlistSignup
-                buttonText="Join the waitlist"
-                inputWidth={360}
-              />
-              {/* <Button variant="outline" href={"#schedule"} component={Link}>
-                Learn more
-              </Button> */}
-            {/* </Group> */}
+            <Title style={{ textAlign: 'center' }} size={64}>Parsl</Title>
+            <Text style={{ textAlign: 'center' }} size="xl">Accurate Legal Due Diligence for Technology Focused M&A</Text>
+            <WaitlistSignup
+              buttonText="Join the Waitlist"
+              inputWidth={360}
+            />
+
           </Stack>
         </Center>
       </Container>
 
-      {/* <Box mb={"xl"} py={60} bg={"dark.7"} mih={500} c={"white"}>
+      <Box py={60} bg={"#1382B2"} mih={500} c={"white"}>
         <Container>
+          <Stack gap={"sm"} align="center">
 
-          <SimpleGrid cols={{ base: 1, sm: 2 }}>
+            <Title>Optimize you time</Title>
+            <Text size="xl">Parsl automates common tedious tasks so you and your team only need to spend time and resources on the rare edge cases that require a human touch.</Text>
+            <div
+              className={classes.videoIframe}
+
+            >
+             
+              <iframe
+                // width="560" height="315"
+                src="https://www.youtube.com/embed/cZrwCpxlefQ?si=7UwV5pzt39PXTBg5"
+                width="100%"
+                height="100%"
+                title="Parsl Demo"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen></iframe>
+            </div>
+
+          </Stack>
+        </Container>
+      </Box>
 
 
-            <Image src="/images/annica_and_patrick.png" alt="frustrated lawyers" h={300} fit="contain" />
-            <Center h={300} >
-              <Text maw={400} size="xl">Do you ever feel like Annica and Patrick who were just assigned a new batch of contracts to review from scratch?</Text>
-            </Center>
+      <Box py={60} bg={"dark.7"} c={"white"}>
+        <Container className={classes.responsiveContainer}>
 
 
-            <Image fit="contain" src="/images/sarah_celebrating.png" alt="celebrating lawyer" h={300} />
-            <Center h={300}>
-              <Text maw={400} size="xl">Meet Sarah, who just used Parsl for the first time and was amazed to see that with the help of AI a first draft of her work product was complete before she even read a page!</Text>
-            </Center>
+          <Stack >
+            <Title order={3}>Get critical results in record speed</Title>
+
+            <Text size="xl">Parsl revolutionizes turnaround times by delivering a comprehensive and actionable issue analysis within 24 hours. Gain the upper hand in setting the terms of the deal by identifying and solving issues early.</Text>
+          </Stack>
+
+
+
+        </Container>
+      </Box>
+
+      <Box py={60} bg={"#1382B2"} c={"white"}>
+        <Container className={classes.responsiveContainer}>
+
+          <SimpleGrid spacing={"xl"} cols={{ sm: 2 }}>
+
+
+            <Image src="/images/product/agreement_view.png" alt="frustrated lawyers" h={260} fit="contain" />
+            <Stack >
+              <Title order={3}>Achieve better outcomes by doing less</Title>
+
+              <Text size="xl">Achieve higher accuracy in finding key information by merging the unique strengths of manual and automated review by performing AI-assisted due diligence. With Parsl it has never been easier to verify AI results. All decisions are provided with linked references to the original contract language from which AI decisions were made. Understand and confirm the logic with a click of a mouse.</Text>
+            </Stack>
+
+
+
           </SimpleGrid>
         </Container>
-      </Box> */}
+      </Box>
+      <Box py={60} >
+        <Container className={classes.responsiveContainer}>
 
-      {/* <Stack align="center" my={80}>
+
+          <Stack >
+            <Title order={3}>Enhanced purchase agreement drafting and negotiation</Title>
+
+            <Text size="xl">Easily access granular contract data to auto generate disclosure schedules, inform your purchase agreement drafting, and negotiate with data on your side.</Text>
+          </Stack>
+
+
+
+        </Container>
+      </Box>
+      <Box bg={"dark.7"} py={60} c="white">
+        <Container className={classes.responsiveContainer}>
+
+          <SimpleGrid spacing={"xl"} cols={{ sm: 2 }}>
+
+
+            <Image src="/images/product/project_home.jpg" alt="Project home view" h={260} fit="contain" />
+            <Stack >
+              <Title order={3}>Streamline your team’s process from end-to-end</Title>
+
+              <Text size="xl">Increase efficiency and streamline communication using an all-in-one platform. Whether you’re reviewing by yourself, or managing dozens of others, Parsl makes it easy. Assign documents to reviewers, manage supplemental requests, escalate problems, and much more.</Text>
+            </Stack>
+
+
+
+          </SimpleGrid>
+        </Container>
+      </Box>
+
+
+
+      <Stack align="center" my={80}>
 
         <div>
 
-          <Title>Join our waitlist!</Title>
-          <Text size="sm">Get updates on our progress</Text>
+          <Title>Get updates on our progress</Title>
+          {/* <Text size="sm">Get updates on our progress</Text> */}
         </div>
         <WaitlistSignup
-          buttonText="Join"
-        />
-      </Stack> */}
+          buttonText="Join the Waitlist"
+        /> 
+        <div>
+
+        For questions or comments, please email <Anchor  href="mailto:ezra@parslai.com">ezra@parslai.com</Anchor>
+        </div>
+      </Stack>
 
       <Box bg={"dark.7"} mih={500} c={"white"}>
 
-        <Container py={60}>
+        {/* <Container py={60}>
           <Title>How does Parsl...</Title>
           <SimpleGrid mt={"xl"} spacing={"xl"} cols={{ base: 1, sm: 2 }}>
             <DescriptionItem
@@ -99,7 +175,7 @@ export default function HomePage() {
               text="Just because you drowned in due diligence when you first got your license doesn’t mean your team should. Parsl sets your team up for success by utilizing AI to fly through the more tedious and painstaking aspects of M&A transactions, so they can focus on more meaningful work, and you can invest more time accelerating their learning — in return, drive faster value for your firm. By letting Parsl take the first pass the cognitive load of decision making is decreased and attorneys are able to save their energy for the more rare but important edge cases."
             />
           </SimpleGrid>
-        </Container>
+        </Container> */}
 
 
         <Grid py={"xl"} id="footer">

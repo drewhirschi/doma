@@ -2,8 +2,8 @@ import { type CookieOptions, createBrowserClient, createServerClient } from '@su
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { cookies } from 'next/headers'
-import { Database } from '@/types/supabase-generated';
 import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/supabase';
 
 /**
  * DANGEROUS Creates a full access service client for supabase.

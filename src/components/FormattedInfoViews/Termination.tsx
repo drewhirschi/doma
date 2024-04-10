@@ -1,25 +1,34 @@
-import { Anchor, Badge, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core"
-import { FormatterViewProps, TerminationFormatResponse } from "@/types/formattersTypes"
+import { Box, Select, Textarea, } from "@mantine/core"
+import { TerminationItemShape, TerminationTag } from "@/types/formattersTypes"
 
-import { FormattedInfoWithEiId } from "@/types/complex"
-import MetadataItem from "../MetadataItem"
+import { ItemViewProps } from "./FormattedItemList";
+import { UseFormReturnType } from "@mantine/form";
+import { z } from "zod";
 
-export function FormattedTermination({ info }: FormatterViewProps) {
-    const data: TerminationFormatResponse | undefined = info?.data as unknown as TerminationFormatResponse | undefined
-   
-
-
+export function FormattedTermination({ form, index, onChange }: ItemViewProps<z.infer<typeof TerminationItemShape>>) {
 
 
 
     return (
-        <Stack gap={4}>
-            <Text size="sm">{data?.summary}</Text>
 
-            <SimpleGrid cols={2} spacing="md">
-                <MetadataItem header="Tag" text={data?.tag ?? ""} />
+        <Box>
 
-            </SimpleGrid>
-        </Stack>
+            <Textarea autosize name="summary"
+                {...form.getInputProps(`infos.${index}.data.summary`)}
+            />
+            <Select label="Type"
+                {...form.getInputProps(`infos.${index}.data.tag`)}
+                onChange={(value) => {
+                    form.setFieldValue(`infos.${index}.data.tag`, value)
+                    onChange()
+                }}
+                data={[
+                    { value: TerminationTag.CONVENIENCE, label: "Convenience" },
+                    { value: TerminationTag.CHANGE_OF_CONTROL_TERMINATION, label: "Change of control termination" },
+                    { value: TerminationTag.TERMINATED, label: "Terminated" }
+                ]} />
+        </Box>
+
+
     )
 }

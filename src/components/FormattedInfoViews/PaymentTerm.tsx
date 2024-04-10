@@ -1,30 +1,45 @@
-import { Anchor, Badge, Group, Stack, Text, Title } from "@mantine/core"
-import { FormatterViewProps, PaymentTermsFormatResponse } from "@/types/formattersTypes"
+import { ActionIcon, Anchor, Badge, Box, Button, Checkbox, Group, Select, SimpleGrid, Stack, Text, Textarea, Title } from "@mantine/core"
+import { PaymentTermsDirection, PaymentTermsItemShape } from "@/types/formattersTypes"
 
-import { FormattedInfoWithEiId } from "@/types/complex"
-import MetadataItem from "../MetadataItem"
+import { BoolSelect } from "../BoolSelect"
+import { ItemViewProps } from "./FormattedItemList"
+import { z } from "zod"
 
-export function FormattedPaymentTerms({ info }: FormatterViewProps) {
+export function FormattedPaymentTerms({ form, index, onChange }: ItemViewProps<z.infer<typeof PaymentTermsItemShape>>) {
 
-   
 
-    const data = info?.data as unknown as PaymentTermsFormatResponse | undefined
 
-    const extractedInfoRefs = info?.extracted_information?.map(ei => ei.id) ?? []
+
 
 
     return (
+
         <Stack>
+            <Textarea
+                // label="Summary"
+                {...form.getInputProps(`infos.${index}.data.summary`)}
+                autosize
+            />
+            <SimpleGrid cols={2} spacing="md" style={{ alignItems: "center" }}>
+                <Select
+                    label="Direction"
+                    {...form.getInputProps(`infos.${index}.data.direction`)}
+                    data={Object.keys(PaymentTermsDirection).map(k => ({ value: k, label: k.charAt(0) + k.slice(1).toLowerCase() }))}
+                />
 
-            <Text>{data?.summary}</Text>
-            <MetadataItem header="Direction" text={data?.direction ?? ""}/>
 
-            <Group gap={2}>
 
-                {extractedInfoRefs.map((id, index) => (
-                    <Anchor key={id} href={`#${id}`}>[{index + 1}]</Anchor>
-                ))}
-            </Group>
+                <BoolSelect
+                    label="Royalty"
+                    {...form.getInputProps(`infos.${index}.data.royalty`)}
+                    onChange={(value) => {
+                        form.setFieldValue(`infos.${index}.data.royalty`, value)
+                        onChange()
+                    }}
+                />
+            </SimpleGrid>
+
+
 
         </Stack>
     )

@@ -1,4 +1,4 @@
-import { Database as DatabaseGenerated, Json } from './supabase-generated'
+import { Database as DatabaseGenerated, Json as GeneratedJson } from './supabase-generated'
 
 import { MergeDeep } from 'type-fest'
 import { ScaledPosition } from '@/components/PdfViewer/types'
@@ -10,7 +10,7 @@ export type Database = MergeDeep<
       Tables: {
         annotation: {
           Row: {
-            position: ScaledPosition | Json
+            position: ScaledPosition
           }
         },
         project: {
@@ -22,3 +22,5 @@ export type Database = MergeDeep<
     }
   }
 >
+
+

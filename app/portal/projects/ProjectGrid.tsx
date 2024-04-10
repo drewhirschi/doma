@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Button, Grid } from "@mantine/core";
+import { Box, Button, Grid, Group } from "@mantine/core";
 
 import { AddProjectsModal } from "./AddProjectsModal";
 import ProjectCard from "@/components/ProjectCard";
@@ -22,15 +22,15 @@ export function ProjectGrid({ projects, users }: Props) {
                 projects={projects}
                 users={users}
             />
-            <Grid mt={"sm"}>
+            <Group mt={"sm"}>
                 {projects.map((project: Project_SB) => (
-                    <Grid.Col key={project.id} span={{ base: 12, md: 6, lg: 4 }}>
-                        {/* @ts-ignore */}
-                        <ProjectCard project={project} />
-                    </Grid.Col>
+                    // <Grid.Col key={project.id} span={{ base: 12, md: 6, lg: 4 }}>
+                        // @ts-ignore 
+                        <ProjectCard key={project.id} project={project} />
+                    // </Grid.Col>
                 ))}
 
-            </Grid>
+            </Group>
         </Box>
     )
 }

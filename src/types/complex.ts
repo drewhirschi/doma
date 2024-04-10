@@ -1,7 +1,6 @@
-export type FormatterWithInfoAndEi = (Formatter_SB & {
-    formatted_info: FormattedInfoWithEiId[]
+export type FormatterWithInfo = (Formatter_SB & {
+    formatted_info: FormattedInfo_SB[]
 })
 
-export type FormattedInfoWithEiId = (FormattedInfo_SB & {
-    extracted_information: {id:string}[]
-})
+export type ContractWithFormattedInfo = Contract_SB & { formatted_info: FormattedInfo_SB[] }
+

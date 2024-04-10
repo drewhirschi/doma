@@ -7,20 +7,23 @@ export enum ExtractJobStatus {
 
 
 export enum FormatterKeys {
-    ipOwnership = "ipOwnership",
     agreementInfo = "agreementInfo",
     term = "term",
     termination = "termination",
     license = "license",
     sourceCode = "sourceCode",
+    ipOwnership = "ipOwnership",
     paymentTerms = "paymentTerms",
+    convenantNotToSue = "convenantNotToSue",
+    mostFavoredNation = "mostFavoredNation",
+    nonSolicitHire = "nonSolicitHire",
+    rightOfFirstRefusal = "rightOfFirstRefusal",
+    warranties = "warranties",
     limitationOfLiability = "limitationOfLiability",
-    nonSolicit = "nonSolicit",
-    nonHire = "nonHire",
+    indemnities = "indemnities",
     nonCompete = "nonCompete",
     trojans = "trojans",
     effectsOfTransaction = "effectsOfTransaction",
-    mostFavoredNation = "mostFavoredNation",
     governingLaw = "governingLaw",
     assignability = "assignability"
 }

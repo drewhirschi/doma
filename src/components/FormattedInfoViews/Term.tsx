@@ -1,33 +1,57 @@
-import { AgreementInfoFormatResponse, TermFormatResponse, TerminationFormatResponse } from "@/types/formattersTypes"
-import { Anchor, Badge, Group, SimpleGrid, Stack, Text, Title } from "@mantine/core"
+import { AgreementInfoFormatResponse, TermFormatResponse, } from "@/types/formattersTypes"
+import { Anchor, Badge, Button, Group, InputVariant, MantineComponent, Select, SelectProps, SelectStylesNames, SimpleGrid, Stack, Text, Textarea, Title } from "@mantine/core"
+import { useEffect, useState } from "react"
 
-import { EIReferenceLinks } from "./EIReferences"
-import { FormattedInfoWithEiId } from "@/types/complex"
-import MetadataItem from "../MetadataItem"
+import { AnnotationsList } from "./AnnotationsList"
+import { BoolSelect } from "../BoolSelect"
+import { DatePickerInput } from "@mantine/dates"
+import { ViewProps } from "./FormattedItemSingle"
+import { notifications } from "@mantine/notifications"
+import { useForm } from '@mantine/form';
 
-interface Props {
-    
-    info?: FormattedInfoWithEiId
-}
-
-export function FormattedTerm({ info }: Props) {
-  
-
-    const data = info?.data as unknown as TermFormatResponse | undefined
-
-  
+export function FormattedTerm({ form, onChange }: ViewProps<TermFormatResponse>) {
 
 
     return (
         <Stack gap={4}>
-            <Text size="sm">{data?.summary}</Text>
-            <EIReferenceLinks ids={info?.extracted_information?.map(ei => ei.id) ?? []} />
+            <Textarea autosize {...form.getInputProps('summary')} />
 
 
             <SimpleGrid cols={2} spacing="md">
-                <MetadataItem header="Expire date" text={data?.expireDate ? new Date(data.expireDate).toLocaleDateString() : "No Date"} />
-                <MetadataItem header="Expired" text={data?.expired ? "Yes" : "No"} />
+                <DatePickerInput
+                    label="Expire date"
+                    placeholder="N/A"
+                    clearable
+                    firstDayOfWeek={0}
+                    {...form.getInputProps('expireDate')}
+                    value={form.values.expireDate ? new Date(form.values.expireDate) : null}
+                    onChange={(value) => {
+                        form.setFieldValue('expireDate', value)
+                        onChange()
+                    }}
+                />
+                <BoolSelect
+                    label="Expired"
+                    {...form.getInputProps('expired')}
+                    onChange={(value) => {
+                        form.setFieldValue('expired', value )
+                        onChange()
+                    }}
+
+                />
+              
+                <BoolSelect
+                    label="Silent"
+                    {...form.getInputProps('silent')}
+                    onChange={(value) => {
+                        form.setFieldValue('silent', value )
+                        onChange()
+                    }}
+                   
+                />
             </SimpleGrid>
+
         </Stack>
+
     )
 }

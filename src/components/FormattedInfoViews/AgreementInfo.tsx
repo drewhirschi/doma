@@ -1,31 +1,39 @@
-import { Anchor, Badge, Group, Select, SimpleGrid, Stack, Text, TextInput, Title } from "@mantine/core"
+import { Anchor, Badge, Button, SimpleGrid, Stack, Text, TextInput, Textarea, Title } from "@mantine/core"
 
 import { AgreementInfoFormatResponse } from "@/types/formattersTypes"
-import { FormattedInfoWithEiId } from "@/types/complex"
-import MetadataItem from "../MetadataItem"
+import { DatePickerInput } from "@mantine/dates";
+import { ViewProps } from "./FormattedItemSingle";
 
-interface Props {
-    // data: AgreementInfoFormatResponse
-    // extractedInfoRefs: string[]
-    info?: FormattedInfoWithEiId
-}
+export function FormattedAgreementInfo({ form, onChange }: ViewProps<AgreementInfoFormatResponse>) {
+    
 
-export function FormattedAgreementInfo({ info }: Props) {
-
-
-    const data: AgreementInfoFormatResponse = info?.data as unknown as AgreementInfoFormatResponse
 
 
     return (
-        <Stack gap={4}>
-            <Text size="sm">{data.summary}</Text>
+     
+                <Stack gap={4}>
+                    <Textarea autosize {...form.getInputProps('summary')} />
 
-            <SimpleGrid cols={2} spacing="md">
-                <TextInput label="Title" value={data.title}/>
-                <TextInput label="Effective date" value={data.effective_date}/>
-                <TextInput label="Target" value={data.target_entity}/>
-                <TextInput label="Counter party" value={data.counter_party}/>
-            </SimpleGrid>
-        </Stack>
+                    <SimpleGrid cols={2} spacing="md">
+                        <TextInput label="Title" {...form.getInputProps('title')} />
+                        <DatePickerInput
+                            firstDayOfWeek={0}
+                            label="Effective date"
+                            placeholder="No date"
+                            clearable
+                            {...form.getInputProps('effective_date')}
+                            value={form.values.effective_date ? new Date(form.values.effective_date) : null}
+                            onChange={(value) => {
+                                form.setFieldValue('effective_date', value)
+                                onChange()
+                            }}
+                        />
+                        <TextInput label="Target" {...form.getInputProps('target_entity')} />
+                        <TextInput label="Counterparty" {...form.getInputProps("counter_party")} />
+                    </SimpleGrid>
+
+                </Stack>
+         
+
     )
 }

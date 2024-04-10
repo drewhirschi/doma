@@ -3,34 +3,41 @@ import { IResp, rerm, rok } from '@/utils';
 
 import { Database } from '@/types/supabase';
 import { ExtractJobStatus } from '@/types/enums';
+import { IpOwnershipType } from '@/types/formattersTypes';
+import { Json } from '@/types/supabase-generated';
 import OpenAI from 'openai';
-import PQueue from 'p-queue';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { buildScaledPostionFromContractLines } from '@/helpers';
 import { sleep } from '@/utils';
 import { v4 as uuidv4 } from 'uuid';
+import { z } from "zod";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 
-
-const systemMessage = `You are a tool used by lawyers for extracting verbatim language containing key information and red flags from our client's contracts in the context of a merger or acquisition. 
-
-Be thorough, the whole document needs to be handled.
-
-Do not provide explanations, just state the verbatim language.
-
-Your output should be a JSON object with a schema that matches the following: {data: {text: string, lines: string}[]} where each object in the array has a verbaitim quote and the lines that quote came from.
-
-In the schema, the property "lines" should state the start and end of the lines the information came from like "33-48"`
+interface ContractLine {
+    text: string;
+    ntokens: number;
+}
 
 
 
 
+const RawExtractionDataSchema = z.object({
+    lines: z.number().array(),
+});
 
+export type RawExtractionData = z.infer<typeof RawExtractionDataSchema>;
 
-export type RawExtractionData = { text: string, lines: string, id: string }
+const extractorIdMap = {
+    paymentTerms: "8e105eac-82f9-473f-9330-f837b173bfa8",
+    IpOwnership: "084fc678-f4c0-4e54-9524-0597a3330316",
+    license: "334e16da-2c83-4110-8ed1-92ff35fb5b55"
+
+}
+
 
 
 export async function runSingleExtraction(supabase: SupabaseClient<Database>, contractId: string, extractorId: string) {
@@ -139,7 +146,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
 
-export async function execExtractor(sb: SupabaseClient<Database>, extractor: Parslet_SB, contract: Contract_SB & { contract_line: { text: string, ntokens: number }[] }): Promise<IResp<RawExtractionData[]>> {
+export async function execExtractor(sb: SupabaseClient<Database>, extractor: Parslet_SB, contract: Contract_SB & { contract_line: ContractLine[] }): Promise<IResp<RawExtractionData>> {
 
     const job = await createExtractionJob(sb, contract.id, extractor!.id)
 
@@ -147,29 +154,38 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
     console.log(`executing extractor ${extractor.display_name}`)
 
 
-    const xmlContractText = buildXmlContract(contract.contract_line)
+    const contractSegments = segmentContractLines(contract.contract_line)
+
+    const relevantLineNubers: number[] = []
 
     try {
+        for (let contractSegment of contractSegments) {
 
-        const res: ChatCompletion = await openai.chat.completions.create({
-            messages: buildExtracitonMessages(extractor, xmlContractText),
-            model: 'gpt-4-1106-preview',
-            temperature: 0,
-            response_format: { 'type': "json_object" }
-        });
+            const xmlContractText = buildXmlContract(contractSegment)
 
-        const responseMessage = res.choices[0].message;
 
-        let content: { data: RawExtractionData[] } = { data: [] }
-        try {
-            content.data = JSON.parse(responseMessage.content!).data.map((d: { text: string, lines: string }) => ({ ...d, id: uuidv4() }))
-        } catch (error) {
-            console.error("Failed to parse: ", responseMessage.content)
-            throw error
+            const res: ChatCompletion = await openai.chat.completions.create({
+                messages: buildExtracitonMessages(extractor, xmlContractText),
+                model: 'gpt-4-turbo-preview',
+                temperature: 0,
+                response_format: { 'type': "json_object" }
+            });
+
+            const responseMessage = res.choices[0].message;
+
+            let content: { data: RawExtractionData[] } = { data: [] }
+            try {
+                content.data = JSON.parse(responseMessage.content!).data.map((d: { text: string, lines: string }) => ({ ...d, id: uuidv4() }))
+            } catch (error) {
+                console.error("Failed to parse: ", responseMessage.content)
+                await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
+                throw error
+            }
+
         }
 
         await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.COMPLETE)
-        return rok(content.data)
+        return rok({ lines: relevantLineNubers })
 
     } catch (error) {
         console.error('Error extracting data:', error);
@@ -183,52 +199,65 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 }
 
 
-async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractionData: RawExtractionData[]) {
-    const { error: insertError } = await supabase
-        .from('extracted_information')
-        .insert(extractionData.map((d) => (
-            {
-                id: d.id,
-                parslet_id: extractor.id,
-                data: d.text,
-                contract_id: contractId
-            }
-        )));
-
-    if (insertError) {
-        console.error('Error inserting data:', insertError);
-        return
-    } else {
-        console.log(`Inserted ${extractionData.length} ${extractor.display_name} extractions successfully`);
-    }
+async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractionData: RawExtractionData) {
 
 
 
-    const eiRefs = extractionData.flatMap((ei) => {
+    // const linesq = await supabase.from('contract_line').select().eq('contract_id', contractId)
 
-        const { start, end } = parseRefLines(ei.lines)
+    // const { error: insertError } = await supabase
+    //     .from('annotation')
+    //     .insert(extractionData.map((d) => {
 
-        const refs = []
-        for (let i = start; i <= end; i++) {
-            refs.push({
-                line_id: i,
-                contract_id: contractId,
-                extracted_info_id: ei.id
-            })
+    //         const { start, end } = parseRefLines(d.lines)
+    //         const relatedLines = linesq.data?.filter((l) => l.id >= start && l.id <= end) ?? []
+    //         const position = buildScaledPostionFromContractLines(relatedLines) as unknown as Json
+
+    //         const newAnnotation = {
+    //             id: d.id,
+    //             contract_id: contractId,
+    //             parslet_id: extractor.id,
+    //             text: d.text,
+    //             position,
+    //             formatter_key: null,
+    //             formatter_item_idx: null,
+    //             is_user: false
+    //         }
+
+    //         return newAnnotation
+    //     }));
+
+    // if (insertError) {
+    //     console.error('Error inserting data:', insertError);
+    //     return
+    // } else {
+    //     console.log(`Inserted ${extractionData.length} ${extractor.display_name} extractions successfully`);
+    // }
+
+
+
+
+
+    const eiRefs = extractionData.lines.map((lineNumber) => {
+
+
+        return {
+            line_id: lineNumber,
+            contract_id: contractId,
+            extractor_key: extractor.key
         }
-        return refs
     })
 
-    const { error: insertRelaitonshipError } = await supabase
-        .from('line_ref')
-        .insert(eiRefs);
+    // const { error: insertRelaitonshipError } = await supabase
+    //     .from('line_extractions')
+    //     .insert(eiRefs);
 
 
-    if (insertRelaitonshipError) {
-        console.error('Error inserting data:', insertRelaitonshipError);
-    } else {
-        console.log(`Inserted ${eiRefs.length} line references`);
-    }
+    // if (insertRelaitonshipError) {
+    //     console.error('Error inserting data:', insertRelaitonshipError);
+    // } else {
+    //     console.log(`Inserted ${eiRefs.length} line references`);
+    // }
 
 }
 
@@ -236,20 +265,24 @@ async function saveExtraction(supabase: SupabaseClient<Database>, contractId: st
  * @param {string} xmlContractText - The line XML of the contract.
  */
 function buildExtracitonMessages(extractor: Parslet_SB, xmlContractText: string) {
+
+    const systemMessage = `You are a tool used by lawyers for extracting line numbers containing key information and red flags from our client's contracts in the context of a merger or acquisition. Be thorough, the whole document needs to be handled.
+
+Your output should be a JSON object with a schema that matches the following: { lines: number[]} where each number represents a line number in the contract that is relevant to the extraction instructions.
+
+<extraction_instructions>
+${extractor.instruction}
+</extraction_instructions>
+`
+
     const messages: ChatCompletionMessageParam[] = [
         { role: "system", content: systemMessage },
         { role: 'user', content: `<contract>${xmlContractText}</contract>` },
-        {
-            role: 'user', content: `<instruction>${extractor.instruction}</instruction>
-                <output type="JSON">
-                <schema>${extractor.schema ?? "{data: {text: string, lines: string}[]}"}</schema>
-                ${extractor.examples ? `<examples>${extractor.examples.map(e => "<example>" + e + "</example>").join('\n')}</examples>` : ''}</output>`
-        }
     ];
     return messages;
 }
 
-export function buildXmlContract(contractLines: { text: string }[]) {
+export function buildXmlContract(contractLines: ContractLine[]) {
     return contractLines.reduce((acc, line, i) => {
         return acc + `<line id="${i}">${line.text}</line>` + "\n";
     }, "")
@@ -281,7 +314,7 @@ async function createExtractionJob(supabase: SupabaseClient<Database>, contractI
     const job = await supabase.from("extract_jobs").upsert({
         contract_id: contractId,
         parslet_id: extractorId,
-        status: "pending",
+        status: ExtractJobStatus.PENDING,
         updated_at: new Date().toISOString()
     }).select().single()
 
@@ -292,4 +325,27 @@ async function createExtractionJob(supabase: SupabaseClient<Database>, contractI
 
     return job.data
 
+}
+
+function segmentContractLines(lines: ContractLine[]): ContractLine[][] {
+    const segments: ContractLine[][] = [];
+    let currentSegment: ContractLine[] = [];
+    let currentTokenCount = 0;
+
+    lines.forEach((line) => {
+        if (currentTokenCount + line.ntokens > 10000) {
+            segments.push(currentSegment);
+            currentSegment = [];
+            currentTokenCount = 0;
+        }
+        currentSegment.push(line);
+        currentTokenCount += line.ntokens;
+    });
+
+    // Add the last segment if not empty
+    if (currentSegment.length) {
+        segments.push(currentSegment);
+    }
+
+    return segments;
 }
