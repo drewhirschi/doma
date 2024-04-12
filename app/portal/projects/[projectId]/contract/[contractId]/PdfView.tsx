@@ -29,14 +29,12 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
     const router = useRouter()
     const [focusedHighlightId, setFocusedHighlightId] = useState<string | undefined>()
 
-    const scrollToHighlightFromHash = () => {
-       
-            setFocusedHighlightId(window.location.hash.slice(1));
-        
-    }
+    const scrollToHighlightFromHash = () =>  setFocusedHighlightId(window.location.hash.slice(1));
+    
     
     useEffect(() => {
-    
+        scrollToHighlightFromHash();
+        
         window.addEventListener("hashchange", scrollToHighlightFromHash, false);
     
         return () => {
@@ -46,7 +44,8 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
 
     const resetHash = () => {
-        router.replace(pathname.split("#")[0])
+        setFocusedHighlightId(undefined)
+        router.replace(window.location.href.split("#")[0])
     };
 
 
@@ -61,7 +60,7 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
             <PdfLoader
                 pdfBase64={pdfBase64}
-                url={pdfUrl}
+                // url={pdfUrl}
                 beforeLoad={
                     <div>
 
@@ -86,17 +85,6 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                 onScrollChange={resetHash}
                                 pdfScaleValue="page-width"
                                 // pdfScaleValue=".75"
-                                // scrolledToHighlight={scrollToHighlightFromHash}
-                                // scrollRef={(scrollTo) => {
-                                //     const hash = window.location.hash.slice(1);
-                                //     const selectedHighlight = highlights.find(
-                                //         (highlight) => highlight.id === hash
-                                //     );
-                                //     if (selectedHighlight) {
-                                //         scrollTo(selectedHighlight);
-                                //     }
-                                //     scrollViewerTo = scrollTo;
-                                // }}
                                 focusedHighlightId={focusedHighlightId}
                                 onSelectionFinished={(
                                     position,

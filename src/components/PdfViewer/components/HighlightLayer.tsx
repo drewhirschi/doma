@@ -1,5 +1,3 @@
-import { viewportToScaled } from "../lib/coordinates";
-import React from "react";
 import {
   IHighlight,
   LTWH,
@@ -9,10 +7,13 @@ import {
   ScaledPosition,
 } from "../types";
 
+import React from "react";
+import { viewportToScaled } from "../lib/coordinates";
+
 interface HighlightLayerProps<T_HT> {
   highlightsByPage: { [pageNumber: string]: Array<T_HT> };
   pageNumber: string;
-  scrolledToHighlightId: string;
+  scrolledToHighlightId: string | undefined;
   highlightTransform: (
     highlight: any,
     index: number,

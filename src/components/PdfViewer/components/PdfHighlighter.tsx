@@ -54,7 +54,7 @@ interface State<T_HT> {
     tipPosition: Position | null;
     tipChildren: JSX.Element | null;
     isAreaSelectionInProgress: boolean;
-    scrolledToHighlightId: string;
+    // scrolledToHighlightId: string;
 }
 
 interface Props<T_HT> {
@@ -84,7 +84,6 @@ interface Props<T_HT> {
     focusedHighlightId:string | undefined
 }
 
-const EMPTY_ID = "empty-id";
 
 export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     Props<T_HT>,
@@ -98,7 +97,6 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         ghostHighlight: null,
         isCollapsed: true,
         range: null,
-        scrolledToHighlightId: EMPTY_ID,
         isAreaSelectionInProgress: false,
         tip: null,
         tipPosition: null,
@@ -131,6 +129,8 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     componentDidMount() {
         this.init();
+
+       
     }
 
     attachRef = () => {
@@ -201,8 +201,14 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         this.linkService.setDocument(pdfDocument);
         this.linkService.setViewer(this.viewer);
         this.viewer.setDocument(pdfDocument);
+
         // debug
         (window as any).PdfViewer = this;
+
+       
+
+
+        
     }
 
     componentWillUnmount() {
@@ -407,12 +413,15 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
             ],
         });
 
-        this.setState(
-            {
-                scrolledToHighlightId: highlight.id,
-            },
-            () => this.renderHighlightLayers()
-        );
+        // this.setState(
+        //     {
+        //         scrolledToHighlightId: highlight.id,
+        //     },
+        //     () => this.renderHighlightLayers()
+        // );
+
+        this.renderHighlightLayers()
+
 
         // wait for scrolling to finish
         setTimeout(() => {
@@ -423,7 +432,21 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     onDocumentReady = () => {
         // const { scrollRef } = this.props;
 
+        console.log('onDocumentReady')
         this.handleScaleValue();
+
+
+        if (this.props.focusedHighlightId) {
+            const highlight = this.props.highlights.find(
+                (h) => h.id === this.props.focusedHighlightId
+            );
+            if (highlight) {
+                console.log("starting scroll")
+                this.scrollTo(highlight);
+            } else {
+                console.warn("Could not find highlight with id", this.props.focusedHighlightId);
+            }
+        }
 
         // scrollRef(this.scrollTo);
     };
@@ -464,12 +487,14 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
         onScrollChange();
 
-        this.setState(
-            {
-                scrolledToHighlightId: EMPTY_ID,
-            },
-            () => this.renderHighlightLayers()
-        );
+        // this.setState(
+        //     {
+        //         scrolledToHighlightId: EMPTY_ID,
+        //     },
+        //     () => this.renderHighlightLayers()
+        // );
+
+        this.renderHighlightLayers()
 
         this.viewer.container.removeEventListener("scroll", this.onScroll);
     };
@@ -564,6 +589,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     render() {
         // const { onSelectionFinished, enableAreaSelection } = this.props;
+        console.log("num pages", this.viewer?._pages?.length)
 
         return (
             <div onPointerDown={this.onMouseDown}>
@@ -669,12 +695,12 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     private renderHighlightLayer(root: Root, pageNumber: number) {
         const { highlightTransform, highlights } = this.props;
-        const { tip, scrolledToHighlightId } = this.state;
+        const { tip } = this.state;
         root.render(
             <HighlightLayer
                 highlightsByPage={this.groupHighlightsByPage(highlights)}
                 pageNumber={pageNumber.toString()}
-                scrolledToHighlightId={scrolledToHighlightId}
+                scrolledToHighlightId={this.props.focusedHighlightId}
                 highlightTransform={highlightTransform}
                 tip={tip}
                 scaledPositionToViewport={this.scaledPositionToViewport.bind(this)}

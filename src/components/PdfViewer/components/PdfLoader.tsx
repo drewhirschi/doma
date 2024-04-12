@@ -7,7 +7,7 @@ interface Props {
   /** See `GlobalWorkerOptionsType`. */
   workerSrc: string;
 
-  url: string;
+  // url?: string;
   pdfBase64: string;
   beforeLoad: JSX.Element;
   errorMessage?: JSX.Element;
@@ -45,8 +45,8 @@ export class PdfLoader extends Component<Props, State> {
     }
   }
 
-  componentDidUpdate({ url }: Props) {
-    if (this.props.url !== url) {
+  componentDidUpdate({ pdfBase64 }: Props) {
+    if (this.props.pdfBase64 !== pdfBase64) {
       this.load();
     }
   }
