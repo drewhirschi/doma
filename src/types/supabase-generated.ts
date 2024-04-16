@@ -371,20 +371,23 @@ export type Database = {
         }
         Relationships: []
       }
-      line_extractions: {
+      line_ref: {
         Row: {
-          annotation_id: string
           contract_id: string
+          extractor_key: string | null
+          formatter_key: string | null
           line_id: number
         }
         Insert: {
-          annotation_id: string
           contract_id: string
+          extractor_key?: string | null
+          formatter_key?: string | null
           line_id: number
         }
         Update: {
-          annotation_id?: string
           contract_id?: string
+          extractor_key?: string | null
+          formatter_key?: string | null
           line_id?: number
         }
         Relationships: [
@@ -396,11 +399,11 @@ export type Database = {
             referencedColumns: ["contract_id", "id"]
           },
           {
-            foreignKeyName: "public_line_ref_annotation_id_fkey"
-            columns: ["annotation_id"]
+            foreignKeyName: "public_line_extractions_formatter_key_fkey"
+            columns: ["formatter_key"]
             isOneToOne: false
-            referencedRelation: "annotation"
-            referencedColumns: ["id"]
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
           },
         ]
       }

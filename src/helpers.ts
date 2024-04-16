@@ -1,5 +1,8 @@
 import type { LTWHP, Scaled, ScaledPosition } from "@/components/PdfViewer";
 
+import { Database } from "./types/supabase";
+import { SupabaseClient } from "@supabase/supabase-js";
+
 type Rect = {
     x1: number;
     x2: number;
@@ -52,6 +55,43 @@ export function buildScaledPostionFromContractLines(contractLines: ContractLine_
         pageNumber: pageNumber,
         boundingRect: boundingRect || { x1: 0, x2: 0, y1: 0, y2: 0, width: 0, height: 0, pageNumber: 0 }
     };
+}
+
+
+
+export async function getContractLinesWithinAnnotation(supabase: SupabaseClient<Database>, annotation: Annotation_SB, contract: { height: number, width: number, id: string }):Promise<ContractLine_SB[]> {
+    //@ts-ignore
+    const boundingRect: Rect = annotation.position?.boundingRect
+
+    if (!boundingRect) {
+        throw `Annotation: ${annotation.text}\n No bounding rect found\n\n`
+    }
+
+    const scaledBr = {
+        x1: boundingRect.x1 * (contract.width / boundingRect.width),
+        x2: boundingRect.x2 * (contract.width / boundingRect.width),
+        y1: boundingRect.y1 * (contract.height / boundingRect.height),
+        y2: boundingRect.y2 * (contract.height / boundingRect.height),
+        width: contract.width,
+        height: contract.height,
+        pageNumber: boundingRect.pageNumber,
+    }
+
+    const topBound = scaledBr.y1
+    const bottomBound = scaledBr.y2
+    const tolerance = 0
+
+    // console.log(`looking for lines y1 lte ${topBound - tolerance} and y2 gte ${bottomBound + tolerance} and`)
+
+    const linesq = await supabase.from('contract_line').select('*').throwOnError()
+        .eq('contract_id', contract.id)
+        .eq('page', scaledBr.pageNumber)
+        .gte('y1', topBound - tolerance)
+        .lte('y2', bottomBound + tolerance)
+
+   
+
+    return linesq.data ?? []
 }
 
 

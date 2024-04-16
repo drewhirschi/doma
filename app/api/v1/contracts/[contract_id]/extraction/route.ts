@@ -3,7 +3,7 @@ import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } fro
 import { NextRequest } from "next/server";
 import OpenAI from 'openai';
 import { routeClient } from "@/supabase/ServerClients";
-import { runContractExtraction } from '@/server/extractionAgent';
+import { runContractExtraction } from '@/agents/extractionAgent';
 
 export async function POST(req: NextRequest) {
     console.log(req.url)

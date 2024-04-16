@@ -128,6 +128,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     }
 
     componentDidMount() {
+        console.log("PdfHighlighter mounted", this.props.pdfDocument.numPages)
         this.init();
 
        
@@ -140,8 +141,10 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
         if (ref) {
             const { ownerDocument: doc } = ref;
+
             eventBus.on("textlayerrendered", this.onTextLayerRendered);
             eventBus.on("pagesinit", this.onDocumentReady);
+
             doc.addEventListener("selectionchange", this.onSelectionChange);
             doc.addEventListener("keydown", this.handleKeyDown);
             doc.defaultView?.addEventListener("resize", this.debouncedScaleValue);
@@ -150,6 +153,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
             this.unsubscribe = () => {
                 eventBus.off("pagesinit", this.onDocumentReady);
                 eventBus.off("textlayerrendered", this.onTextLayerRendered);
+
                 doc.removeEventListener("selectionchange", this.onSelectionChange);
                 doc.removeEventListener("keydown", this.handleKeyDown);
                 doc.defaultView?.removeEventListener(
@@ -162,10 +166,10 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
     };
 
     componentDidUpdate(prevProps: Props<T_HT>) {
-        if (prevProps.pdfDocument !== this.props.pdfDocument) {
-            this.init();
-            return;
-        }
+        // if (prevProps.pdfDocument !== this.props.pdfDocument) {
+        //     this.init();
+        //     return;
+        // }
         if (prevProps.highlights !== this.props.highlights) {
             this.renderHighlightLayers();
         }
@@ -200,7 +204,9 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
         this.linkService.setDocument(pdfDocument);
         this.linkService.setViewer(this.viewer);
+        console.log(pdfDocument.numPages);
         this.viewer.setDocument(pdfDocument);
+        console.log("pages.length", this.viewer);
 
         // debug
         (window as any).PdfViewer = this;
@@ -213,6 +219,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     componentWillUnmount() {
         this.unsubscribe();
+        
     }
 
     findOrCreateHighlightLayer(page: number) {
@@ -589,7 +596,6 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
     render() {
         // const { onSelectionFinished, enableAreaSelection } = this.props;
-        console.log("num pages", this.viewer?._pages?.length)
 
         return (
             <div onPointerDown={this.onMouseDown}>

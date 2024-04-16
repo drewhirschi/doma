@@ -28,6 +28,7 @@ export function AnnotationReference({ ann, removeAnnotation }: { ann: Annotation
         <Group
             maw={"100%"}
             justify="space-between"
+            gap={0}
         >
 
             <Anchor

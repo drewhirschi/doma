@@ -1,59 +1,18 @@
-import { SupabaseClient } from '@supabase/supabase-js'
-import { fullAccessServiceClient } from '@/supabase/ServerClients'
 import { Database } from '@/types/supabase'
+import { SupabaseClient } from '@supabase/supabase-js'
+import chalk from 'chalk';
+import { fullAccessServiceClient } from '@/supabase/ServerClients'
+import { getContractLinesWithinAnnotation } from '@/helpers'
 
 const supabase = fullAccessServiceClient()
 
 
-type Rect = {
-    x1: number,
-    x2: number,
-    y1: number,
-    y2: number,
-    width: number,
-    height: number,
-    pageNumber: number,
-}
 
-
-export async function getAnnotationContractLines(supabase: SupabaseClient<Database>, annotation: Annotation_SB, contract: { height: number, width: number, id: string }):Promise<ContractLine_SB[] | null> {
-    //@ts-ignore
-    const boundingRect: Rect = annotation.position?.boundingRect
-
-    if (!boundingRect) {
-        console.log(`Annotation: ${annotation.text}\n No bounding rect found\n\n`)
-        return null
-    }
-
-    const scaledBr = {
-        x1: boundingRect.x1 * (contract.width / boundingRect.width),
-        x2: boundingRect.x2 * (contract.width / boundingRect.width),
-        y1: boundingRect.y1 * (contract.height / boundingRect.height),
-        y2: boundingRect.y2 * (contract.height / boundingRect.height),
-        width: contract.width,
-        height: contract.height,
-        pageNumber: boundingRect.pageNumber,
-    }
-
-    const topBound = scaledBr.y1
-    const bottomBound = scaledBr.y2
-    const tolerance = 0
-
-    // console.log(`looking for lines y1 lte ${topBound - tolerance} and y2 gte ${bottomBound + tolerance} and`)
-
-    const linesq = await supabase.from('contract_line').select('*')
-        .eq('contract_id', contract.id)
-        .eq('page', scaledBr.pageNumber)
-        .gte('y1', topBound - tolerance)
-        .lte('y2', bottomBound + tolerance)
-
-    return linesq.data
-}
 
 async function main() {
-    const contractId = "7bcb5164-ae37-4b89-bdd2-083a33aeabc1"
+    const contractId = "393141ef-6d76-4c37-9ba6-97cabd301afa"
 
-    const { data: annotations, error: annotationsE } = await supabase.from('annotation').select('*').eq('contract_id', contractId)
+    const { data: annotations, error: annotationsE } = await supabase.from('annotation').select('*').eq('contract_id', contractId).order('position->boundingRect->pageNumber', { ascending: true })
     const { data: contractLines, error: contractLinesE } = await supabase.from('contract_line').select('*').eq('contract_id', contractId)
 
     if (!contractLines || !annotations) {
@@ -66,12 +25,26 @@ async function main() {
     const contractWidth = contractLines[0].page_width
 
 
+    const TOLERANCE = 0.1
 
     annotations?.forEach(async (annotation) => {
 
-        const contractLines = await getAnnotationContractLines( supabase, annotation, { height: contractHeight, width: contractWidth, id: contractId })
 
-        console.log(contractLines?.map((line) => line.id))
+        const contractLines = await getContractLinesWithinAnnotation( supabase, annotation, { height: contractHeight, width: contractWidth, id: contractId })
+        // contractLines.filter((line) => line.page === annotation.position.boundingRect.pageNumber)
+
+        console.log("".padStart(100, "-"))
+        console.log(chalk.bold("annotation text".padStart(40, " ")))
+        console.log(annotation.text)
+        console.log("\n")
+        
+        const str = contractLines.map((line) => line.text).join("\n")
+        
+        console.log(chalk.bold("corresponding contract line text".padStart(50, " ")))
+        console.log(str)
+        console.log("\n")
+        console.log("".padStart(100, "-"))
+
 
 
 

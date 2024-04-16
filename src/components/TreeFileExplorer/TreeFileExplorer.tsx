@@ -199,13 +199,15 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, project, me
                             if (index === array.length - 1) {
 
                                 return (<Group key={index}> {index != 0 && <IconChevronRight size={16} />}
-                                    <Text className={classnames.lastPathSegment}>{path}</Text>
+                                    <Text className={classnames.lastPathSegment} fw={700}
+                                    >{path}</Text>
                                 </Group>)
                             }
 
                             return (<Group key={index}>  {index != 0 && <IconChevronRight size={16} />} <UnstyledButton
                                 onClick={() => navigateUp(array.length - index - 1)}
                                 className={classnames.pathButton}
+                                fw={700}
                             >{path}</UnstyledButton></Group>)
                         })
                     }

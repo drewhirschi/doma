@@ -74,6 +74,7 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
             >
                 {(pdfDocument) => {
 
+                    // console.log("loaded pdf", pdfDocument.numPages)
 
                     return (
                         <MantineProvider theme={theme}>

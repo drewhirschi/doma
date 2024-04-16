@@ -9,7 +9,6 @@ import OpenAI from 'openai';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { buildScaledPostionFromContractLines } from '@/helpers';
 import { sleep } from '@/utils';
-import { v4 as uuidv4 } from 'uuid';
 import { z } from "zod";
 
 const openai = new OpenAI({
@@ -146,7 +145,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
 
-export async function execExtractor(sb: SupabaseClient<Database>, extractor: Parslet_SB, contract: Contract_SB & { contract_line: ContractLine[] }): Promise<IResp<RawExtractionData>> {
+export async function execExtractor(sb: SupabaseClient<Database>, extractor: Parslet_SB, contract: Contract_SB & { contract_line: ContractLine[] }): Promise<IResp<number[]>> {
 
     const job = await createExtractionJob(sb, contract.id, extractor!.id)
 
@@ -173,9 +172,10 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
             const responseMessage = res.choices[0].message;
 
-            let content: { data: RawExtractionData[] } = { data: [] }
             try {
-                content.data = JSON.parse(responseMessage.content!).data.map((d: { text: string, lines: string }) => ({ ...d, id: uuidv4() }))
+                const res:{ lines: number[]} = JSON.parse(responseMessage.content!)
+                relevantLineNubers.push(...res.lines)
+
             } catch (error) {
                 console.error("Failed to parse: ", responseMessage.content)
                 await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
@@ -185,7 +185,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
         }
 
         await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.COMPLETE)
-        return rok({ lines: relevantLineNubers })
+        return rok(relevantLineNubers)
 
     } catch (error) {
         console.error('Error extracting data:', error);
@@ -199,7 +199,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 }
 
 
-async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractionData: RawExtractionData) {
+async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractedLines: number[]) {
 
 
 
@@ -238,7 +238,7 @@ async function saveExtraction(supabase: SupabaseClient<Database>, contractId: st
 
 
 
-    const eiRefs = extractionData.lines.map((lineNumber) => {
+    const lineRefs = extractedLines.map((lineNumber) => {
 
 
         return {
@@ -248,16 +248,16 @@ async function saveExtraction(supabase: SupabaseClient<Database>, contractId: st
         }
     })
 
-    // const { error: insertRelaitonshipError } = await supabase
-    //     .from('line_extractions')
-    //     .insert(eiRefs);
+    const { error: insertRelaitonshipError } = await supabase
+        .from('line_ref')
+        .insert(lineRefs);
 
 
-    // if (insertRelaitonshipError) {
-    //     console.error('Error inserting data:', insertRelaitonshipError);
-    // } else {
-    //     console.log(`Inserted ${eiRefs.length} line references`);
-    // }
+    if (insertRelaitonshipError) {
+        console.error('Error inserting data:', insertRelaitonshipError);
+    } else {
+        console.log(`Inserted ${lineRefs.length} line references`);
+    }
 
 }
 

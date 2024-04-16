@@ -1,10 +1,10 @@
 "use server"
 
 import { IResp, sleep } from "@/utils"
-import { formatPipeline, getDataFormatted, pipelineRunFormatter } from "@/server/formatAgent"
-import { runContractExtraction, runSingleExtraction } from "@/server/extractionAgent"
+import { formatPipeline, getDataFormatted, pipelineRunFormatter } from "@/agents/formatAgent"
+import { runContractExtraction, runSingleExtraction } from "@/agents/extractionAgent"
 
-import { categorize } from "@/server/categoryAgent"
+import { categorize } from "@/agents/categoryAgent"
 import { getFormatterShape } from "@/shared/getFormatterShape"
 import { revalidatePath } from "next/cache"
 import { serverActionClient } from "@/supabase/ServerClients"
