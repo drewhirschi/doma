@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -596,6 +597,58 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      zuva_extraction: {
+        Row: {
+          file_id: string
+          request_id: string
+          status: string
+        }
+        Insert: {
+          file_id: string
+          request_id: string
+          status: string
+        }
+        Update: {
+          file_id?: string
+          request_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_zuva_extraction_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "zuva_file"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zuva_file: {
+        Row: {
+          contract_id: string
+          expiration: string
+          id: string
+        }
+        Insert: {
+          contract_id?: string
+          expiration?: string
+          id: string
+        }
+        Update: {
+          contract_id?: string
+          expiration?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_zuva_file_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contract"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

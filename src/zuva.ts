@@ -2,8 +2,10 @@ import { IResp, rerm, rok } from './utils';
 import axios, { AxiosInstance } from 'axios';
 
 import { Readable } from 'stream';
-import { RealtimeChannel } from '@supabase/supabase-js';
+import { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import fs from 'fs';
+import { Database } from './types/supabase';
+import PQueue from 'p-queue';
 
 export type ZuvaFile = {
     file_id: string;
@@ -30,7 +32,7 @@ type ExtractionFileItem = {
     status: ExtractionStatusEnum;
 };
 
-type CreateExtractionResult = {
+type CreateExtractionApiResponse = {
     file_ids: ExtractionFileItem[];
 };
 
@@ -51,7 +53,7 @@ type StatusDetail = {
     request_id: string;
 };
 
-type ExtractionStatusesResponse = {
+type ExtractionStatusesApiResponse = {
     errors: {
         [key: string]: { error: ErrorDetail }
     };
@@ -61,6 +63,85 @@ type ExtractionStatusesResponse = {
         [key: string]: StatusDetail
     };
 };
+
+type ExtractionResultApiResponse = {
+    file_id: string;
+    request_id: string;
+    results: ExtractionResult[];
+};
+
+type ExtractionResult = {
+    answers: Answer[]
+    extractions: TextExtraction[]
+    field_id: string
+    field_name: string
+
+}
+
+type Answer = {
+    option: string
+    value: string
+}
+
+type TextExtraction = {
+    currencies: CurrencyValues[]
+    dates: DateValues[]
+    defined_term: DefinedTerm
+    durations: DurationValues[]
+    spans: CharacterSpan[]
+    text: string
+}
+
+type CurrencyValues = {
+    value: string;
+    symbol: string;
+    precision: number;
+};
+
+
+type DateValues = {
+    day: number;
+    month: number;
+    year: number;
+};
+
+type DefinedTerm = {
+    term: string;
+    spans: CharacterSpan[];
+};
+
+type CharacterSpan = {
+    bounds?: BoundingBoxSummary;
+    bboxes: BoundingBoxesByPage[];
+    end: number;
+    pages: Span;
+    score: number;
+    start: number;
+};
+
+type BoundingBoxSummary = {
+    bottom: number;
+    left: number;
+    right: number;
+    top: number;
+};
+
+type BoundingBoxesByPage = {
+    page: number;
+    bounds: BoundingBoxSummary[];
+};
+
+type Span = {
+    start: number;
+    end: number;
+};
+
+type DurationValues = {
+    unit: string;
+    value: number;
+};
+
+
 
 
 
@@ -79,6 +160,9 @@ class Zuva {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
             },
+            paramsSerializer: {
+                indexes: null
+            }
         });
     }
 
@@ -128,7 +212,7 @@ class Zuva {
     }
 
 
-    public async uploadFile(fileStream: Readable) {
+    public async uploadFile(fileStream: Readable): Promise<IResp<ZuvaFile>> {
         try {
 
 
@@ -146,36 +230,38 @@ class Zuva {
                 throw response.data
 
             }
-            return response.data;
+            return rok(response.data);
 
 
         } catch (error) {
             // Code to handle error
             console.log(error);
+            return rerm("Failed to upload file", { error })
         }
 
     }
 
-    public async createExtraction(fileIds: string[]): Promise<IResp<CreateExtractionResult>> {
+    public async createExtraction(fileIds: string[]): Promise<IResp<CreateExtractionApiResponse>> {
 
         try {
 
-            const res: CreateExtractionResult = {
+            const res: CreateExtractionApiResponse = {
                 file_ids: []
             }
 
-            for (let i = 0; i < fileIds.length; i += 10) {
+            for (let i = 0; i < Object.values(this.fields).length; i += 10) {
 
                 const upperLimit = Math.min(i + 10, Object.values(this.fields).length)
 
-                const response = await this.axiosInstance.post<CreateExtractionResult>('/extraction', {
+                const response = await this.axiosInstance.post<CreateExtractionApiResponse>('/extraction', {
                     file_ids: fileIds,
                     field_ids: Object.values(this.fields).slice(i, upperLimit),
                 });
 
-                if (response.status !== 201) {
+                if (!(response.status >= 200 && response.status < 300)) {
                     throw response.data;
                 }
+
 
                 res.file_ids.push(...response.data.file_ids)
 
@@ -190,9 +276,9 @@ class Zuva {
 
 
 
-    public async getExtractionStatuses(extractionRequestIds: string[]): Promise<IResp<ExtractionStatusesResponse>> {
+    public async getExtractionStatuses(extractionRequestIds: string[]): Promise<IResp<ExtractionStatusesApiResponse>> {
         try {
-            const response = await this.axiosInstance.get<ExtractionStatusesResponse>(`/extractions`, {
+            const response = await this.axiosInstance.get<ExtractionStatusesApiResponse>(`/extractions`, {
                 params: {
                     request_id: extractionRequestIds,
                 },
@@ -210,6 +296,131 @@ class Zuva {
             return rerm("Failed to get extraction statuses", { error })
         }
     }
+
+
+    public async getExtractionResults(requestId: string): Promise<IResp<ExtractionResultApiResponse>> {
+        try {
+            const response = await this.axiosInstance.get<ExtractionResultApiResponse>(`/extraction/${requestId}/results/text`);
+
+            if (response.status !== 200) {
+                return rerm("non 200 status", response.data)
+            }
+
+            return rok(response.data);
+
+
+
+
+        } catch (error) {
+            console.log(error);
+            return rerm("Failed to get extraction results", { error })
+        }
+    }
 }
 
 export default Zuva;
+
+
+export async function startZuvaExtraction(sb: SupabaseClient<Database>, contractId: string) {
+
+
+
+    const contract = await sb.from('contract').select().eq('id', contractId).single()
+
+    if (contract.error) {
+        throw contract.error
+    }
+
+
+
+    const bucket = contract.data.tenant_id
+    const filepath = contract.data.name;
+
+    const zuvaApi = Zuva.getInstance();
+
+    const url = `${process.env.SUPABASE_URL}/storage/v1/object/${bucket}/${filepath}`;
+
+    const fileStreamResponse = await axios({
+        method: 'get',
+        url: url,
+        responseType: 'stream',
+        headers: {
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'apiKey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+            "Accept-Encoding": "gzip, deflate",
+        }
+    });
+
+    const stream: Readable = fileStreamResponse.data
+
+
+    const zuvaFile = await zuvaApi.uploadFile(stream)
+
+    if (zuvaFile.error) {
+        throw new Error('Failed to upload file to Zuva')
+    }
+
+    //create zuvafile in sb
+    const fileinsert = await sb.from('zuva_file').insert({
+        id: zuvaFile.ok.file_id,
+        contract_id: contractId,
+        expiration: zuvaFile.ok.expiration
+    })
+
+    // const file_id = "coff1jtu386c73b1siqg"
+    const file_id = zuvaFile.ok.file_id
+
+    const extraction = await zuvaApi.createExtraction([file_id])
+
+    if (extraction.error) {
+        throw new Error('Failed to create extraction')
+    }
+
+    const extractionRequestIds = extraction.ok.file_ids.map(f => f.request_id)
+
+
+    const insertExtractions = await sb.from('zuva_extraction_job')
+        .insert(extraction.ok.file_ids.map(f => ({ request_id: f.request_id, file_id: f.file_id, status: f.status })))
+
+    if (insertExtractions.error) {
+        throw insertExtractions.error
+    }
+
+
+
+
+
+}
+
+
+export async function checkExtractionJobs(sb: SupabaseClient<Database>) {
+
+    const zuvaApi = Zuva.getInstance();
+
+
+    // const extractionRequestIds = ["coff5nelnbpc73a2vrcg", "coff5nelnbpc73a2vre0", "coff5nf3u6ls73ahtne0", "coff5nf3u6ls73ahtnfg" ]
+    const extractionJobs = await sb.from('zuva_extraction_job').select()
+
+    const extractionStatuses = await zuvaApi.getExtractionStatuses(extractionJobs.data?.map((job) => job.request_id) ?? [] )
+
+    if (extractionStatuses.error) {
+        throw extractionStatuses.error
+    }
+
+    
+
+
+    const jobQueue = new PQueue({ concurrency: 20 });
+
+    Object.values(extractionStatuses.ok.statuses)
+    .filter((es) => es.status === ExtractionStatusEnum.complete)
+    .map(async (es) => {
+        const extractionResults = await jobQueue.add(() => zuvaApi.getExtractionResults(es.request_id))
+        console.log(extractionResults.ok)
+       
+    })
+
+   
+
+
+}

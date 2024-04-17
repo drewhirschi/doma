@@ -1,9 +1,10 @@
 import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } from 'openai/resources/index.js';
 
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import OpenAI from 'openai';
 import { routeClient } from "@/supabase/ServerClients";
 import { runContractExtraction } from '@/agents/extractionAgent';
+import { startZuvaExtraction } from '@/zuva';
 
 export async function POST(req: NextRequest) {
     console.log(req.url)
@@ -12,10 +13,11 @@ export async function POST(req: NextRequest) {
     const supabase = routeClient()
 
 
-    await runContractExtraction(supabase, contract_id)
+    // await runContractExtraction(supabase, contract_id)
+    await startZuvaExtraction(supabase, contract_id)
     
 
-    return Response.json({ message: "POST request processed" });
+    return Response.json({}, {status: 200})
 }
 
 
