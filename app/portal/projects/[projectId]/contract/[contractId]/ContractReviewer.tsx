@@ -150,6 +150,7 @@ export function ContractReviewer(props: Props) {
             text: text ?? "",
             position: position,
             parslet_id: null,
+            zextractor_id: null,
             is_user: true,
         }
 
@@ -204,7 +205,7 @@ export function ContractReviewer(props: Props) {
             if (formattedInfoRes.ok.length > 0) {
                 setFormatters((prevState) => {
                     const updatedFormatters = prevState.map(formatter => {
-                        if (formatter.key === formatterKey &&  formatter.formatted_info.find(fi => fi.id == itemIndex)) {
+                        if (formatter.key === formatterKey && formatter.formatted_info.find(fi => fi.id == itemIndex)) {
                             formatter.formatted_info.find(fi => fi.id == itemIndex)!.data = formattedInfoRes.ok[0]
                         }
                         return formatter
@@ -291,6 +292,14 @@ export function ContractReviewer(props: Props) {
                                     </Menu.Item>
 
                                     <Menu.Label>AI</Menu.Label>
+                                    <Menu.Item disabled
+                                        leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={() => {
+                                            actions.zuvaExtraction(contract.id)
+                                        }}
+                                    >
+                                        Zuva extraciton
+                                    </Menu.Item>
                                     <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
                                             actions.reviewContractAction(contract.id)
@@ -328,12 +337,12 @@ export function ContractReviewer(props: Props) {
                         </Group>
                         {/* <HoverCard openDelay={500}>
                             <HoverCard.Target> */}
-                                <UnstyledButton
-                                    onClick={() => openDetailsDrawer()}
-                                >
-                                    <Title order={3}>{contract.display_name}</Title>
-                                </UnstyledButton>
-                            {/* </HoverCard.Target>
+                        <UnstyledButton
+                            onClick={() => openDetailsDrawer()}
+                        >
+                            <Title order={3}>{contract.display_name}</Title>
+                        </UnstyledButton>
+                        {/* </HoverCard.Target>
                             <HoverCard.Dropdown>
                                 <Group>
                                     <MetadataItem header="Contract ID" text={contract.id} />
@@ -403,6 +412,7 @@ export function ContractReviewer(props: Props) {
                         highlights={highlights}
                         handleAddHighlight={handleAddHighlight}
                         handleRemoveHighlight={handleRemoveHighlight}
+                        parslets={parslets}
                     />
 
 

@@ -1,21 +1,39 @@
 import type { LTWHP, Scaled, ScaledPosition } from "@/components/PdfViewer";
 
+import { CharacterSpan } from "./zuva";
 import { Database } from "./types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-type Rect = {
-    x1: number;
-    x2: number;
-    y1: number;
-    y2: number;
-    width: number;
-    height: number;
-    pageNumber: number;
-};
+export function spanToScaledPosition(spans: CharacterSpan[], height: number, width: number): ScaledPosition | null {
+
+
+    const rects: Scaled[] = spans.map((span: CharacterSpan) => ({
+        height: height * 4.1,
+        width: width * 4.1,
+        x1: (span.bounds?.left ?? 0),
+        x2: (span.bounds?.right ?? 0),
+        y1: (span.bounds?.top ?? 0),
+        y2: (span.bounds?.bottom ?? 0),
+        pageNumber: span.pages.start
+    }))
+
+    const boundingRect = calculateBoundingRect(rects)
+
+    if (!boundingRect) return null
+
+    const position: ScaledPosition = {
+        boundingRect,
+        rects,
+        pageNumber: spans[0].pages.start
+    }
 
 
 
-function calculateBoundingRect(rects: Rect[]): Rect | null {
+    return position
+
+}
+
+function calculateBoundingRect(rects: Scaled[]): Scaled | null {
     if (rects.length === 0) return null;
 
     let minX1 = rects[0].x1;
@@ -59,7 +77,7 @@ export function buildScaledPostionFromContractLines(contractLines: ContractLine_
 
 
 
-export async function getContractLinesWithinAnnotation(supabase: SupabaseClient<Database>, annotation: Annotation_SB, contract: { height: number, width: number, id: string }):Promise<ContractLine_SB[]> {
+export async function getContractLinesWithinAnnotation(supabase: SupabaseClient<Database>, annotation: Annotation_SB, contract: { height: number, width: number, id: string }): Promise<ContractLine_SB[]> {
     //@ts-ignore
     const boundingRect: Rect = annotation.position?.boundingRect
 
@@ -89,7 +107,7 @@ export async function getContractLinesWithinAnnotation(supabase: SupabaseClient<
         .gte('y1', topBound - tolerance)
         .lte('y2', bottomBound + tolerance)
 
-   
+
 
     return linesq.data ?? []
 }

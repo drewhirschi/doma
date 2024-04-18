@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -22,6 +21,7 @@ export type Database = {
           position: Json
           tenant_id: string | null
           text: string
+          zextractor_id: string | null
         }
         Insert: {
           contract_id: string
@@ -34,6 +34,7 @@ export type Database = {
           position: Json
           tenant_id?: string | null
           text: string
+          zextractor_id?: string | null
         }
         Update: {
           contract_id?: string
@@ -46,6 +47,7 @@ export type Database = {
           position?: Json
           tenant_id?: string | null
           text?: string
+          zextractor_id?: string | null
         }
         Relationships: [
           {
@@ -82,6 +84,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "formatters"
             referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "public_annotation_zextractor_id_fkey"
+            columns: ["zextractor_id"]
+            isOneToOne: false
+            referencedRelation: "zuva_extractors"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -598,18 +607,51 @@ export type Database = {
         }
         Relationships: []
       }
-      zuva_extraction: {
+      zuva_dependencies: {
         Row: {
+          formatter_key: string
+          zextractor_key: string
+        }
+        Insert: {
+          formatter_key: string
+          zextractor_key?: string
+        }
+        Update: {
+          formatter_key?: string
+          zextractor_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_zuva_dependencies_formatter_key_fkey"
+            columns: ["formatter_key"]
+            isOneToOne: true
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "public_zuva_dependencies_zextractor_id_fkey"
+            columns: ["zextractor_key"]
+            isOneToOne: false
+            referencedRelation: "zuva_extractors"
+            referencedColumns: ["key"]
+          },
+        ]
+      }
+      zuva_extraction_job: {
+        Row: {
+          contract_id: string
           file_id: string
           request_id: string
           status: string
         }
         Insert: {
+          contract_id: string
           file_id: string
           request_id: string
           status: string
         }
         Update: {
+          contract_id?: string
           file_id?: string
           request_id?: string
           status?: string
@@ -622,7 +664,32 @@ export type Database = {
             referencedRelation: "zuva_file"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "public_zuva_extraction_job_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contract"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      zuva_extractors: {
+        Row: {
+          display_name: string
+          id: string
+          key: string
+        }
+        Insert: {
+          display_name: string
+          id?: string
+          key: string
+        }
+        Update: {
+          display_name?: string
+          id?: string
+          key?: string
+        }
+        Relationships: []
       }
       zuva_file: {
         Row: {

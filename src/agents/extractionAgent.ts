@@ -2,6 +2,7 @@ import { ChatCompletion, ChatCompletionMessage, ChatCompletionMessageParam } fro
 import { IResp, rerm, rok } from '@/utils';
 
 import { Database } from '@/types/supabase';
+import { Except } from 'type-fest';
 import { ExtractJobStatus } from '@/types/enums';
 import { IpOwnershipType } from '@/types/formattersTypes';
 import { Json } from '@/types/supabase-generated';
@@ -90,9 +91,9 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
     const { data: extractors, error: extractorError } = await supabase.from('parslet').select('*')
         .order("order", { ascending: true })
-        .is('schema', null)
+        // .limit(10)
 
-    if (!extractors) {
+    if (extractorError) {
         console.error('Error loading extractors:', extractorError);
         return Response.json({ message: "Could not load extractors" })
     }
@@ -120,12 +121,12 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
         const task = async () => {
             tokensUsedThisMinute += APX_TOKENS_PER_REQUEST;
-            const extraction = await execExtractor(supabase, extractor!, contractData)
+            const extractedLines = await execExtractor(supabase, extractor!, contractData)
 
-            if (extraction.error) {
-                console.error('Error extracting data:', extraction.error);
+            if (extractedLines.error) {
+                console.error('Error extracting data:', extractedLines.error);
             } else {
-                await saveExtraction(supabase, contractId, extractor!, extraction.ok)
+                await saveExtraction(supabase, contractId, extractor!, extractedLines.ok)
             }
         }
 
@@ -173,7 +174,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
             const responseMessage = res.choices[0].message;
 
             try {
-                const res:{ lines: number[]} = JSON.parse(responseMessage.content!)
+                const res: { lines: number[] } = JSON.parse(responseMessage.content!)
                 relevantLineNubers.push(...res.lines)
 
             } catch (error) {
@@ -201,42 +202,10 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
 async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractedLines: number[]) {
 
-
-
-    // const linesq = await supabase.from('contract_line').select().eq('contract_id', contractId)
-
-    // const { error: insertError } = await supabase
-    //     .from('annotation')
-    //     .insert(extractionData.map((d) => {
-
-    //         const { start, end } = parseRefLines(d.lines)
-    //         const relatedLines = linesq.data?.filter((l) => l.id >= start && l.id <= end) ?? []
-    //         const position = buildScaledPostionFromContractLines(relatedLines) as unknown as Json
-
-    //         const newAnnotation = {
-    //             id: d.id,
-    //             contract_id: contractId,
-    //             parslet_id: extractor.id,
-    //             text: d.text,
-    //             position,
-    //             formatter_key: null,
-    //             formatter_item_idx: null,
-    //             is_user: false
-    //         }
-
-    //         return newAnnotation
-    //     }));
-
-    // if (insertError) {
-    //     console.error('Error inserting data:', insertError);
-    //     return
-    // } else {
-    //     console.log(`Inserted ${extractionData.length} ${extractor.display_name} extractions successfully`);
-    // }
-
-
-
-
+    if (extractedLines.length === 0) {
+        console.log(`No lines extracted for ${extractor.display_name}`)
+        return
+    }
 
     const lineRefs = extractedLines.map((lineNumber) => {
 
@@ -257,6 +226,64 @@ async function saveExtraction(supabase: SupabaseClient<Database>, contractId: st
         console.error('Error inserting data:', insertRelaitonshipError);
     } else {
         console.log(`Inserted ${lineRefs.length} line references`);
+    }
+
+
+
+    const groupedLines: number[][] = [];
+    let currentGroup: number[] = [];
+
+    extractedLines.forEach((lineNumber, index) => {
+        if (index === 0 || lineNumber === extractedLines[index - 1] + 1) {
+            currentGroup.push(lineNumber);
+        } else {
+            groupedLines.push(currentGroup);
+            currentGroup = [lineNumber];
+        }
+    });
+
+    // Add the last group if not empty
+    if (currentGroup.length) {
+        groupedLines.push(currentGroup);
+    }
+
+    const { data: contractLines, error: linesError } = await supabase.from('contract_line').select().eq('contract_id', contractId).order('id', { ascending: true })
+    if (linesError) {
+        console.error('Error loading contract lines:', linesError);
+        return
+    }
+
+    const annotations: Except<Annotation_SB, 'tenant_id' | "id" | "created_at">[] = groupedLines.map((group) => {
+
+        const lines = contractLines.filter((l) => group.includes(l.id))
+        const position = buildScaledPostionFromContractLines(lines)
+
+        return {
+
+            contract_id: contractId,
+            text: lines.map((l) => l.text).join("\n"),
+            position: position,
+            is_user: false,
+            zextractor_id: null,
+            formatter_item_id: null,
+            formatter_key: null,
+            parslet_id: extractor.id,
+            // created_at: new Date().toISOString(),
+            // id: null, 
+            // tenant_id: null,
+        }
+    })
+
+    const { error: insertError } = await supabase
+        .from('annotation')
+        // @ts-ignore
+        .insert(annotations);
+
+    if (insertError) {
+        console.error('Error inserting data:', insertError);
+        return
+    } else {
+        console.log(`Inserted ${annotations.length} ${extractor.display_name} extractions successfully`);
     }
 
 }

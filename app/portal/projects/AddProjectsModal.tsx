@@ -33,6 +33,11 @@ export function AddProjectsModal(props: Props) {
 
   const uniqueNames = new Set(props.projects.map((d) => d.display_name));
 
+  const today = new Date();
+  const nextWeek = new Date(today);
+
+  nextWeek.setDate(today.getDate() + 7);
+
   const form = useForm({
     initialValues: {
       projectName: '',
@@ -41,7 +46,7 @@ export function AddProjectsModal(props: Props) {
       client: '',
       counterparty: '',
       targetNames: [],
-      phaseDeadline: new Date()
+      phaseDeadline: nextWeek // Set default to a week in the future
     },
 
     validate: {
@@ -55,16 +60,14 @@ export function AddProjectsModal(props: Props) {
     },
   });
 
-  // autofill with project creator (not working)
-  // useEffect(()=>{
-  //     supabase.auth.getSession().then(session => {
-  //         form.values.assignedAttorneys.push(session.data.session?.user.id)}
-  //     )}, []
-  //   )
+  
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Authentication">
+      <Modal opened={opened} onClose={() => {
+        close()
+        form.reset()
+      }} title="Authentication" closeOnClickOutside={false}>
 
         <Box component="form" maw={400} mx="auto" onSubmit={form.onSubmit((values) => {
           console.log("creating project")

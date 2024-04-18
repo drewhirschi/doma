@@ -1,11 +1,12 @@
 import { IResp, rerm, rok } from './utils';
+import { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
 import axios, { AxiosInstance } from 'axios';
 
-import { Readable } from 'stream';
-import { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
-import fs from 'fs';
 import { Database } from './types/supabase';
+import { Except } from 'type-fest';
 import PQueue from 'p-queue';
+import { Readable } from 'stream';
+import { spanToScaledPosition } from './helpers';
 
 export type ZuvaFile = {
     file_id: string;
@@ -110,7 +111,7 @@ type DefinedTerm = {
     spans: CharacterSpan[];
 };
 
-type CharacterSpan = {
+export type CharacterSpan = {
     bounds?: BoundingBoxSummary;
     bboxes: BoundingBoxesByPage[];
     end: number;
@@ -153,7 +154,7 @@ class Zuva {
     private constructor() {
         this.axiosInstance = axios.create({
             baseURL: 'https://us.app.zuva.ai/api/v2',
-            timeout: 5000,
+            timeout: 15000,
             headers: {
                 // 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${process.env.ZUVA_API_KEY}`,
@@ -324,51 +325,57 @@ export default Zuva;
 export async function startZuvaExtraction(sb: SupabaseClient<Database>, contractId: string) {
 
 
+    const zuvaApi = Zuva.getInstance();
 
-    const contract = await sb.from('contract').select().eq('id', contractId).single()
+    const contract = await sb.from('contract').select("*, zuva_file(*)")
+        .eq('id', contractId)
+        .gt("zuva_file.expiration", new Date().toISOString())
+        .single()
 
     if (contract.error) {
         throw contract.error
     }
 
+    let file_id
+    if (contract.data.zuva_file.length > 0) {
+        file_id = contract.data.zuva_file[0].id
+    } else {
+        const bucket = contract.data.tenant_id
+        const filepath = contract.data.name;
 
 
-    const bucket = contract.data.tenant_id
-    const filepath = contract.data.name;
+        const url = `${process.env.SUPABASE_URL}/storage/v1/object/${bucket}/${filepath}`;
 
-    const zuvaApi = Zuva.getInstance();
+        const fileStreamResponse = await axios({
+            method: 'get',
+            url: url,
+            responseType: 'stream',
+            headers: {
+                'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+                'apiKey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+                "Accept-Encoding": "gzip, deflate",
+            }
+        });
 
-    const url = `${process.env.SUPABASE_URL}/storage/v1/object/${bucket}/${filepath}`;
+        const stream: Readable = fileStreamResponse.data
 
-    const fileStreamResponse = await axios({
-        method: 'get',
-        url: url,
-        responseType: 'stream',
-        headers: {
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-            'apiKey': process.env.SUPABASE_SERVICE_ROLE_KEY,
-            "Accept-Encoding": "gzip, deflate",
+
+        const zuvaFile = await zuvaApi.uploadFile(stream)
+
+        if (zuvaFile.error) {
+            throw new Error('Failed to upload file to Zuva')
         }
-    });
 
-    const stream: Readable = fileStreamResponse.data
+        //create zuvafile in sb
+        const fileinsert = await sb.from('zuva_file').insert({
+            id: zuvaFile.ok.file_id,
+            contract_id: contractId,
+            expiration: zuvaFile.ok.expiration
+        })
 
-
-    const zuvaFile = await zuvaApi.uploadFile(stream)
-
-    if (zuvaFile.error) {
-        throw new Error('Failed to upload file to Zuva')
+        // const file_id = "coff1jtu386c73b1siqg"
+        file_id = zuvaFile.ok.file_id
     }
-
-    //create zuvafile in sb
-    const fileinsert = await sb.from('zuva_file').insert({
-        id: zuvaFile.ok.file_id,
-        contract_id: contractId,
-        expiration: zuvaFile.ok.expiration
-    })
-
-    // const file_id = "coff1jtu386c73b1siqg"
-    const file_id = zuvaFile.ok.file_id
 
     const extraction = await zuvaApi.createExtraction([file_id])
 
@@ -380,7 +387,7 @@ export async function startZuvaExtraction(sb: SupabaseClient<Database>, contract
 
 
     const insertExtractions = await sb.from('zuva_extraction_job')
-        .insert(extraction.ok.file_ids.map(f => ({ request_id: f.request_id, file_id: f.file_id, status: f.status })))
+        .insert(extraction.ok.file_ids.map(f => ({ request_id: f.request_id, file_id: f.file_id, status: f.status, contract_id: contractId })))
 
     if (insertExtractions.error) {
         throw insertExtractions.error
@@ -398,29 +405,79 @@ export async function checkExtractionJobs(sb: SupabaseClient<Database>) {
     const zuvaApi = Zuva.getInstance();
 
 
-    // const extractionRequestIds = ["coff5nelnbpc73a2vrcg", "coff5nelnbpc73a2vre0", "coff5nf3u6ls73ahtne0", "coff5nf3u6ls73ahtnfg" ]
     const extractionJobs = await sb.from('zuva_extraction_job').select()
 
-    const extractionStatuses = await zuvaApi.getExtractionStatuses(extractionJobs.data?.map((job) => job.request_id) ?? [] )
+    if (extractionJobs.error) {
+        throw extractionJobs.error
+    }
+
+    const extractionStatuses = await zuvaApi.getExtractionStatuses(extractionJobs.data.map((job) => job.request_id))
 
     if (extractionStatuses.error) {
         throw extractionStatuses.error
     }
 
-    
+
 
 
     const jobQueue = new PQueue({ concurrency: 20 });
+    // const limit = pLimit(10);
+
+
+    if (extractionStatuses.ok.num_found === 0) {
+        return
+    }
 
     Object.values(extractionStatuses.ok.statuses)
-    .filter((es) => es.status === ExtractionStatusEnum.complete)
-    .map(async (es) => {
-        const extractionResults = await jobQueue.add(() => zuvaApi.getExtractionResults(es.request_id))
-        console.log(extractionResults.ok)
-       
-    })
+        .filter((es) => es.status === ExtractionStatusEnum.complete)
+        .map(async (es) => {
+            console.log("handling job", es.request_id)
+            const extractionResults = await jobQueue.add(() => zuvaApi.getExtractionResults(es.request_id))
+            const result = extractionResults as IResp<ExtractionResultApiResponse>
+            if (result.error) {
+                throw result.error
+            }
+            // result.ok.results[0].
+            const contract_id = extractionJobs.data.find((job) => job.file_id === es.file_id)?.contract_id
+            if (!contract_id) {
+                throw new Error('Contract id not found')
+            }
+            const firstLineOfContract = await sb.from('contract_line')
+            .select('*')
+            .eq('contract_id', contract_id)
+            // .eq('page', 1)
+            .eq('id', 0)
+            
+            .single()
 
-   
+            const annotations: Except<Annotation_SB, 'tenant_id' | "id" | "created_at">[] = result.ok.results.flatMap((res) => res.extractions?.map((extraction) => {
+
+                const position = spanToScaledPosition(extraction.spans, firstLineOfContract.data?.page_height ?? 0, firstLineOfContract.data?.page_width ?? 0)
+
+                return {
+
+                    contract_id: contract_id!,
+                    text: extraction.text,
+                    position: position!,
+                    is_user: false,
+                    zextractor_id: res.field_id,
+                    formatter_item_id: null,
+                    formatter_key: null,
+                    parslet_id: null,
+                    // created_at: new Date().toISOString(),
+                    // id: null, 
+                    // tenant_id: null,
+                }
+            }) ?? [])
+                .filter((a) => a.position !== null)
+
+            console.log(annotations)
+
+            //@ts-ignore
+            const createAnnotation = await sb.from('annotation').insert(annotations)
+        })
+
+
 
 
 }

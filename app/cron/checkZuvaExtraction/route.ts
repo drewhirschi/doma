@@ -1,6 +1,7 @@
-import type { NextRequest } from 'next/server';
 import Zuva, { checkExtractionJobs } from '@/zuva';
-import { routeClient } from '@/supabase/ServerClients';
+import { fullAccessServiceClient, routeClient } from '@/supabase/ServerClients';
+
+import type { NextRequest } from 'next/server';
 
 export function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -11,7 +12,7 @@ export function GET(request: NextRequest) {
   }
 
 
-  const supabase = routeClient()
+  const supabase = fullAccessServiceClient()
 
   try {
     

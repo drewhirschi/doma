@@ -19,10 +19,11 @@ interface Props {
     handleAddHighlight: (highlight: { position: any, text: string, formatterKey: string, itemId: number }) => void
     handleRemoveHighlight: (id: string) => void
     formatters: FormatterWithInfo[]
+    parslets: Parslet_SB[]
 
 }
 
-export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, handleAddHighlight, formatters }: Props) {
+export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, handleAddHighlight, formatters, parslets }: Props) {
 
 
     const pathname = usePathname()
@@ -146,6 +147,8 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                             position={highlight.position}
                                             onClick={() => handleRemoveHighlight(highlight.id)}
                                             isUserHighlight={highlight.is_user}
+                                            text={highlight.text}
+                                            extractorName={parslets.find(p => p.id === highlight.parslet_id)?.display_name ?? "Unknown"}
                                         />
                                     );
                                 }}

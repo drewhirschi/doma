@@ -8,6 +8,7 @@ import { categorize } from "@/agents/categoryAgent"
 import { getFormatterShape } from "@/shared/getFormatterShape"
 import { revalidatePath } from "next/cache"
 import { serverActionClient } from "@/supabase/ServerClients"
+import { startZuvaExtraction } from "@/zuva"
 import { zodObjectToXML } from "@/zodUtils"
 
 export async function reviewContractAction(contractId: string) {
@@ -100,5 +101,14 @@ export async function describeAndTag(contractId: string, projectId: string, targ
     }
     revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 
+
+}
+
+
+export async function zuvaExtraction(contractId:string) {
+
+    const supabase = serverActionClient()
+
+    startZuvaExtraction(supabase, contractId)
 
 }
