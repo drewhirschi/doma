@@ -1,13 +1,9 @@
-import { Anchor, AspectRatio, Box, Button, Center, Checkbox, Container, Grid, GridCol, Group, Image, SimpleGrid, Space, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
+import { Anchor, Box, Center, Container, Grid, GridCol, Group, Image, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 
-import Link from "next/link";
 import LoginButton from "./LoginButton";
 import { ReactNode } from "react";
 import { WaitlistSignup } from "./WaitlistSignup";
-import axios from "axios";
 import classes from './page.module.css';
-import { pixel } from "@/utils";
-import { redirect } from "next/navigation";
 
 function DescriptionItem({ header, text }: { header: string, text: ReactNode }) {
   return (
