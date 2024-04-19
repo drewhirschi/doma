@@ -13,6 +13,7 @@ interface Props {
     rects: Array<LTWHP>;
   };
   onClick?: () => void;
+  onDelete?: () => void;
   onMouseOver?: () => void;
   onMouseOut?: () => void;
 
@@ -27,6 +28,7 @@ export class Highlight extends Component<Props> {
     const {
       position,
       onClick,
+      onDelete,
       onMouseOver,
       onMouseOut,
       isScrolledTo,
@@ -45,7 +47,9 @@ export class Highlight extends Component<Props> {
         >
           <Menu width={200} position="bottom" withArrow shadow="md">
             <Menu.Target>
-              <ActionIcon variant="subtle" aria-label="Settings" style={{ top: boundingRect.top, }}
+              <ActionIcon 
+              // onClick={onClick}
+              variant="subtle" aria-label="Settings" style={{ top: boundingRect.top, }}
               >
                 {/* <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5}  /> */}
                 <IconNote style={{ width: '70%', height: '70%' }} stroke={1.5} />
@@ -64,7 +68,7 @@ export class Highlight extends Component<Props> {
               <Menu.Item
                 color="red"
                 leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
-                onClick={onClick}
+                onClick={onDelete}
 
               >
                 Delete

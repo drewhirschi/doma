@@ -9,6 +9,7 @@ import { Json } from '@/types/supabase-generated';
 import OpenAI from 'openai';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { buildScaledPostionFromContractLines } from '@/helpers';
+import { getDataFormatted } from './formatAgent';
 import { sleep } from '@/utils';
 import { z } from "zod";
 
@@ -78,7 +79,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
     const { data: contractData, error: contractError } = await supabase.from('contract')
-        .select('*, contract_line(text, ntokens)')
+        .select('*, contract_line(text, ntokens), formatted_info(*)')
         .order("id", { referencedTable: "contract_line", ascending: true })
         .eq('id', contractId).single()
 
@@ -91,7 +92,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
     const { data: extractors, error: extractorError } = await supabase.from('parslet').select('*')
         .order("order", { ascending: true })
-        // .limit(10)
+    // .limit(10)
 
     if (extractorError) {
         console.error('Error loading extractors:', extractorError);
@@ -140,6 +141,83 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
     clearInterval(rateLimitInterval);
 
 
+    //run formatters
+
+    const { data: formatters, error: formattersError } = await supabase.from('formatters')
+        .select('*, parslet(*, annotation(*))')
+        .eq('parslet.annotation.contract_id', contractId)
+
+    if (formattersError) {
+        console.error('Error loading formatters:', formattersError);
+        return Response.json({ message: "Could not load formatters" })
+    }
+
+
+
+
+    formatters.map(async (formatter) => {
+        const formatAndSave = async (input: string, itemId: number, annotationIds:string[]) => {
+            const res = await getDataFormatted(formatter, contractData, input, true)
+
+            if (res.error) {
+                console.error('Error formatting data:', res.error);
+                return
+            }
+
+            console.log(formatter.key)
+            const upsertRes = await supabase.from("formatted_info").upsert({ 
+                data: res.ok[0], 
+                id: itemId,
+                formatter_key: formatter.key,
+                contract_id: contractId
+            })
+
+            if (upsertRes.error) {
+                console.error('Error saving formatted data:', formatter.key, upsertRes.error);
+            }
+
+            const annotationUpdate = await supabase.from("annotation")
+            .update({ formatter_key: formatter.key, formatter_item_id: itemId }).in("id", annotationIds)
+        }
+
+
+
+        if (formatter.hitems) {
+
+            formatter.parslet.map(async (parslet) => {
+                parslet.annotation.map(async (annotation, i) => {
+                    let input = `<extraction>\n${annotation.text}\n</extraction>`
+
+                    await formatAndSave(input, i, [annotation.id])
+                })
+
+            })
+        } else {
+            let input = ""
+            const annIds:string[] = []
+            formatter.parslet.map(async (parslet) => {
+                input += `<extraction_topic name="${parslet.display_name}">\n`
+                input += parslet.annotation.map((annotation, i) =>{
+
+                    annIds.push(annotation.id)
+                   return  `<extraction id="${i}">\n${annotation.text}\n</extraction>\n`
+                }).join("\n")
+                input += "</extraction_topic>\n"
+
+            })
+
+            await formatAndSave(input, 0, annIds)
+
+
+        }
+
+
+    })
+
+
+
+
+
 
 }
 
@@ -166,7 +244,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
             const res: ChatCompletion = await openai.chat.completions.create({
                 messages: buildExtracitonMessages(extractor, xmlContractText),
-                model: 'gpt-4-turbo-preview',
+                model: 'gpt-4-turbo',
                 temperature: 0,
                 response_format: { 'type': "json_object" }
             });
@@ -362,8 +440,8 @@ function segmentContractLines(lines: ContractLine[]): ContractLine[][] {
     lines.forEach((line) => {
         if (currentTokenCount + line.ntokens > 10000) {
             segments.push(currentSegment);
-            currentSegment = [];
-            currentTokenCount = 0;
+            currentSegment = currentSegment.slice(-5);
+            currentTokenCount = currentSegment.reduce((sum, item) => sum + item.ntokens, 0);
         }
         currentSegment.push(line);
         currentTokenCount += line.ntokens;

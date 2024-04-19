@@ -145,10 +145,12 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                             key={highlight.id}
                                             isScrolledTo={isScrolledTo}
                                             position={highlight.position}
-                                            onClick={() => handleRemoveHighlight(highlight.id)}
+                                            // onClick={() => setFocusedHighlightId(highlight.id, {scrollTo:false})}
+                                            onDelete={() => handleRemoveHighlight(highlight.id)}
                                             isUserHighlight={highlight.is_user}
                                             text={highlight.text}
                                             extractorName={parslets.find(p => p.id === highlight.parslet_id)?.display_name ?? "Unknown"}
+                                            // setFocusedHighlightId={setFocusedHighlightId}
                                         />
                                     );
                                 }}

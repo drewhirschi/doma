@@ -1,4 +1,4 @@
-import { AgreementInfoShape, AssignabilityShape, CovenantNotToSueItemShape, CovenantNotToSueShape, EffectsOfTransactionShape, GoverningLawShape, IPOwnershipItemShape, IPOwnershipShape, IndemnitiesShape, LicenseItemShape, LicenseShape, LimitationOfLiabilityShape, MostFavoredNationShape, NonCompeteShape, NonSolicitHireShape, PaymentTermsItemShape, PaymentTermsShape, RightOfFirstRefusalShape, SourceCodeShape, TermShape, TerminationItemShape, TerminationShape, TrojanShape, WarrantyShape } from "@/types/formattersTypes";
+import { AgreementInfoShape, AssignabilityShape, CovenantNotToSueItemShape, EffectsOfTransactionShape, GoverningLawShape, IPOwnershipItemShape, IPOwnershipShape, IndemnitiesShape, LicenseItemShape, LicenseShape, LimitationOfLiabilityShape, MostFavoredNationShape, NonCompeteShape, NonSolicitHireShape, PaymentTermsItemShape, RightOfFirstRefusalShape, SourceCodeShape, TermShape, TerminationItemShape, TerminationShape, TrojanShape, WarrantyShape } from "@/types/formattersTypes";
 
 import { FormatterKeys } from "@/types/enums";
 import { z } from "zod";

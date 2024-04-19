@@ -165,7 +165,6 @@ export async function buildInstruction(formatter: Formatter_SB, contract: Contra
     return inst
 }
 
-//should this be allows to return multipl items? might want to have a versino for single and multiple
 export async function getDataFormatted(formatter: Formatter_SB, contract: ContractWithFormattedInfo, dataInput: string, singleMode: boolean): Promise<IResp<any[]>> {
 
     if (!contract.target) {
@@ -173,6 +172,7 @@ export async function getDataFormatted(formatter: Formatter_SB, contract: Contra
     }
 
     const instruction = await buildInstruction(formatter, contract, singleMode)
+
 
     const res = await generateAgentResponse(instruction, dataInput)
 
@@ -196,33 +196,7 @@ export async function getDataFormatted(formatter: Formatter_SB, contract: Contra
     return rok([formattedData])
 
 
-    // let dataToUpsert
-    // if (hasItemsChild(responseShape)) {
-    //     dataToUpsert = formattedData.items.map((item: any, idx: number) => ({
-    //         contract_id: contractId,
-    //         formatter_key: formatterKey,
-    //         data: item as unknown as Json,
-    //         id: idx
-    //     }))
-
-    // } else {
-    //     dataToUpsert = {
-    //         contract_id: contractId,
-    //         formatter_key: formatterKey,
-    //         data: formattedData as unknown as Json,
-    //         id: 0
-    //     }
-    // }
-    // const { data, error: fiErr } = await sb.from("formatted_info").upsert(dataToUpsert).select()
-
-    // if (fiErr) {
-    //     return rerm("There was an error upserting the formatted info.", fiErr)
-    // }
-
-
-
-
-    // return rok() 
+    
 
 }
 

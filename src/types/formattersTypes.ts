@@ -16,22 +16,17 @@ export const GenericFormatResponseShape = z.object({
 
 export type GenericFormatResponse = z.infer<typeof GenericFormatResponseShape>;
 
-export const SummaryListShape = z.object({
-    items: z.object({
-        summary: z.string(),
-    }).array(),
-});
 
-export type SummaryListFormatResponse = z.infer<typeof SummaryListShape>;
+
 
 export const AgreementInfoShape = z.object({
     title: z.string().nullable(),
     counter_party: z.string().nullable(),
     alternate_counter_party_names: z.string().array()
-    .describe("list of any other names the counterparty is referred to as. These are often mentioned right aftet the counterparty's name in the agreement."),
+        .describe("list of any other names the counterparty is referred to as. These are often mentioned right aftet the counterparty's name in the agreement."),
     target_entity: z.string().nullable(),
     alternate_target_entity_names: z.string().array()
-    .describe("list of any other names the target entity is referred to as. These are often mentioned right aftet the target's name in the agreement.  If only one party is named and the other party is given a generic title such as 'you', 'contracting party', 'licensor' then that generic title should be assumed as the Target Entity."),
+        .describe("list of any other names the target entity is referred to as. These are often mentioned right aftet the target's name in the agreement.  If only one party is named and the other party is given a generic title such as 'you', 'contracting party', 'licensor' then that generic title should be assumed as the Target Entity."),
     effective_date: z.coerce.date().nullable()
         .describe("What date did or will the agreement go into effect? Format the date as YYYY/MM/DD"),
     summary: z.string().nullable()
@@ -179,27 +174,21 @@ export const PaymentTermsItemShape = z.object({
     royalty: z.boolean().nullable()
         .describe(`True if the payment is a royalty. Otherwise false.`),
 })
-export const PaymentTermsShape = z.object({
-    items: PaymentTermsItemShape.array(),
-});
 
-export type PaymentTermsFormatResponse = z.infer<typeof PaymentTermsShape>;
+
 
 
 export const CovenantNotToSueItemShape = z.object({
     summary: z.string().nullable()
-    .describe("Summary of one item the target entity agrees not to sue the counterparty for."),
+        .describe("Summary of one item the target entity agrees not to sue the counterparty for."),
 })
-export const CovenantNotToSueShape = z.object({
-    items: CovenantNotToSueItemShape.array().describe("List of things the target entitiy agrees not to sue the counterparty for."),
-});
 
-export type CovenantNotToSueFormatResponse = z.infer<typeof CovenantNotToSueShape>;
+
 
 
 
 export const MostFavoredNationShape = z.object({
-        summary: z.string().nullable().describe("Summarzie the MFN clause."),
+    summary: z.string().nullable().describe("Summarzie the MFN clause."),
 });
 
 // buildListShape(MostFavoredNationShape, {itemsDescription: "List of Most Favored Nation clauses."})
@@ -209,29 +198,28 @@ export type MostFavoredNationFormatResponse = z.infer<typeof MostFavoredNationSh
 
 
 export const NonSolicitHireShape = z.object({
-        summary: z.string().nullable().describe("Summarize the non-solicitation of hire clause."),
+    summary: z.string().nullable().describe("Summarize the non-solicitation of hire clause."),
 });
 buildListShape(NonSolicitHireShape, { itemsDescription: "List of summaries of non-solicitation of hire clauses." })
 
 
 
 export const RightOfFirstRefusalShape = z.object({
-        summary: z.string().nullable().describe("Summarize the right of first refusal clause."),
+    summary: z.string().nullable().describe("Summarize the right of first refusal clause."),
 });
 // export type RightOfFirstRefusalFormatResponse = z.infer<typeof RightOfFirstRefusalShape>;
 
 
 
 export const WarrantyShape = z.object({
-        summary: z.string().nullable().describe("Summarize the warranty"),
-        noWaiver: z.boolean().nullable().describe("False if it says either “as is” or something along the lines of 'disclaims warranties'."),
+    summary: z.string().nullable().describe("Summarize the warranty"),
+    noWaiver: z.boolean().nullable().describe("False if it says either “as is” or something along the lines of 'disclaims warranties'."),
 });
 // export type WarrantyFormatResponse = z.infer<typeof WarrantyShape>;
 
 
 
 export const LimitationOfLiabilityShape = z.object({
-    items: z.object({
         summary: z.string().nullable().describe(`Summarize and label the limitation of liability sections and format them similar to example given below. The answer should just be a string. 
         Special, punitive, indirect, incidental or consequential damages all should be considered under consequential damages for our purposes.
         For the limit's provide the limit amount, if it is silent, or waived. For the limit exception's specify the exceptions to the relevant limit.
@@ -242,32 +230,25 @@ export const LimitationOfLiabilityShape = z.object({
         Consequential Damages Limit: Waived
         Consequential Damages Exceptions: Breaches of confidentiality and indemnification obligations`),
         noWaiver: z.boolean().nullable().describe("False if it says either “as is” or something along the lines of 'disclaims warranties'."),
-    }).array().describe("List of summaries of warranty."),
 });
 export type LimitationOfLiabilityFormatResponse = z.infer<typeof LimitationOfLiabilityShape>;
 
 export const IndemnitiesShape = z.object({
-    items: z.object({
-        summary: z.string().nullable().describe("Summarize the indemnity in under 20 words"),
-        inclusive: z.boolean().nullable().describe("True if the indemnity is not limited to third-party claims"),
-        ipInfringe: z.boolean().nullable().describe("True for outbound IP infringement indemnification obligations (look for an indemnity relating to IP claims, or indemnification for breach of non-infringement warranty)"),
-    }).array().describe("List of summaries of indemnity."),
+    summary: z.string().nullable().describe("Summarize the indemnity in under 20 words"),
+    inclusive: z.boolean().nullable().describe("True if the indemnity is not limited to third-party claims"),
+    ipInfringe: z.boolean().nullable().describe("True for outbound IP infringement indemnification obligations (look for an indemnity relating to IP claims, or indemnification for breach of non-infringement warranty)"),
 
 });
 export type IndemnitiesFormatResponse = z.infer<typeof IndemnitiesShape>;
 
 export const NonCompeteShape = z.object({
-    items: z.object({
-        summary: z.string().nullable().describe("Summarize the non-compete in less than 20 words."),
-    }).array(),
+    summary: z.string().nullable().describe("Summarize the non-compete in less than 20 words."),
 });
 export type NonCompeteFormatResponse = z.infer<typeof NonCompeteShape>;
 
 
 export const EffectsOfTransactionShape = z.object({
-    items: z.object({
-        summary: z.string().nullable().describe("Summarize the effect of transaction in less than 20 words."),
-    }).array().describe("List of summaries of the effects of transaction."),
+    summary: z.string().nullable().describe("Summarize the effect of transaction in less than 20 words."),
 });
 export type EffectsOfTransactionFormatResponse = z.infer<typeof EffectsOfTransactionShape>;
 
@@ -275,9 +256,7 @@ export type EffectsOfTransactionFormatResponse = z.infer<typeof EffectsOfTransac
 
 
 export const TrojanShape = z.object({
-    items: z.object({
-        summary: z.string().nullable().describe("Summarize the effect of transaction in less than 20 words."),
-    }).array().describe("List of summaries of the effects of transaction."),
+    summary: z.string().nullable().describe("Summarize the trojan in less than 20 words."),
 });
 export type TrojanFormatResponse = z.infer<typeof TrojanShape>;
 
