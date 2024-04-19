@@ -90,55 +90,60 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
 
-    // const { data: extractors, error: extractorError } = await supabase.from('parslet').select('*')
-    //     .order("order", { ascending: true })
-    // // .limit(10)
+    const { data: extractors, error: extractorError } = await supabase.from('parslet').select('*')
+        .order("order", { ascending: true })
+    // .limit(10)
 
-    // if (extractorError) {
-    //     console.error('Error loading extractors:', extractorError);
-    //     return Response.json({ message: "Could not load extractors" })
-    // }
-
-
-
-    // let tokensUsedThisMinute = 0;
-    // const TOKEN_LIMIT_PER_MINUTE = 250_000;
-    // const APX_TOKENS_PER_REQUEST = contractData.contract_line.reduce((sum, line) => sum + line.ntokens, 0) + contractData.contract_line.length * 8;
-
-    // const rateLimitInterval = setInterval(() => {
-    //     tokensUsedThisMinute = 0;
-    // }, 60_000);
-
-
-    // while (extractors.length > 0) {
-
-    //     if (tokensUsedThisMinute + APX_TOKENS_PER_REQUEST > TOKEN_LIMIT_PER_MINUTE) {
-    //         console.log('Rate limit reached, waiting 15 seconds')
-    //         await sleep(15_000)
-    //         continue
-    //     }
-
-    //     const extractor = extractors.shift()
-
-    //     const task = async () => {
-    //         tokensUsedThisMinute += APX_TOKENS_PER_REQUEST;
-    //         const extractedLines = await execExtractor(supabase, extractor!, contractData)
-
-    //         if (extractedLines.error) {
-    //             console.error('Error extracting data:', extractedLines.error);
-    //         } else {
-    //             await saveExtraction(supabase, contractId, extractor!, extractedLines.ok)
-    //         }
-    //     }
-
-    //     task()
+    if (extractorError) {
+        console.error('Error loading extractors:', extractorError);
+        return Response.json({ message: "Could not load extractors" })
+    }
 
 
 
-    // }
+    let tokensUsedThisMinute = 0;
+    const TOKEN_LIMIT_PER_MINUTE = 400_000;
+    const APX_TOKENS_PER_REQUEST = contractData.contract_line.reduce((sum, line) => sum + line.ntokens, 0) + contractData.contract_line.length * 8;
+
+    const rateLimitInterval = setInterval(() => {
+        tokensUsedThisMinute = 0;
+    }, 60_000);
 
 
-    // clearInterval(rateLimitInterval);
+    await new Promise<void>(async (resolve, reject) => {
+
+        while (extractors.length > 0) {
+
+            if (tokensUsedThisMinute + APX_TOKENS_PER_REQUEST > TOKEN_LIMIT_PER_MINUTE) {
+                console.log('Rate limit reached, waiting 15 seconds')
+                await sleep(15_000)
+                continue
+            }
+
+            const extractor = extractors.shift()
+
+            const task = async () => {
+                tokensUsedThisMinute += APX_TOKENS_PER_REQUEST;
+                const extractedLines = await execExtractor(supabase, extractor!, contractData)
+
+                if (extractedLines.error) {
+                    console.error('Error extracting data:', extractedLines.error);
+                    reject()
+                } else {
+                    await saveExtraction(supabase, contractId, extractor!, extractedLines.ok)
+                }
+            }
+
+            task()
+
+
+
+        }
+        resolve()
+    })
+
+
+    clearInterval(rateLimitInterval);
 
     console.log("formatting extracted data")
 
@@ -160,7 +165,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
     formatters.map(async (formatter) => {
-        const formatAndSave = async (input: string, itemId: number, annotationIds:string[]) => {
+        const formatAndSave = async (input: string, itemId: number, annotationIds: string[]) => {
             const res = await getDataFormatted(formatter, contractData, input, true)
 
             if (res.error) {
@@ -169,8 +174,8 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
             }
 
             console.log(formatter.key)
-            const upsertRes = await supabase.from("formatted_info").upsert({ 
-                data: res.ok[0], 
+            const upsertRes = await supabase.from("formatted_info").upsert({
+                data: res.ok[0],
                 id: itemId,
                 formatter_key: formatter.key,
                 contract_id: contractId
@@ -181,7 +186,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
             }
 
             const annotationUpdate = await supabase.from("annotation")
-            .update({ formatter_key: formatter.key, formatter_item_id: itemId }).in("id", annotationIds)
+                .update({ formatter_key: formatter.key, formatter_item_id: itemId }).in("id", annotationIds)
         }
 
 
@@ -198,13 +203,13 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
             })
         } else {
             let input = ""
-            const annIds:string[] = []
+            const annIds: string[] = []
             formatter.parslet.map(async (parslet) => {
                 input += `<extraction_topic name="${parslet.display_name}">\n`
-                input += parslet.annotation.map((annotation, i) =>{
+                input += parslet.annotation.map((annotation, i) => {
 
                     annIds.push(annotation.id)
-                   return  `<extraction id="${i}">\n${annotation.text}\n</extraction>\n`
+                    return `<extraction id="${i}">\n${annotation.text}\n</extraction>\n`
                 }).join("\n")
                 input += "</extraction_topic>\n"
 
