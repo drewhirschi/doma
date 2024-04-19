@@ -4,10 +4,12 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedAgreementInfo } from "./AgreementInfo";
 import { FormattedAssignability } from "./Assignability";
 import { FormattedGeneric } from "./Generic";
+import { FormattedIndemnities } from "./Indemnities";
 import { FormattedInfoView } from "./FormattedItemSingle";
 import { FormattedIpOwnership } from "./IpOwnership"
 import { FormattedItemList } from "./FormattedItemList";
 import { FormattedLicense } from "./License";
+import { FormattedLimitationOfLiability } from "./LimitationOfLiability";
 import { FormattedPaymentTerms } from "./PaymentTerm";
 import { FormattedSourceCode } from "./SourceCode";
 import { FormattedSummaryList } from "./SummaryList";
@@ -78,6 +80,13 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
 
             case FormatterKeys.assignability:
                 return FormattedAssignability
+
+            case FormatterKeys.limitationOfLiability:
+            case FormatterKeys.warranties:
+                return FormattedLimitationOfLiability
+            case FormatterKeys.indemnities:
+                return FormattedIndemnities
+
             default:
                 return UnknownFormatter
         }
@@ -114,11 +123,11 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
     return (
         <Stack gap={4}>
             <Group>
-                <Title 
-                order={3}
-                c={formatter.formatted_info.length == 0 ? "gray" : "black"}
+                <Title
+                    order={3}
+                    c={formatter.formatted_info.length == 0 ? "gray" : "black"}
                 >{formatter.display_name}</Title>
-                {isLoading && <Loader size="xs"/>}
+                {isLoading && <Loader size="xs" />}
                 {/* <ActionIcon size={"sm"}
                     onClick={() => {
                         singleRun(formatter.key)

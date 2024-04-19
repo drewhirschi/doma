@@ -6,31 +6,34 @@ import { ViewProps } from "./FormattedItemSingle"
 export function FormattedSourceCode({ form, onChange }: ViewProps<SourceCodeFormatResponse>) {
 
 
-     
 
 
-  
+
+
 
 
     return (
 
-       
-            <Stack>
 
-                <Textarea
-                    label="Content"
-                    {...form.getInputProps('content')}
-                />
-                <Textarea
-                    label="Release conditions"
-                    {...form.getInputProps('releaseConditions')}
-                />
-                <Textarea
-                    label="License"
-                    {...form.getInputProps('license')}
-                />
+        <Stack>
+
+            <Textarea
+                autosize
+                label="Content"
+                {...form.getInputProps('content')}
+            />
+            <Textarea
+                autosize
+                label="Release conditions"
+                {...form.getInputProps('releaseConditions')}
+            />
+            <Textarea
+                autosize
+                label="License"
+                {...form.getInputProps('license')}
+            />
 
 
-            </Stack>
+        </Stack>
     )
 }

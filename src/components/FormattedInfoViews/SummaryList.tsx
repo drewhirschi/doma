@@ -6,22 +6,11 @@ import { z } from "zod"
 
 export function FormattedSummaryList({ form, index, onChange }: ItemViewProps<z.infer<typeof GenericFormatResponseShape>>) {
 
-
-
-
-
-
     return (
-
-
         <Box>
-
             <Textarea
                 {...form.getInputProps(`items.${index}.data.summary`)}
             />
-
         </Box>
-
-
     )
 }

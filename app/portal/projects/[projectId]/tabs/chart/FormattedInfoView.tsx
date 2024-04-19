@@ -1,13 +1,27 @@
 import {
     AgreementInfoFormatResponse,
     AssignabilityShape,
+    CovenantNotToSueItemShape,
+    EffectsOfTransactionShape,
+    GoverningLawShape,
     IPOwnershipItemShape,
+    IndemnitiesShape,
     IpOwnershipType,
     LicenseDirection,
     LicenseItemShape,
     LicenseSuffix,
+    LimitationOfLiabilityShape,
+    MostFavoredNationShape,
+    NonCompeteShape,
+    NonSolicitHireShape,
     PaymentTermsDirection,
-    PaymentTermsItemShape
+    PaymentTermsItemShape,
+    RightOfFirstRefusalShape,
+    SourceCodeShape,
+    TermShape,
+    TerminationItemShape,
+    TrojanShape,
+    WarrantyShape
 } from "@/types/formattersTypes";
 import { Anchor, Badge } from "@mantine/core";
 
@@ -153,7 +167,144 @@ export function FormattedInfoView(props: Props) {
             <br />
             {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)}
         </>)
-    }
+    } else if (key === FormatterKeys.term) {
+        const data = props.infoArray[0].data as z.infer<typeof TermShape>
+        return (<>
+            {data.summary}
+            <br />
+            {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)}
+        </>)
+    } else if (key === FormatterKeys.termination) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof TerminationItemShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+
+
+            </div>
+        })
+    } else if (key === FormatterKeys.sourceCode) {
+       
+        const data = props.infoArray[0].data as z.infer<typeof SourceCodeShape>
+        return (<>
+            {data.content}
+            <br />
+            {data.license}
+            <br />
+            {data.releaseConditions}
+            
+            {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)}
+        </>)
+    } else if (key === FormatterKeys.convenantNotToSue) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof CovenantNotToSueItemShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    }  else if (key === FormatterKeys.mostFavoredNation) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof MostFavoredNationShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    }  else if (key === FormatterKeys.nonSolicitHire) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof NonSolicitHireShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    }  else if (key === FormatterKeys.rightOfFirstRefusal) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof RightOfFirstRefusalShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    }  else if (key === FormatterKeys.warranties) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof WarrantyShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    } else if (key === FormatterKeys.limitationOfLiability) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof LimitationOfLiabilityShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    } else if (key === FormatterKeys.indemnities) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof IndemnitiesShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    } else if (key === FormatterKeys.nonCompete) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof NonCompeteShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    } else if (key === FormatterKeys.effectsOfTransaction) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof EffectsOfTransactionShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    } else if (key === FormatterKeys.trojans) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof TrojanShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.summary}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+        })
+
+
+    } else if (key === FormatterKeys.governingLaw) {
+            const data = props.infoArray[0].data as z.infer<typeof GoverningLawShape>
+            return <div >
+                {data.summary}
+                {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)}
+            </div>
+
+
+    } 
 
 
 

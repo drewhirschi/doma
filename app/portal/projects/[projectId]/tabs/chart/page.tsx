@@ -24,7 +24,7 @@ export default async function Page({ params }: { params: { projectId: string } }
     
     const formattersq = await supabase.from("formatters")
     .select("*, formatted_info(*, annotation(*))")
-    .in("key", [FormatterKeys.agreementInfo, FormatterKeys.license, FormatterKeys.ipOwnership, FormatterKeys.paymentTerms, FormatterKeys.assignability])
+    // .in("key", [FormatterKeys.agreementInfo, FormatterKeys.license, FormatterKeys.ipOwnership, FormatterKeys.paymentTerms, FormatterKeys.assignability, FormatterKeys.term])
     .in("formatted_info.contract_id", [projectQ.data.contract.map((c) => c.id)])
     .order("priority", { ascending: true })
 

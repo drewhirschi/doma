@@ -79,7 +79,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
     const { data: contractData, error: contractError } = await supabase.from('contract')
-        .select('*, contract_line(text, ntokens), formatted_info(*)')
+        .select('*, contract_line(text, ntokens), formatted_info(*), project(target)')
         .order("id", { referencedTable: "contract_line", ascending: true })
         .eq('id', contractId).single()
 
@@ -90,58 +90,62 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
 
-    const { data: extractors, error: extractorError } = await supabase.from('parslet').select('*')
-        .order("order", { ascending: true })
-    // .limit(10)
+    // const { data: extractors, error: extractorError } = await supabase.from('parslet').select('*')
+    //     .order("order", { ascending: true })
+    // // .limit(10)
 
-    if (extractorError) {
-        console.error('Error loading extractors:', extractorError);
-        return Response.json({ message: "Could not load extractors" })
-    }
-
-
-
-    let tokensUsedThisMinute = 0;
-    const TOKEN_LIMIT_PER_MINUTE = 250_000;
-    const APX_TOKENS_PER_REQUEST = contractData.contract_line.reduce((sum, line) => sum + line.ntokens, 0) + contractData.contract_line.length * 8;
-
-    const rateLimitInterval = setInterval(() => {
-        tokensUsedThisMinute = 0;
-    }, 60_000);
-
-
-    while (extractors.length > 0) {
-
-        if (tokensUsedThisMinute + APX_TOKENS_PER_REQUEST > TOKEN_LIMIT_PER_MINUTE) {
-            console.log('Rate limit reached, waiting 15 seconds')
-            await sleep(15_000)
-            continue
-        }
-
-        const extractor = extractors.shift()
-
-        const task = async () => {
-            tokensUsedThisMinute += APX_TOKENS_PER_REQUEST;
-            const extractedLines = await execExtractor(supabase, extractor!, contractData)
-
-            if (extractedLines.error) {
-                console.error('Error extracting data:', extractedLines.error);
-            } else {
-                await saveExtraction(supabase, contractId, extractor!, extractedLines.ok)
-            }
-        }
-
-        task()
+    // if (extractorError) {
+    //     console.error('Error loading extractors:', extractorError);
+    //     return Response.json({ message: "Could not load extractors" })
+    // }
 
 
 
-    }
+    // let tokensUsedThisMinute = 0;
+    // const TOKEN_LIMIT_PER_MINUTE = 250_000;
+    // const APX_TOKENS_PER_REQUEST = contractData.contract_line.reduce((sum, line) => sum + line.ntokens, 0) + contractData.contract_line.length * 8;
+
+    // const rateLimitInterval = setInterval(() => {
+    //     tokensUsedThisMinute = 0;
+    // }, 60_000);
 
 
-    clearInterval(rateLimitInterval);
+    // while (extractors.length > 0) {
 
+    //     if (tokensUsedThisMinute + APX_TOKENS_PER_REQUEST > TOKEN_LIMIT_PER_MINUTE) {
+    //         console.log('Rate limit reached, waiting 15 seconds')
+    //         await sleep(15_000)
+    //         continue
+    //     }
+
+    //     const extractor = extractors.shift()
+
+    //     const task = async () => {
+    //         tokensUsedThisMinute += APX_TOKENS_PER_REQUEST;
+    //         const extractedLines = await execExtractor(supabase, extractor!, contractData)
+
+    //         if (extractedLines.error) {
+    //             console.error('Error extracting data:', extractedLines.error);
+    //         } else {
+    //             await saveExtraction(supabase, contractId, extractor!, extractedLines.ok)
+    //         }
+    //     }
+
+    //     task()
+
+
+
+    // }
+
+
+    // clearInterval(rateLimitInterval);
+
+    console.log("formatting extracted data")
 
     //run formatters
+    if (!contractData.target) {
+        contractData.target = contractData.project?.target[0] ?? ""
+    }
 
     const { data: formatters, error: formattersError } = await supabase.from('formatters')
         .select('*, parslet(*, annotation(*))')
