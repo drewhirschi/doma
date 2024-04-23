@@ -5,6 +5,7 @@ import { serverClient } from '@/supabase/ServerClients';
 // export const revalidate = 0
 // export const dynamic = 'force-dynamic'
 
+export const maxDuration = 300
 
 export default async function Page({ params }: { params: { projectId: string, contractId: string } }) {
 
