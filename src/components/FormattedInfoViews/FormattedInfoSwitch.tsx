@@ -57,11 +57,11 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
                 return FormattedPaymentTerms
 
 
-            //warranties needs custom
-            // limitaion of liability needs custom    
-            //indemnities needs custom
-            // case FormatterKeys.warranties:
-            //needs custome
+            case FormatterKeys.limitationOfLiability:
+            case FormatterKeys.warranties:
+                return FormattedLimitationOfLiability
+            case FormatterKeys.indemnities:
+                return FormattedIndemnities
 
 
             case FormatterKeys.convenantNotToSue:
@@ -81,11 +81,7 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
             case FormatterKeys.assignability:
                 return FormattedAssignability
 
-            case FormatterKeys.limitationOfLiability:
-            case FormatterKeys.warranties:
-                return FormattedLimitationOfLiability
-            case FormatterKeys.indemnities:
-                return FormattedIndemnities
+
 
             default:
                 return UnknownFormatter

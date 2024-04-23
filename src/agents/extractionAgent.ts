@@ -17,6 +17,11 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
+const llm = new OpenAI({
+    apiKey: process.env.MINDSDB_API_KEY,
+    baseURL: "https://llm.mdb.ai"
+});
+
 
 interface ContractLine {
     text: string;
@@ -32,12 +37,7 @@ const RawExtractionDataSchema = z.object({
 
 export type RawExtractionData = z.infer<typeof RawExtractionDataSchema>;
 
-const extractorIdMap = {
-    paymentTerms: "8e105eac-82f9-473f-9330-f837b173bfa8",
-    IpOwnership: "084fc678-f4c0-4e54-9524-0597a3330316",
-    license: "334e16da-2c83-4110-8ed1-92ff35fb5b55"
 
-}
 
 
 
@@ -112,6 +112,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
     await new Promise<void>(async (resolve, reject) => {
 
+        const tasks = []
         while (extractors.length > 0) {
 
             if (tokensUsedThisMinute + APX_TOKENS_PER_REQUEST > TOKEN_LIMIT_PER_MINUTE) {
@@ -134,11 +135,14 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
                 }
             }
 
-            task()
+            tasks.push(task())
 
 
 
         }
+
+        await Promise.all(tasks)
+
         resolve()
     })
 
@@ -251,9 +255,17 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
             const xmlContractText = buildXmlContract(contractSegment)
 
 
-            const res: ChatCompletion = await openai.chat.completions.create({
+            // const res: ChatCompletion = await openai.chat.completions.create({
+            //     messages: buildExtracitonMessages(extractor, xmlContractText),
+            //     model: 'gpt-4-turbo',
+            //     temperature: 0,
+            //     response_format: { 'type': "json_object" }
+            // });
+
+            const res: ChatCompletion = await llm.chat.completions.create({
                 messages: buildExtracitonMessages(extractor, xmlContractText),
-                model: 'gpt-4-turbo',
+                // model: 'llama-3-70b',
+                model: 'mixtral-8x7b',
                 temperature: 0,
                 response_format: { 'type': "json_object" }
             });
@@ -447,7 +459,7 @@ function segmentContractLines(lines: ContractLine[]): ContractLine[][] {
     let currentTokenCount = 0;
 
     lines.forEach((line) => {
-        if (currentTokenCount + line.ntokens > 10000) {
+        if (currentTokenCount + line.ntokens > 10_000) {
             segments.push(currentSegment);
             currentSegment = currentSegment.slice(-5);
             currentTokenCount = currentSegment.reduce((sum, item) => sum + item.ntokens, 0);

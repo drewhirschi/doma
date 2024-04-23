@@ -282,6 +282,7 @@ export enum AssignabilityType {
     AFREE = "AFREE",
     ACOMP = "ACOMP",
     COC = "COC",
+    COCIMP = "COCIMP",
     CFREE = "CFREE",
     CCOMP = "CCOMP",
     CTERM = "CTERM",
@@ -295,7 +296,7 @@ export const AssignabilityShape = z.object({
 AFREE: Agreement expressly assignable by Target without restriction by its terms (no mention of a change of control).
 ACOMP: Agreement expressly assignable by Target without restriction by its terms (no mention of a change of control), except that Target may not assign to a competitor of the Counterparty.
 COC: Agreement is not assignable by Target, including in connection with a change of control either because the agreement prohibits assignment in the context of a change of control or it is implied.
-COC (IMPLIED): Agreement is not assignable by either party, but the Counterparty may assign in connection with a merger.
+COCIMP: Agreement is not assignable by either party, but the Counterparty may assign in connection with a merger.
 CFREE: Agreement is freely assignable by Target but only in the context of a change of control.
 CTERM: the counterparty may terminate in connection with a change of control involving Target.
 CCOMP: Agreement expressly restricts Target's right to assign to a competitor in the context of a change of control (e.g., either party may assign this agreement in connection with a merger that does not involve a competitor of the other party).

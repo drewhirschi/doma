@@ -81,7 +81,7 @@ interface Props<T_HT> {
         transformSelection: () => void
     ) => JSX.Element | null;
     enableAreaSelection: (event: MouseEvent) => boolean;
-    focusedHighlightId:string | undefined
+    focusedHighlight:{id:string, scroll:boolean} | undefined
 }
 
 
@@ -173,15 +173,15 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         if (prevProps.highlights !== this.props.highlights) {
             this.renderHighlightLayers();
         }
-        if (prevProps.focusedHighlightId !== this.props.focusedHighlightId) {
-            if (this.props.focusedHighlightId) {
+        if (prevProps.focusedHighlight?.id !== this.props.focusedHighlight?.id) {
+            if (this.props.focusedHighlight?.id) {
                 const highlight = this.props.highlights.find(
-                    (h) => h.id === this.props.focusedHighlightId
+                    (h) => h.id === this.props.focusedHighlight?.id
                 );
-                if (highlight) {
+                if (highlight && this.props.focusedHighlight?.scroll) {
                     this.scrollTo(highlight);
                 } else {
-                    console.warn("Could not find highlight with id", this.props.focusedHighlightId);
+                    console.warn("Could not find highlight with id", this.props.focusedHighlight?.id);
                 }
             }
         }
@@ -443,15 +443,15 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         this.handleScaleValue();
 
 
-        if (this.props.focusedHighlightId) {
+        if (this.props.focusedHighlight) {
             const highlight = this.props.highlights.find(
-                (h) => h.id === this.props.focusedHighlightId
+                (h) => h.id === this.props.focusedHighlight?.id
             );
             if (highlight) {
                 console.log("starting scroll")
                 this.scrollTo(highlight);
             } else {
-                console.warn("Could not find highlight with id", this.props.focusedHighlightId);
+                console.warn("Could not find highlight with id", this.props.focusedHighlight?.id);
             }
         }
 
@@ -706,7 +706,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
             <HighlightLayer
                 highlightsByPage={this.groupHighlightsByPage(highlights)}
                 pageNumber={pageNumber.toString()}
-                scrolledToHighlightId={this.props.focusedHighlightId}
+                scrolledToHighlightId={this.props.focusedHighlight?.id}
                 highlightTransform={highlightTransform}
                 tip={tip}
                 scaledPositionToViewport={this.scaledPositionToViewport.bind(this)}
