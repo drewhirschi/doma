@@ -14,7 +14,7 @@ import { zodObjectToXML } from "@/zodUtils"
 export async function reviewContractAction(contractId: string) {
     const supabase = serverActionClient()
 
-    runContractExtraction(supabase, contractId).then(console.log)
+    await runContractExtraction(supabase, contractId).then(console.log)
 }
 export async function completeContractAction(contractId: string) {
     const supabase = serverActionClient()
