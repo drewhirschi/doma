@@ -21,7 +21,9 @@ export function FormattedIpOwnership({ form, index, onChange }: ItemViewProps<z.
             <Textarea
                 // label="Summary"
                 {...form.getInputProps(`infos.${index}.data.summary`)}
-                autosize
+                autosize 
+                value={form.getInputProps(`infos.${index}.data.summary`).value ?? ""}
+
             />
             <SimpleGrid cols={2} spacing="md">
                 <Select

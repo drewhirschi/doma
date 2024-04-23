@@ -15,6 +15,8 @@ export function FormattedTermination({ form, index, onChange }: ItemViewProps<z.
 
             <Textarea autosize name="summary"
                 {...form.getInputProps(`infos.${index}.data.summary`)}
+                value={form.getInputProps(`infos.${index}.data.summary`).value ?? ""}
+
             />
             <Select label="Type"
                 {...form.getInputProps(`infos.${index}.data.tag`)}

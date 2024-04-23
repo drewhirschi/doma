@@ -10,6 +10,8 @@ export function FormattedSummaryList({ form, index, onChange }: ItemViewProps<z.
         <Box>
             <Textarea
                 {...form.getInputProps(`items.${index}.data.summary`)}
+                value={form.getInputProps(`infos.${index}.data.summary`).value ?? ""}
+
             />
         </Box>
     )

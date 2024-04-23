@@ -12,7 +12,12 @@ export function FormattedAgreementInfo({ form, onChange }: ViewProps<AgreementIn
     return (
      
                 <Stack gap={4}>
-                    <Textarea autosize {...form.getInputProps('summary')} />
+                    <Textarea 
+                    autosize
+                     {...form.getInputProps('summary')} 
+                     value={form.getInputProps(`summary`).value ?? ""}
+
+                     />
 
                     <SimpleGrid cols={2} spacing="md">
                         <TextInput label="Title" {...form.getInputProps('title')} />

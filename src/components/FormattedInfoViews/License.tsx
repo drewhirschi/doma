@@ -19,6 +19,8 @@ export function FormattedLicense({ form, onChange, index }: ItemViewProps<Zod.in
 
             <Textarea autosize name="summary"
                 {...form.getInputProps(`infos.${index}.data.summary`)}
+                value={form.getInputProps(`infos.${index}.data.summary`).value ?? ""}
+
             />
             <SimpleGrid cols={2} spacing="md">
                 <BoolSelect

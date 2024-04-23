@@ -14,7 +14,12 @@ export function FormattedTerm({ form, onChange }: ViewProps<TermFormatResponse>)
 
     return (
         <Stack gap={4}>
-            <Textarea autosize {...form.getInputProps('summary')} />
+            <Textarea
+             autosize
+              {...form.getInputProps('summary')} 
+              value={form.getInputProps(`summary`).value ?? ""}
+
+              />
 
 
             <SimpleGrid cols={2} spacing="md">

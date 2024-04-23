@@ -18,6 +18,7 @@ export function FormattedPaymentTerms({ form, index, onChange }: ItemViewProps<z
             <Textarea
                 // label="Summary"
                 {...form.getInputProps(`infos.${index}.data.summary`)}
+                value={form.getInputProps(`infos.${index}.data.summary`).value ?? ""}
                 autosize
             />
             <SimpleGrid cols={2} spacing="md" style={{ alignItems: "center" }}>

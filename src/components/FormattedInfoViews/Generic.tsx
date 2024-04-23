@@ -10,7 +10,13 @@ export function FormattedGeneric({ form }: ViewProps<GenericFormatResponse>) {
     return (
 
 
-        <Textarea autosize style={{ whiteSpace: "pre-wrap" }} {...form.getInputProps('summary')} />
+        <Textarea
+            autosize
+            style={{ whiteSpace: "pre-wrap" }}
+            {...form.getInputProps('summary')}
+            value={form.getInputProps(`summary`).value ?? ""}
+
+        />
 
     )
 }

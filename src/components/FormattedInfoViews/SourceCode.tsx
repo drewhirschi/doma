@@ -21,16 +21,22 @@ export function FormattedSourceCode({ form, onChange }: ViewProps<SourceCodeForm
                 autosize
                 label="Content"
                 {...form.getInputProps('content')}
+                value={form.getInputProps(`content`).value ?? ""}
+
             />
             <Textarea
                 autosize
                 label="Release conditions"
                 {...form.getInputProps('releaseConditions')}
+                value={form.getInputProps(`releaseConditions`).value ?? ""}
+
             />
             <Textarea
                 autosize
                 label="License"
                 {...form.getInputProps('license')}
+                value={form.getInputProps(`license`).value ?? ""}
+
             />
 
 
