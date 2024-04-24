@@ -36,26 +36,37 @@ const computeOffsets = (highlights: Annotation_SB[]): { id: string, value: numbe
 
     const offsets: { id: string, value: number }[] = []
 
-    let lastPage = 0;
-    let lastBottom = 0;
-    sortedHighlights.forEach((highlight, index) => {
-        let offset = 0;
-        if (index === 0 || highlight.position.pageNumber !== lastPage) {
-            // Reset the lastBottom if it's the first item or new page starts
-            lastBottom = 0;
+    const iconHeight = 32
+
+    const sameHeightMap = new Map<number, Annotation_SB[]>()
+
+    highlights.forEach(h => {
+        const top = h.position.boundingRect.y1
+        if (sameHeightMap.has(top)) {
+            sameHeightMap.get(top)?.push(h)
         } else {
-            const currentTop = highlight.position.boundingRect.y1;
-            // Adjust the offset if overlapping or too close to the previous highlight on the same page
-            if (currentTop < lastBottom + 10) { // Assuming a 10px minimum gap
-                offset = lastBottom - currentTop + 10;
-            } else {
-            }
+            sameHeightMap.set(top, [h])
         }
-        offsets.push({ id: highlight.id, value: offset })
-        // Update lastBottom to the current item's bottom including its offset
-        lastBottom = highlight.position.boundingRect.y1 + offset + (highlight.position.boundingRect.y2 - highlight.position.boundingRect.y1);
-        lastPage = highlight.position.pageNumber; // Update the lastPage to current
-    });
+    })
+
+    sameHeightMap.forEach((highlights) => {
+        const mid = Math.floor(highlights.length / 2) -1;
+
+        for (let i = 0; i <= mid; i++) {
+          if (mid - i >= 0) {
+            console.log(highlights[mid - i]);  // Process element from the middle to the start
+            offsets.push({ id: highlights[mid - i].id, value: (i * iconHeight * -1) - (iconHeight / 2) })
+          }
+          if (mid + i < highlights.length) {
+            console.log(highlights[mid + i]);  // Process element from the middle to the end
+            offsets.push({ id: highlights[mid + i].id, value:( i * iconHeight) + (iconHeight / 2)})
+          }
+        }
+    })
+
+
+
+ 
 
     return offsets;
 };
@@ -65,9 +76,9 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
 
     const pathname = usePathname()
     const router = useRouter()
-    const [focusedHighlight, setFocusedHighlight] = useState<{id:string, scroll:boolean} | undefined>()
+    const [focusedHighlight, setFocusedHighlight] = useState<{ id: string, scroll: boolean } | undefined>()
 
-    const scrollToHighlightFromHash = () => setFocusedHighlight({id: window.location.hash.slice(1), scroll: true});
+    const scrollToHighlightFromHash = () => setFocusedHighlight({ id: window.location.hash.slice(1), scroll: true });
 
 
     useEffect(() => {
@@ -188,7 +199,8 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                             isUserHighlight={highlight.is_user}
                                             text={highlight.text}
                                             extractorName={parslets.find(p => p.id === highlight.parslet_id)?.display_name ?? "Unknown"}
-                                            setFocusedHighlightId={() => setFocusedHighlight({id:highlight.id, scroll:false})}
+                                            setFocusedHighlightId={() => setFocusedHighlight({ id: highlight.id, scroll: false })}
+                                            resetFocusedHighlight={() => setFocusedHighlight(undefined)}
                                             offset={highlightOffsets.find(h => h.id === highlight.id)?.value ?? 0}
                                         />
                                     );

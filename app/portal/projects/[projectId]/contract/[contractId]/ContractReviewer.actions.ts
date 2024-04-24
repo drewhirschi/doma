@@ -35,6 +35,8 @@ export async function deleteContractExtractedInfo(contractId: string, projectId:
 
     const { error: eiErr } = await supabase.from('annotation').delete().eq('contract_id', contractId).eq('is_user', false)
     const { error: jobErr } = await supabase.from('extract_jobs').delete().eq('contract_id', contractId)
+    const { error: infoErr } = await supabase.from('formatted_info').delete().eq('contract_id', contractId)
+    const { error: lineRefErr } = await supabase.from('line_ref').delete().eq('contract_id', contractId)
 
     revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
 

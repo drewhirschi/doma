@@ -16,6 +16,7 @@ import { ContractDetailsDrawer } from './DetailsDrawer';
 import { FormatterSwitch } from '@/components/FormattedInfoViews/FormattedInfoSwitch';
 import { FormatterWithInfo } from '@/types/complex';
 import { ScaledPosition } from '@/components/PdfViewer';
+import { SubMenu } from './SubMenu';
 import { browserClient } from "@/supabase/BrowerClients";
 import dynamic from 'next/dynamic'
 import { notifications } from '@mantine/notifications';
@@ -307,12 +308,13 @@ export function ContractReviewer(props: Props) {
                                     >
                                         Run extraciton
                                     </Menu.Item>
+                                   {/* <SubMenu/> */}
                                     <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
                                             actions.deleteContractExtractedInfo(contract.id, projectId)
                                         }}
                                     >
-                                        Clear extracted info
+                                        Reset contract
                                     </Menu.Item>
 
                                     <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
@@ -332,6 +334,10 @@ export function ContractReviewer(props: Props) {
                                     >
                                         Run formatters
                                     </Menu.Item>
+
+                                    <Menu.Divider/>
+                                    <Menu.Label>Extract</Menu.Label>
+                                    {formatters.map(f => (<Menu.Item>{f.display_name}</Menu.Item>))}
                                 </Menu.Dropdown>
                             </Menu>
                         </Group>

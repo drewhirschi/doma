@@ -23,6 +23,7 @@ interface Props {
   extractorName: string
   offset: number
   setFocusedHighlightId: () => void
+  resetFocusedHighlight: () => void
 }
 
 export class Highlight extends Component<Props> {
@@ -37,7 +38,7 @@ export class Highlight extends Component<Props> {
       isUserHighlight,
       text,
       extractorName,
-      offset, setFocusedHighlightId
+      offset, setFocusedHighlightId, resetFocusedHighlight
     } = this.props;
 
     const { rects, boundingRect } = position;
@@ -48,11 +49,13 @@ export class Highlight extends Component<Props> {
         <div
           className={`Highlight ${isScrolledTo ? "Highlight--scrolledTo" : ""}`}
         >
-          <Menu width={200} position="bottom" withArrow shadow="md">
+          <Menu width={200} position="bottom" withArrow shadow="md"
+          onClose={resetFocusedHighlight}
+          >
             <Menu.Target>
               <ActionIcon 
               onClick={setFocusedHighlightId}
-              variant="subtle" aria-label="Settings" style={{ top: boundingRect.top + offset, }}
+              variant="subtle" aria-label="Settings" style={{ top: boundingRect.top - 5 + offset, }}
               >
                 <IconNote style={{ width: '70%', height: '70%' }} stroke={1.5} />
               </ActionIcon>

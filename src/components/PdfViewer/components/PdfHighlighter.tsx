@@ -174,6 +174,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
             this.renderHighlightLayers();
         }
         if (prevProps.focusedHighlight?.id !== this.props.focusedHighlight?.id) {
+            this.renderHighlightLayers();
             if (this.props.focusedHighlight?.id) {
                 const highlight = this.props.highlights.find(
                     (h) => h.id === this.props.focusedHighlight?.id

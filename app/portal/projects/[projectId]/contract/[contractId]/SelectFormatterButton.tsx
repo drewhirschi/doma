@@ -43,12 +43,14 @@ export function SelectFormatterButton(props: { formatter: FormatterWithInfo, han
         </Button.Group>
         <Collapse in={opened}>
             {formatter.formatted_info.map((fi, j) => (
+
                 <Button
                     {...buttonProps}
                     key={j}
                     onClick={() => handleClick(fi.id)}
                     ml={20}
-                >
+                    w={200}
+                    >
                     {`Item ${j + 1}`}
                 </Button>
             ))}
