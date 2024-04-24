@@ -337,7 +337,7 @@ export function ContractReviewer(props: Props) {
 
                                     <Menu.Divider/>
                                     <Menu.Label>Extract</Menu.Label>
-                                    {formatters.map(f => (<Menu.Item>{f.display_name}</Menu.Item>))}
+                                    {formatters.map(f => (<Menu.Item key={f.key}>{f.display_name}</Menu.Item>))}
                                 </Menu.Dropdown>
                             </Menu>
                         </Group>
