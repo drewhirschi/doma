@@ -4,7 +4,7 @@ import { AgreementTypes } from "@/types/enums";
 import { Database } from "@/types/supabase-generated";
 import OpenAI from "openai";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { generateAgentResponse } from "./formatAgent";
+import { generateAgentJsonResponse } from "./formatAgent";
 import { z } from "zod"
 
 export const agreementsTypeInstructions = {
@@ -65,7 +65,7 @@ ${Object.entries(agreementsTypeInstructions).map(([key, value]) => `<${key} desc
         description: z.string({ required_error: "Description is required" }),
     })
 
-    const response = await generateAgentResponse(systemMessage, first500Tokens.str)
+    const response = await generateAgentJsonResponse(systemMessage, first500Tokens.str)
     
     if (response.error) {
         return response

@@ -17,6 +17,7 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
+
 const llm = new OpenAI({
     apiKey: process.env.MINDSDB_API_KEY,
     baseURL: "https://llm.mdb.ai"
@@ -26,6 +27,7 @@ const llm = new OpenAI({
 interface ContractLine {
     text: string;
     ntokens: number;
+    id: number;
 }
 
 
@@ -45,7 +47,7 @@ export async function runSingleExtraction(supabase: SupabaseClient<Database>, co
 
     const [extractorq, contractq] = await Promise.all([
         supabase.from('parslet').select('*').eq('id', extractorId).single(),
-        supabase.from('contract').select('*, contract_line(text, ntokens)').eq('id', contractId).single()
+        supabase.from('contract').select('*, contract_line(text, ntokens, id)').eq('id', contractId).single()
     ])
 
     if (extractorq.error) {
@@ -73,173 +75,14 @@ export async function runSingleExtraction(supabase: SupabaseClient<Database>, co
 
 
 
-export async function runContractExtraction(supabase: SupabaseClient<Database>, contractId: string) {
 
-    console.log(`Running extractors on contract [${contractId}]`)
-
-
-    const { data: contractData, error: contractError } = await supabase.from('contract')
-        .select('*, contract_line(text, ntokens), formatted_info(*), project(target)')
-        .order("id", { referencedTable: "contract_line", ascending: true })
-        .eq('id', contractId).single()
-
-    if (!contractData) {
-        console.error('Error loading contract:', contractError);
-        return Response.json({ message: "Could not load contract" })
-    }
-
-
-
-    const { data: extractors, error: extractorError } = await supabase.from('parslet').select('*')
-        .order("order", { ascending: true })
-    // .limit(10)
-
-    if (extractorError) {
-        console.error('Error loading extractors:', extractorError);
-        return Response.json({ message: "Could not load extractors" })
-    }
-
-
-
-    let tokensUsedThisMinute = 0;
-    const TOKEN_LIMIT_PER_MINUTE = 400_000;
-    const APX_TOKENS_PER_REQUEST = contractData.contract_line.reduce((sum, line) => sum + line.ntokens, 0) + contractData.contract_line.length * 8;
-
-    const rateLimitInterval = setInterval(() => {
-        tokensUsedThisMinute = 0;
-    }, 60_000);
-
-
-    await new Promise<void>(async (resolve, reject) => {
-
-        const tasks = []
-        while (extractors.length > 0) {
-
-            if (tokensUsedThisMinute + APX_TOKENS_PER_REQUEST > TOKEN_LIMIT_PER_MINUTE) {
-                console.log('Rate limit reached, waiting 15 seconds')
-                await sleep(15_000)
-                continue
-            }
-
-            const extractor = extractors.shift()
-
-            const task = async () => {
-                tokensUsedThisMinute += APX_TOKENS_PER_REQUEST;
-                const extractedLines = await execExtractor(supabase, extractor!, contractData)
-
-                if (extractedLines.error) {
-                    console.error('Error extracting data:', extractedLines.error);
-                    reject()
-                } else {
-                    await saveExtraction(supabase, contractId, extractor!, extractedLines.ok)
-                }
-            }
-
-            tasks.push(task())
-
-
-
-        }
-
-        await Promise.all(tasks)
-
-        resolve()
-    })
-
-
-    clearInterval(rateLimitInterval);
-
-    console.log("formatting extracted data")
-
-    //run formatters
-    if (!contractData.target) {
-        contractData.target = contractData.project?.target[0] ?? ""
-    }
-
-    const { data: formatters, error: formattersError } = await supabase.from('formatters')
-        .select('*, parslet(*, annotation(*))')
-        .eq('parslet.annotation.contract_id', contractId)
-
-    if (formattersError) {
-        console.error('Error loading formatters:', formattersError);
-        return Response.json({ message: "Could not load formatters" })
-    }
-
-
-
-
-    formatters.map(async (formatter) => {
-        const formatAndSave = async (input: string, itemId: number, annotationIds: string[]) => {
-            const res = await getDataFormatted(formatter, contractData, input, true)
-
-            if (res.error) {
-                console.error('Error formatting data:', res.error);
-                return
-            }
-
-            console.log(formatter.key)
-            const upsertRes = await supabase.from("formatted_info").upsert({
-                data: res.ok[0],
-                id: itemId,
-                formatter_key: formatter.key,
-                contract_id: contractId
-            })
-
-            if (upsertRes.error) {
-                console.error('Error saving formatted data:', formatter.key, upsertRes.error);
-            }
-
-            const annotationUpdate = await supabase.from("annotation")
-                .update({ formatter_key: formatter.key, formatter_item_id: itemId }).in("id", annotationIds)
-        }
-
-
-
-        if (formatter.hitems) {
-
-            formatter.parslet.map(async (parslet) => {
-                parslet.annotation.map(async (annotation, i) => {
-                    let input = `<extraction>\n${annotation.text}\n</extraction>`
-
-                    await formatAndSave(input, i, [annotation.id])
-                })
-
-            })
-        } else {
-            let input = ""
-            const annIds: string[] = []
-            formatter.parslet.map(async (parslet) => {
-                input += `<extraction_topic name="${parslet.display_name}">\n`
-                input += parslet.annotation.map((annotation, i) => {
-
-                    annIds.push(annotation.id)
-                    return `<extraction id="${i}">\n${annotation.text}\n</extraction>\n`
-                }).join("\n")
-                input += "</extraction_topic>\n"
-
-            })
-
-            await formatAndSave(input, 0, annIds)
-
-
-        }
-
-
-    })
-
-
-
-
-
-
-}
 
 
 
 
 export async function execExtractor(sb: SupabaseClient<Database>, extractor: Parslet_SB, contract: Contract_SB & { contract_line: ContractLine[] }): Promise<IResp<number[]>> {
 
-    const job = await createExtractionJob(sb, contract.id, extractor!.id)
+    // const job = await createExtractionJob(sb, contract.id, extractor!.id)
 
     await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.RUNNING)
     console.log(`executing extractor ${extractor.display_name}`)
@@ -266,6 +109,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
                 messages: buildExtracitonMessages(extractor, xmlContractText),
                 // model: 'llama-3-70b',
                 model: 'mixtral-8x7b',
+                // model: 'gpt-3.5-turbo',
                 temperature: 0,
                 response_format: { 'type': "json_object" }
             });
@@ -278,18 +122,18 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
             } catch (error) {
                 console.error("Failed to parse: ", responseMessage.content)
-                await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
-                throw error
+                // await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
+                return rerm("Failed to parse response", { error })
             }
 
         }
 
-        await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.COMPLETE)
+        // await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.COMPLETE)
         return rok(relevantLineNubers)
 
     } catch (error) {
         console.error('Error extracting data:', error);
-        await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
+        // await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
         return rerm("Error extracting data", { error })
     }
 
@@ -299,7 +143,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 }
 
 
-async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractedLines: number[]) {
+export async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractedLines: number[]) {
 
     if (extractedLines.length === 0) {
         console.log(`No lines extracted for ${extractor.display_name}`)
@@ -392,7 +236,9 @@ async function saveExtraction(supabase: SupabaseClient<Database>, contractId: st
  */
 function buildExtracitonMessages(extractor: Parslet_SB, xmlContractText: string) {
 
-    const systemMessage = `You are a tool used by lawyers for extracting line numbers containing key information and red flags from our client's contracts in the context of a merger or acquisition. Be thorough, the whole document needs to be handled.
+    // When selecting an entire section, with subsections for example, include the blank lines inbetween the subsections as well.
+    const systemMessage = `You are a tool used by lawyers for extracting line numbers containing key information and red flags from our client's contracts in the context of a merger or acquisition. 
+    Be thorough, the whole document needs to be considered.
 
 Your output should be a JSON object with a schema that matches the following: { lines: number[]} where each number represents a line number in the contract that is relevant to the extraction instructions.
 
@@ -409,8 +255,8 @@ ${extractor.instruction}
 }
 
 export function buildXmlContract(contractLines: ContractLine[]) {
-    return contractLines.reduce((acc, line, i) => {
-        return acc + `<line id="${i}">${line.text}</line>` + "\n";
+    return contractLines.reduce((acc, line) => {
+        return acc + `<line id="${line.id}">${line.text}</line>` + "\n";
     }, "")
 }
 

@@ -86,7 +86,7 @@ export async function formatPipeline(sb: SupabaseClient<Database>, contractId: s
     return results
 }
 
-export async function generateAgentResponse(sysMessage: string, input: string, model = "gpt-4-turbo-preview"): Promise<IResp<any>> {
+export async function generateAgentJsonResponse(sysMessage: string, input: string, model = "gpt-4-turbo"): Promise<IResp<any>> {
     const oaiClient = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
@@ -174,7 +174,7 @@ export async function getDataFormatted(formatter: Formatter_SB, contract: Contra
     const instruction = await buildInstruction(formatter, contract, singleMode)
 
 
-    const res = await generateAgentResponse(instruction, dataInput)
+    const res = await generateAgentJsonResponse(instruction, dataInput)
 
     if (res.error) {
         return res
