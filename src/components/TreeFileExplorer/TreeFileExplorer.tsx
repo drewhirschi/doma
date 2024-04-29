@@ -170,7 +170,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, project, me
                 <Table.Td>{item.metadata?.description}</Table.Td>
                 <Table.Td> {item.metadata?.completed ? "Yes" : "No"}</Table.Td>
                 <Table.Td>{item.metadata?.npages ?? 1}</Table.Td>
-                <Table.Td>{item.metadata?.tag && <AgreementTypeBadge type={item.metadata?.tag} />}</Table.Td>
+                <Table.Td>{item.metadata?.tag && <AgreementTypeBadge type={item.metadata?.tag} contractId={item.id} />}</Table.Td>
                 <Table.Td>
                     <ReviewerCombobox projectMembers={members} selectedProfileId={item.metadata?.assigned_to} handleUpdate={(async (memberId) => {
                         const supabase = browserClient()

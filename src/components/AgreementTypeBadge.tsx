@@ -1,47 +1,136 @@
-import { Badge } from "@mantine/core";
+import { Badge, Box, Button, Combobox, ScrollArea, Text, useCombobox } from '@mantine/core';
 
-export function AgreementTypeBadge({ type }: { type: string }) {
-    
-    switch (type) {
-        case 'customer_agreement':
-            return <Badge color='teal'>Customer</Badge>;
-        case 'supply_agreement':
-            return <Badge color='teal'>Supply</Badge>;
-        case 'distribution_agreement':
-            return <Badge color="blue">Distribution</Badge>;
-        case 'non_disclosure_agreement':
-            return <Badge color="violet">NDA</Badge>;
-        case 'contractor_agreement':
-            return <Badge color="green">Contractor</Badge>;
-        case 'employee_agreement':
-            return <Badge color="orange">Employee</Badge>;
-        case 'intercompany_agreement':
-            return <Badge color="cyan">Intercompany</Badge>;
-        case 'joint_development_agreement':
-            return <Badge color="pink">Joint development</Badge>;
-        case 'collaboration_agreements':
-            return <Badge color="purple">Collaboration</Badge>;
-        case 'data_processing_agreement':
-            return <Badge color="lime">Data Processing</Badge>;
-        case 'settlement_agreement':
-            return <Badge color="red">Settlement</Badge>;
-        case 'standards_setting_bodies_agreements':
-            return <Badge color="brown">Standards Body</Badge>;
-        case 'advertising_agreement':
-            return <Badge color="yellow">Advertising</Badge>;
-        case 'publishing_agreement':
-            return <Badge color="amber">Publishing</Badge>;
-        case 'marketing_inbound_agreement':
-            return <Badge color="deepOrange">Inbound Marketing</Badge>;
-        case 'marketing_outbound_agreement':
-            return <Badge color="deepPurple">Outbound Marketing</Badge>;
-        case 'marketing_joint_agreement':
-            return <Badge color="indigo">Joint Marketing</Badge>;
-        case 'marketing_cross_agreement':
-            return <Badge color="blueGrey">Cross Marketing</Badge>;
-        case 'unknown':
-        default:
-            return <Badge color="gray">Unknown</Badge>;
+import { browserClient } from '@/supabase/BrowerClients';
+import { useState } from 'react';
+
+export function AgreementTypeBadge({ type, contractId }: { type: string, contractId: string }) {
+
+    const sb = browserClient();
+
+
+
+    const [selectedType, setSelectedType] = useState<string>(type);
+    const combobox = useCombobox({
+        onDropdownClose: () => combobox.resetSelectedOption(),
+    });
+
+
+
+
+    const typeData: Record<string, { color: string, text: string }> = {
+        'customer_agreement': {
+            color: 'teal',
+            text: "Customer"
+        },
+        'supply_agreement': {
+            color: 'teal',
+            text: "Supply"
+        },
+        'distribution_agreement': {
+            color: "blue",
+            text: "Distribution"
+        },
+        'non_disclosure_agreement': {
+            color: "violet",
+            text: "NDA"
+        },
+        'contractor_agreement': {
+            color: "green",
+            text: "Contractor"
+        },
+        'employee_agreement': {
+            color: "orange",
+            text: "Employee"
+        },
+        'intercompany_agreement': {
+            color: "cyan",
+            text: "Intercompany"
+        },
+        'joint_development_agreement': {
+            color: "pink",
+            text: "Joint Development"
+        },
+        'collaboration_agreements': {
+            color: "purple",
+            text: "Collaboration"
+        },
+        'data_processing_agreement': {
+            color: "lime",
+            text: "Data Processing"
+        },
+        'settlement_agreement': {
+            color: "red",
+            text: "Settlement"
+        },
+        'standards_setting_bodies_agreements': {
+            color: "brown",
+            text: "Standards Body"
+        },
+        'advertising_agreement': {
+            color: "yellow",
+            text: "Advertising"
+        },
+        'publishing_agreement': {
+            color: "amber",
+            text: "Publishing"
+        },
+        'marketing_inbound_agreement': {
+            color: "deepOrange",
+            text: "Inbound Marketing"
+        },
+        'marketing_outbound_agreement': {
+            color: "deepPurple",
+            text: "Outbound Marketing"
+        },
+        'marketing_joint_agreement': {
+            color: "indigo",
+            text: "Joint Marketing"
+        },
+        'marketing_cross_agreement': {
+            color: "blueGrey",
+            text: "Cross Marketing"
+        },
+        "unknown": {
+            color: "gray",
+            text: "Unknown"
+        }
     }
-    
+
+    const options = Object.entries(typeData).map(([key, value]) => (
+        <Combobox.Option value={key} key={key}>
+            <Badge color={value.color}>{value.text}</Badge>
+        </Combobox.Option>
+    ));
+
+    return (
+        <>
+            <Combobox
+                store={combobox}
+                width={250}
+                position="bottom-start"
+                withArrow
+                withinPortal={false}
+                onOptionSubmit={(val) => {
+                    setSelectedType(val);
+                    sb.from("contract").update({ tag: val }).eq("id", contractId).then(() => {})
+                    combobox.closeDropdown();
+                }}
+            >
+                <Combobox.Target>
+                    <Button radius={'lg'} px={"sm"} size='compact-xs' color={typeData[selectedType]?.color ?? "gray"} onClick={() => combobox.toggleDropdown()}
+                    >{typeData[selectedType]?.text.toUpperCase() ?? "NONE"}</Button>
+                </Combobox.Target>
+
+                <Combobox.Dropdown >
+                    <Combobox.Options>
+                        <ScrollArea.Autosize mah={200} type="scroll">
+                            {options}
+                        </ScrollArea.Autosize>
+                    </Combobox.Options>
+                </Combobox.Dropdown>
+            </Combobox>
+
+        </>
+    );
+
 }

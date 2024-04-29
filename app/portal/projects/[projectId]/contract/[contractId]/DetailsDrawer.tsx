@@ -1,6 +1,5 @@
 import { Box, Button, Group, Select, Stack, Text, TextInput, Textarea } from "@mantine/core";
 
-import { AgreementTypeBadge } from "@/components/AgreementTypeBadge";
 import { AgreementTypes } from "@/types/enums";
 import MetadataItem from "@/components/MetadataItem";
 import { browserClient } from "@/supabase/BrowerClients";

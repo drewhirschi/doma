@@ -76,7 +76,7 @@ export function SearchTab({ project, contracts, contractCount }: Props) {
                     {contract.npages ?? 1}
                 </Table.Td>
                 <Table.Td>
-                    {contract.tag && <AgreementTypeBadge type={contract.tag} />}
+                    {contract.tag && <AgreementTypeBadge type={contract.tag}  contractId={contract.id}/>}
                 </Table.Td>
                 <Table.Td>
                     <ReviewerCombobox projectMembers={project.profile} selectedProfileId={contract.assigned_to} handleUpdate={async (memberId) => {
