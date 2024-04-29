@@ -256,14 +256,15 @@ export type EffectsOfTransactionFormatResponse = z.infer<typeof EffectsOfTransac
 
 
 export const TrojanShape = z.object({
-    summary: z.string().nullable().describe("Summarize the trojan in less than 20 words."),
+    summary: z.string().nullable().describe("Summarize and flag any provisions that could apply to a company that purchases the [Target]. This could be the case when the provision binds the [Target] and its affiliates or the definition describing the obligated party includes affiliates."),
 });
 export type TrojanFormatResponse = z.infer<typeof TrojanShape>;
 
 
 
 export const GoverningLawShape = z.object({
-    summary: z.string().nullable().describe("From the governing law sections from the contract provide the jurisdiction that governs. Possibly it will have multiple jurisdictions depending on a condition such as location of the Target or Entity. List the jurisdictions and the conditions for each."),
+    jurisdiction: z.string().nullable().describe("The jurisdiction that governs."),
+    condition: z.string().nullable().describe("Give the condition for this jurisdiction or null if it is always the governing jurisdiciton."),
 });
 
 export type GoverningLawFormatResponse = z.infer<typeof GoverningLawShape>;

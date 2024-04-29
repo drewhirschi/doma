@@ -68,7 +68,8 @@ interface Props<T_HT> {
         hideTip: () => void,
         viewportToScaled: (rect: LTWHP) => Scaled,
         screenshot: (position: LTWH) => string,
-        isScrolledTo: boolean
+        isScrolledTo: boolean,
+        isContinuationHighlight: boolean
     ) => JSX.Element;
     highlights: Array<T_HT>;
     onScrollChange: () => void;

@@ -21,7 +21,8 @@ interface HighlightLayerProps<T_HT> {
     hideTip: () => void,
     viewportToScaled: (rect: LTWHP) => Scaled,
     screenshot: (position: LTWH) => string,
-    isScrolledTo: boolean
+    isScrolledTo: boolean,
+    isContinuationHighlight: boolean
   ) => JSX.Element;
   tip: {
     highlight: any;
@@ -48,7 +49,7 @@ export function HighlightLayer<T_HT extends IHighlight>({
   showTip,
   setState,
 }: HighlightLayerProps<T_HT>) {
-  const currentHighlights = highlightsByPage[String(pageNumber)] || [];
+  const currentHighlights = highlightsByPage[pageNumber] || [];
   return (
     <div>
       {currentHighlights.map(({ position, id, ...highlight }, index) => {
@@ -84,7 +85,8 @@ export function HighlightLayer<T_HT extends IHighlight>({
             return viewportToScaled(rect, viewport);
           },
           (boundingRect) => screenshot(boundingRect, parseInt(pageNumber)),
-          isScrolledTo
+          isScrolledTo,
+          Object.entries(highlightsByPage).filter(([pageKey, highlights]) => Number(pageKey) < Number(pageNumber)).some(([_, highlights]) => highlights.some((highlight) => highlight.id === id))
         );
       })}
     </div>

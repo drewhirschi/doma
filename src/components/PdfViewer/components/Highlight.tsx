@@ -24,6 +24,7 @@ interface Props {
   offset: number
   setFocusedHighlightId: () => void
   resetFocusedHighlight: () => void
+  isContinuationHighlight: boolean
 }
 
 export class Highlight extends Component<Props> {
@@ -38,7 +39,7 @@ export class Highlight extends Component<Props> {
       isUserHighlight,
       text,
       extractorName,
-      offset, setFocusedHighlightId, resetFocusedHighlight
+      offset, setFocusedHighlightId, resetFocusedHighlight, isContinuationHighlight
     } = this.props;
 
     const { rects, boundingRect } = position;
@@ -49,7 +50,7 @@ export class Highlight extends Component<Props> {
         <div
           className={`Highlight ${isScrolledTo ? "Highlight--scrolledTo" : ""}`}
         >
-          <Menu width={200} position="bottom" withArrow shadow="md"
+         {!isContinuationHighlight && <Menu width={200} position="bottom" withArrow shadow="md"
           onClose={resetFocusedHighlight}
           >
             <Menu.Target>
@@ -79,7 +80,7 @@ export class Highlight extends Component<Props> {
                 Delete
               </Menu.Item>
             </Menu.Dropdown>
-          </Menu>
+          </Menu>}
 
           <div className="Highlight__parts">
             {rects.map((rect, index) => (

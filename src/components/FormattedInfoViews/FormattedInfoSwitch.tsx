@@ -4,6 +4,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedAgreementInfo } from "./AgreementInfo";
 import { FormattedAssignability } from "./Assignability";
 import { FormattedGeneric } from "./Generic";
+import { FormattedGoverningLaw } from "./GoverningLaw";
 import { FormattedIndemnities } from "./Indemnities";
 import { FormattedInfoView } from "./FormattedItemSingle";
 import { FormattedIpOwnership } from "./IpOwnership"
@@ -76,7 +77,7 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
             case FormatterKeys.effectsOfTransaction:
                 return FormattedSummaryList
             case FormatterKeys.governingLaw:
-                return FormattedGeneric
+                return FormattedGoverningLaw
 
             case FormatterKeys.assignability:
                 return FormattedAssignability

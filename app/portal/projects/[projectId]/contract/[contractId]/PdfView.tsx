@@ -185,7 +185,8 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                     hideTip,
                                     viewportToScaled,
                                     screenshot,
-                                    isScrolledTo
+                                    isScrolledTo, 
+                                    isContinuationHighlight
                                 ) => {
 
 
@@ -202,6 +203,7 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                             setFocusedHighlightId={() => setFocusedHighlight({ id: highlight.id, scroll: false })}
                                             resetFocusedHighlight={() => setFocusedHighlight(undefined)}
                                             offset={highlightOffsets.find(h => h.id === highlight.id)?.value ?? 0}
+                                            isContinuationHighlight={isContinuationHighlight}
                                         />
                                     );
                                 }}

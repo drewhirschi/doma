@@ -18,9 +18,15 @@ const openai = new OpenAI({
 });
 
 
-const llm = new OpenAI({
+const mindsdbLLM = new OpenAI({
     apiKey: process.env.MINDSDB_API_KEY,
     baseURL: "https://llm.mdb.ai"
+});
+
+const togetherLLM = new OpenAI({
+    apiKey: process.env.TOGETHERAI_API_KEY,
+    baseURL: "https://api.together.xyz/v1",
+    // defaultQuery: {}
 });
 
 
@@ -98,21 +104,30 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
             const xmlContractText = buildXmlContract(contractSegment)
 
 
-            // const res: ChatCompletion = await openai.chat.completions.create({
-            //     messages: buildExtracitonMessages(extractor, xmlContractText),
-            //     model: 'gpt-4-turbo',
-            //     temperature: 0,
-            //     response_format: { 'type': "json_object" }
-            // });
-
-            const res: ChatCompletion = await llm.chat.completions.create({
+            const res: ChatCompletion = await openai.chat.completions.create({
                 messages: buildExtracitonMessages(extractor, xmlContractText),
-                // model: 'llama-3-70b',
-                model: 'mixtral-8x7b',
+                model: 'gpt-4-turbo',
                 // model: 'gpt-3.5-turbo',
                 temperature: 0,
                 response_format: { 'type': "json_object" }
             });
+
+            // const res = await togetherLLM.chat.completions.create({
+            //     messages: buildExtracitonMessages(extractor, xmlContractText),
+            //     // model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+            //     model: "mistralai/Mixtral-8x22B-Instruct-v0.1",
+            //     temperature: 0,
+            //     // response_format: { 'type': "json_object" }
+            //   });
+
+            // const res: ChatCompletion = await mindsdbLLM.chat.completions.create({
+            //     messages: buildExtracitonMessages(extractor, xmlContractText),
+            //     // model: 'llama-3-70b',
+            //     model: 'mixtral-8x7b',
+            //     // model: 'gpt-3.5-turbo',
+            //     temperature: 0,
+            //     response_format: { 'type': "json_object" }
+            // });
 
             const responseMessage = res.choices[0].message;
 

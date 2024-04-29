@@ -299,7 +299,8 @@ export function FormattedInfoView(props: Props) {
     } else if (key === FormatterKeys.governingLaw) {
             const data = props.infoArray[0].data as z.infer<typeof GoverningLawShape>
             return <div >
-                {data.summary}
+                {data.jurisdiction}
+                {data.condition}
                 {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)}
             </div>
 

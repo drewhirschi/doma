@@ -151,16 +151,27 @@ export async function buildInstruction(formatter: Formatter_SB, contract: Contra
         case FormatterKeys.term:
             additionalInstructions += `Todays date is ${new Date().toISOString()}`;
 
+        // case FormatterKeys.trojans:
+
+        //     additionalInstructions += `
+        // ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === FormatterKeys.license)?.data, FormatterKeys.license)}
+        // ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === FormatterKeys.mostFavoredNation)?.data, FormatterKeys.mostFavoredNation)}
+        // ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === FormatterKeys.nonCompete)?.data, FormatterKeys.nonCompete)}
+        // ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === FormatterKeys.convenantNotToSue)?.data, FormatterKeys.convenantNotToSue)}
+        // ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === FormatterKeys.nonSolicitHire)?.data, FormatterKeys.nonSolicitHire)}
+        // ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === FormatterKeys.rightOfFirstRefusal)?.data, FormatterKeys.rightOfFirstRefusal)}
+        // `
+
         case FormatterKeys.assignability:
 
             additionalInstructions += `
             ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === "governingLaw")?.data, "governingLaw")}
-            ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === "license")?.data, "license")}`
+            ${objectToXml(contract.formatted_info.find((fi) => fi.formatter_key === "license")?.data, "license")} `
 
     }
 
     if (additionalInstructions !== "")
-        inst += `<additionalInfo>\n${additionalInstructions}\n</additionalInfo>`
+        inst += `<additionalInfo>\n${additionalInstructions} \n < /additionalInfo>`
 
     return inst
 }
@@ -196,7 +207,7 @@ export async function getDataFormatted(formatter: Formatter_SB, contract: Contra
     return rok([formattedData])
 
 
-    
+
 
 }
 
