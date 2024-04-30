@@ -1,18 +1,21 @@
 import { UseFormReturnType, useForm } from '@mantine/form';
+import { useEffect, useState } from "react";
 
 import { AnnotationsList } from "./AnnotationsList";
+import { browserClient } from '@/supabase/BrowerClients';
 import { notifications } from "@mantine/notifications";
 import { useDebouncedCallback } from "use-debounce";
-import { useEffect } from "react";
 
 export interface ViewProps<T> {
     form: UseFormReturnType<T>
+    // data: T
+    // setData: (data: T) => void
     onChange: () => void
 }
 
 export interface FormatterViewWrapperProps {
     info: FormattedInfo_SB<any>[]
-    handleSave: (info: FormattedInfo_SB<any>[]) => Promise<void>
+    handleSave: (infoId: number, data: any) => Promise<void>
     annotations: Annotation_SB[]
     removeAnnotation: (id: string) => void
     ItemView: React.ComponentType<ViewProps<any>>
@@ -21,41 +24,26 @@ export interface FormatterViewWrapperProps {
 }
 
 export function FormattedInfoView({ info, handleSave, annotations, removeAnnotation, ItemView, formatterKey, contractId }: FormatterViewWrapperProps) {
-    const data = info[0]?.data
-    const form = useForm({
-        initialValues: data
 
-    });
+    const form = useForm({
+        initialValues:  info[0]?.data,
+    })
+
     useEffect(() => {
-        form.setValues(data)
-    }, [data])
+        form.setValues(info[0]?.data)
+    }, [JSON.stringify(info[0]?.data)])
+
+
 
 
 
     const debouncedSave = useDebouncedCallback(async () => {
-
-        if (info[0] === undefined) {
-            info.push({
-                contract_id: contractId,
-                formatter_key: formatterKey,
-                data: {},
-                created_at: new Date().toISOString(),
-                id: 0
-            })
-        }
-        
-        
-        info[0].data = form.values
-
-
-        await handleSave(info)
-
-
+        await handleSave(0, form.values)
     }, 600)
+
 
     async function handleChildFormChange() {
         try {
-            console.log('got change')
             debouncedSave()
         } catch (e) {
             console.error(e)
@@ -78,8 +66,10 @@ export function FormattedInfoView({ info, handleSave, annotations, removeAnnotat
                 annotations={annotations}
                 removeAnnotation={removeAnnotation}
             />
-            <form onChange={handleChildFormChange}>
-                {<ItemView form={form} onChange={handleChildFormChange} />}
+            <form onChange={handleChildFormChange} id={formatterKey + info[0].id} >
+                {<ItemView
+                    form={form}
+                    onChange={handleChildFormChange} />}
             </form>
         </>
 

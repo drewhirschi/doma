@@ -13,7 +13,7 @@ interface ItemShapeWrapper<T> {
     infos: {
         data: T
     }[]
-    
+
 }
 export interface ItemViewProps<T> {
     index: number,
@@ -23,7 +23,7 @@ export interface ItemViewProps<T> {
 
 export interface ListFormatterViewProps {
     info: FormattedInfo_SB<any>[]
-    handleSave: (info: any[]) => Promise<void>
+    handleSave: (infoId: number, data: any) => Promise<void>
     annotations: Annotation_SB[]
     removeAnnotation: (id: string) => Promise<void>
     removeItem: (id: number) => Promise<void>
@@ -47,19 +47,13 @@ export function FormattedItemList({ info, handleSave, annotations, removeAnnotat
 
     }, [info])
 
-  
-    const debouncedSave = useDebouncedCallback(async () => {
 
-        // console.log("saving")
-        await handleSave(form.values.infos)
-        
+    const debouncedSave = useDebouncedCallback(async (id) => {
 
-    }, 600)
 
-    async function handleChildFormChange()  {
         try {
-            // console.log('got change')
-            debouncedSave()
+            const data = form.values.infos.find(i => i.id === id)?.data
+            await handleSave(id, data)
         } catch (e) {
             console.error(e)
             notifications.show({
@@ -68,57 +62,46 @@ export function FormattedItemList({ info, handleSave, annotations, removeAnnotat
                 color: "red"
             })
         }
-    }
+
+
+
+    }, 1_000)
+
 
 
 
     return (
-        <form onChange={handleChildFormChange }>
 
-            <Stack gap={"lg"}>
-                {form.values?.infos.map((info, i) => (
-                    <Box key={formatterKey + i.toString()} p="sm"
-                    >
-                        <Group justify="space-between">
-                            <Title order={4}>Item {i + 1}</Title>
-                            <ActionIcon variant="subtle" color="gray" onClick={async () => {
+        <Stack gap={"lg"}>
+            {form.values?.infos.map((info, i) => (
+                <form key={formatterKey + info.id} id={formatterKey + info.id}
+                    onChange={() => debouncedSave(info.id)}
+                //  p="sm"
+                >
+                    <Group justify="space-between">
+                        <Title order={4}>Item {i + 1}</Title>
+                        <ActionIcon variant="subtle" color="gray" onClick={async () => {
 
-                                
-                                form.removeListItem("infos", i)
-                                removeItem(info.id)
 
-                            }}>
+                            form.removeListItem("infos", i)
+                            removeItem(info.id)
 
-                                <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                            </ActionIcon>
-                        </Group>
-                        <AnnotationsList
-                            annotations={annotations.filter(a => a.formatter_item_id === info.id)}
-                            removeAnnotation={removeAnnotation}
-                        />
-                        {/* @ts-ignore */}
-                        {<ItemView index={i} form={form} onChange={handleChildFormChange} />}
-                    </Box>
+                        }}>
 
-                )) ?? []}
-                {/* <Group justify="flex-end">
+                            <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                        </ActionIcon>
+                    </Group>
+                    <AnnotationsList
+                        annotations={annotations.filter(a => a.formatter_item_id === info.id)}
+                        removeAnnotation={removeAnnotation}
+                    />
+                    {/* @ts-ignore */}
+                    {<ItemView index={i} form={form} onChange={() => debouncedSave(info.id)} />}
+                </form>
 
-                    <Button size="xs" variant="default" onClick={() => {
+            )) ?? []}
 
-                        const newItem: FormattedInfo_SB = {
-                            contract_id: contractId,
-                            formatter_key: formatterKey,
-                            created_at: new Date().toISOString(),
-                            id: info.length == 0 ? 0 : Math.max(...info.map(fi => fi.id)) + 1,
-                            data: { }
 
-                        }
-                        form.insertListItem('infos', newItem);
-
-                    }}>Add</Button>
-                </Group> */}
-
-            </Stack>
-        </form >
+        </Stack>
     )
 }

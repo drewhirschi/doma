@@ -1,3 +1,4 @@
+import { AgreementInfoShape, buildListShape } from "@/types/formattersTypes";
 import { Database, Json } from "@/types/supabase-generated";
 import { IResp, ISuccessResp, isEmptyObject, objectToXml, rerm, rok } from "@/utils";
 import { ZodObject, ZodTypeAny } from "zod";
@@ -7,7 +8,6 @@ import { ContractWithFormattedInfo } from "@/types/complex";
 import { FormatterKeys } from "@/types/enums";
 import OpenAI from "openai";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { buildListShape } from "@/types/formattersTypes";
 import { getFormatterShape } from "@/shared/getFormatterShape";
 import { serverActionClient } from "@/supabase/ServerClients";
 import { z } from "zod"
@@ -124,11 +124,16 @@ export async function generateAgentJsonResponse(sysMessage: string, input: strin
 
 export async function buildInstruction(formatter: Formatter_SB, contract: ContractWithFormattedInfo, singleMode: boolean): Promise<string> {
 
-    const agreementInfo = contract.formatted_info.find((fi) => fi.formatter_key === FormatterKeys.agreementInfo)
+    const agreementInfo = contract.formatted_info.find((fi) => fi.formatter_key === FormatterKeys.agreementInfo) as FormattedInfo_SB<z.infer<typeof AgreementInfoShape>>
+
+    let targetName = contract.target ?? contract.project?.target
+    if (agreementInfo?.data?.alternate_target_entity_names) {
+        targetName += `(aka: ${agreementInfo.data.alternate_target_entity_names.join(", ")})`
+    }
 
     const agreementInfoStr = (!!agreementInfo && !isEmptyObject(agreementInfo.data))
         ? objectToXml(agreementInfo.data, "agreementInfo")
-        : `The Target Entity is "${contract.target}". Counterparty is any party that is not a Target Entity.`
+        : `The Target Entity is "${targetName}". Counterparty is any party that is not a Target Entity.`
 
     const schema = (singleMode || formatter.hitems)
         ? getFormatterShape(formatter.key)
@@ -178,7 +183,7 @@ export async function buildInstruction(formatter: Formatter_SB, contract: Contra
 
 export async function getDataFormatted(formatter: Formatter_SB, contract: ContractWithFormattedInfo, dataInput: string, singleMode: boolean): Promise<IResp<any[]>> {
 
-    if (!contract.target) {
+    if (!contract.target && !contract.project?.target) {
         return rerm("Please set the target", {})
     }
 

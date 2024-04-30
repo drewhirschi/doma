@@ -16,6 +16,12 @@ export function FormattedAgreementInfo({ form, onChange }: ViewProps<AgreementIn
                 autosize
                 {...form.getInputProps('summary')}
                 value={form.getInputProps(`summary`).value ?? ""}
+                // value={data.summary ?? ""}
+                // onChange={(e) => {
+                //     // form.setFieldValue('summary', e.currentTarget.value)
+                //     setData({ ...data, summary: e.currentTarget.value })
+                //     // onChange()
+                // }}
 
             />
 

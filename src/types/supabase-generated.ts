@@ -427,7 +427,6 @@ export type Database = {
           key: string
           order: number
           schema: string | null
-          tenant_id: string | null
         }
         Insert: {
           created_at?: string
@@ -438,7 +437,6 @@ export type Database = {
           key?: string
           order?: number
           schema?: string | null
-          tenant_id?: string | null
         }
         Update: {
           created_at?: string
@@ -449,17 +447,8 @@ export type Database = {
           key?: string
           order?: number
           schema?: string | null
-          tenant_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "parslet_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenant"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profile: {
         Row: {
@@ -522,7 +511,7 @@ export type Database = {
           id: string
           is_active: boolean
           phase_deadline: string
-          target: string[]
+          target: string
           tenant_id: string
         }
         Insert: {
@@ -534,7 +523,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           phase_deadline: string
-          target: string[]
+          target: string
           tenant_id: string
         }
         Update: {
@@ -546,7 +535,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           phase_deadline?: string
-          target?: string[]
+          target?: string
           tenant_id?: string
         }
         Relationships: [

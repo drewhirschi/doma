@@ -8,8 +8,7 @@ import * as actions from "./ContractReviewer.actions";
 import { ActionIcon, Box, Button, Center, CopyButton, Divider, Drawer, Flex, Group, HoverCard, Menu, Paper, ScrollArea, SegmentedControl, Skeleton, Stack, Text, TextInput, Textarea, ThemeIcon, Title, Tooltip, UnstyledButton, rem } from "@mantine/core";
 import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTrash, IconUser } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { use, useEffect, useOptimistic, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRef, useState } from "react";
 
 import { BackButton } from "@/components/BackButton";
 import { ContractDetailsDrawer } from './DetailsDrawer';
@@ -21,6 +20,7 @@ import { browserClient } from "@/supabase/BrowerClients";
 import dynamic from 'next/dynamic'
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
+import { useSearchParams } from "next/navigation";
 
 const PDFView = dynamic(() => import('./PdfView'), { ssr: false, loading: () => <p>Loading...</p> })
 
@@ -73,15 +73,15 @@ export function ContractReviewer(props: Props) {
 
 
 
-    async function handleSaveFormattedItems(formatterKey: string, infos: FormattedInfo_SB<any>[]) {
+    async function handleSaveFormattedItems(formatterKey: string, infoId: number, data: any) {
 
         const res = await supabase.from("formatted_info")
-            .upsert(infos.map((fi) => ({
+            .upsert({
                 contract_id: contract.id,
-                data: fi.data,
+                data,
                 formatter_key: formatterKey,
-                id: fi.id
-            })))
+                id: infoId
+            })
         if (res.error) {
             notifications.show({
                 title: "Error",
@@ -308,7 +308,7 @@ export function ContractReviewer(props: Props) {
                                     >
                                         Run extraciton
                                     </Menu.Item>
-                                   {/* <SubMenu/> */}
+                                    {/* <SubMenu/> */}
                                     <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
                                             actions.deleteContractExtractedInfo(contract.id, projectId)
@@ -335,7 +335,7 @@ export function ContractReviewer(props: Props) {
                                         Run formatters
                                     </Menu.Item>
 
-                                    <Menu.Divider/>
+                                    <Menu.Divider />
                                     <Menu.Label>Extract</Menu.Label>
                                     {formatters.map(f => (<Menu.Item key={f.key} onClick={() => actions.reExtractTopic(contract.id, f.key)}>{f.display_name}</Menu.Item>))}
                                 </Menu.Dropdown>
@@ -385,7 +385,7 @@ export function ContractReviewer(props: Props) {
                                             annotations={highlights.filter(h => h.formatter_key == f.key)}
                                             removeAnnotation={handleRemoveHighlight}
                                             removeItem={async (id) => handleRemoveFormattedItem(f.key, id)}
-                                            handleSave={async (items: FormattedInfo_SB[]) => handleSaveFormattedItems(f.key, items)}
+                                            handleSave={async (itemId:number, data:any) => handleSaveFormattedItems(f.key, itemId, data)}
                                             formatter={f}
                                             contractId={contract.id}
                                             isLoading={loadingFormatters.includes(f.key)}
@@ -398,6 +398,7 @@ export function ContractReviewer(props: Props) {
                                         />
                                     ))
                                 }
+                                <Box h={"100%"} />
 
                             </Stack>
                         </ScrollArea>
@@ -419,6 +420,21 @@ export function ContractReviewer(props: Props) {
                         handleAddHighlight={handleAddHighlight}
                         handleRemoveHighlight={handleRemoveHighlight}
                         parslets={parslets}
+                        scrollFiIntoView={(formatterKey: string | null, itemId: number | null) => {
+                            const searchId = `${formatterKey}${String(itemId)}`
+                            const element = document.getElementById(searchId);
+                            if (element) {
+                                element.scrollIntoView({ behavior: 'smooth' });
+                                // const scrolledY = window.scrollY;
+                                // if (scrolledY) {
+                                //     window.scroll({
+                                //         top: scrolledY - 20,
+                                //         behavior: 'smooth'
+                                //     });
+                                // }
+                            }
+                        }
+                        }
                     />
 
 

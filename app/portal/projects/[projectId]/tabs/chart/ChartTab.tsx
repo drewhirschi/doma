@@ -59,7 +59,7 @@ export default function Chart(props: Props) {
     // })
 
     return (
-        <TableScrollContainer minWidth={500} flex={1}   >
+        // <TableScrollContainer minWidth={500} flex={1}   >
             <Table
                 horizontalSpacing={"md"}
                 withColumnBorders
@@ -76,12 +76,13 @@ export default function Chart(props: Props) {
                 }}
             >
 
-                <TableThead>
+                <TableThead
+                //  style={{position:"sticky"}}
+                 >
                     <TableTr>
                         <TableTh miw={150} mx={"sm"} styles={{
                             th: {
-                                whiteSpace: "nowrap"
-
+                                whiteSpace: "nowrap",
                             }
                         }}>Contract name</TableTh>
                         {/* {props.parslets.map(parslet => <TableTh key={`th_${parslet.id}`} miw={150} mx={"sm"} styles={{
@@ -103,6 +104,6 @@ export default function Chart(props: Props) {
                 <TableTbody>{formatterRows}</TableTbody>
             </Table>
 
-        </TableScrollContainer>
+        //  </TableScrollContainer>
     );
 }

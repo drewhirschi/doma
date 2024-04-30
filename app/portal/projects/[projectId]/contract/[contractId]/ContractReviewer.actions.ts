@@ -66,7 +66,7 @@ export async function runFormatters(contractId: string, projectId: string, targe
 
     const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
 
-    target ??= data?.target.join(", ")
+    target ??= data?.target
 
     formatPipeline(supabase, contractId, target ?? "No target found")
     // revalidatePath(`/portal/projects/${projectId}/contract/${contractId}`)
@@ -78,7 +78,7 @@ export async function format(formatterKey: string, contractId: string, projectId
 
     // const projectq = await supabase.from('project').select().eq('id', projectId).single()
     const formatterq = await supabase.from('formatters').select().eq('key', formatterKey).single()
-    const contractq = await supabase.from('contract').select("*, formatted_info(*)").eq('id', contractId).single()
+    const contractq = await supabase.from('contract').select("*, formatted_info(*), project(target)").eq('id', contractId).single()
 
     if (formatterq.error) {
         return { error: formatterq.error }
@@ -98,7 +98,7 @@ export async function describeAndTag(contractId: string, projectId: string, targ
 
     const { data, error } = await supabase.from('project').select().eq('id', projectId).single()
 
-    target ??= data?.target.join(", ")
+    target ??= data?.target
 
 
     const res = await categorize(supabase, contractId, projectId, target ?? "No target found")

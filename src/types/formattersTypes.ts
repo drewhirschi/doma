@@ -147,7 +147,7 @@ export const IPOwnershipItemShape = z.object({
     summary: z.string().nullable()
         .describe(`Paraphrase the assignments that are being granted from the IP ownership specific sections from the contract by providing the assignment language and what material that is being assigned along with the scope.`),
     direction: z.nativeEnum(IpOwnershipType).nullable()
-        .describe(`Chose one option, "INBOUND" if it is directed to the Target Entity, "OUTBOUND" if it is given by the Target Entity, or "JOINT_OWNERSHIP" if it is owned by both the Target Entity and the counterparty.`),
+        .describe(`Chose one option, "INBOUND" if it is directed to the Target Entity, "OUTBOUND" if it is given by the Target Entity, or "JOINT_OWNERSHIP" if it is owned by both the Target Entity and the counterparty. Leave null if not applicable.`),
     not_present_assignment: z.boolean().nullable()
         .describe(`true if the language states a future promise rather than present assignment for example “shall own” or “agrees to assign”. Otherwise false.`),
     feedback: z.boolean().nullable()

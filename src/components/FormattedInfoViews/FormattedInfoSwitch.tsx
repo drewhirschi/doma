@@ -3,7 +3,6 @@ import { Group, Loader, Stack, Text, Title } from "@mantine/core";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedAgreementInfo } from "./AgreementInfo";
 import { FormattedAssignability } from "./Assignability";
-import { FormattedGeneric } from "./Generic";
 import { FormattedGoverningLaw } from "./GoverningLaw";
 import { FormattedIndemnities } from "./Indemnities";
 import { FormattedInfoView } from "./FormattedItemSingle";
@@ -23,7 +22,7 @@ import { UnknownFormatter } from "./UnknownFormatter";
 interface Props {
     formatter: FormatterWithInfo,
     singleRun: (key: string) => void,
-    handleSave: (infos: FormattedInfo_SB[]) => Promise<void>,
+    handleSave: (infoId:number, data:any) => Promise<void>,
     annotations: Annotation_SB[]
     removeAnnotation: (id: string) => Promise<void>
     removeItem: (id: number) => Promise<void>
@@ -125,13 +124,7 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
                     c={formatter.formatted_info.length == 0 ? "gray" : "black"}
                 >{formatter.display_name}</Title>
                 {isLoading && <Loader size="xs" />}
-                {/* <ActionIcon size={"sm"}
-                    onClick={() => {
-                        singleRun(formatter.key)
-                    }}
-                >
-                    <IconPrompt size={16} />
-                </ActionIcon> */}
+
             </Group>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
                 {body()}

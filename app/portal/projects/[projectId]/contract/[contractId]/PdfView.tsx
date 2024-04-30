@@ -9,7 +9,6 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { FormatterWithInfo } from "@/types/complex";
 import { SelectFormatterButton } from "./SelectFormatterButton";
-import { off } from "process";
 import { theme } from "../../../../../../theme";
 
 interface Props {
@@ -21,7 +20,7 @@ interface Props {
     handleRemoveHighlight: (id: string) => void
     formatters: FormatterWithInfo[]
     parslets: Parslet_SB[]
-
+    scrollFiIntoView: (formatterKey:string|null, itemId:number|null) => void
 }
 
 
@@ -54,11 +53,9 @@ const computeOffsets = (highlights: Annotation_SB[]): { id: string, value: numbe
 
         for (let i = 0; i <= mid; i++) {
           if (mid - i >= 0) {
-            console.log(highlights[mid - i]);  // Process element from the middle to the start
             offsets.push({ id: highlights[mid - i].id, value: (i * iconHeight * -1) - (iconHeight / 2) })
           }
           if (mid + i < highlights.length) {
-            console.log(highlights[mid + i]);  // Process element from the middle to the end
             offsets.push({ id: highlights[mid + i].id, value:( i * iconHeight) + (iconHeight / 2)})
           }
         }
@@ -71,7 +68,7 @@ const computeOffsets = (highlights: Annotation_SB[]): { id: string, value: numbe
     return offsets;
 };
 
-export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, handleAddHighlight, formatters, parslets }: Props) {
+export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, handleAddHighlight, formatters, parslets, scrollFiIntoView }: Props) {
 
 
     const pathname = usePathname()
@@ -200,7 +197,10 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                             isUserHighlight={highlight.is_user}
                                             text={highlight.text}
                                             extractorName={parslets.find(p => p.id === highlight.parslet_id)?.display_name ?? "Unknown"}
-                                            setFocusedHighlightId={() => setFocusedHighlight({ id: highlight.id, scroll: false })}
+                                            setFocusedHighlightId={() => {
+                                                setFocusedHighlight({ id: highlight.id, scroll: false })
+                                                scrollFiIntoView(highlight.formatter_key, highlight.formatter_item_id)
+                                            }}
                                             resetFocusedHighlight={() => setFocusedHighlight(undefined)}
                                             offset={highlightOffsets.find(h => h.id === highlight.id)?.value ?? 0}
                                             isContinuationHighlight={isContinuationHighlight}

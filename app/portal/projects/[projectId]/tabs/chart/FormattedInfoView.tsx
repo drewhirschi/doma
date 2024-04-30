@@ -59,7 +59,7 @@ export function FormattedInfoView(props: Props) {
         return (<>
             {(props.infoArray[0].data as AgreementInfoFormatResponse).summary}
             <br />
-            {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)}
+            {/* {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)} */}
         </>)
     } else if (key === FormatterKeys.license) {
 
