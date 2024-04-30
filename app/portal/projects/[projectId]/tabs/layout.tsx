@@ -35,7 +35,7 @@ export default async function Layout({
                 <SimpleGrid ml="lg" cols={5} styles={{root: {alignSelf: "flex-end", flex: 1}}}>
                     <div style={{ color: 'GrayText' }}> <Text c="black" fw={600}>Deal Structure</Text> {project.deal_structure}</div>
                     <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Client</Text> {project.client}</div>
-                    <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Target</Text>{...project.target}</div>
+                    <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Target</Text>{project.target}</div>
                     <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Phase Deadline</Text>{project.phase_deadline}</div>
                     <div style={{ color: 'GrayText' }}><Text c="black" fw={600}>Counterparty</Text>{project.counterparty}</div>
                 </SimpleGrid>

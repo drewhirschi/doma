@@ -21,7 +21,7 @@ export interface CreateFormValues {
   dealStructure: string,
   client: string,
   counterparty: string,
-  targetNames: string[],
+  targetNames: string,
   phaseDeadline: Date
 }
 
@@ -45,7 +45,7 @@ export function AddProjectsModal(props: Props) {
       dealStructure: '',
       client: '',
       counterparty: '',
-      targetNames: [],
+      targetNames: '',
       phaseDeadline: nextWeek // Set default to a week in the future
     },
 
