@@ -3,7 +3,7 @@ import { Anchor, Badge, Button, Group, Stack, Text, Textarea, Title } from "@man
 import { SourceCodeFormatResponse } from "@/types/formattersTypes"
 import { ViewProps } from "./FormattedItemSingle"
 
-export function FormattedSourceCode({ form, onChange }: ViewProps<SourceCodeFormatResponse>) {
+export function FormattedSourceCode({ form, afterChange: onChange }: ViewProps<SourceCodeFormatResponse>) {
 
 
 

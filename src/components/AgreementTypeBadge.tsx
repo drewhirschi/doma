@@ -71,15 +71,15 @@ export function AgreementTypeBadge({ type, contractId }: { type: string, contrac
             text: "Advertising"
         },
         'publishing_agreement': {
-            color: "amber",
+            color: "#795548",
             text: "Publishing"
         },
         'marketing_inbound_agreement': {
-            color: "deepOrange",
+            color: "#2196f3",
             text: "Inbound Marketing"
         },
         'marketing_outbound_agreement': {
-            color: "deepPurple",
+            color: "#3f51b5",
             text: "Outbound Marketing"
         },
         'marketing_joint_agreement': {
@@ -87,7 +87,7 @@ export function AgreementTypeBadge({ type, contractId }: { type: string, contrac
             text: "Joint Marketing"
         },
         'marketing_cross_agreement': {
-            color: "blueGrey",
+            color: "#ff5722",
             text: "Cross Marketing"
         },
         "unknown": {

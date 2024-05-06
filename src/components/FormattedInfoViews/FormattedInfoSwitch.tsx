@@ -1,4 +1,5 @@
-import { Group, Loader, Stack, Text, Title } from "@mantine/core";
+import { ActionIcon, Group, Loader, Stack, Text, Title } from "@mantine/core";
+import { use, useEffect, useState } from "react";
 
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedAgreementInfo } from "./AgreementInfo";
@@ -15,14 +16,16 @@ import { FormattedSourceCode } from "./SourceCode";
 import { FormattedSummaryList } from "./SummaryList";
 import { FormattedTerm } from "./Term";
 import { FormattedTermination } from "./Termination";
+import { FormattedWarranty } from "./Warranty";
 import { FormatterKeys } from "@/types/enums";
 import { FormatterWithInfo } from "@/types/complex";
+import { IconTrash } from "@tabler/icons-react";
 import { UnknownFormatter } from "./UnknownFormatter";
 
 interface Props {
     formatter: FormatterWithInfo,
     singleRun: (key: string) => void,
-    handleSave: (infoId:number, data:any) => Promise<void>,
+    handleSave: (infoId: number, data: any) => Promise<void>,
     annotations: Annotation_SB[]
     removeAnnotation: (id: string) => Promise<void>
     removeItem: (id: number) => Promise<void>
@@ -31,6 +34,9 @@ interface Props {
 }
 
 export function FormatterSwitch({ formatter, isLoading, handleSave, annotations, removeAnnotation, contractId, removeItem }: Props) {
+
+   const [formattedInfo, setFormattedInfo] = useState(formatter.formatted_info)
+    
 
     const insideView = () => {
 
@@ -58,8 +64,9 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
 
 
             case FormatterKeys.limitationOfLiability:
-            case FormatterKeys.warranties:
                 return FormattedLimitationOfLiability
+            case FormatterKeys.warranties:
+                return FormattedWarranty
             case FormatterKeys.indemnities:
                 return FormattedIndemnities
 
@@ -93,7 +100,7 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
         if (formatter.hitems) {
             return <FormattedItemList
                 handleSave={handleSave}
-                info={formatter.formatted_info}
+                info={formattedInfo}
                 annotations={annotations}
                 removeAnnotation={removeAnnotation}
                 removeItem={removeItem}
@@ -105,7 +112,7 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
         } else {
             return <FormattedInfoView
                 handleSave={handleSave}
-                info={formatter.formatted_info}
+                info={formattedInfo}
                 annotations={annotations}
                 removeAnnotation={removeAnnotation}
                 formatterKey={formatter.key}
@@ -118,13 +125,25 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
 
     return (
         <Stack gap={4}>
-            <Group>
-                <Title
-                    order={3}
-                    c={formatter.formatted_info.length == 0 ? "gray" : "black"}
-                >{formatter.display_name}</Title>
-                {isLoading && <Loader size="xs" />}
+            <Group justify="space-between">
+                <Group>
 
+                    <Title
+                        order={3}
+                        c={formattedInfo.length == 0 ? "gray" : "black"}
+                    >{formatter.display_name}</Title>
+                    {isLoading && <Loader size="xs" />}
+                </Group>
+
+                {!formatter.hitems && formattedInfo.length &&
+                    <ActionIcon variant="subtle" color="gray" onClick={async () => {
+                        removeItem(0)
+                        handleSave(0, {})
+                        setFormattedInfo([])
+                    }}>
+
+                        <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                    </ActionIcon>}
             </Group>
             <ErrorBoundary fallback={<div>Something went wrong</div>}>
                 {body()}

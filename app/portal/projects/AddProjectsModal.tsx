@@ -109,7 +109,7 @@ export function AddProjectsModal(props: Props) {
             mt="md"
             {...form.getInputProps('counterparty')}
           />
-          <TagsInput
+          <Select
             label="Target (all known names)"
             placeholder="Pick from list or type anything"
             data={[{ value: form.values.client + "_client", label: form.values.client }, { value: form.values.counterparty + "_counterparty", label: form.values.counterparty }].filter((d) => d.label)}

@@ -9,7 +9,7 @@ import { ViewProps } from "./FormattedItemSingle"
 import { notifications } from "@mantine/notifications"
 import { useForm } from '@mantine/form';
 
-export function FormattedTerm({ form, onChange }: ViewProps<TermFormatResponse>) {
+export function FormattedTerm({ form, afterChange: onChange }: ViewProps<TermFormatResponse>) {
 
 
     return (

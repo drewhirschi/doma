@@ -8,9 +8,7 @@ import { useDebouncedCallback } from "use-debounce";
 
 export interface ViewProps<T> {
     form: UseFormReturnType<T>
-    // data: T
-    // setData: (data: T) => void
-    onChange: () => void
+    afterChange: () => void
 }
 
 export interface FormatterViewWrapperProps {
@@ -69,7 +67,7 @@ export function FormattedInfoView({ info, handleSave, annotations, removeAnnotat
             <form onChange={handleChildFormChange} id={formatterKey + info[0].id} >
                 {<ItemView
                     form={form}
-                    onChange={handleChildFormChange} />}
+                    afterChange={handleChildFormChange} />}
             </form>
         </>
 

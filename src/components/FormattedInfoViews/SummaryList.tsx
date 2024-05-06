@@ -9,8 +9,13 @@ export function FormattedSummaryList({ form, index, onChange }: ItemViewProps<z.
     return (
         <Box>
             <Textarea
+                autosize
                 {...form.getInputProps(`items.${index}.data.summary`)}
                 value={form.getInputProps(`infos.${index}.data.summary`).value ?? ""}
+                onChange={(e) => {
+                    form.setFieldValue(`infos.${index}.data.summary`, e.currentTarget.value)
+                    onChange()
+                }}
 
             />
         </Box>

@@ -79,7 +79,7 @@ export function FormattedItemList({ info, handleSave, annotations, removeAnnotat
                 //  p="sm"
                 >
                     <Group justify="space-between">
-                        <Title order={4}>Item {i + 1}</Title>
+                        <Title order={5} >Item {i + 1}</Title>
                         <ActionIcon variant="subtle" color="gray" onClick={async () => {
 
 

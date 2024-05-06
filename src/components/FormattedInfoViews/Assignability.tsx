@@ -4,7 +4,7 @@ import { MultiSelect, Select, SimpleGrid, Stack, Text, Textarea, Title } from "@
 import { ViewProps } from "./FormattedItemSingle"
 import { z } from "zod"
 
-export function FormattedAssignability({ form, onChange }: ViewProps<z.infer<typeof AssignabilityShape>>) {
+export function FormattedAssignability({ form, afterChange: onChange }: ViewProps<z.infer<typeof AssignabilityShape>>) {
 
 
 
@@ -25,14 +25,14 @@ export function FormattedAssignability({ form, onChange }: ViewProps<z.infer<typ
 
             <SimpleGrid cols={2} spacing="md">
 
-                <Select
+                <MultiSelect
                     label="Type"
                     placeholder="N/A"
                     {...form.getInputProps('type')}
                     clearable
                     data={Object.keys(AssignabilityType)}
                     onChange={(value) => {
-                        form.setFieldValue('type', value as AssignabilityType)
+                        form.setFieldValue('type', value as AssignabilityType[])
                         onChange()
                     }}
                 />
