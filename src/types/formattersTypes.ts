@@ -23,14 +23,16 @@ export const AgreementInfoShape = z.object({
     title: z.string().nullable(),
     counter_party: z.string().nullable(),
     alternate_counter_party_names: z.string().array()
-        .describe("list of any other names the counterparty is referred to as. These are often mentioned right aftet the counterparty's name in the agreement."),
+        .describe("list of any other names or titles the counterparty is referred to as. These are often mentioned right aftet the counterparty's name in the agreement, sometimes in parentheses or quotes."),
     target_entity: z.string().nullable(),
     alternate_target_entity_names: z.string().array()
-        .describe("list of any other names the target entity is referred to as. These are often mentioned right aftet the target's name in the agreement.  If only one party is named and the other party is given a generic title such as 'you', 'contracting party', 'licensor' then that generic title should be assumed as the Target Entity."),
+        .describe("list of any other names, referential terms, or aliases of the target entity is referred to as. These are often mentioned right aftet the target's name in parentheses.  If only one party is named and the other party is given a generic title such as 'you', 'contracting party', 'licensor' then that generic title should be assumed as the Target Entity."),
     effective_date: z.coerce.date().nullable()
         .describe("What date did or will the agreement go into effect? Format the date as YYYY/MM/DD"),
     summary: z.string().nullable()
         .describe(`Summarize in the following format by replacing the brackets with the specified information if provided: "[Title] between [Counterparty] and [Target Entity] dated [Effective Date in long date format]". If there are amendments, addendums, or statements of work add the following wording with the brackets filled in with the applicable information: ", as amended [list amendment dates], including [Statement(s) of Work/Addend(um)/(a)] dated [list dates] [(as amended [list dates])]`),
+    incorporatedAgreements: z.string().array()
+        .describe(`List the names of any amendments, addendums, or statements of work that are incorporated into the agreement.`),
 });
 
 export type AgreementInfoFormatResponse = z.infer<typeof AgreementInfoShape>;
@@ -42,8 +44,8 @@ export type AgreementInfoFormatResponse = z.infer<typeof AgreementInfoShape>;
 export const TermShape = z.object({
     summary: z.string().nullable()
         .describe("Summarize the term of the agreement along with any renewals from the contract's term sections provided below."),
-    silent: z.boolean().nullable()
-        .describe("Silent if there is no term or renewals"),
+    // silent: z.boolean().nullable()
+    //     .describe("Silent if there is no term or renewals"),
     expired: z.boolean().nullable()
         .describe("Expired if a contract states an end date or a time frame without automatic renewals that when applied to the date in the Agreement Info is past today's date."),
     expireDate: z.date()
@@ -207,30 +209,30 @@ buildListShape(NonSolicitHireShape, { itemsDescription: "List of summaries of no
 export const RightOfFirstRefusalShape = z.object({
     summary: z.string().nullable().describe("Summarize the right of first refusal clause."),
 });
-// export type RightOfFirstRefusalFormatResponse = z.infer<typeof RightOfFirstRefusalShape>;
 
 
 
 export const WarrantyShape = z.object({
     summary: z.string().nullable().describe("Summarize the warranty"),
-    noWaiver: z.boolean().nullable().describe("False if it says either “as is” or something along the lines of 'disclaims warranties'."),
+    noWaiver: z.boolean().nullable().describe("False if it says either “as is” or something along the lines of 'disclaims warranties'. This only applies if the target entity is offering services or products."),
 });
-// export type WarrantyFormatResponse = z.infer<typeof WarrantyShape>;
 
 
 
 export const LimitationOfLiabilityShape = z.object({
-        summary: z.string().nullable().describe(`Summarize and label the limitation of liability sections and format them similar to example given below. The answer should just be a string. 
-        Special, punitive, indirect, incidental or consequential damages all should be considered under consequential damages for our purposes.
-        For the limit's provide the limit amount, if it is silent, or waived. For the limit exception's specify the exceptions to the relevant limit.
-
-        Example:
-        Direct Damages Limit: Capped at $50,000
-        Direct Damages Exceptions: Indemnification obligations 
-        Consequential Damages Limit: Waived
-        Consequential Damages Exceptions: Breaches of confidentiality and indemnification obligations`),
-        noWaiver: z.boolean().nullable().describe("False if it says either “as is” or something along the lines of 'disclaims warranties'."),
-});
+    directDamagesLimit: z.object({
+        waived: z.boolean().nullable().describe("True if the limit is waived"),
+        silent: z.boolean().nullable().describe("True if the limit is silent"),
+        amount: z.string().nullable().describe("The amount of the limit"),
+    }).nullable(),
+    directDamagesExceptions: z.string().nullable().array().describe(`specify the exceptions to the relevant limit for example: Indemnification obligations `),
+    consequentialDamagesLimit: z.object({
+        waived: z.boolean().nullable().describe("True if the limit is waived"),
+        silent: z.boolean().nullable().describe("True if the limit is silent"),
+        amount: z.string().nullable().describe("The amount of the limit"),
+    }).nullable().describe("        Special, punitive, indirect, incidental or consequential damages all should be considered under consequential damages for our purposes."),
+    consequentialDamagesExceptions: z.string().nullable().array().describe(`specify the exceptions to the relevant limit for example:  Breaches of confidentiality and indemnification obligations `),
+}).describe("Summarize and label the limitation of liability sections.");
 export type LimitationOfLiabilityFormatResponse = z.infer<typeof LimitationOfLiabilityShape>;
 
 export const IndemnitiesShape = z.object({
@@ -292,7 +294,7 @@ export enum AssignabilityType {
 }
 export const AssignabilityShape = z.object({
     summary: z.string().nullable().describe("Summaraize the assignability clauses."),
-    type: z.nativeEnum(AssignabilityType).nullable()
+    type: z.nativeEnum(AssignabilityType).nullable().array()
         .describe(`AFFILIATE: Agreement is expressly assignable by Target to an affiliate.
 AFREE: Agreement expressly assignable by Target without restriction by its terms (no mention of a change of control).
 ACOMP: Agreement expressly assignable by Target without restriction by its terms (no mention of a change of control), except that Target may not assign to a competitor of the Counterparty.
