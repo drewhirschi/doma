@@ -48,10 +48,9 @@ export default function HomePage() {
               className={classes.videoIframe}
 
             >
-             
               <iframe
                 // width="560" height="315"
-                src="https://www.youtube.com/embed/cZrwCpxlefQ?si=7UwV5pzt39PXTBg5"
+                src="https://www.youtube.com/embed/PlgKMQCawaM?si=kXJcVckA78rEfQhJ"
                 width="100%"
                 height="100%"
                 title="Parsl Demo"
@@ -142,10 +141,10 @@ export default function HomePage() {
         </div>
         <WaitlistSignup
           buttonText="Join the Waitlist"
-        /> 
+        />
         <div>
 
-        For questions or comments, please email <Anchor  href="mailto:ezra@parslai.com">ezra@parslai.com</Anchor>
+          For questions or comments, please email <Anchor href="mailto:ezra@parslai.com">ezra@parslai.com</Anchor>
         </div>
       </Stack>
 
