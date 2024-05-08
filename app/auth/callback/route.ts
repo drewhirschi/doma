@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { routeClient } from '../../../src/supabase/ServerClients'
+import { routeClient } from "@/supabase/ServerClients"
 
 export async function GET(request: NextRequest) {
   console.log(request.url)

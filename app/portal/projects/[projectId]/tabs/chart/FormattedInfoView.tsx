@@ -160,6 +160,7 @@ export function FormattedInfoView(props: Props) {
     } else if (key === FormatterKeys.assignability) {
 
         const data = props.infoArray[0].data as z.infer<typeof AssignabilityShape>
+        console.log(data.type)
         return (<>
             {data.suffix?.map((s) => <Badge key={s} color="blue" mx={2}>{s}</Badge>)}
             {data.type?.filter(Boolean)?.map((type:AssignabilityType | null) =>  <Badge key={type} color={"green"} mx={2}>{formatKey(type!)}</Badge>)}

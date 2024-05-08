@@ -1,5 +1,4 @@
-import { Badge, Button, Card, Container, Grid, Group, Image, Space, Text } from "@mantine/core";
-
+import { Container } from "@mantine/core";
 import { ProjectGrid } from "./ProjectGrid";
 import { serverClient } from "@/supabase/ServerClients";
 

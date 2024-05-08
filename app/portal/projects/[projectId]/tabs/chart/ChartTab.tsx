@@ -4,6 +4,7 @@ import { Anchor, Table, TableScrollContainer, TableTbody, TableTh, TableThead, T
 import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes";
 
 import { ContractReviewerLink } from "@/components/PdfViewer/components/ContractReveiwerLink";
+import { ErrorBoundary } from "react-error-boundary";
 import { FormattedInfoView } from "./FormattedInfoView";
 import Link from "next/link";
 import classes from "./Chart.module.css"
@@ -30,11 +31,18 @@ export default function Chart(props: Props) {
                 </Table.Td>
                 {props.formatters.map((formatter, i) => (
                     <Table.Td className={classes.tabledata} key={formatter.key + contract.id}>
+
                         {/* {(formatter.formatted_info.find((fi) => fi.contract_id == contract.id)?.data as unknown as IFormatResponse)?.summary ?? ""} */}
-                        <FormattedInfoView
-                            projectId={props.projectId}
-                            infoArray={formatter.formatted_info.filter(fi => fi.contract_id == contract.id)}
-                        />
+                        <ErrorBoundary
+                            fallback={<div>There was an error</div>}
+                        >
+
+                            <FormattedInfoView
+                                projectId={props.projectId}
+                                infoArray={formatter.formatted_info.filter(fi => fi.contract_id == contract.id)}
+                            />
+                        </ErrorBoundary>
+
                     </Table.Td>
                 ))}
             </Table.Tr>
@@ -60,49 +68,49 @@ export default function Chart(props: Props) {
 
     return (
         // <TableScrollContainer minWidth={500} flex={1}   >
-            <Table
-                horizontalSpacing={"md"}
-                withColumnBorders
-                stickyHeader
-                // stickyHeaderOffset={60}
-                classNames={{
-                    table: classes.table,
-                    th: classes.th,
-                    td: classes.td
-                    // thead: classes.thead,
-                    // tbody: classes.tbody,
-                    // tr: classes.tr,
+        <Table
+            horizontalSpacing={"md"}
+            withColumnBorders
+            stickyHeader
+            // stickyHeaderOffset={60}
+            classNames={{
+                table: classes.table,
+                th: classes.th,
+                td: classes.td
+                // thead: classes.thead,
+                // tbody: classes.tbody,
+                // tr: classes.tr,
 
-                }}
+            }}
+        >
+
+            <TableThead
+            //  style={{position:"sticky"}}
             >
-
-                <TableThead
-                //  style={{position:"sticky"}}
-                 >
-                    <TableTr>
-                        <TableTh miw={150} mx={"sm"} styles={{
-                            th: {
-                                whiteSpace: "nowrap",
-                            }
-                        }}>Contract name</TableTh>
-                        {/* {props.parslets.map(parslet => <TableTh key={`th_${parslet.id}`} miw={150} mx={"sm"} styles={{
+                <TableTr>
+                    <TableTh miw={150} mx={"sm"} styles={{
+                        th: {
+                            whiteSpace: "nowrap",
+                        }
+                    }}>Contract name</TableTh>
+                    {/* {props.parslets.map(parslet => <TableTh key={`th_${parslet.id}`} miw={150} mx={"sm"} styles={{
                             th: {
                                 whiteSpace: "nowrap"
 
                             }
                         }}>{parslet.display_name}</TableTh>)} */}
-                        {props.formatters.map(formatter => <TableTh key={`th_${formatter.key}`} miw={150} mx={"sm"} styles={{
-                            th: {
-                                whiteSpace: "nowrap"
+                    {props.formatters.map(formatter => <TableTh key={`th_${formatter.key}`} miw={150} mx={"sm"} styles={{
+                        th: {
+                            whiteSpace: "nowrap"
 
-                            }
-                        }}>{formatter.display_name}</TableTh>)}
+                        }
+                    }}>{formatter.display_name}</TableTh>)}
 
-                    </TableTr>
-                </TableThead>
-                {/* <TableTbody>{parsletRows}</TableTbody> */}
-                <TableTbody>{formatterRows}</TableTbody>
-            </Table>
+                </TableTr>
+            </TableThead>
+            {/* <TableTbody>{parsletRows}</TableTbody> */}
+            <TableTbody>{formatterRows}</TableTbody>
+        </Table>
 
         //  </TableScrollContainer>
     );
