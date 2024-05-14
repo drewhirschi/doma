@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, MantineColorsTuple, createTheme } from "@mantine/core";
+import { Button, MantineColorsTuple, Title, createTheme } from "@mantine/core";
 
 const blue: MantineColorsTuple = [
   '#ebf3ff',
@@ -16,14 +16,36 @@ const blue: MantineColorsTuple = [
 ];
 
 export const theme = createTheme({
+  // fontFamily: "Inter, Poppins",
   colors: {
     blue,
   },
+  headings: {
+    sizes: {
+      h1: {
+        fontSize: "72px",
+        fontWeight: "650",
+
+      }
+    }
+  },
+  fontSizes: {
+    xl: "24px"
+  },
   components: {
+    Title: Title.extend({
+      defaultProps: {
+        // fw: 400
+
+      },
+     
+
+    }),
     Button: Button.extend({
       defaultProps: {
         size: 'sm',
       },
     }),
+    
   },
 });
