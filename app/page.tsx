@@ -62,7 +62,7 @@ export default function HomePage() {
             <Group justify="space-between">
 
               <Box>
-                <Text mb={"sm"} maw={300} size="xl">Don’t wait weeks to surface the data you need to make a confident decision. Get a comprehensive analysis in minutes.</Text>
+                <Text mb={"sm"} maw={300} size="xl">Don&apos;t wait weeks to surface the data you need to make a confident decision. Get a comprehensive analysis in minutes.</Text>
                 <WaitlistSignup />
               </Box>
             </Group>
@@ -87,7 +87,7 @@ export default function HomePage() {
             <Group justify="space-between">
               <div></div>
               <Box>
-                <Text mb={"sm"} style={{ alignSelf: "flex-end" }} maw={300} size="xl">Be prepared by catching and resolving deal issues that would add to your attorney's workload and cause unnecessary delays that naturally increase your bill.</Text>
+                <Text mb={"sm"} style={{ alignSelf: "flex-end" }} maw={300} size="xl">Be prepared by catching and resolving deal issues that would add to your attorney&apos;s workload and cause unnecessary delays that naturally increase your bill.</Text>
                 <WaitlistSignup />
               </Box>
             </Group>
