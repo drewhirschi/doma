@@ -1,8 +1,6 @@
 import { Anchor, Box, Center, Container, Divider, Grid, GridCol, Group, Image, Paper, SimpleGrid, Stack, Tabs, TabsList, TabsPanel, TabsTab, Text, Title } from "@mantine/core";
 import { IconMessageCircle, IconPhoto, IconSettings } from "@tabler/icons-react";
-import { Lamp, LampDemo } from "./lamp";
 
-import { AudienceTabs, } from "./Tabs";
 import GridBackground from "@/components/GridBackground";
 import LoginButton from "./LoginButton";
 import { ReactNode } from "react";

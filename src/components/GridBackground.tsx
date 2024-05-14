@@ -27,7 +27,9 @@ const GridBackground = () => {
 
     return (
         <div >
+            {/* @ts-ignore */}
             <div style={gridStyle}></div>
+            {/* @ts-ignore */}
             <div style={maskStyle}></div>
         </div>
     );
