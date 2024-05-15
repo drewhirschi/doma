@@ -1,8 +1,11 @@
 import { Anchor, Box, Center, Container, Divider, Grid, GridCol, Group, Image, Paper, SimpleGrid, Stack, Tabs, TabsList, TabsPanel, TabsTab, Text, Title } from "@mantine/core";
 import { IconMessageCircle, IconPhoto, IconSettings } from "@tabler/icons-react";
 
+import { FrostedGlassSVG, } from "./GlassPane";
 import GridBackground from "@/components/GridBackground";
 import LoginButton from "./LoginButton";
+import { Meteors } from "@/components/Meteors";
+import NextImage from 'next/image';
 import { ReactNode } from "react";
 import { WaitlistSignup } from "./WaitlistSignup";
 import classes from './page.module.css';
@@ -24,7 +27,7 @@ export default function HomePage() {
 
 
   return (
-    <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350} c={"dark"}>
+    <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350} c={"gray.8"}>
 
       <Group justify="flex-end"><LoginButton /></Group>
 
@@ -32,8 +35,8 @@ export default function HomePage() {
 
 
       <div style={{ position: "relative" }}>
-
         <GridBackground />
+        <Meteors />
 
         <Container style={{ zIndex: 2, position: "relative" }} >
           <Center h={"95vh"}>
@@ -53,25 +56,39 @@ export default function HomePage() {
 
 
 
-      <Box py={60}>
-        <Container size={"1200px"} className={classes.responsiveContainer}>
+      <Stack py={60} >
+        <Container
+          size={"1200px"}
+        //  className={classes.responsiveContainer}
+        >
 
 
           <Stack >
             <Title order={1}>Gain the upper hand, make informed bids sooner</Title>
-            <Group justify="space-between">
+            <Grid
+              gutter={"xl"}
 
-              <Box>
-                <Text mb={"sm"} maw={300} size="xl">Don&apos;t wait weeks to surface the data you need to make a confident decision. Get a comprehensive analysis in minutes.</Text>
+            >
+
+              <GridCol span={{ base: 12, md: 4 }}>
+                <Text mb={"sm"} size="xl">Don&apos;t wait weeks to surface the data you need to make a confident decision. Get a comprehensive analysis in minutes.</Text>
                 <WaitlistSignup />
-              </Box>
-            </Group>
+              </GridCol>
+              <GridCol span={{ base: 12, md: 8 }}>
+
+                <Image
+                  radius={"md"}
+                  // component={NextImage} 
+                  width={750} height={500} src={null} alt="My image"
+                  fallbackSrc="https://placehold.co/600x400?text=Placeholder" />
+              </GridCol>
+            </Grid>
           </Stack>
 
 
 
         </Container>
-      </Box>
+      </Stack >
 
       <Divider />
 
@@ -79,18 +96,31 @@ export default function HomePage() {
 
 
       <Box py={60}>
-        <Container size={"1200px"} className={classes.responsiveContainer}>
+        <Container size={"1200px"}
+        // className={classes.responsiveContainer}/
+        >
 
 
           <Stack >
             <Title order={1}>Slash your legal spend</Title>
-            <Group justify="space-between">
-              <div></div>
-              <Box>
-                <Text mb={"sm"} style={{ alignSelf: "flex-end" }} maw={300} size="xl">Be prepared by catching and resolving deal issues that would add to your attorney&apos;s workload and cause unnecessary delays that naturally increase your bill.</Text>
+            <Grid
+              gutter={"xl"}
+
+            >
+              <GridCol span={{ base: 12, md: 8 }}>
+
+                <Image
+                  radius={"md"}
+
+                  // component={NextImage} 
+                  width={750} height={500} src={null} alt="My image"
+                  fallbackSrc="https://placehold.co/750x500?text=Example" />
+              </GridCol>
+              <GridCol span={{ base: 12, md: 4 }}>
+                <Text mb={"sm"} style={{ alignSelf: "flex-end" }} size="xl">Be prepared by catching and resolving deal issues that would add to your attorney&apos;s workload and cause unnecessary delays that naturally increase your bill.</Text>
                 <WaitlistSignup />
-              </Box>
-            </Group>
+              </GridCol>
+            </Grid>
           </Stack>
 
 
@@ -102,18 +132,28 @@ export default function HomePage() {
 
 
       <Box py={60}>
-        <Container size={"1200px"} className={classes.responsiveContainer}>
+        <Container size={"1200px"}
+        // className={classes.responsiveContainer}
+        >
 
 
           <Stack >
             <Title order={1}>Mitigate risk with improved accuracy</Title>
-            <Group justify="space-between">
+            <Grid gutter={"xl"}>
 
-              <Box>
-                <Text mb={"sm"} style={{ alignSelf: "flex-end" }} maw={300} size="xl">Catch details that can be missed by sleep deprived junior associates. AI-assisted review is the best of both worlds.</Text>
+              <GridCol span={{ base: 12, md: 4 }}>
+                <Text mb={"sm"} size="xl">Catch details that can be missed by sleep deprived junior associates. AI-assisted review is the best of both worlds.</Text>
                 <WaitlistSignup />
-              </Box>
-            </Group>
+              </GridCol>
+              <GridCol span={{ base: 12, md: 8 }}>
+                <Image
+                  radius={"md"}
+
+                  // component={NextImage} 
+                  width={750} height={500} src={null} alt="My image"
+                  fallbackSrc="https://placehold.co/600x400?text=Placeholder" />
+              </GridCol>
+            </Grid>
           </Stack>
 
 
@@ -125,34 +165,36 @@ export default function HomePage() {
 
 
 
+      <FrostedGlassSVG>
+        <div></div>
 
 
-      <Box pt={"10vh"} pb={"15vh"}  pos={"relative"}>
+        <Box pt={"10vh"} pb={"15vh"} pos={"relative"}>
+          <Meteors />
 
-        {/* <GridBackground /> */}
-        <Container style={{zIndex: 2}} pos={"relative"}>
-          <Stack gap={"sm"} align="center">
+          <Container style={{ zIndex: 2 }} pos={"relative"}>
+            <Stack gap={"sm"} align="center">
 
-            <Title mb={"sm"}>Parsl in action</Title>
-            {/* <Text size="xl">Parsl automates common tedious tasks so you and your team only need to spend time and resources on the rare edge cases that require a human touch.</Text> */}
-            <div
-              className={classes.videoIframe}
+              <Title mb={"sm"}>Parsl in action</Title>
+              <div
+                className={classes.videoIframe}
 
-            >
-              <iframe
-                // width="560" height="315"
-                src="https://www.youtube.com/embed/PlgKMQCawaM?si=kXJcVckA78rEfQhJ"
-                width="100%"
-                height="100%"
-                title="Parsl Demo"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen></iframe>
-            </div>
+              >
+                <iframe
+                  // width="560" height="315"
+                  src="https://www.youtube.com/embed/PlgKMQCawaM?si=kXJcVckA78rEfQhJ"
+                  width="100%"
+                  height="100%"
+                  title="Parsl Demo"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen></iframe>
+              </div>
 
-          </Stack>
-        </Container>
-      </Box>
+            </Stack>
+          </Container>
+        </Box>
+      </FrostedGlassSVG>
 
       <Box bg={"dark.7"} mih={500} c={"white"}>
 
@@ -176,7 +218,7 @@ export default function HomePage() {
 
 
 
-    </Box>
+    </Box >
   )
 }
 

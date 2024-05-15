@@ -32,6 +32,7 @@ export const theme = createTheme({
   fontSizes: {
     xl: "24px"
   },
+  
   components: {
     Title: Title.extend({
       defaultProps: {

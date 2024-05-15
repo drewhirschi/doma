@@ -9,11 +9,14 @@ import { useDisclosure } from '@mantine/hooks';
 import { useForm } from "@mantine/form";
 
 export function WaitlistSignup() {
-    const [opened, { open, close }] = useDisclosure(false);
+    const [opened, { open, close:closeModal }] = useDisclosure(false);
 
     const form = useForm({
         initialValues: {
             email: "",
+            first: "",
+            last: "",
+            title: ""
         },
 
         validate: {
@@ -37,6 +40,7 @@ export function WaitlistSignup() {
                             })
                             pixel.event("WaitlistJoin")
                             form.reset()
+                            closeModal()
                             notifications.show({
                                 title: "Thank you!",
                                 message: "We'll be in touch soon.",
@@ -55,7 +59,7 @@ export function WaitlistSignup() {
                     <Divider />
 
                     <Text p={"sm"}>
-                        As we have capacity, you can expect an email to set up a get to know you call.
+                        As we have capacity, you can expect an email to set up a get-to-know you call.
                     </Text>
 
                     <Box p={"lg"}>

@@ -8,8 +8,8 @@
 
 
 .videoIframe {
-  width: 640px;
-  height: 360px;
+  width: 750px;
+  height: 500px;
 }
 
 @media (max-width: 600px) {
