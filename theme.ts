@@ -45,7 +45,11 @@ export const theme = createTheme({
     Button: Button.extend({
       defaultProps: {
         size: 'sm',
+        variant: "gradient",
+        gradient: {"deg":30, from: "blue.8", to: "blue.6"},
+        fw: 500
       },
+
     }),
     
   },
