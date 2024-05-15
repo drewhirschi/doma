@@ -27,7 +27,7 @@ export function WaitlistSignup() {
 
     return (
         <>
-            <Modal opened={opened} onClose={close} title="Join the Waitlist">
+            <Modal opened={opened} onClose={closeModal} title="Join the Waitlist">
                 {/* Modal content */}
 
                 <form
