@@ -69,12 +69,12 @@ export function SearchTab({ project, contracts, contractCount }: Props) {
                 <Table.Td>
                     {contract.description}
                 </Table.Td>
-                <Table.Td>
+                {/* <Table.Td>
                     {contract.completed ? "Yes" : "No"}
-                </Table.Td>
-                <Table.Td>
+                </Table.Td> */}
+                {/* <Table.Td>
                     {contract.npages ?? 1}
-                </Table.Td>
+                </Table.Td> */}
                 <Table.Td>
                     {contract.tag && <AgreementTypeBadge type={contract.tag}  contractId={contract.id}/>}
                 </Table.Td>
@@ -112,8 +112,8 @@ export function SearchTab({ project, contracts, contractCount }: Props) {
                     <Table.Tr>
                         <Table.Th>Contract</Table.Th>
                         <Table.Th>Description</Table.Th>
-                        <Table.Th>Completed</Table.Th>
-                        <Table.Th>Pages</Table.Th>
+                        {/* <Table.Th>Completed</Table.Th> */}
+                        {/* <Table.Th>Pages</Table.Th> */}
                         <Table.Th>Agreement Type</Table.Th>
                         <Table.Th>Assigned To</Table.Th>
 

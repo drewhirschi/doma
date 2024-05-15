@@ -71,15 +71,16 @@ export default function HomePage() {
             >
 
               <GridCol span={{ base: 12, md: 4 }}>
-                <Text mb={"sm"} size="xl">Don&apos;t wait weeks to surface the data you need to make a confident decision. Get a comprehensive analysis in minutes.</Text>
+                <Text mb={"sm"} size="xl">Beat out competition by making compelling offers sooner or move on to more promising deals quicker with an accelerated deal workflow.</Text>
                 <WaitlistSignup />
               </GridCol>
               <GridCol span={{ base: 12, md: 8 }}>
 
                 <Image
                   radius={"md"}
+                  fit="fill"
                   // component={NextImage} 
-                  width={750} height={500} src={null} alt="My image"
+                  width={750} height={500} src={"images/product/chart.png"} alt="My image"
                   fallbackSrc="https://placehold.co/600x400?text=Placeholder" />
               </GridCol>
             </Grid>
@@ -113,7 +114,7 @@ export default function HomePage() {
                   radius={"md"}
 
                   // component={NextImage} 
-                  width={750} height={500} src={null} alt="My image"
+                  width={750} height={500} src={"images/product/contract_list.png"} alt="My image"
                   fallbackSrc="https://placehold.co/750x500?text=Example" />
               </GridCol>
               <GridCol span={{ base: 12, md: 4 }}>
@@ -148,9 +149,9 @@ export default function HomePage() {
               <GridCol span={{ base: 12, md: 8 }}>
                 <Image
                   radius={"md"}
-
+                  fit="contain"
                   // component={NextImage} 
-                  width={750} height={500} src={null} alt="My image"
+                  width={750} height={500} src={"images/product/formatter.png"} alt="Auto summarized and checked"
                   fallbackSrc="https://placehold.co/600x400?text=Placeholder" />
               </GridCol>
             </Grid>
@@ -163,19 +164,72 @@ export default function HomePage() {
 
       <Divider />
 
+      <Box py={60}>
+        <Container size={"1200px"}
+        // className={classes.responsiveContainer}
+        >
 
 
-      <FrostedGlassSVG>
-        <div></div>
+          <Stack >
+            <Title order={1}>Not to mention...</Title>
+            <Grid gutter={"xl"}>
+
+              {/* <GridCol span={{ base: 12, md: 4 }}> */}
+              <Text mb={"sm"} size="xl">Verified results, Enhanced purchase agreement negotiation, Streamline your team’s process from end-to-end, All your documents in one place, and much more.</Text>
+              <WaitlistSignup />
+              {/* </GridCol> */}
+              {/* <GridCol span={{ base: 12, md: 8 }}>
+                
+              </GridCol> */}
+            </Grid>
+          </Stack>
+
+
+
+        </Container>
+      </Box>
+
+      <Divider />
+
+
+      <Box>
+
+        <GridBackground y="100%" x="80%" />
+        <Box mt={"10vh"} pb={"5vh"} >
+          <Meteors />
+
+          {/* <FrostedGlassSVG> */}
+          <Container size={1260}>
+            <Paper
+              shadow="xl"
+              p={"xl"}
+              py={60}
+              style={{ zIndex: 3 }}
+              pos="relative"
+              bg={"indigo.0"}
+              radius={"md"}>
+
+
+              <Title>Simple Pricing</Title>
+              <Stack mt={"lg"} gap={"sm"} align="center" >
+                <Text style={{ fontWeight: 800, fontSize: 64 }} variant="gradient" gradient={{ from: 'blue.6', to: 'cyan.8', deg: 30 }}
+                >$1000/month + $0.50 per page</Text>
+                <Text size="xl" variant="gradient" gradient={{ from: 'blue.6', to: 'cyan.8', deg: 30 }}
+                >Annual plan, 1000 pages included every month</Text>
+
+              </Stack>
+            </Paper>
+          </Container>
+          {/* </FrostedGlassSVG> */}
+        </Box>
 
 
         <Box pt={"10vh"} pb={"15vh"} pos={"relative"}>
-          <Meteors />
 
-          <Container style={{ zIndex: 2 }} pos={"relative"}>
+          <Container size={1200} style={{ zIndex: 2 }} pos={"relative"}>
             <Stack gap={"sm"} align="center">
 
-              <Title mb={"sm"}>Parsl in action</Title>
+              <Title style={{ alignSelf: "flex-start" }} mb={"sm"} >Parsl in action</Title>
               <div
                 className={classes.videoIframe}
 
@@ -194,7 +248,8 @@ export default function HomePage() {
             </Stack>
           </Container>
         </Box>
-      </FrostedGlassSVG>
+      </Box>
+
 
       <Box bg={"dark.7"} mih={500} c={"white"}>
 

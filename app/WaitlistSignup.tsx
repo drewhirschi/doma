@@ -9,7 +9,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { useForm } from "@mantine/form";
 
 export function WaitlistSignup() {
-    const [opened, { open, close:closeModal }] = useDisclosure(false);
+    const [opened, { open, close: closeModal }] = useDisclosure(false);
 
     const form = useForm({
         initialValues: {
@@ -85,7 +85,10 @@ export function WaitlistSignup() {
             <Button onClick={open}
                 //  styles={{label: {fontSize: 24}}}
                 size="lg"
-            >Join the Waitlist</Button>
+                variant="gradient"
+                gradient={{ "deg": 30, from: "blue.8", to: "blue.6" }}
+                fw={500}
+            >Join the Waitlist</Button >
         </>
     );
 }

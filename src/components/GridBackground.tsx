@@ -1,12 +1,12 @@
 import React from 'react';
 
-const GridBackground = () => {
+const GridBackground = ({ x = "0", y = "0" }) => {
     const gridStyle = {
         height: "100%",
         width: "100%",
         opacity: 0.4,
         backgroundImage: `
-            repeating-radial-gradient(circle at 0 0, transparent 0, #ffffff 18px), 
+            repeating-radial-gradient(circle at ${x} ${y}, transparent 0, #ffffff 18px), 
             repeating-linear-gradient(#e0e0ec55, #e0e0ec)
         `,
         backgroundSize: 'cover',
