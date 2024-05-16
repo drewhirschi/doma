@@ -1,15 +1,17 @@
 "use client"
 
 import { Anchor, Box, Button, Checkbox, Container, Divider, Grid, Group, Modal, SimpleGrid, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 
 import axios from "axios";
 import { notifications } from "@mantine/notifications";
 import { pixel } from "@/utils";
-import { useDisclosure } from '@mantine/hooks';
+import { theme } from "../theme";
 import { useForm } from "@mantine/form";
 
 export function WaitlistSignup() {
     const [opened, { open, close: closeModal }] = useDisclosure(false);
+    const largeScreen = useMediaQuery(`(min-width: ${theme.breakpoints?.sm || 48}em)`); // Ensure proper units
 
     const form = useForm({
         initialValues: {
@@ -27,7 +29,13 @@ export function WaitlistSignup() {
 
     return (
         <>
-            <Modal opened={opened} onClose={closeModal} title="Join the Waitlist">
+            <Modal
+                opened={opened}
+                onClose={closeModal}
+                title="Join the Waitlist"
+                size={largeScreen ? "lg" : "md"}
+            >
+
                 {/* Modal content */}
 
                 <form
@@ -58,13 +66,15 @@ export function WaitlistSignup() {
                 >
                     <Divider />
 
-                    <Text p={"sm"}>
-                        As we have capacity, you can expect an email to set up a get-to-know you call.
+
+                    <Text py={"sm"}>
+                        As we have capacity, you can expect an email to schedule a get-to-know-you call.
                     </Text>
 
-                    <Box p={"lg"}>
+                    <Box >
 
-                        <SimpleGrid cols={2}>
+                        <SimpleGrid cols={{ base: 1, sm: 2 }}
+                        >
                             <TextInput {...form.getInputProps("first")} label="First Name" placeholder="First Name" />
                             <TextInput {...form.getInputProps("last")} label="Last Name" placeholder="Last Name" />
                             <TextInput {...form.getInputProps("email")} required label="Email" placeholder="Email" />
