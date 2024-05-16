@@ -143,7 +143,7 @@ export default function HomePage() {
             <Grid gutter={"xl"}>
 
               <GridCol span={{ base: 12, sm: 4 }}>
-                <Text mb={"sm"} size="xl">Achieve the highest accuracy in finding critical deal information by merging the unique strengths of manual and AI automated due diligence.</Text>
+                <Text mb={"sm"} size="xl">Merge the unique strengths of manual and AI automated due diligence for better accuracy.</Text>
                 <WaitlistSignup />
               </GridCol>
               <GridCol span={{ base: 12, sm: 8 }}>
