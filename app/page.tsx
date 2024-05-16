@@ -9,6 +9,7 @@ import NextImage from 'next/image';
 import { ReactNode } from "react";
 import { WaitlistSignup } from "./WaitlistSignup";
 import classes from './page.module.css';
+import { theme } from "../theme";
 
 function DescriptionItem({ header, text }: { header: string, text: ReactNode }) {
   return (
@@ -170,7 +171,7 @@ export default function HomePage() {
 
           <Stack >
             <Title order={1}>Built for M&A professionals</Title>
-            <Grid gutter={"xl"}>
+            {/* <Grid gutter={"xl"}> */}
 
               {/* <GridCol span={{ base: 12, md: 4 }}> */}
               <Text mb={"sm"} size="xl">Seamless workflow integration, Auditable AI results, Enhanced purchase agreement negotiation, Supplemental request support, Team collaboration, and much more.</Text>
@@ -179,7 +180,7 @@ export default function HomePage() {
               {/* <GridCol span={{ base: 12, md: 8 }}>
                 
               </GridCol> */}
-            </Grid>
+            {/* </Grid> */}
           </Stack>
 
 
@@ -210,7 +211,10 @@ export default function HomePage() {
 
               <Title c="dark">Simple Pricing</Title>
               <Stack mt={"lg"} gap={"sm"} align="center" >
-                <Text style={{ fontWeight: 800, fontSize: 64 }} variant="gradient" gradient={{ from: 'blue.6', to: 'cyan.8', deg: 30 }}
+                <Text
+                className={classes.priceTitle}
+                 
+                 variant="gradient" gradient={{ from: 'blue.6', to: 'cyan.8', deg: 30 }}
                 >$1000/month + $0.50 per page</Text>
                 <Text size="xl" variant="gradient" gradient={{ from: 'blue.6', to: 'cyan.8', deg: 30 }}
                 >Annual plan, 1000 pages included every month</Text>

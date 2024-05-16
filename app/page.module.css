@@ -5,7 +5,10 @@
     max-width: rem(900px);
   }
 }
-
+.priceTitle {
+  font-size: 64px;
+  font-weight: 800;
+}
 
 .videoIframe {
   width: 750px;
@@ -16,5 +19,8 @@
   .videoIframe {
     width: 100%;
     /* height: 100%; */
+  }
+  .priceTitle {
+    font-size: 52px;
   }
 }
