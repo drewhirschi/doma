@@ -63,6 +63,7 @@
     "supabase": "^1.131.5",
     "ts-node": "^10.9.2",
     "typescript": "5.2.2",
+    "typescript-plugin-css-modules": "^5.1.0",
     "worker-loader": "^3.0.8"
   }
 }

@@ -1,27 +1,11 @@
-import { Anchor, Box, Center, Container, Divider, Grid, GridCol, Group, Image, Paper, SimpleGrid, Stack, Tabs, TabsList, TabsPanel, TabsTab, Text, Title } from "@mantine/core";
-import { IconMessageCircle, IconPhoto, IconSettings } from "@tabler/icons-react";
+import { Anchor, Box, Center, Container, Divider, Grid, GridCol, Group, Image, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 
-import { FrostedGlassSVG, } from "./GlassPane";
 import GridBackground from "@/components/GridBackground";
 import LoginButton from "./LoginButton";
 import { Meteors } from "@/components/Meteors";
-import NextImage from 'next/image';
-import { ReactNode } from "react";
 import { WaitlistSignup } from "./WaitlistSignup";
-import classes from './page.module.css';
+import styles, {} from './page.module.css';
 import { theme } from "../theme";
-
-function DescriptionItem({ header, text }: { header: string, text: ReactNode }) {
-  return (
-    <Box>
-      <Title order={4}>{header}</Title>
-      <Text mt={"sm"}>{text}</Text>
-    </Box>
-  )
-}
-
-
-
 
 export default function HomePage() {
 
@@ -173,11 +157,14 @@ export default function HomePage() {
             <Title order={1}>Built for M&A professionals</Title>
             {/* <Grid gutter={"xl"}> */}
 
-              {/* <GridCol span={{ base: 12, md: 4 }}> */}
-              <Text mb={"sm"} size="xl">Seamless workflow integration, Auditable AI results, Enhanced purchase agreement negotiation, Supplemental request support, Team collaboration, and much more.</Text>
+            {/* <GridCol span={{ base: 12, md: 4 }}> */}
+            <Text mb={"sm"} size="xl">Seamless workflow integration, Auditable AI results, Enhanced purchase agreement negotiation, Supplemental request support, Team collaboration, and much more.</Text>
+            <Group>
+
               <WaitlistSignup />
-              {/* </GridCol> */}
-              {/* <GridCol span={{ base: 12, md: 8 }}>
+            </Group>
+            {/* </GridCol> */}
+            {/* <GridCol span={{ base: 12, md: 8 }}>
                 
               </GridCol> */}
             {/* </Grid> */}
@@ -212,9 +199,9 @@ export default function HomePage() {
               <Title c="dark">Simple Pricing</Title>
               <Stack mt={"lg"} gap={"sm"} align="center" >
                 <Text
-                className={classes.priceTitle}
-                 
-                 variant="gradient" gradient={{ from: 'blue.6', to: 'cyan.8', deg: 30 }}
+                  className={styles.priceTitle}
+
+                  variant="gradient" gradient={{ from: 'blue.6', to: 'cyan.8', deg: 30 }}
                 >$1000/month + $0.50 per page</Text>
                 <Text size="xl" variant="gradient" gradient={{ from: 'blue.6', to: 'cyan.8', deg: 30 }}
                 >Annual plan, 1000 pages included every month</Text>
@@ -233,14 +220,15 @@ export default function HomePage() {
 
               <Title style={{ alignSelf: "flex-start" }} mb={"sm"} >Parsl in action</Title>
               <div
-                className={classes.videoIframe}
+                className={styles.videoContainer}
 
               >
                 <iframe
                   // width="560" height="315"
+                  className={styles.videoIframe}
                   src="https://www.youtube.com/embed/PlgKMQCawaM?si=kXJcVckA78rEfQhJ"
-                  width="100%"
-                  height="100%"
+                  // width="100%"
+                  // height="100%"
                   title="Parsl Demo"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
