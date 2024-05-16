@@ -64,14 +64,14 @@ export default function HomePage() {
 
 
           <Stack >
-            <Title order={1}>Gain the upper hand, make informed bids sooner</Title>
+            <Title order={1}>Make informed decisions in hours, not weeks</Title>
             <Grid
               gutter={"xl"}
 
             >
 
               <GridCol span={{ base: 12, md: 4 }}>
-                <Text mb={"sm"} size="xl">Beat out competition by making compelling offers sooner or move on to more promising deals quicker with an accelerated deal workflow.</Text>
+                <Text mb={"sm"} size="xl">Beat out competition by making compelling offers faster and waste less time on lemon deals by identifying deal breakers earlier.</Text>
                 <WaitlistSignup />
               </GridCol>
               <GridCol span={{ base: 12, md: 8 }}>
@@ -118,7 +118,7 @@ export default function HomePage() {
                   fallbackSrc="https://placehold.co/750x500?text=Example" />
               </GridCol>
               <GridCol span={{ base: 12, md: 4 }}>
-                <Text mb={"sm"} style={{ alignSelf: "flex-end" }} size="xl">Be prepared by catching and resolving deal issues that would add to your attorney&apos;s workload and cause unnecessary delays that naturally increase your bill.</Text>
+                <Text mb={"sm"} style={{ alignSelf: "flex-end" }} size="xl">Reduce costs by removing due diligence roadblocks and resolving red flags prior to handing contract review over to outside counsel.</Text>
                 <WaitlistSignup />
               </GridCol>
             </Grid>
@@ -139,11 +139,11 @@ export default function HomePage() {
 
 
           <Stack >
-            <Title order={1}>Mitigate risk with improved accuracy</Title>
+            <Title order={1}>Mitigate risk with AI</Title>
             <Grid gutter={"xl"}>
 
               <GridCol span={{ base: 12, sm: 4 }}>
-                <Text mb={"sm"} size="xl">Catch details that can be missed by sleep deprived junior associates. AI-assisted review is the best of both worlds.</Text>
+                <Text mb={"sm"} size="xl">Achieve the highest accuracy in finding critical deal information by merging the unique strengths of manual and AI automated due diligence.</Text>
                 <WaitlistSignup />
               </GridCol>
               <GridCol span={{ base: 12, sm: 8 }}>
@@ -169,11 +169,11 @@ export default function HomePage() {
 
 
           <Stack >
-            <Title order={1}>Not to mention...</Title>
+            <Title order={1}>Built for M&A professionals</Title>
             <Grid gutter={"xl"}>
 
               {/* <GridCol span={{ base: 12, md: 4 }}> */}
-              <Text mb={"sm"} size="xl">Verified results, Enhanced purchase agreement negotiation, Streamline your team’s process from end-to-end, All your documents in one place, and much more.</Text>
+              <Text mb={"sm"} size="xl">Seamless workflow integration, Auditable AI results, Enhanced purchase agreement negotiation, Supplemental request support, Team collaboration, and much more.</Text>
               <WaitlistSignup />
               {/* </GridCol> */}
               {/* <GridCol span={{ base: 12, md: 8 }}>
