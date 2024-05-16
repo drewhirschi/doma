@@ -71,7 +71,7 @@ export default function HomePage() {
             >
 
               <GridCol span={{ base: 12, md: 4 }}>
-                <Text mb={"sm"} size="xl">Beat out competition by making compelling offers faster and waste less time on lemon deals by identifying deal breakers earlier.</Text>
+                <Text mb={"sm"} size="xl">Beat out competition by making compelling offers faster and identifying lemons earlier.</Text>
                 <WaitlistSignup />
               </GridCol>
               <GridCol span={{ base: 12, md: 8 }}>
@@ -118,7 +118,7 @@ export default function HomePage() {
                   fallbackSrc="https://placehold.co/750x500?text=Example" />
               </GridCol>
               <GridCol span={{ base: 12, md: 4 }}>
-                <Text mb={"sm"} style={{ alignSelf: "flex-end" }} size="xl">Reduce costs by removing due diligence roadblocks and resolving red flags prior to handing contract review over to outside counsel.</Text>
+                <Text mb={"sm"} style={{ alignSelf: "flex-end" }} size="xl">Remove due diligence roadblocks and resolve red flags prior to handing contract review over to outside counsel.</Text>
                 <WaitlistSignup />
               </GridCol>
             </Grid>
