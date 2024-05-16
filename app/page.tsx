@@ -12,7 +12,7 @@ export default function HomePage() {
 
 
   return (
-    <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350} c={"gray.8"}>
+    <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350} c={"gray.8"} className={styles.landingPageContainer}>
 
       <Group justify="flex-end"><LoginButton /></Group>
 

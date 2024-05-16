@@ -20,15 +20,7 @@ export const theme = createTheme({
   colors: {
     blue,
   },
-  headings: {
-    sizes: {
-      h1: {
-        fontSize: "72px",
-        fontWeight: "650",
-
-      }
-    }
-  },
+ 
   fontSizes: {
     xl: "24px"
   },

@@ -1,6 +1,4 @@
 .responsiveContainer {
- 
-
   @media (min-width: em(600px)) {
     max-width: rem(900px);
   }
@@ -30,7 +28,11 @@
   border: 0; /* Optional: Remove iframe border */
 }
 
-@media (max-width: 600px) {
+.landingPageContainer h1 {
+  font-size: 72px;
+}
+
+@media (max-width: 48em) {
   .videoContainer {
     max-width: 100%; /* Ensure full width on smaller screens */
     padding-bottom: 56.25%; /* Maintain aspect ratio */
@@ -38,4 +40,9 @@
   .priceTitle {
     font-size: 52px;
   }
+  .landingPageContainer h1 {
+    font-size: 48px;
+  }
 }
+
+
