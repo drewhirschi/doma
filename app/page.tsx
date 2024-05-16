@@ -112,7 +112,7 @@ export default function HomePage() {
 
                 <Image
                   radius={"md"}
-
+                  fit="contain"
                   // component={NextImage} 
                   width={750} height={500} src={"images/product/contract_list.png"} alt="My image"
                   fallbackSrc="https://placehold.co/750x500?text=Example" />
@@ -142,11 +142,11 @@ export default function HomePage() {
             <Title order={1}>Mitigate risk with improved accuracy</Title>
             <Grid gutter={"xl"}>
 
-              <GridCol span={{ base: 12, md: 4 }}>
+              <GridCol span={{ base: 12, sm: 4 }}>
                 <Text mb={"sm"} size="xl">Catch details that can be missed by sleep deprived junior associates. AI-assisted review is the best of both worlds.</Text>
                 <WaitlistSignup />
               </GridCol>
-              <GridCol span={{ base: 12, md: 8 }}>
+              <GridCol span={{ base: 12, sm: 8 }}>
                 <Image
                   radius={"md"}
                   fit="contain"
@@ -165,9 +165,7 @@ export default function HomePage() {
       <Divider />
 
       <Box py={60}>
-        <Container size={"1200px"}
-        // className={classes.responsiveContainer}
-        >
+        <Container size={"1200px"}>
 
 
           <Stack >
@@ -210,7 +208,7 @@ export default function HomePage() {
               radius={"md"}>
 
 
-              <Title>Simple Pricing</Title>
+              <Title c="dark">Simple Pricing</Title>
               <Stack mt={"lg"} gap={"sm"} align="center" >
                 <Text style={{ fontWeight: 800, fontSize: 64 }} variant="gradient" gradient={{ from: 'blue.6', to: 'cyan.8', deg: 30 }}
                 >$1000/month + $0.50 per page</Text>
