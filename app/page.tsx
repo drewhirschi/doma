@@ -1,17 +1,46 @@
 import { Anchor, Box, Center, Container, Divider, Grid, GridCol, Group, Image, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 
 import GridBackground from "@/components/GridBackground";
+import Head from "next/head";
 import LoginButton from "./LoginButton";
+import { Metadata } from "next";
 import { Meteors } from "@/components/Meteors";
 import { WaitlistSignup } from "./WaitlistSignup";
 import styles, {} from './page.module.css';
 import { theme } from "../theme";
+
+export const metadata: Metadata = {
+  title: 'Parsl AI',
+  description: 'Accurate Legal Due Diligence for M&A',
+  keywords: "Parsl, AI Due Diligence, AI M&A",
+  openGraph : {
+    type: "website",
+    title: "Parsl AI",
+    description: "Accurate Legal Due Diligence for M&A",
+    images: "",
+    url: "https://parslai.com"
+  }
+
+}
+
 
 export default function HomePage() {
 
 
 
   return (
+    <>
+    <Head>
+        <meta property="og:title" content="Home Page Title" />
+        <meta property="og:description" content="Description of the home page." />
+        <meta property="og:image" content="https://yourwebsite.com/path-to-your-home-thumbnail.jpg" />
+        <meta property="og:url" content="https://yourwebsite.com/home" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Home Page Title" />
+        <meta name="twitter:description" content="Description of the home page." />
+        <meta name="twitter:image" content="https://yourwebsite.com/path-to-your-home-thumbnail.jpg" />
+      </Head>
     <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350} c={"gray.8"} className={styles.landingPageContainer}>
 
       <Group justify="flex-end"><LoginButton /></Group>
@@ -264,6 +293,7 @@ export default function HomePage() {
 
 
     </Box >
+    </>
   )
 }
 
