@@ -6,8 +6,9 @@ import type { NextRequest } from 'next/server';
 export function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   if (process.env.NODE_ENV !== 'development' && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new Response('Unauthorized', {
+    return new Response('Unauthorized, token was ' + authHeader, {
       status: 401,
+
     });
   }
 
