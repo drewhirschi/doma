@@ -11,13 +11,13 @@ import { theme } from "../theme";
 
 export const metadata: Metadata = {
   title: 'Parsl AI',
-  description: 'Accurate Legal Due Diligence for M&A',
+  description: 'Accurate AI Legal Due Diligence for M&A',
   keywords: "Parsl, AI Due Diligence, AI M&A",
   authors: { name: "Atlas Technology", url: "https://parslai.com" },
   openGraph: {
     type: "website",
     title: "Parsl AI",
-    description: "Accurate Legal Due Diligence for M&A",
+    description: "Accurate AI Legal Due Diligence for M&A",
     images: "https://parslai.com/images/product/landing_preview.png",
     url: "https://parslai.com",
 
@@ -60,7 +60,7 @@ export default function HomePage() {
 
                 <Text style={{ textAlign: 'left', alignSelf: "flex-start", fontWeight: 400, fontSize: 64 }} variant="gradient" gradient={{ from: 'dark.8', to: 'dark.3', deg: -45 }}
                 >Parsl</Text>
-                <Title order={1} ta={"center"}>Accurate Legal Due Diligence for M&A</Title>
+                <Title order={1} ta={"center"}>Accurate AI Legal Due Diligence for M&A</Title>
                 <WaitlistSignup />
 
               </Stack>
