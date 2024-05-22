@@ -3,7 +3,7 @@
 import { Button, Popover, Select, Text, TextInput } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
-import { browserClient } from '@/supabase/BrowerClients';
+import { browserClient } from '@/supabase/BrowserClient';
 import { getFormatterShape } from '@/shared/getFormatterShape';
 import { useForm } from '@mantine/form';
 

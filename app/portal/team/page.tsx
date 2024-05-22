@@ -8,7 +8,6 @@ import { serverClient } from "@/supabase/ServerClients";
 
 export default async function Page() {
 
-    const load = 0
     const supabase = serverClient()
     const userFetch = await supabase.from("profile").select("*")
     const contractFetch = await supabase.from("contract").select("*")
@@ -19,14 +18,15 @@ export default async function Page() {
     }
 
     if (!contractFetch.data) {
-        console.error(userFetch.error)
+        console.error(contractFetch.error)
         throw new Error("Failed to fetch contract data")
     }
+
 
     const iconStyle = { width: rem(12), height: rem(12) };
 
     const rows = userFetch.data
-        .filter((profile) => profile.email_confirmed_at)
+        // .filter((profile) => profile.email_confirmed_at)
         .map((profile) => (
             <TableTr key={profile.display_name}>
                 <TableTd>

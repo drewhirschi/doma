@@ -1,4 +1,3 @@
-import { z } from 'zod';
 
 export function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => {
@@ -71,17 +70,22 @@ export function rerm<TError = any>(message: string, anyErrorData: TError, errorC
 
 
 
-export function rangeToStringWithNewLines(range: Range): string {
+
+export function rangeToStringWithNewLines(range: Range): {text:string, rects:DOMRect[]} {
     const fragment = range.cloneContents();
     const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    // const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
     let text = '';
+    const rects:DOMRect[] = []
     let currentNode: Node | null = walker.currentNode;
 
     while (currentNode) {
         if (currentNode.nodeType === Node.TEXT_NODE) {
             text += currentNode.textContent;
+            if (currentNode.parentElement) rects.push(currentNode.parentElement.getBoundingClientRect())
         } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
             const element = currentNode as Element;
+            // rects.push(element.getBoundingClientRect())
             // Check if the element is a block-level element
             if (['DIV', 'P', 'BR'].includes(element.tagName)) {
                 text += '\n'; // Add a newline for block-level elements
@@ -90,7 +94,7 @@ export function rangeToStringWithNewLines(range: Range): string {
         currentNode = walker.nextNode();
     }
 
-    return text;
+    return {text, rects};
 }
 
 
@@ -98,7 +102,7 @@ export function formatKey(text: string): string {
     const words = text.split('_');
     const formattedWords = words.map((word, index) => {
         // if (index === 0) {
-            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
         // } else {
         //     return word.toLowerCase();
         // }

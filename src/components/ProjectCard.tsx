@@ -5,9 +5,7 @@ import { IconDotsVertical, IconMessages, IconNote, IconPlayerPause, IconPlayerPa
 import { changeProjectStatus, deleteProject } from "./ProjectCard.actions";
 
 import Link from "next/link";
-import { browserClient } from "@/supabase/BrowerClients";
 import { getInitials } from "@/ux/helper";
-import { serverClient } from "@/supabase/ServerClients";
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[], contract: { completed: boolean }[] }

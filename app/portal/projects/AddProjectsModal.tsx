@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 import { DatePickerInput } from '@mantine/dates';
 import { IconCalendar } from '@tabler/icons-react';
-import { browserClient } from '@/supabase/BrowerClients';
+import { browserClient } from '@/supabase/BrowserClient';
 import { createProject } from './AddProjectModal.action';
 import { useDisclosure } from '@mantine/hooks';
 

@@ -12,6 +12,7 @@ declare global {
     type ExtractJob_SB = Database['public']['Tables']['extract_jobs']['Row']
     type FormattedInfo_SB<T = any> = Database['public']['Tables']['formatted_info']['Row'] & {data: T}
     type Formatter_SB = Database['public']['Tables']['formatters']['Row']
+    type ContractJob_SB = Database['public']['Tables']['contract_job_queue']['Row']
 
     interface Window {
         fbq: any;

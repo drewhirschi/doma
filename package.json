@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sb:types": "supabase gen types typescript --linked --schema public > src/types/supabase-generated.ts"
+    "sb:types": "supabase gen types typescript --schema public > src/types/supabase-generated.ts"
   },
   "dependencies": {
     "@mantine/core": "7.4.2",

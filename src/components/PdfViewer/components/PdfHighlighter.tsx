@@ -30,6 +30,7 @@ import { scaledToViewport, viewportToScaled } from "../lib/coordinates";
 
 import { HighlightLayer } from "./HighlightLayer";
 import MouseSelection from "./MouseSelection";
+import MouseTracker from "../../../../app/portal/projects/[projectId]/contract/[contractId]/MouseTracker";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import TipContainer from "./TipContainer";
 import debounce from "lodash.debounce";
@@ -82,7 +83,7 @@ interface Props<T_HT> {
         transformSelection: () => void
     ) => JSX.Element | null;
     enableAreaSelection: (event: MouseEvent) => boolean;
-    focusedHighlight:{id:string, scroll:boolean} | undefined
+    focusedHighlight: { id: string, scroll: boolean } | undefined
 }
 
 
@@ -132,7 +133,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         console.log("PdfHighlighter mounted", this.props.pdfDocument.numPages)
         this.init();
 
-       
+
     }
 
     attachRef = () => {
@@ -171,7 +172,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         //     this.init();
         //     return;
         // }
-        if (prevProps.highlights !== this.props.highlights) {
+        if (prevProps.highlights.length !== this.props.highlights.length) {
             this.renderHighlightLayers();
         }
         if (prevProps.focusedHighlight?.id !== this.props.focusedHighlight?.id) {
@@ -213,15 +214,15 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         // debug
         (window as any).PdfViewer = this;
 
-       
 
 
-        
+
+
     }
 
     componentWillUnmount() {
         this.unsubscribe();
-        
+
     }
 
     findOrCreateHighlightLayer(page: number) {
@@ -526,6 +527,29 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         }
     };
 
+    drawBoxToTextLayer(bbox: DOMRect) {
+        const container = document.querySelector('.textLayer');
+        if (!container) {
+            console.log('Container with class "textLayer" not found.');
+            return;
+        }
+
+        const parentBox = container.getBoundingClientRect()
+
+        // Create the bounding box div
+        const box = document.createElement('div');
+        box.style.position = 'absolute';
+        box.style.left = `${bbox.left - parentBox.left}px`;
+        box.style.top = `${bbox.top - parentBox.top}px`;
+        box.style.width = `${bbox.width}px`;
+        box.style.height = `${bbox.height}px`;
+        box.style.backgroundColor = 'rgba(255, 0, 0, 0.5)'; // Red semi-transparent
+        box.style.border = '2px solid red'; // Red border
+
+        // Append the box to the container
+        container.appendChild(box);
+    }
+
     afterSelection = () => {
         const { onSelectionFinished } = this.props;
 
@@ -543,6 +567,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
         const rects = getClientRects(range, pages);
 
+
         if (rects.length === 0) {
             return;
         }
@@ -557,7 +582,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
 
         const content = {
             // text: range.toString(),
-            text: rangeToStringWithNewLines(range),
+            text: rangeToStringWithNewLines(range).text,
 
         };
         const scaledPosition = this.viewportPositionToScaled(viewportPosition);
@@ -600,16 +625,18 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         // const { onSelectionFinished, enableAreaSelection } = this.props;
 
         return (
-            <div onPointerDown={this.onMouseDown}>
-                <div
-                    ref={this.containerNodeRef}
-                    className="PdfHighlighter"
-                    onContextMenu={(e) => e.preventDefault()}
-                >
-                    <div className="pdfViewer" />
-                    {this.renderTip()}
-                    {/* not supporting area highlights for now */}
-                    {/* {typeof enableAreaSelection === "function" ? (
+            <MouseTracker>
+
+                <div onPointerDown={this.onMouseDown}>
+                    <div
+                        ref={this.containerNodeRef}
+                        className="PdfHighlighter"
+                        onContextMenu={(e) => e.preventDefault()}
+                    >
+                        <div className="pdfViewer" />
+                        {this.renderTip()}
+                        {/* not supporting area highlights for now */}
+                        {/* {typeof enableAreaSelection === "function" ? (
             <MouseSelection
               onDragStart={() => this.toggleTextSelection(true)}
               onDragEnd={() => this.toggleTextSelection(false)}
@@ -675,8 +702,10 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
               }}
             />
           ) : null} */}
+                    </div>
                 </div>
-            </div>
+            </MouseTracker>
+
         );
     }
 
@@ -721,5 +750,7 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         );
     }
 }
+
+
 
 

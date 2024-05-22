@@ -1,7 +1,7 @@
 import { Avatar, Box, Combobox, Flex, Group, Input, InputBase, Text, useCombobox } from "@mantine/core";
 import { useEffect, useState } from "react";
 
-import { browserClient } from "@/supabase/BrowerClients";
+import { browserClient } from "@/supabase/BrowserClient";
 import { getInitials } from "@/ux/helper";
 
 function SelectOption({ avatar, color, initials, name }: { avatar: string, color: string, initials: string, name: string, }) {

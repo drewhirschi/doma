@@ -5,10 +5,10 @@ import { IconChevronRight, IconLogout, } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
 import { Session } from '@supabase/supabase-js';
-import { browserClient } from '@/supabase/BrowerClients';
+import { browserClient } from '@/supabase/BrowserClient';
 import classes from './UserButton.module.css';
-import { useRouter } from 'next/navigation';
 import { getInitials } from '@/ux/helper';
+import { useRouter } from 'next/navigation';
 
 export function UserButton({ collapsed }: { collapsed?: boolean }) {
 

@@ -1,12 +1,19 @@
-import { Avatar, Group, Progress, SimpleGrid, Table, TableTbody, TableTd, TableTh, TableThead, TableTr, Text } from "@mantine/core";
+import { Avatar, Box, Button, Group, Progress, SimpleGrid, Table, TableTbody, TableTd, TableTh, TableThead, TableTr, Text } from "@mantine/core";
 import { getCompletedContracts, getInitials, getTotalContracts } from "@/ux/helper";
 
 import MetadataItem from "@/components/MetadataItem";
+import { queueProjectContracts } from "@/actions/queueProject";
 import { serverClient } from "@/supabase/ServerClients";
 
 export default async function SettingsPage({ params }: { params: { projectId: string } }) {
 
   const supabase = serverClient()
+
+  async function queueProject() {
+    'use server'
+
+    await queueProjectContracts(params.projectId)
+  }
 
   const { data, error } = await supabase.from("project")
     .select("*, profile(*)")
@@ -16,7 +23,7 @@ export default async function SettingsPage({ params }: { params: { projectId: st
   if (error) {
     return <div>Error loading project</div>
   }
-  
+
   // @ts-ignore
   const memberRows = data.profile?.map((item) => (
     <TableTr key={item.display_name}>
@@ -53,8 +60,11 @@ export default async function SettingsPage({ params }: { params: { projectId: st
   ));
 
   return (
-    <div>
-      <SimpleGrid>
+    <Box p={"sm"}>
+      <form action={queueProject}>
+        <Button type="submit" >Queue contracts</Button>
+      </form>
+      <SimpleGrid >
         <MetadataItem header="Project Id" text={data.id} copyButton />
         <MetadataItem header="Tenant Id" text={data.tenant_id} copyButton />
       </SimpleGrid>
@@ -67,6 +77,6 @@ export default async function SettingsPage({ params }: { params: { projectId: st
         </TableThead>
         <TableTbody>{memberRows}</TableTbody>
       </Table>
-    </div>
+    </Box>
   );
 }

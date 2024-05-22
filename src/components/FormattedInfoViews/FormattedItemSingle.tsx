@@ -2,7 +2,6 @@ import { UseFormReturnType, useForm } from '@mantine/form';
 import { useEffect, useState } from "react";
 
 import { AnnotationsList } from "./AnnotationsList";
-import { browserClient } from '@/supabase/BrowerClients';
 import { notifications } from "@mantine/notifications";
 import { useDebouncedCallback } from "use-debounce";
 

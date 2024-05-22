@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { FileInput } from '@mantine/core';
 import { FileObject } from '@supabase/storage-js'
-import { browserClient } from '@/supabase/BrowerClients';
+import { browserClient } from '@/supabase/BrowserClient';
 import { formatBytes } from '@/ux/helper';
 import { unzipFile } from './AddContractsModal.actions';
 import { uploadTenantFile } from '@/supabase/Storage';

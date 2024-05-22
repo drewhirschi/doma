@@ -9,7 +9,7 @@ import { ContractReviewerLink } from '../PdfViewer/components/ContractReveiwerLi
 import { IconChevronRight } from '@tabler/icons-react';
 import Link from 'next/link';
 import { ReviewerCombobox } from '../ReviewerCombobox';
-import { browserClient } from '@/supabase/BrowerClients';
+import { browserClient } from '@/supabase/BrowserClient';
 import classnames from "./FileExplorer.module.css"
 
 interface FileItem {

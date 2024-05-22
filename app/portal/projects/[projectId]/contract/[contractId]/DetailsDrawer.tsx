@@ -2,7 +2,7 @@ import { Box, Button, Group, Select, Stack, Text, TextInput, Textarea } from "@m
 
 import { AgreementTypes } from "@/types/enums";
 import MetadataItem from "@/components/MetadataItem";
-import { browserClient } from "@/supabase/BrowerClients";
+import { browserClient } from "@/supabase/BrowserClient";
 import { notifications } from "@mantine/notifications";
 import { useForm } from '@mantine/form';
 import { useState } from "react";

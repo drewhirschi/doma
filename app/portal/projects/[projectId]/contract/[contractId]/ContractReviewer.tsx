@@ -16,7 +16,7 @@ import { FormatterSwitch } from '@/components/FormattedInfoViews/FormattedInfoSw
 import { FormatterWithInfo } from '@/types/complex';
 import { ScaledPosition } from '@/components/PdfViewer';
 import { SubMenu } from './SubMenu';
-import { browserClient } from "@/supabase/BrowerClients";
+import { browserClient } from "@/supabase/BrowserClient";
 import dynamic from 'next/dynamic'
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
@@ -194,31 +194,31 @@ export function ContractReviewer(props: Props) {
 
 
 
-            setLoadingFormatters((prevState) => prevState.concat([formatterKey]))
-            const formattedInfoRes = await actions.format(formatterKey, contract.id, projectId, inputData)
-            setLoadingFormatters((prevState) => prevState.filter(f => f !== formatterKey))
-            if (formattedInfoRes.error) {
-                // @ts-ignore
-                throw new Error(formattedInfoRes.error.message)
-            }
+            // setLoadingFormatters((prevState) => prevState.concat([formatterKey]))
+            // const formattedInfoRes = await actions.format(formatterKey, contract.id, projectId, inputData)
+            // setLoadingFormatters((prevState) => prevState.filter(f => f !== formatterKey))
+            // if (formattedInfoRes.error) {
+            //     // @ts-ignore
+            //     throw new Error(formattedInfoRes.error.message)
+            // }
 
 
-            if (formattedInfoRes.ok.length > 0) {
-                setFormatters((prevState) => {
-                    const updatedFormatters = prevState.map(formatter => {
-                        if (formatter.key === formatterKey && formatter.formatted_info.find(fi => fi.id == itemIndex)) {
-                            formatter.formatted_info.find(fi => fi.id == itemIndex)!.data = formattedInfoRes.ok[0]
-                        }
-                        return formatter
-                    })
-                    return updatedFormatters
-                })
-                const upsertRes = await supabase.from("formatted_info").update({ data: formattedInfoRes.ok[0] })
-                    .eq("id", itemIndex)
-                    .eq("formatter_key", formatterKey)
-                    .eq("contract_id", contract.id)
-                    .throwOnError()
-            }
+            // if (formattedInfoRes.ok.length > 0) {
+            //     setFormatters((prevState) => {
+            //         const updatedFormatters = prevState.map(formatter => {
+            //             if (formatter.key === formatterKey && formatter.formatted_info.find(fi => fi.id == itemIndex)) {
+            //                 formatter.formatted_info.find(fi => fi.id == itemIndex)!.data = formattedInfoRes.ok[0]
+            //             }
+            //             return formatter
+            //         })
+            //         return updatedFormatters
+            //     })
+            //     const upsertRes = await supabase.from("formatted_info").update({ data: formattedInfoRes.ok[0] })
+            //         .eq("id", itemIndex)
+            //         .eq("formatter_key", formatterKey)
+            //         .eq("contract_id", contract.id)
+            //         .throwOnError()
+            // }
 
 
 
@@ -253,7 +253,7 @@ export function ContractReviewer(props: Props) {
         <>
 
             <PanelGroup direction="horizontal">
-                <Panel defaultSize={40} minSize={20} style={{ height: "100dvh" }}>
+                <Panel defaultSize={40} minSize={30} style={{ height: "100dvh" }}>
                     <Stack pb={"lg"} justify="space-between" align="stretch" gap="xs" pl={"md"} style={{ height: "100dvh" }}>
                         <Group mt={"md"}>
                             <BackButton href={backUrl} style={{ alignSelf: "flex-start" }} />

@@ -32,17 +32,6 @@ export default function HomePage() {
 
   return (
     <>
-      <Head>
-        <meta property="og:title" content="Home Page Title" />
-        <meta property="og:description" content="Description of the home page." />
-        <meta property="og:image" content="https://yourwebsite.com/path-to-your-home-thumbnail.jpg" />
-        <meta property="og:url" content="https://yourwebsite.com/home" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Home Page Title" />
-        <meta name="twitter:description" content="Description of the home page." />
-        <meta name="twitter:image" content="https://yourwebsite.com/path-to-your-home-thumbnail.jpg" />
-      </Head>
       <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350} c={"gray.8"} className={styles.landingPageContainer}>
 
         <Group justify="flex-end"><LoginButton /></Group>

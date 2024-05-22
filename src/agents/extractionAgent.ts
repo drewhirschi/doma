@@ -106,7 +106,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
             const res: ChatCompletion = await openai.chat.completions.create({
                 messages: buildExtracitonMessages(extractor, xmlContractText),
-                model: 'gpt-4-turbo',
+                model: 'gpt-4o',
                 // model: 'gpt-3.5-turbo',
                 temperature: 0,
                 response_format: { 'type': "json_object" }

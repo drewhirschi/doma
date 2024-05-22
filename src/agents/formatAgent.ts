@@ -86,10 +86,12 @@ export async function formatPipeline(sb: SupabaseClient<Database>, contractId: s
     return results
 }
 
-export async function generateAgentJsonResponse(sysMessage: string, input: string, model = "gpt-4-turbo"): Promise<IResp<any>> {
+export async function generateAgentJsonResponse(sysMessage: string, input: string, model = "gpt-4o"): Promise<IResp<any>> {
     const oaiClient = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
+
+    // console.log(sysMessage, input)
 
     try {
         const res = await oaiClient.chat.completions.create({

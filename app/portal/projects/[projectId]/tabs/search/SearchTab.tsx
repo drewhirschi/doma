@@ -1,16 +1,15 @@
 "use client"
 
-import { Anchor, Avatar, Box, Button, Container, Grid, Group, Pagination, Select, SimpleGrid, Space, Table, Tabs, TabsList, TabsPanel, TabsTab, Text, TextInput, Title, rem } from '@mantine/core';
+import { Box, Group, Pagination, Table, Text, TextInput, Title, rem } from '@mantine/core';
 import { IconSearch, IconSettings } from '@tabler/icons-react';
-import { RedirectType, redirect, usePathname, useRouter, useSearchParams, } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams, } from 'next/navigation';
 
 import { AgreementTypeBadge } from '@/components/AgreementTypeBadge';
 import { ContractReviewerLink } from '@/components/PdfViewer/components/ContractReveiwerLink';
 import { FilterPopover } from '../overview/Filter';
-import Link from 'next/link';
 import { PAGE_SIZE } from './shared';
 import { ReviewerCombobox } from '@/components/ReviewerCombobox';
-import { browserClient } from '@/supabase/BrowerClients';
+import { browserClient } from '@/supabase/BrowserClient';
 import { useDebouncedCallback } from 'use-debounce';
 
 interface Props {
@@ -69,12 +68,12 @@ export function SearchTab({ project, contracts, contractCount }: Props) {
                 <Table.Td>
                     {contract.description}
                 </Table.Td>
-                {/* <Table.Td>
+                <Table.Td>
                     {contract.completed ? "Yes" : "No"}
-                </Table.Td> */}
-                {/* <Table.Td>
+                </Table.Td>
+                <Table.Td>
                     {contract.npages ?? 1}
-                </Table.Td> */}
+                </Table.Td>
                 <Table.Td>
                     {contract.tag && <AgreementTypeBadge type={contract.tag}  contractId={contract.id}/>}
                 </Table.Td>
@@ -112,8 +111,8 @@ export function SearchTab({ project, contracts, contractCount }: Props) {
                     <Table.Tr>
                         <Table.Th>Contract</Table.Th>
                         <Table.Th>Description</Table.Th>
-                        {/* <Table.Th>Completed</Table.Th> */}
-                        {/* <Table.Th>Pages</Table.Th> */}
+                        <Table.Th>Completed</Table.Th>
+                        <Table.Th>Pages</Table.Th>
                         <Table.Th>Agreement Type</Table.Th>
                         <Table.Th>Assigned To</Table.Th>
 

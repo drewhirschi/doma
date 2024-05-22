@@ -26,6 +26,7 @@ const getClientRects = (
 ): Array<LTWHP> => {
   const clientRects = Array.from(range.getClientRects());
 
+
   const rects: LTWHP[] = [];
 
   for (const clientRect of clientRects) {
@@ -39,22 +40,24 @@ const getClientRects = (
         clientRect.width < pageRect.width &&
         clientRect.height < pageRect.height
       ) {
-        // const highlightedRect = {
-        //   top: clientRect.top + page.node.scrollTop - pageRect.top,
-        //   left: clientRect.left + page.node.scrollLeft - pageRect.left,
-        //   width: clientRect.width,
-        //   height: clientRect.height,
-        //   pageNumber: page.number,
-        // } as LTWHP;
-        
-        //underline instead of highlight
         const highlightedRect = {
-          top: clientRect.bottom - clientRect.height * 0.2 + page.node.scrollTop - pageRect.top,
+          top: clientRect.top + page.node.scrollTop - pageRect.top,
+          bottom: clientRect.bottom,
           left: clientRect.left + page.node.scrollLeft - pageRect.left,
+          right: clientRect.right,
           width: clientRect.width,
-          height: clientRect.height * 0.1,
+          height: clientRect.height,
           pageNumber: page.number,
         } as LTWHP;
+
+        //underline instead of highlight
+        // const highlightedRect = {
+        //   top: clientRect.bottom - clientRect.height * 0.2 + page.node.scrollTop - pageRect.top,
+        //   left: clientRect.left + page.node.scrollLeft - pageRect.left,
+        //   width: clientRect.width,
+        //   height: clientRect.height * 0.1,
+        //   pageNumber: page.number,
+        // } as LTWHP;
 
         rects.push(highlightedRect);
       }
@@ -65,3 +68,5 @@ const getClientRects = (
 };
 
 export default getClientRects;
+
+

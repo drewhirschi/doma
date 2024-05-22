@@ -163,6 +163,44 @@ export type Database = {
           },
         ]
       }
+      contract_job_queue: {
+        Row: {
+          contract_id: string
+          created_at: string
+          id: number
+          job_type: string
+          payload: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          id?: number
+          job_type: string
+          payload?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          id?: number
+          job_type?: string
+          payload?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_job_queue_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contract"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_line: {
         Row: {
           contract_id: string

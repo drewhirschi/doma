@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Combobox, ScrollArea, Text, useCombobox } from '@mantine/core';
 
-import { browserClient } from '@/supabase/BrowerClients';
+import { browserClient } from '@/supabase/BrowserClient';
 import { useState } from 'react';
 
 export function AgreementTypeBadge({ type, contractId }: { type: string, contractId: string }) {

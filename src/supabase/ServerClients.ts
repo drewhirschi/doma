@@ -1,9 +1,24 @@
-import { type CookieOptions, createBrowserClient, createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server'
+import { type CookieOptions, createServerClient } from '@supabase/ssr';
 
 import { cookies } from 'next/headers'
-import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
+import { SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL } from './envs';
+
+
+if (!SUPABASE_SERVICE_ROLE_KEY) {
+    console.error("No service role key")
+    // throw new Error("No service role key")
+} 
+if (!SUPABASE_ANON_KEY) {
+    console.error("No anon key")
+    // throw new Error("No anon key")
+} 
+if (!SUPABASE_URL) {
+    console.error("No supabase url")
+    // throw new Error("No supabase url")
+}
+
 
 /**
  * DANGEROUS Creates a full access service client for supabase.
@@ -11,14 +26,14 @@ import { Database } from '@/types/supabase';
  * @returns {SupabaseClient<Database>} The database client.
  * @throws {Error} If the SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables are not set.
  */
-export const fullAccessServiceClient = () => createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+export const fullAccessServiceClient = () => createClient<Database>(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
 
 
 export const serverClient = () => {
     const cookieStore = cookies()
     return createServerClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        SUPABASE_URL!,
+        SUPABASE_ANON_KEY!,
         {
             cookies: {
                 get(name: string) {
@@ -35,8 +50,8 @@ export const routeClient = () => {
     const cookieStore = cookies()
 
     return createServerClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        SUPABASE_URL!,
+        SUPABASE_ANON_KEY!,
         {
             cookies: {
                 get(name: string) {
@@ -57,8 +72,8 @@ export const serverActionClient = () => {
     const cookieStore = cookies()
 
     return createServerClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        SUPABASE_URL!,
+        SUPABASE_ANON_KEY!,
         {
             cookies: {
                 get(name: string) {

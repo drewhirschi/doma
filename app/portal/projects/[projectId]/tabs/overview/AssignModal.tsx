@@ -1,7 +1,7 @@
 import { Button, Modal, Stack } from '@mantine/core';
 
 import { ReviewerCombobox } from '@/components/ReviewerCombobox';
-import { browserClient } from '@/supabase/BrowerClients';
+import { browserClient } from '@/supabase/BrowserClient';
 import { notifications } from '@mantine/notifications';
 import { revalidatePath } from 'next/cache';
 import { useDisclosure } from '@mantine/hooks';

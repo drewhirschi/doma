@@ -1,7 +1,7 @@
 "use server"
 
-import { serverActionClient } from "@/supabase/ServerClients"
 import { revalidatePath } from "next/cache"
+import { serverActionClient } from "@/supabase/ServerClients"
 
 export async function updateContractAssignment(assigneeId: string, contractId: string) {
     const supabase = serverActionClient()
