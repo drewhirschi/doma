@@ -186,7 +186,7 @@ export default function HomePage() {
           <Container size={"1200px"}>
             <Stack >
               <Title order={1}>What integration risk?</Title>
-              <Text mb={"sm"} size="xl">For early customers there will be zero setup or required training. Simply share a deal's data room permissions and receive a completed interactive due diligence chart in 24 hours. We will use Parsl on your behalf to smooth out the rough edges and cater it to your needs. Worried about AI accuracy? All results will be double checked by an attorney, like getting a lawyer at the price of a SaaS.</Text>
+              <Text mb={"sm"} size="xl">For early customers there will be zero setup or required training. Simply share a deal&apos;s data room permissions and receive a completed interactive due diligence chart in 24 hours. We will use Parsl on your behalf to smooth out the rough edges and cater it to your needs. Worried about AI accuracy? All results will be double checked by an attorney, like getting a lawyer at the price of a SaaS.</Text>
               <Group>
                 <WaitlistSignup />
               </Group>
