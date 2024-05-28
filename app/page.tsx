@@ -1,4 +1,4 @@
-import { Anchor, Box, Center, Container, Divider, Grid, GridCol, Group, Image, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { Anchor, Box, Center, Container, Divider, Grid, GridCol, Group, Image, List, ListItem, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 
 import GridBackground from "@/components/GridBackground";
 import Head from "next/head";
@@ -49,7 +49,7 @@ export default function HomePage() {
 
                 <Text style={{ textAlign: 'left', alignSelf: "flex-start", fontWeight: 400, fontSize: 64 }} variant="gradient" gradient={{ from: 'dark.8', to: 'dark.3', deg: -45 }}
                 >Parsl</Text>
-                <Title order={1} ta={"center"}>Accurate AI Legal Due Diligence for M&A</Title>
+                <Title order={1} ta={"center"}>Drowning in M&A Documents?  We Can Help You Breathe.</Title>
                 <WaitlistSignup />
 
               </Stack>
@@ -69,14 +69,14 @@ export default function HomePage() {
 
 
             <Stack >
-              <Title order={1}>Make informed decisions in hours, not weeks</Title>
+              <Title order={1}>Empowering M&A professionals</Title>
               <Grid
                 gutter={"xl"}
 
               >
 
                 <GridCol span={{ base: 12, md: 4 }}>
-                  <Text mb={"sm"} size="xl">Beat out competition by making compelling offers faster and identifying lemons earlier.</Text>
+                  <Text mb={"sm"} size="xl">Parsl automates repetitive tasks like contract review, data extraction, and deal management so you can keep your head above water. This frees up valuable time to focus on higher-level tasks requiring strategic thinking and legal expertise.</Text>
                   <WaitlistSignup />
                 </GridCol>
                 <GridCol span={{ base: 12, md: 8 }}>
@@ -108,7 +108,7 @@ export default function HomePage() {
 
 
             <Stack >
-              <Title order={1}>Slash your legal spend</Title>
+              <Title order={1}>M&A contract review is hard</Title>
               <Grid
                 gutter={"xl"}
 
@@ -123,7 +123,7 @@ export default function HomePage() {
                     fallbackSrc="https://placehold.co/750x500?text=Example" />
                 </GridCol>
                 <GridCol span={{ base: 12, md: 4 }}>
-                  <Text mb={"sm"} style={{ alignSelf: "flex-end" }} size="xl">Remove due diligence roadblocks and resolve red flags prior to handing contract review over to outside counsel.</Text>
+                  <Text mb={"sm"} style={{ alignSelf: "flex-end" }} size="xl">M&A due diligence is ambiguous and often done by associates still in training. There’s a lot on the line and always a worry that crucial details might be overlooked in a sea of paperwork. Parsl utilizes AI to bring peace of mind by ensuring a thorough and standardized review process. Parsl increases confidence by catching potential issues early and enables review of documents that were before not feasible.</Text>
                   <WaitlistSignup />
                 </GridCol>
               </Grid>
@@ -144,11 +144,11 @@ export default function HomePage() {
 
 
             <Stack >
-              <Title order={1}>Mitigate risk with AI</Title>
+              <Title order={1}>Stand out from the crowd</Title>
               <Grid gutter={"xl"}>
 
                 <GridCol span={{ base: 12, sm: 4 }}>
-                  <Text mb={"sm"} size="xl">Merge the unique strengths of manual and AI automated due diligence for better accuracy.</Text>
+                  <Text mb={"sm"} size="xl">The legal world is moving faster than it ever has and nobody wants to be left behind. Clients are looking for firms that are efficient, close deals fast, utilize technology enabled insights, and offer predictable pricing. With Parsl your M&A group will be at the forefront of the industry and in a prime position to provide your clients the value they want.</Text>
                   <WaitlistSignup />
                 </GridCol>
                 <GridCol span={{ base: 12, sm: 8 }}>
@@ -171,40 +171,62 @@ export default function HomePage() {
 
         <Box py={60}>
           <Container size={"1200px"}>
-
-
             <Stack >
-              <Title order={1}>Built for M&A professionals</Title>
-              {/* <Grid gutter={"xl"}> */}
-
-              {/* <GridCol span={{ base: 12, md: 4 }}> */}
-              <Text mb={"sm"} size="xl">Seamless workflow integration, Auditable AI results, Enhanced purchase agreement negotiation, Supplemental request support, Team collaboration, and much more.</Text>
+              <Title order={1}>Parsl is unique</Title>
+              <Text mb={"sm"} size="xl">No other AI platform is as purpose-built and easy to use for M&A as Parsl. Parsl goes beyond verbatim clause extraction by automating the backend work of interpreting and applying the clauses. The results are simple enough for nonlawyers to understand and are easily queried to make populating disclosure schedules seamless.</Text>
               <Group>
-
                 <WaitlistSignup />
               </Group>
-              {/* </GridCol> */}
-              {/* <GridCol span={{ base: 12, md: 8 }}>
-                
-              </GridCol> */}
-              {/* </Grid> */}
             </Stack>
+          </Container>
+        </Box>
+
+        <Divider />
+        <Box py={60}>
+          <Container size={"1200px"}>
+            <Stack >
+              <Title order={1}>What integration risk?</Title>
+              <Text mb={"sm"} size="xl">For early customers there will be zero setup or required training. Simply share a deal's data room permissions and receive a completed interactive due diligence chart in 24 hours. We will use Parsl on your behalf to smooth out the rough edges and cater it to your needs. Worried about AI accuracy? All results will be double checked by an attorney, like getting a lawyer at the price of a SaaS.</Text>
+              <Group>
+                <WaitlistSignup />
+              </Group>
+            </Stack>
+          </Container>
+        </Box>
+
+        <Divider />
+        <Box py={60}>
+          <Container size={"1200px"}>
+            <Stack >
+              <Title order={1}>Security and privacy at the core</Title>
+              <Text mb={"sm"} size="xl">Data security is our top priority. We implement industry-leading security practices to ensure the confidentiality, integrity, and availability of your information. Our measures include:
+                <List p={"sm"}>
+                  <ListItem>Encrypting data both in transit and at rest using robust encryption standards.</ListItem>
+                  <ListItem>Conducting regular security audits and vulnerability assessments to identify and mitigate potential threats.</ListItem>
+                  <ListItem>Enforcing Multi-factor authentication and role-based access control ensure that only authorized personnel can access sensitive information.</ListItem>
+                  <ListItem>Continuous monitoring of our systems for suspicious activities to prevent breaches.</ListItem>
+                </List>
 
 
 
+
+              </Text>
+              <Group>
+                <WaitlistSignup />
+              </Group>
+            </Stack>
           </Container>
         </Box>
 
         <Divider />
 
 
-        <Box>
+        <Box pos={"relative"}>
 
           <GridBackground y="100%" x="80%" />
-          <Box mt={"10vh"} pb={"5vh"} >
+          {/* <Box mt={"10vh"} pb={"5vh"} >
             <Meteors />
-
-            {/* <FrostedGlassSVG> */}
+ 
             <Container size={1260}>
               <Paper
                 shadow="xl"
@@ -229,26 +251,20 @@ export default function HomePage() {
                 </Stack>
               </Paper>
             </Container>
-            {/* </FrostedGlassSVG> */}
-          </Box>
+          </Box> */}
 
 
           <Box pt={"10vh"} pb={"15vh"} pos={"relative"}>
 
             <Container size={1200} style={{ zIndex: 2 }} pos={"relative"}>
               <Stack gap={"sm"} align="center">
-
                 <Title style={{ alignSelf: "flex-start" }} mb={"sm"} >Parsl in action</Title>
                 <div
                   className={styles.videoContainer}
-
                 >
                   <iframe
-                    // width="560" height="315"
                     className={styles.videoIframe}
                     src="https://www.youtube.com/embed/PlgKMQCawaM?si=kXJcVckA78rEfQhJ"
-                    // width="100%"
-                    // height="100%"
                     title="Parsl Demo"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -261,13 +277,7 @@ export default function HomePage() {
         </Box>
 
 
-        <Box bg={"dark.7"} mih={500} c={"white"}>
-
-
-
-
-
-
+        <Box bg={"dark.7"} h={300} c={"white"}>
           <Grid py={"xl"} id="footer">
             <GridCol span={{ base: 12, md: 6 }}>
               <Group justify="center" >© 2024 Atlas Technology LLC. All rights reserved.</Group>
