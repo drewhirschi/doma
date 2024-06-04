@@ -1,19 +1,19 @@
 import { Avatar, Box, Button, Group, Progress, SimpleGrid, Table, TableTbody, TableTd, TableTh, TableThead, TableTr, Text } from "@mantine/core";
 import { getCompletedContracts, getInitials, getTotalContracts } from "@/ux/helper";
+import { serverActionClient, serverClient } from "@/supabase/ServerClients";
 
 import MetadataItem from "@/components/MetadataItem";
+import { ProjectActionButtons } from "./ProjectActionButtons";
+import axios from "axios";
+import { convertProjectWordFiles } from "@/actions/convertWordFiles";
+import { getUserTenant } from "@/shared/getUserTenant";
 import { queueProjectContracts } from "@/actions/queueProject";
-import { serverClient } from "@/supabase/ServerClients";
 
 export default async function SettingsPage({ params }: { params: { projectId: string } }) {
 
   const supabase = serverClient()
 
-  async function queueProject() {
-    'use server'
-
-    await queueProjectContracts(params.projectId)
-  }
+  
 
   const { data, error } = await supabase.from("project")
     .select("*, profile(*)")
@@ -61,9 +61,7 @@ export default async function SettingsPage({ params }: { params: { projectId: st
 
   return (
     <Box p={"sm"}>
-      <form action={queueProject}>
-        <Button type="submit" >Queue contracts</Button>
-      </form>
+      <ProjectActionButtons projectId={params.projectId}/>
       <SimpleGrid >
         <MetadataItem header="Project Id" text={data.id} copyButton />
         <MetadataItem header="Tenant Id" text={data.tenant_id} copyButton />

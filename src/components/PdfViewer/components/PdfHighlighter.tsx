@@ -625,18 +625,18 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
         // const { onSelectionFinished, enableAreaSelection } = this.props;
 
         return (
-            <MouseTracker>
+            // <MouseTracker>
 
-                <div onPointerDown={this.onMouseDown}>
-                    <div
-                        ref={this.containerNodeRef}
-                        className="PdfHighlighter"
-                        onContextMenu={(e) => e.preventDefault()}
-                    >
-                        <div className="pdfViewer" />
-                        {this.renderTip()}
-                        {/* not supporting area highlights for now */}
-                        {/* {typeof enableAreaSelection === "function" ? (
+            <div onPointerDown={this.onMouseDown}>
+                <div
+                    ref={this.containerNodeRef}
+                    className="PdfHighlighter"
+                    onContextMenu={(e) => e.preventDefault()}
+                >
+                    <div className="pdfViewer" />
+                    {this.renderTip()}
+                    {/* not supporting area highlights for now */}
+                    {/* {typeof enableAreaSelection === "function" ? (
             <MouseSelection
               onDragStart={() => this.toggleTextSelection(true)}
               onDragEnd={() => this.toggleTextSelection(false)}
@@ -702,9 +702,9 @@ export class PdfHighlighter<T_HT extends IHighlight> extends PureComponent<
               }}
             />
           ) : null} */}
-                    </div>
                 </div>
-            </MouseTracker>
+            </div>
+            // </MouseTracker>
 
         );
     }

@@ -131,8 +131,8 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                                     highlights={highlights}
                                     enableAreaSelection={(event) => event.altKey}
                                     onScrollChange={resetHash}
-                                    // pdfScaleValue="page-width"
-                                    pdfScaleValue="1"
+                                    pdfScaleValue="page-width"
+                                    // pdfScaleValue="1"
                                     focusedHighlight={focusedHighlight}
                                     onSelectionFinished={(
                                         position,

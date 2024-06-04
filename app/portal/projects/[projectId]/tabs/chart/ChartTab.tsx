@@ -1,13 +1,16 @@
 "use client"
 
-import { Anchor, Table, TableScrollContainer, TableTbody, TableTh, TableThead, TableTr } from "@mantine/core";
+import { ActionIcon, Anchor, Group, Table, TableScrollContainer, TableTbody, TableTh, TableThead, TableTr, Tooltip } from "@mantine/core";
 import { IFormatResponse, IPOwnershipFormatResponse } from "@/types/formattersTypes";
+import { writeFile, utils as xlsxUtils } from "xlsx";
 
 import { ContractReviewerLink } from "@/components/PdfViewer/components/ContractReveiwerLink";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedInfoView } from "./FormattedInfoView";
+import { IconFileDownload } from "@tabler/icons-react";
 import Link from "next/link";
 import classes from "./Chart.module.css"
+import { formattedInfoStr } from "./utils";
 import { serverClient } from "@/supabase/ServerClients";
 
 interface Props {
@@ -17,6 +20,16 @@ interface Props {
 }
 
 export default function Chart(props: Props) {
+
+
+    const exportToExcel = (data: string[][], fileName: string) => {
+        const ws = xlsxUtils.aoa_to_sheet(data);
+        ws['!cols'] = data[0].map(d => ({wpx:300}))
+        ws['!rows'] = [{hpx:15}, ...data.slice(1).map(d => ({hpx:45}))]
+        const wb = xlsxUtils.book_new();
+        xlsxUtils.book_append_sheet(wb, ws, 'Sheet1');
+        writeFile(wb, `${fileName}.xlsx`);
+    };
 
     const formatterRows = props.contracts.map(contract => {
 
@@ -68,50 +81,79 @@ export default function Chart(props: Props) {
 
     return (
         // <TableScrollContainer minWidth={500} flex={1}   >
-        <Table
-            horizontalSpacing={"md"}
-            withColumnBorders
-            stickyHeader
-            // stickyHeaderOffset={60}
-            classNames={{
-                table: classes.table,
-                th: classes.th,
-                td: classes.td
-                // thead: classes.thead,
-                // tbody: classes.tbody,
-                // tr: classes.tr,
+        <>
+            <Group p={"sm"}>
+                <Tooltip label="Download as xlsx">
+                    <ActionIcon variant="light" aria-label="Download as xlsx" onClick={() => {
 
-            }}
-        >
-
-            <TableThead
-            //  style={{position:"sticky"}}
-            >
-                <TableTr>
-                    <TableTh miw={150} mx={"sm"} styles={{
-                        th: {
-                            whiteSpace: "nowrap",
+                        const headerRow = ['name', ...props.formatters.map(f => f.key)]
+                        const excelData:string[][] = [headerRow]
+                        for (const contract of props.contracts) {
+                            // const row = new Map()
+                            const row:string[] = []
+                            row.push(contract.display_name ?? contract.id)
+                            props.formatters.forEach((formatter) => {
+                                const formattedInfo = formattedInfoStr({
+                                    infoArray: formatter.formatted_info.filter((fi: FormattedInfo_SB) => fi.contract_id == contract.id),
+                                    projectId: props.projectId
+                                })
+                                row.push(formattedInfo)
+                            })
+                            excelData.push(row)
                         }
-                    }}>Contract name</TableTh>
-                    {/* {props.parslets.map(parslet => <TableTh key={`th_${parslet.id}`} miw={150} mx={"sm"} styles={{
-                            th: {
-                                whiteSpace: "nowrap"
 
+
+
+
+                        exportToExcel(excelData, "Project_Chart")
+                    }}>
+                        <IconFileDownload style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                    </ActionIcon>
+                </Tooltip>
+
+            </Group>
+            <Table
+                horizontalSpacing={"md"}
+                withColumnBorders
+                stickyHeader
+                // stickyHeaderOffset={60}
+                classNames={{
+                    table: classes.table,
+                    th: classes.th,
+                    td: classes.td
+                    // thead: classes.thead,
+                    // tbody: classes.tbody,
+                    // tr: classes.tr,
+
+                }}
+            >
+
+                <TableThead>
+                    <TableTr>
+                        <TableTh miw={150} mx={"sm"} styles={{
+                            th: {
+                                whiteSpace: "nowrap",
                             }
-                        }}>{parslet.display_name}</TableTh>)} */}
-                    {props.formatters.map(formatter => <TableTh key={`th_${formatter.key}`} miw={150} mx={"sm"} styles={{
+                        }}>Contract name</TableTh>
+                        {/* {props.parslets.map(parslet => <TableTh key={`th_${parslet.id}`} miw={150} mx={"sm"} styles={{
                         th: {
                             whiteSpace: "nowrap"
-
+                            
                         }
-                    }}>{formatter.display_name}</TableTh>)}
+                    }}>{parslet.display_name}</TableTh>)} */}
+                        {props.formatters.map(formatter => <TableTh key={`th_${formatter.key}`} miw={150} mx={"sm"} styles={{
+                            th: {
+                                whiteSpace: "nowrap"
+                            }
+                        }}>{formatter.display_name}</TableTh>)}
 
-                </TableTr>
-            </TableThead>
-            {/* <TableTbody>{parsletRows}</TableTbody> */}
-            <TableTbody>{formatterRows}</TableTbody>
-        </Table>
+                    </TableTr>
+                </TableThead>
+                {/* <TableTbody>{parsletRows}</TableTbody> */}
+                <TableTbody>{formatterRows}</TableTbody>
+            </Table>
 
+        </>
         //  </TableScrollContainer>
     );
 }

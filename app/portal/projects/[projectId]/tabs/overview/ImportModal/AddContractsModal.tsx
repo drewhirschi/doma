@@ -43,7 +43,7 @@ export function AddContractsModalButton({ project }: Props) {
     const supabase = browserClient()
     const [uploadStatus, setUploadStatus] = useState<WizStatus>(WizStatus.IDLE)
     const [files, setFiles] = useState<FileWithPath[]>([]);
-    const [uploadProgress, setUploadProgress] = useState(0)
+    const [uploadProgress, setUploadProgress] = useState<Map<string, number>>(new Map())
     const [uploadedFiles, setUploadedFiles] = useState<FileObject[]>([])
 
     const [activeStep, setActiveStep] = useState(WizSteps.UPLOAD);
@@ -56,11 +56,21 @@ export function AddContractsModalButton({ project }: Props) {
         e.preventDefault();
         try {
             setUploadStatus(WizStatus.UPLOADING);
-            const uploadurl = await uploadTenantFile(supabase, `projects/${project.id}/${files[0]?.name}`, files[0]!, {
-                updatePercentage: (percentage) => {
-                    setUploadProgress(percentage);
-                }
-            });
+            const uploadProms = files.map(async (file) => {
+
+                const fileName = `projects/${project.id}/${file?.name}`
+                const uploadurl = await uploadTenantFile(supabase, fileName, file, {
+                    updatePercentage: (percentage) => {
+                        setUploadProgress((prevState) => {
+                            prevState.set(fileName, percentage)
+                            return prevState
+                        });
+                    }
+                });
+
+            })
+
+            await Promise.all(uploadProms)
             setUploadStatus(WizStatus.UPLOAD_SUCCESS);
         } catch (error) {
             setUploadStatus(WizStatus.UPLOAD_ERROR);
@@ -68,20 +78,25 @@ export function AddContractsModalButton({ project }: Props) {
         }
 
         setUploadStatus(WizStatus.UNZIPPING);
-        setActiveStep(WizSteps.UNZIP);
+        // setActiveStep(WizSteps.UNZIP);
 
         try {
-            await unzipFile(`projects/${project.id}/${files[0]?.name}`, project.id);
+            files.map(async (file) => {
+                if (file.type === "application/zip") {
+                    await unzipFile(`projects/${project.id}/${file?.name}`, project.id);
+
+                }
+            })
             setUploadStatus(WizStatus.UNZIP_SUCCESS);
         } catch (error) {
             setUploadStatus(WizStatus.UNZIPPING_ERROR);
 
         }
 
-        setActiveStep(WizSteps.ASSIGN);
+        // setActiveStep(WizSteps.ASSIGN);
 
         try {
-           
+
 
             const filesListRes = await supabase.storage.from(project.tenant_id).list(`projects/${project.id}/${files[0]?.name.replace(".zip", "")}`)
             if (filesListRes.error) {
@@ -131,11 +146,18 @@ export function AddContractsModalButton({ project }: Props) {
                             <Stack>
 
                                 <Dropzone
+                                    useFsAccessApi
                                     onDrop={(files) => setFiles(files)}
                                     onReject={(files) => console.log('rejected files', files)}
                                     maxSize={5 * 1024 ** 3}
-                                    accept={['application/zip', "application/x-zip-compressed"]}
-                                    multiple={false}
+                                    accept={['application/zip',
+                                        "application/x-zip-compressed",
+                                        'application/pdf',
+                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                        'text/csv'
+                                    ]}
+                                    multiple={true}
                                 >
                                     <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: 'none' }}>
                                         <Dropzone.Accept>
@@ -199,9 +221,9 @@ export function AddContractsModalButton({ project }: Props) {
                                                 <Progress.Section
                                                     color={uploadStatus === WizStatus.UPLOAD_SUCCESS ? "green" : "blue"}
                                                     animated={uploadStatus === WizStatus.UPLOADING}
-                                                    value={uploadProgress * 100}
+                                                    value={uploadProgress.get(file?.path ?? "") ?? 0 * 100}
                                                     style={{
-                                                        transform: `translateX(-${100 - uploadProgress * 100}%)`,
+                                                        transform: `translateX(-${100 - (uploadProgress.get(file?.path ?? "") ?? 0) * 100}%)`,
                                                         transition: "transform 200ms ease", // Add CSS transition
                                                     }}
                                                 />

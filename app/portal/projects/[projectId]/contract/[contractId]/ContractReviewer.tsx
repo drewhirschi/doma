@@ -194,31 +194,31 @@ export function ContractReviewer(props: Props) {
 
 
 
-            // setLoadingFormatters((prevState) => prevState.concat([formatterKey]))
-            // const formattedInfoRes = await actions.format(formatterKey, contract.id, projectId, inputData)
-            // setLoadingFormatters((prevState) => prevState.filter(f => f !== formatterKey))
-            // if (formattedInfoRes.error) {
-            //     // @ts-ignore
-            //     throw new Error(formattedInfoRes.error.message)
-            // }
+            setLoadingFormatters((prevState) => prevState.concat([formatterKey]))
+            const formattedInfoRes = await actions.format(formatterKey, contract.id, projectId, inputData)
+            setLoadingFormatters((prevState) => prevState.filter(f => f !== formatterKey))
+            if (formattedInfoRes.error) {
+                // @ts-ignore
+                throw new Error(formattedInfoRes.error.message)
+            }
 
 
-            // if (formattedInfoRes.ok.length > 0) {
-            //     setFormatters((prevState) => {
-            //         const updatedFormatters = prevState.map(formatter => {
-            //             if (formatter.key === formatterKey && formatter.formatted_info.find(fi => fi.id == itemIndex)) {
-            //                 formatter.formatted_info.find(fi => fi.id == itemIndex)!.data = formattedInfoRes.ok[0]
-            //             }
-            //             return formatter
-            //         })
-            //         return updatedFormatters
-            //     })
-            //     const upsertRes = await supabase.from("formatted_info").update({ data: formattedInfoRes.ok[0] })
-            //         .eq("id", itemIndex)
-            //         .eq("formatter_key", formatterKey)
-            //         .eq("contract_id", contract.id)
-            //         .throwOnError()
-            // }
+            if (formattedInfoRes.ok.length > 0) {
+                setFormatters((prevState) => {
+                    const updatedFormatters = prevState.map(formatter => {
+                        if (formatter.key === formatterKey && formatter.formatted_info.find(fi => fi.id == itemIndex)) {
+                            formatter.formatted_info.find(fi => fi.id == itemIndex)!.data = formattedInfoRes.ok[0]
+                        }
+                        return formatter
+                    })
+                    return updatedFormatters
+                })
+                const upsertRes = await supabase.from("formatted_info").update({ data: formattedInfoRes.ok[0] })
+                    .eq("id", itemIndex)
+                    .eq("formatter_key", formatterKey)
+                    .eq("contract_id", contract.id)
+                    .throwOnError()
+            }
 
 
 

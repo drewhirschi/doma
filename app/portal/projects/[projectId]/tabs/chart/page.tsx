@@ -10,28 +10,26 @@ export default async function Page({ params }: { params: { projectId: string } }
     const supabase = serverClient()
 
 
-    const [projectQ] = await Promise.all([
-        supabase.from("project").select("*, contract(*)").eq("id", params.projectId).single(),
+    const [contractq] = await Promise.all([
+        supabase.from("contract").select("*").eq("project_id", params.projectId).limit(100),
         // supabase.from("parslet").select("*, contract_note(content)").order("order", { ascending: true })
 
     ])
     
     
-    if (!projectQ.data ) {
-        console.error(projectQ.error)
+    if (contractq.error ) {
+        console.error(contractq.error)
         throw new Error("Failed to fetch data")
     }
     
     const formattersq = await supabase.from("formatters")
     .select("*, formatted_info(*, annotation(*))")
     // .in("key", [FormatterKeys.agreementInfo, FormatterKeys.license, FormatterKeys.ipOwnership, FormatterKeys.paymentTerms, FormatterKeys.assignability, FormatterKeys.term])
-    .in("formatted_info.contract_id", [projectQ.data.contract.map((c) => c.id)])
+    .in("formatted_info.contract_id", [contractq.data.map((c) => c.id)])
     .order("priority", { ascending: true })
 
 
-    // projectQ.data.contract.forEach(contract => {
-    //     contract.contract_note.sort((a, b) => (a.parslet?.order ?? 0) - (b.parslet?.order ?? 0))
-    // })
+    
 
 
 
@@ -40,7 +38,7 @@ export default async function Page({ params }: { params: { projectId: string } }
      
 
 
-        <Chart projectId={params.projectId} contracts={projectQ.data?.contract ?? []} formatters={formattersq.data ?? []}/>
+        <Chart projectId={params.projectId} contracts={contractq.data ?? []} formatters={formattersq.data ?? []}/>
 
     );
 }

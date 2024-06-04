@@ -1,19 +1,27 @@
 import * as tus from 'tus-js-client'
 
+import { Database } from '@/types/supabase';
+import { SUPABASE_URL } from './envs';
 import { SupabaseClient } from '@supabase/supabase-js';
 
-export async function uploadTenantFile(supabase: SupabaseClient, fileName: string, file: File, callbacks?: {
+const wordMimeTypes = [
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+    "application/msword" // .doc
+];
+export async function uploadTenantFile(supabase: SupabaseClient<Database>, fileName: string, file: File, callbacks?: {
     updatePercentage?: (percentage: number) => void
 
 }) {
-    const { data: sessionData } = await supabase.auth.getSession()
-    const { data: userData } = await supabase.from("profile").select("*").eq("id", sessionData?.session?.user.id).single()
+    const session = await supabase.auth.getSession()
+    const sessionData = session.data
+    const tenantId = sessionData.session?.user.app_metadata.tenant_id
+
+
 
 
     return new Promise((resolve, reject) => {
         const uploadOptions = {
-            endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
-            // retryDelays: [0, 3000, 5000, 10000, 20000],
+            endpoint: `${SUPABASE_URL}/storage/v1/upload/resumable`,
             retryDelays: [0, 3000, 5000],
             headers: {
                 authorization: `Bearer ${sessionData.session?.access_token}`,
@@ -22,7 +30,7 @@ export async function uploadTenantFile(supabase: SupabaseClient, fileName: strin
             uploadDataDuringCreation: true,
             removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
             metadata: {
-                bucketName: userData?.tenant_id,
+                bucketName: tenantId,
                 objectName: fileName,
                 contentType: file.type,
                 cacheControl: "3600",
@@ -31,10 +39,6 @@ export async function uploadTenantFile(supabase: SupabaseClient, fileName: strin
             onError: function (error: any) {
                 reject(error)
             },
-            // onProgress: callbacks.onProgress ?? function (bytesUploaded: number, bytesTotal: number) {
-            //     var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2)
-            //     console.log(bytesUploaded, bytesTotal, percentage + '%')
-            // },
             onChunkComplete: ((chunkSize: number, bytesAccepted: number, bytesTotal: number) => {
                 if (callbacks && callbacks.updatePercentage) callbacks.updatePercentage((bytesAccepted / bytesTotal))
             }),
@@ -59,6 +63,7 @@ export async function uploadTenantFile(supabase: SupabaseClient, fileName: strin
             upload.start()
         })
     })
+
 }
 
 
@@ -83,5 +88,4 @@ export async function rFindFilenames(supabase: SupabaseClient, bucket: string, p
 
     return files
 }
-
 

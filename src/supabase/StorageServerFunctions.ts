@@ -1,7 +1,6 @@
-import { TextItem, TextMarkedContent } from "pdfjs-dist/types/src/display/api"
-
 import { Database } from "@/types/supabase";
 import PQueue from "p-queue";
+import { SUPABASE_URL } from "./envs";
 import { SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import path from 'path';
@@ -34,13 +33,14 @@ export async function unzipTenantFile(supabase: SupabaseClient<Database>, zipFil
                 return
             }
 
-            const fullPath = path.join(filePathWithoutName, fileName);
+            let fullPath = path.join(filePathWithoutName, fileName);
 
             if (type === 'File') {
                 let chunks: Buffer[] = [];
                 entry.on('data', (chunk: Buffer) => chunks.push(chunk));
                 entry.on('end', async () => {
                     let fileBuffer = Buffer.concat(chunks);
+                    
                     await handleFileIngestion(supabase, jobQueue, userData!.tenant_id!, fullPath, fileBuffer);
                     resolve(1)
                 });
@@ -56,7 +56,7 @@ export async function unzipTenantFile(supabase: SupabaseClient<Database>, zipFil
 
 
     try {
-        const url = `${process.env.SUPABASE_URL}/storage/v1/object/${bucket}/${zipFilepath}`;
+        const url = `${SUPABASE_URL}/storage/v1/object/${bucket}/${zipFilepath}`;
 
         const response = await axios({
             method: 'get',
@@ -114,48 +114,3 @@ async function handleFileIngestion(supabase: SupabaseClient, jobQueue: any, tena
 
 }
 
-export async function readPdfLines(pdfBuffer: Buffer): Promise<void> {
-    // console.log("reading a pdf")
-    // const pdf = await pdfjs.getDocument(pdfBuffer).promise;
-
-    // const numPages = pdf.numPages;
-
-    // for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-    //     const page = await pdf.getPage(pageNum);
-    //     const textContent = await page.getTextContent();
-    //     const viewport = page.getViewport({ scale: 1 });
-
-    //     textContent.items.forEach((content:any, index:number) => {
-
-    //         if (!content.hasOwnProperty("str")) {
-    //             return 
-    //         }
-
-    //         const item:TextItem = content as TextItem
-
-    //         const text = item.str;
-    //         const transform = item.transform;
-
-    //         // PDF.js uses a coordinate system where the origin is at the bottom-left corner.
-    //         // The transform array contains [scaleX, skewY, skewX, scaleY, translateX, translateY]
-    //         const x = transform[4];
-    //         const y = viewport.height - transform[5];
-    //         const width = item.width;
-    //         const height = item.height;
-
-    //         const lineData = {
-    //             text: text,
-    //             xStart: x,
-    //             yStart: y,
-    //             xEnd: x + width,
-    //             yEnd: y - height,
-    //             pageHeight: viewport.height,
-    //             pageWidth: viewport.width,
-    //             page: pageNum
-    //         };
-
-    //         console.log(lineData);
-    //     });
-    // }
-
-}

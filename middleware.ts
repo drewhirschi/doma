@@ -1,5 +1,6 @@
 import { createMiddlewareClient } from '@/utils/supabase/middleware'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { redirect } from 'next/navigation';
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -15,6 +16,13 @@ export async function middleware(request: NextRequest) {
         // const redirectUrl = request.url ? encodeURIComponent(request.url) : '/';
         return NextResponse.redirect(new URL(`/login`, request.url))
     }
+
+    if (!user?.app_metadata?.tenant_id) {
+        redirect(`/portal/no-tenant`)
+    }
+
+
+
     return response
 }
 
