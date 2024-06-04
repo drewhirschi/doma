@@ -9,7 +9,7 @@ import { useForm } from '@mantine/form';
 
 interface Props {
 
-    projectId: string
+    // projectId: string
 }
 
 
@@ -43,7 +43,6 @@ export function FilterPopover(props: Props) {
 
     }, [])
 
-    console.log(getFormatterShape(form.values.formatterKey).shape)
 
     return (
         <Popover width={300} trapFocus position="bottom" withArrow shadow="md" closeOnClickOutside={false}>

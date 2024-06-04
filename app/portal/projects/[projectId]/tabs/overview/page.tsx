@@ -5,7 +5,7 @@ import { RedirectType, redirect, } from 'next/navigation';
 import { BackButton } from '@/components/BackButton';
 import Link from 'next/link';
 import OverviewTab from './OverviewTab';
-import { PAGE_SIZE } from '../search/shared';
+import { PAGE_SIZE } from '../shared';
 import { ProjectTabs } from '../ProjectTabs';
 import { getUserTenant } from '@/shared/getUserTenant';
 import { serverClient } from '@/supabase/ServerClients';

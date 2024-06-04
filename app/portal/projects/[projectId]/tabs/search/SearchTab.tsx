@@ -1,16 +1,12 @@
 "use client"
 
 import { Box, Group, Pagination, Table, Text, TextInput, Title, rem } from '@mantine/core';
-import { IconSearch, IconSettings } from '@tabler/icons-react';
-import { usePathname, useRouter, useSearchParams, } from 'next/navigation';
 
 import { AgreementTypeBadge } from '@/components/AgreementTypeBadge';
 import { ContractReviewerLink } from '@/components/PdfViewer/components/ContractReveiwerLink';
-import { FilterPopover } from '../overview/Filter';
-import { PAGE_SIZE } from './shared';
 import { ReviewerCombobox } from '@/components/ReviewerCombobox';
+import { SearchAndPage } from '../SearchAndPage';
 import { browserClient } from '@/supabase/BrowserClient';
-import { useDebouncedCallback } from 'use-debounce';
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[] }
@@ -19,33 +15,7 @@ interface Props {
 }
 
 export function SearchTab({ project, contracts, contractCount }: Props) {
-    const searchParams = useSearchParams();
-    const pathname = usePathname();
-    const { replace } = useRouter();
-
-    const debouncedHandleSearch = useDebouncedCallback((value: string) => {
-        //@ts-ignore
-        const params = new URLSearchParams(searchParams);
-        if (value) {
-            params.set('query', value);
-        } else {
-            params.delete('query');
-        }
-
-        replace(`${pathname}?${params.toString()}`);
-    }, 300)
-
-    function updatePage(value: number) {
-        //@ts-ignore
-        const params = new URLSearchParams(searchParams);
-        if (value) {
-            params.set('page', value.toString());
-        } else {
-            params.delete('page');
-        }
-
-        replace(`${pathname}?${params.toString()}`);
-    }
+   
 
     const contractsRow = contracts
         .filter(item => !item.name.includes(".emptyFolderPlaceholder"))
@@ -91,19 +61,8 @@ export function SearchTab({ project, contracts, contractCount }: Props) {
     return (
         <Box p={"lg"}>
             <Group justify="space-between">
-                <Group align="baseline">
-
-                    <TextInput
-                        w={200}
-                        placeholder="Search"
-                        mb="md"
-                        leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
-                        defaultValue={searchParams.get('query')?.toString()}
-                        onChange={(event) => debouncedHandleSearch(event.currentTarget.value)}
-                    />
-                    <Pagination total={contractCount / PAGE_SIZE} value={Number(searchParams.get("page") ?? 1)} onChange={updatePage} />
-                    <FilterPopover projectId={project.id} />
-                </Group>
+                
+                <SearchAndPage totalCount={contractCount}/>
 
             </Group>
             <Table >

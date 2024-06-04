@@ -9,11 +9,13 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedInfoView } from "./FormattedInfoView";
 import { IconFileDownload } from "@tabler/icons-react";
 import Link from "next/link";
+import { SearchAndPage } from "../SearchAndPage";
 import classes from "./Chart.module.css"
 import { formattedInfoStr } from "./utils";
 import { serverClient } from "@/supabase/ServerClients";
 
 interface Props {
+    contractCount:number
     projectId: string
     contracts: (Contract_SB)[]
     formatters: (Formatter_SB & { formatted_info: (FormattedInfo_SB & { annotation: Annotation_SB[] })[] })[]
@@ -24,8 +26,8 @@ export default function Chart(props: Props) {
 
     const exportToExcel = (data: string[][], fileName: string) => {
         const ws = xlsxUtils.aoa_to_sheet(data);
-        ws['!cols'] = data[0].map(d => ({wpx:300}))
-        ws['!rows'] = [{hpx:15}, ...data.slice(1).map(d => ({hpx:45}))]
+        ws['!cols'] = data[0].map(d => ({ wpx: 300 }))
+        ws['!rows'] = [{ hpx: 15 }, ...data.slice(1).map(d => ({ hpx: 45 }))]
         const wb = xlsxUtils.book_new();
         xlsxUtils.book_append_sheet(wb, ws, 'Sheet1');
         writeFile(wb, `${fileName}.xlsx`);
@@ -83,14 +85,16 @@ export default function Chart(props: Props) {
         // <TableScrollContainer minWidth={500} flex={1}   >
         <>
             <Group p={"sm"}>
+                <SearchAndPage totalCount={props.contractCount} />
+
                 <Tooltip label="Download as xlsx">
                     <ActionIcon variant="light" aria-label="Download as xlsx" onClick={() => {
 
                         const headerRow = ['name', ...props.formatters.map(f => f.key)]
-                        const excelData:string[][] = [headerRow]
+                        const excelData: string[][] = [headerRow]
                         for (const contract of props.contracts) {
                             // const row = new Map()
-                            const row:string[] = []
+                            const row: string[] = []
                             row.push(contract.display_name ?? contract.id)
                             props.formatters.forEach((formatter) => {
                                 const formattedInfo = formattedInfoStr({
