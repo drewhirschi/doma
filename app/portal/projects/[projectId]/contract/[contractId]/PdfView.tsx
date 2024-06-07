@@ -124,91 +124,95 @@ export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHig
                     // console.log("loaded pdf", pdfDocument.numPages)
 
                     return (
-                            <MantineProvider theme={theme}>
+                        <MantineProvider theme={theme}>
 
-                                <PdfHighlighter<Annotation_SB>
-                                    pdfDocument={pdfDocument}
-                                    highlights={highlights}
-                                    enableAreaSelection={(event) => event.altKey}
-                                    onScrollChange={resetHash}
-                                    pdfScaleValue="page-width"
-                                    // pdfScaleValue="1"
-                                    focusedHighlight={focusedHighlight}
-                                    onSelectionFinished={(
-                                        position,
-                                        content,
-                                        hideTipAndSelection,
-                                        transformSelection
-                                    ) => {
-                                        console.log({ position, content })
-                                        return (
-
-
-                                            <Paper shadow="md">
-                                                <Text ml={"sm"}>Topics</Text>
-                                                <ScrollArea
-                                                    h={300}
-                                                    w={240}
-                                                    type="always"
-                                                    pr={"sm"}
-                                                >
-
-                                                    {formatters.map((formatter) => {
+                            <PdfHighlighter<Annotation_SB>
+                                pdfDocument={pdfDocument}
+                                highlights={highlights}
+                                enableAreaSelection={(event) => event.altKey}
+                                onScrollChange={resetHash}
+                                pdfScaleValue="page-width"
+                                // pdfScaleValue="1"
+                                focusedHighlight={focusedHighlight}
+                                onSelectionFinished={(
+                                    position,
+                                    content,
+                                    hideTipAndSelection,
+                                    transformSelection
+                                ) => {
+                                    console.log({ position, content })
+                                    return (
 
 
-                                                        const handleClick = (itemIndex: number) => {
-                                                            handleAddHighlight({ formatterKey: formatter.key, text: content.text ?? "", position, itemId: itemIndex });
-                                                            hideTipAndSelection();
+                                        <Paper shadow="md">
+                                            <Text ml={"sm"}>Topics</Text>
+                                            <ScrollArea
+                                                h={300}
+                                                w={240}
+                                                type="always"
+                                                pr={"sm"}
+                                            >
 
-                                                        }
-                                                        return <SelectFormatterButton
-                                                            key={formatter.key}
-                                                            formatter={formatter}
-                                                            handleClick={handleClick}
-                                                        />
+                                                {formatters.map((formatter) => {
 
+
+                                                    const handleClick = (itemIndex: number) => {
+                                                        handleAddHighlight({ formatterKey: formatter.key, text: content.text ?? "", position, itemId: itemIndex });
+                                                        hideTipAndSelection();
 
                                                     }
-                                                    )}
-
-                                                </ScrollArea>
-                                            </Paper>
-                                        )
-                                    }}
-                                    highlightTransform={(
-                                        highlight,
-                                        index,
-                                        setTip,
-                                        hideTip,
-                                        viewportToScaled,
-                                        screenshot,
-                                        isScrolledTo,
-                                        isContinuationHighlight,
-                                    ) => {
+                                                    return <SelectFormatterButton
+                                                        key={formatter.key}
+                                                        formatter={formatter}
+                                                        handleClick={handleClick}
+                                                    />
 
 
-                                        return (
-                                            <Highlight
-                                                key={highlight.id}
-                                                isScrolledTo={isScrolledTo}
-                                                position={highlight.position}
-                                                // onClick={() => setFocusedHighlightId(highlight.id, {scrollTo:false})}
-                                                onDelete={() => handleRemoveHighlight(highlight.id)}
-                                                isUserHighlight={highlight.is_user}
-                                                text={highlight.text}
-                                                extractorName={parslets.find(p => p.id === highlight.parslet_id)?.display_name ?? "Unknown"}
-                                                setFocusedHighlightId={() => {
-                                                    setFocusedHighlight({ id: highlight.id, scroll: false })
-                                                    scrollFiIntoView(highlight.formatter_key, highlight.formatter_item_id)
-                                                }}
-                                                resetFocusedHighlight={() => setFocusedHighlight(undefined)}
-                                                offset={highlightOffsets.find(h => h.id === highlight.id)?.value ?? 0}
-                                                isContinuationHighlight={isContinuationHighlight}
-                                            />
-                                        );
-                                    }}
-                                />
-                            </MantineProvider>
+                                                }
+                                                )}
+
+                                            </ScrollArea>
+                                        </Paper>
+                                    )
+                                }}
+                                highlightTransform={(
+                                    highlight,
+                                    index,
+                                    setTip,
+                                    hideTip,
+                                    viewportToScaled,
+                                    screenshot,
+                                    isScrolledTo,
+                                    isContinuationHighlight,
+                                ) => {
+
+
+                                    if (highlight.text.includes("DISTRIBUTOR")) {
+
+                                        console.log("viewport to scaled", highlight, viewportToScaled(highlight.position.boundingRect))
+                                    }
+                                    return (
+                                        <Highlight
+                                            key={highlight.id}
+                                            isScrolledTo={isScrolledTo}
+                                            position={highlight.position}
+                                            // onClick={() => setFocusedHighlightId(highlight.id, {scrollTo:false})}
+                                            onDelete={() => handleRemoveHighlight(highlight.id)}
+                                            isUserHighlight={highlight.is_user}
+                                            text={highlight.text}
+                                            extractorName={parslets.find(p => p.id === highlight.parslet_id)?.display_name ?? "Unknown"}
+                                            setFocusedHighlightId={() => {
+                                                setFocusedHighlight({ id: highlight.id, scroll: false })
+                                                scrollFiIntoView(highlight.formatter_key, highlight.formatter_item_id)
+                                            }}
+                                            resetFocusedHighlight={() => setFocusedHighlight(undefined)}
+                                            offset={highlightOffsets.find(h => h.id === highlight.id)?.value ?? 0}
+                                            isContinuationHighlight={isContinuationHighlight}
+                                        />
+                                    );
+                                }}
+                            />
+                        </MantineProvider>
 
                     )
                 }}

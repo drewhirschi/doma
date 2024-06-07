@@ -77,30 +77,31 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
                     reject()
                 } else {
 
-                    //ask the model to check one more time that the lines are accuarate.
+                    // // ask the model to check one more time that the lines are accuarate.
 
-                    const verificationSystemMessage = `You are a tool used by lawyers for extracting line numbers containing key information and red flags from our client's contracts in the context of a merger or acquisition. 
-                    A set of relevant lines from the contact have already been extracted. Please review the extraction instructions and the extracted lines and return the lines that minimally provide the requested information.
+                    // const verificationSystemMessage = `You are a tool used by lawyers for extracting line numbers containing key information and red flags from our client's contracts in the context of a merger or acquisition. 
+                    // A set of relevant lines from the contact have already been extracted. Please review the extraction instructions and the extracted lines and return the lines that minimally provide the requested information.
 
-                    Your output should be a JSON object with a schema that matches the following: { lines: number[]} where each number represents a line number in the contract.
+                    // Your output should be a JSON object with a schema that matches the following: { lines: number[]} where each number represents a line number in the contract.
                     
-                    <extraction_instructions>
-                    ${extractor!.instruction}
-                    </extraction_instructions>
-                    `
-                    const input = buildXmlContract(extractedLines?.ok.map((lineNumber: number) => contractData.contract_line[lineNumber]) ?? [])
+                    // <extraction_instructions>
+                    // ${extractor!.instruction}
+                    // </extraction_instructions>
+                    // `
+                    // const input = buildXmlContract(extractedLines?.ok.map((lineNumber: number) => contractData.contract_line[lineNumber]) ?? [])
 
-                    const verifiedNumbers = await generateAgentJsonResponse(verificationSystemMessage, input, "gpt-4-turbo")
+                    // const verifiedNumbers = await generateAgentJsonResponse<{lines: number[]}>(verificationSystemMessage, input, "gpt-4-turbo")
 
-                    if (verifiedNumbers.error) {
-                        console.error('Error verifying extracted data:', verifiedNumbers.error);
-                        return
-                    }
+                    
+                    // if (verifiedNumbers.error) {
+                    //     console.error('Error verifying extracted data:', verifiedNumbers.error);
+                    //     return
+                    // }
 
 
 
 
-                    await saveExtraction(supabase, contractId, extractor!, verifiedNumbers.ok.lines)
+                    await saveExtraction(supabase, contractId, extractor!, extractedLines.ok)
                 }
             }
 

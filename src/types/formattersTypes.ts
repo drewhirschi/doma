@@ -48,7 +48,7 @@ export const TermShape = z.object({
     //     .describe("Silent if there is no term or renewals"),
     expired: z.boolean().nullable()
         .describe("Expired if a contract states an end date or a time frame without automatic renewals that when applied to the date in the Agreement Info is past today's date."),
-    expireDate: z.date()
+    expireDate: z.coerce.date()
         .nullable()
         .describe("This should be the date the agreement was signed"),
 });

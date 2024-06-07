@@ -86,7 +86,7 @@ export async function runSingleExtraction(supabase: SupabaseClient<Database>, co
 
 
 
-export async function execExtractor(sb: SupabaseClient<Database>, extractor: Parslet_SB, contract: Contract_SB & { contract_line: ContractLine[] }): Promise<IResp<number[]>> {
+export async function execExtractor(sb: SupabaseClient<Database>, extractor: Parslet_SB, contract: Contract_SB & { contract_line: ContractLine[] }): Promise<IResp<string[]>> {
 
     // const job = await createExtractionJob(sb, contract.id, extractor!.id)
 
@@ -96,7 +96,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
     const contractSegments = segmentContractLines(contract.contract_line)
 
-    const relevantLineNubers: number[] = []
+    const relevantHighlights: string[] = []
 
     try {
         for (let contractSegment of contractSegments) {
@@ -106,7 +106,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
             const res: ChatCompletion = await openai.chat.completions.create({
                 messages: buildExtracitonMessages(extractor, xmlContractText),
-                model: 'gpt-4o',
+                model: 'gpt-4-turbo',
                 // model: 'gpt-3.5-turbo',
                 temperature: 0,
                 response_format: { 'type': "json_object" }
@@ -132,8 +132,8 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
             const responseMessage = res.choices[0].message;
 
             try {
-                const res: { lines: number[] } = JSON.parse(responseMessage.content!)
-                relevantLineNubers.push(...res.lines)
+                const res: { lines: string[] } = JSON.parse(responseMessage.content!)
+                relevantHighlights.push(...res.lines)
 
             } catch (error) {
                 console.error("Failed to parse: ", responseMessage.content)
@@ -144,7 +144,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
         }
 
         // await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.COMPLETE)
-        return rok(relevantLineNubers)
+        return rok(relevantHighlights)
 
     } catch (error) {
         console.error('Error extracting data:', error);
@@ -158,21 +158,33 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 }
 
 
-export async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractedLines: number[]) {
+export async function saveExtraction(supabase: SupabaseClient<Database>, contractId: string, extractor: Parslet_SB, extractedLines: string[]) {
 
     if (extractedLines.length === 0) {
         console.log(`No lines extracted for ${extractor.display_name}`)
         return
     }
 
-    const lineRefs = extractedLines.map((lineNumber) => {
 
 
-        return {
-            line_id: lineNumber,
-            contract_id: contractId,
-            extractor_key: extractor.key
-        }
+    const groupedLines: number[][] = extractedLines.map((highlight) => {
+        const { start, end } = parseRefLines(highlight)
+
+        return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+    })
+
+
+
+    const lineRefs = groupedLines.flatMap((lineNumbers) => {
+
+        return lineNumbers.map((lineNumber) => {
+
+            return {
+                line_id: lineNumber,
+                contract_id: contractId,
+                extractor_key: extractor.key
+            }
+        })
     })
 
     const { error: insertRelaitonshipError } = await supabase
@@ -188,22 +200,9 @@ export async function saveExtraction(supabase: SupabaseClient<Database>, contrac
 
 
 
-    const groupedLines: number[][] = [];
-    let currentGroup: number[] = [];
 
-    extractedLines.forEach((lineNumber, index) => {
-        if (index === 0 || lineNumber === extractedLines[index - 1] + 1) {
-            currentGroup.push(lineNumber);
-        } else {
-            groupedLines.push(currentGroup);
-            currentGroup = [lineNumber];
-        }
-    });
 
-    // Add the last group if not empty
-    if (currentGroup.length) {
-        groupedLines.push(currentGroup);
-    }
+
 
     const { data: contractLines, error: linesError } = await supabase.from('contract_line').select().eq('contract_id', contractId).order('id', { ascending: true })
     if (linesError) {
@@ -251,11 +250,13 @@ export async function saveExtraction(supabase: SupabaseClient<Database>, contrac
  */
 function buildExtracitonMessages(extractor: Parslet_SB, xmlContractText: string) {
 
-    // When selecting an entire section, with subsections for example, include the blank lines inbetween the subsections as well.
-    const systemMessage = `You are a tool used by lawyers for extracting line numbers containing key information and red flags from our client's contracts in the context of a merger or acquisition. 
+    const systemMessage = `You are a tool used by lawyers for highlighting lines that contain key information and red flags from our client's contracts in the context of a merger or acquisition. 
     Be thorough, the whole document needs to be considered.
+    When selecting an entire section, with subsections for example, include the blank lines inbetween the subsections as well.
+    When selecting a title and paragraph, include blank lines inbwteen them.
 
-Your output should be a JSON object with a schema that matches the following: { lines: number[]} where each number represents a line number in the contract that is relevant to the extraction instructions.
+Your output should be a JSON object with a schema that matches the following: { lines: string[]} where each entry in the lines array represents a highlight in the contract that is relevant to the extraction instructions.
+The highlight string should be formatted {startLineNumber}-{endLineNumber}
 
 <extraction_instructions>
 ${extractor.instruction}

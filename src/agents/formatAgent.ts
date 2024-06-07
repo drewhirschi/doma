@@ -11,6 +11,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { getFormatterShape } from "@/shared/getFormatterShape";
 import { serverActionClient } from "@/supabase/ServerClients";
 import { z } from "zod"
+import { zodToJsonSchema } from "zod-to-json-schema";
 
 interface IFormatter<T> {
     instruction: string;
@@ -86,7 +87,7 @@ export async function formatPipeline(sb: SupabaseClient<Database>, contractId: s
     return results
 }
 
-export async function generateAgentJsonResponse(sysMessage: string, input: string, model = "gpt-4o"): Promise<IResp<any>> {
+export async function generateAgentJsonResponse<T = any>(sysMessage: string, input: string, model = "gpt-4o"): Promise<IResp<T>> {
     const oaiClient = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
     });
@@ -113,7 +114,7 @@ export async function generateAgentJsonResponse(sysMessage: string, input: strin
         }
         const json = JSON.parse(res.choices[0].message.content);
 
-        return rok(json);
+        return rok(json as T);
     } catch (error) {
         return rerm("Error generating agent response", { error })
     }
@@ -149,7 +150,8 @@ export async function buildInstruction(formatter: Formatter_SB, contract: Contra
         
         Do not provide explanations, just respond with JSON according to the schema. When a field is nullable, you must respond with the type or null.
         
-        ${zodObjectToXML(schema)}`
+         ${zodToJsonSchema(schema)}`
+        // ${zodObjectToXML(schema)}`
 
     let additionalInstructions = ""
 
