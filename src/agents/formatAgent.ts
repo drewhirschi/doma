@@ -150,8 +150,7 @@ export async function buildInstruction(formatter: Formatter_SB, contract: Contra
         
         Do not provide explanations, just respond with JSON according to the schema. When a field is nullable, you must respond with the type or null.
         
-         ${zodToJsonSchema(schema)}`
-        // ${zodObjectToXML(schema)}`
+         <schema>${JSON.stringify(zodToJsonSchema(schema))}</schema>`
 
     let additionalInstructions = ""
 
