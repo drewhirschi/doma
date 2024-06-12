@@ -13,12 +13,22 @@ export default async function SettingsPage({ params }: { params: { projectId: st
 
   const supabase = serverClient()
 
-  
+
 
   const { data, error } = await supabase.from("project")
     .select("*, profile(*)")
     .eq("id", params.projectId)
     .single()
+
+  const contractsTotal = await supabase
+    .from('contract')
+    .select('*', { count: 'exact', head: true })
+    .eq('project_id', params.projectId)
+  const contractsParsed = await supabase
+    .from('contract')
+    .select('*', { count: 'exact', head: true })
+    .eq('project_id', params.projectId)
+    .eq('linified', true)
 
   if (error) {
     return <div>Error loading project</div>
@@ -61,10 +71,12 @@ export default async function SettingsPage({ params }: { params: { projectId: st
 
   return (
     <Box p={"sm"}>
-      <ProjectActionButtons projectId={params.projectId}/>
+      <ProjectActionButtons projectId={params.projectId} />
       <SimpleGrid >
         <MetadataItem header="Project Id" text={data.id} copyButton />
         <MetadataItem header="Tenant Id" text={data.tenant_id} copyButton />
+        <MetadataItem header="Parsed contracts" text={`${contractsParsed.count}/${contractsTotal.count}`} />
+
       </SimpleGrid>
       <Table verticalSpacing="sm">
         <TableThead>

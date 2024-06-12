@@ -321,7 +321,7 @@ function segmentContractLines(lines: ContractLine[]): ContractLine[][] {
     let currentTokenCount = 0;
 
     lines.forEach((line) => {
-        if (currentTokenCount + line.ntokens > 10_000) {
+        if (currentTokenCount + line.ntokens > 120_000) {
             segments.push(currentSegment);
             currentSegment = currentSegment.slice(-5);
             currentTokenCount = currentSegment.reduce((sum, item) => sum + item.ntokens, 0);
