@@ -22,8 +22,11 @@ export default async function Page({ params }: { params: { projectId: string, co
     const [contractQ, parsletQ, formattersQ] = await Promise.all([
         supabase.from("contract").select("*, annotation(*), extract_jobs(*)").eq("id", params.contractId).single(),
         supabase.from("parslet").select("*").order("order", { ascending: true }),
-        supabase.from("formatters").select("*, formatted_info(*)").eq("formatted_info.contract_id", params.contractId)
-        .order("priority", { ascending: true })
+        supabase.from("formatters")
+            .select("*, formatted_info(*), project_formatters!inner(*)")
+            .eq("project_formatters.project_id", params.projectId)
+            .eq("formatted_info.contract_id", params.contractId)
+            .order("priority", { ascending: true })
     ])
 
     if (!contractQ.data || !parsletQ.data) {
@@ -37,9 +40,9 @@ export default async function Page({ params }: { params: { projectId: string, co
         throw new Error("Failed to download file")
     }
     const fileBase64 = Buffer.from(await fileRes.data.arrayBuffer()).toString('base64');
-    
 
-   
+
+
 
 
     const signedUrlQ = await supabase.storage.from(tenantId!).createSignedUrl(contractQ.data.name, 60, {})

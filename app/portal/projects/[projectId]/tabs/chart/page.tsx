@@ -21,20 +21,29 @@ export default async function Page({ params, searchParams }: { params: { project
     if (query) {
         contractQBuilder = contractQBuilder
             .ilike('display_name', `%${searchParams.query}%`)
+            // .or().ilike('id', `%${searchParams.query}%`)
     }
 
     const contractq = await contractQBuilder
-
-
 
     if (contractq.error) {
         console.error(contractq.error)
         throw new Error("Failed to fetch data")
     }
 
+    const projectFormatters = await supabase.from("project")
+        .select("formatters(*)")
+        .eq("id", params.projectId)
+        .single()
+
+    if (projectFormatters.error) {
+        console.error(projectFormatters.error)
+        throw new Error("Failed to fetch project formatters")
+    }
+
     const formattersq = await supabase.from("formatters")
         .select("*, formatted_info(*, annotation(*))")
-        // .in("key", [FormatterKeys.agreementInfo, FormatterKeys.license, FormatterKeys.ipOwnership, FormatterKeys.paymentTerms, FormatterKeys.assignability, FormatterKeys.term])
+        .in("key", projectFormatters.data?.formatters.map((f) => f.key))
         .in("formatted_info.contract_id", [contractq.data.map((c) => c.id)])
         .order("priority", { ascending: true })
 

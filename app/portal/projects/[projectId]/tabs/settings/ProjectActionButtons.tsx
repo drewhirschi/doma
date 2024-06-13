@@ -3,6 +3,7 @@
 import { Button, Group } from "@mantine/core";
 import { convertWordFiles, linifyContracts, queueProject } from "./actions";
 
+import EditFormattersPanel from "./EditFormattersPanel";
 import { useState } from "react";
 
 type ActionStatus = "idle" | "inprogress" | "failed"
@@ -23,6 +24,7 @@ export function ProjectActionButtons({ projectId }: { projectId: string }) {
                         .then(() => setParseStatus("idle"))
                         .catch(() => setParseStatus("failed"))
                 }}>Parse contracts text</Button>
+                <EditFormattersPanel projectId={projectId} />
         </Group>
     )
 }

@@ -24,11 +24,14 @@ export default async function SettingsPage({ params }: { params: { projectId: st
     .from('contract')
     .select('*', { count: 'exact', head: true })
     .eq('project_id', params.projectId)
+    .ilike('name', '%.pdf')
   const contractsParsed = await supabase
     .from('contract')
     .select('*', { count: 'exact', head: true })
     .eq('project_id', params.projectId)
     .eq('linified', true)
+    .ilike('name', '%.pdf')
+
 
   if (error) {
     return <div>Error loading project</div>
@@ -53,18 +56,8 @@ export default async function SettingsPage({ params }: { params: { projectId: st
       </TableTd>
 
       <TableTd>
-        <Progress value={40} />
-        {/* <Group gap="sm" grow>
-          {typeof getCompletedContracts(contracts, item.id) === 'number' && typeof getTotalContracts(contracts, item.id) === 'number' ? (
-            <>
-              <Progress value={(getCompletedContracts(contracts, item.id) / getTotalContracts(contracts, item.id)) * 100} />
-              {`${getCompletedContracts(contracts, item.id)}`} / {`${getTotalContracts(contracts, item.id)}`}
-            </>
-          ) : (
-            // Display a message if the values are not valid numbers
-            <Text>Error: Invalid contract values</Text>
-          )}
-        </Group> */}
+        {/* <Progress value={40} /> */}
+        
       </TableTd>
     </TableTr>
   ));
@@ -72,7 +65,7 @@ export default async function SettingsPage({ params }: { params: { projectId: st
   return (
     <Box p={"sm"}>
       <ProjectActionButtons projectId={params.projectId} />
-      <SimpleGrid >
+      <SimpleGrid cols={4} >
         <MetadataItem header="Project Id" text={data.id} copyButton />
         <MetadataItem header="Tenant Id" text={data.tenant_id} copyButton />
         <MetadataItem header="Parsed contracts" text={`${contractsParsed.count}/${contractsTotal.count}`} />
@@ -87,6 +80,7 @@ export default async function SettingsPage({ params }: { params: { projectId: st
         </TableThead>
         <TableTbody>{memberRows}</TableTbody>
       </Table>
+      
     </Box>
   );
 }

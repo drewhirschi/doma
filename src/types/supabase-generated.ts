@@ -79,13 +79,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "public_annotation_formatter_key_fkey"
-            columns: ["formatter_key"]
-            isOneToOne: false
-            referencedRelation: "formatters"
-            referencedColumns: ["key"]
-          },
-          {
             foreignKeyName: "public_annotation_zextractor_id_fkey"
             columns: ["zextractor_id"]
             isOneToOne: false
@@ -108,6 +101,7 @@ export type Database = {
           npages: number
           path_tokens: string[]
           project_id: string
+          summary: string | null
           tag: string | null
           target: string | null
           tenant_id: string
@@ -125,6 +119,7 @@ export type Database = {
           npages?: number
           path_tokens?: string[]
           project_id: string
+          summary?: string | null
           tag?: string | null
           target?: string | null
           tenant_id: string
@@ -142,6 +137,7 @@ export type Database = {
           npages?: number
           path_tokens?: string[]
           project_id?: string
+          summary?: string | null
           tag?: string | null
           target?: string | null
           tenant_id?: string
@@ -257,6 +253,41 @@ export type Database = {
           },
         ]
       }
+      docreqs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          name: string | null
+          path: string | null
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string | null
+          path?: string | null
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string | null
+          path?: string | null
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "docreqs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       extract_jobs: {
         Row: {
           contract_id: string
@@ -320,13 +351,6 @@ export type Database = {
             referencedRelation: "contract"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "public_format_jobs_formatter_key_fkey"
-            columns: ["formatter_key"]
-            isOneToOne: false
-            referencedRelation: "formatters"
-            referencedColumns: ["key"]
-          },
         ]
       }
       formatted_info: {
@@ -359,13 +383,6 @@ export type Database = {
             referencedRelation: "contract"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "public_formats_type_fkey"
-            columns: ["formatter_key"]
-            isOneToOne: false
-            referencedRelation: "formatters"
-            referencedColumns: ["key"]
-          },
         ]
       }
       formatter_dependencies: {
@@ -388,13 +405,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "parslet"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_formatter_dependencies_formatter_key_fkey"
-            columns: ["formatter_key"]
-            isOneToOne: false
-            referencedRelation: "formatters"
-            referencedColumns: ["key"]
           },
         ]
       }
@@ -445,13 +455,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contract_line"
             referencedColumns: ["contract_id", "id"]
-          },
-          {
-            foreignKeyName: "public_line_extractions_formatter_key_fkey"
-            columns: ["formatter_key"]
-            isOneToOne: false
-            referencedRelation: "formatters"
-            referencedColumns: ["key"]
           },
         ]
       }
@@ -616,6 +619,36 @@ export type Database = {
           },
         ]
       }
+      project_formatters: {
+        Row: {
+          formatter_key: string
+          project_id: string
+        }
+        Insert: {
+          formatter_key: string
+          project_id?: string
+        }
+        Update: {
+          formatter_key?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_formatters_formatter_key_fkey"
+            columns: ["formatter_key"]
+            isOneToOne: false
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "project_formatters_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "project"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant: {
         Row: {
           created_at: string
@@ -648,13 +681,6 @@ export type Database = {
           zextractor_key?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "public_zuva_dependencies_formatter_key_fkey"
-            columns: ["formatter_key"]
-            isOneToOne: true
-            referencedRelation: "formatters"
-            referencedColumns: ["key"]
-          },
           {
             foreignKeyName: "public_zuva_dependencies_zextractor_id_fkey"
             columns: ["zextractor_key"]
