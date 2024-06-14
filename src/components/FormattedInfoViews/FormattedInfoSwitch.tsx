@@ -5,6 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedAgreementInfo } from "./AgreementInfo";
 import { FormattedAssignability } from "./Assignability";
 import { FormattedGoverningLaw } from "./GoverningLaw";
+import { FormattedIncorporatedAgreements } from "./IncorporatedAgreements";
 import { FormattedIndemnities } from "./Indemnities";
 import { FormattedInfoView } from "./FormattedItemSingle";
 import { FormattedIpOwnership } from "./IpOwnership"
@@ -35,14 +36,17 @@ interface Props {
 
 export function FormatterSwitch({ formatter, isLoading, handleSave, annotations, removeAnnotation, contractId, removeItem }: Props) {
 
-   const [formattedInfo, setFormattedInfo] = useState(formatter.formatted_info)
-    
+    const [formattedInfo, setFormattedInfo] = useState(formatter.formatted_info)
+
 
     const insideView = () => {
 
         switch (formatter.key) {
             case FormatterKeys.agreementInfo:
                 return FormattedAgreementInfo
+
+            case FormatterKeys.incorporatedAgreements:
+                return FormattedIncorporatedAgreements
 
             case FormatterKeys.term:
                 return FormattedTerm

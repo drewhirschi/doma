@@ -1,4 +1,4 @@
-import { AgreementInfoShape, AssignabilityShape, CovenantNotToSueItemShape, EffectsOfTransactionShape, GoverningLawShape, IPOwnershipItemShape, IPOwnershipShape, IndemnitiesShape, LicenseItemShape, LicenseShape, LimitationOfLiabilityShape, MostFavoredNationShape, NonCompeteShape, NonSolicitHireShape, PaymentTermsItemShape, RightOfFirstRefusalShape, SourceCodeShape, TermShape, TerminationItemShape, TerminationShape, TrojanShape, WarrantyShape } from "@/types/formattersTypes";
+import { AgreementInfoShape, AssignabilityShape, CovenantNotToSueItemShape, EffectsOfTransactionShape, GoverningLawShape, IPOwnershipItemShape, IPOwnershipShape, IncorporatedAgreementsShape, IndemnitiesShape, LicenseItemShape, LicenseShape, LimitationOfLiabilityShape, MostFavoredNationShape, NonCompeteShape, NonSolicitHireShape, PaymentTermsItemShape, RightOfFirstRefusalShape, SourceCodeShape, TermShape, TerminationItemShape, TerminationShape, TrojanShape, WarrantyShape } from "@/types/formattersTypes";
 
 import { FormatterKeys } from "@/types/enums";
 import { z } from "zod";
@@ -8,6 +8,9 @@ export function getFormatterShape(formatterKey: string) {
     switch (formatterKey) {
         case FormatterKeys.agreementInfo:
             return AgreementInfoShape
+
+        case FormatterKeys.incorporatedAgreements:
+            return IncorporatedAgreementsShape
 
         case FormatterKeys.term:
             return TermShape

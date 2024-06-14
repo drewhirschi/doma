@@ -8,6 +8,7 @@ export enum ExtractJobStatus {
 
 export enum FormatterKeys {
     agreementInfo = "agreementInfo",
+    incorporatedAgreements = "incorporatedAgreements",
     term = "term",
     termination = "termination",
     license = "license",

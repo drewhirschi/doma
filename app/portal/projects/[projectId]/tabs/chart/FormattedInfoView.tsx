@@ -6,6 +6,7 @@ import {
     EffectsOfTransactionShape,
     GoverningLawShape,
     IPOwnershipItemShape,
+    IncorporatedAgreementsShape,
     IndemnitiesShape,
     IpOwnershipType,
     LicenseDirection,
@@ -62,6 +63,15 @@ export function FormattedInfoView(props: Props) {
             <br />
             {/* {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)} */}
         </>)
+    } else if (key === FormatterKeys.incorporatedAgreements) {
+        return props.infoArray.map((info) => {
+            const data = info.data as z.infer<typeof IncorporatedAgreementsShape>
+            return <div key={info.formatter_key + info.id}>
+                {data.name}
+                {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
+            </div>
+
+        })
     } else if (key === FormatterKeys.license) {
 
 
@@ -163,7 +173,7 @@ export function FormattedInfoView(props: Props) {
         console.log(data.type)
         return (<>
             {data.suffix?.map((s) => <Badge key={s} color="blue" mx={2}>{s}</Badge>)}
-            {data.type?.filter(Boolean)?.map((type:AssignabilityType | null) =>  <Badge key={type} color={"green"} mx={2}>{formatKey(type!)}</Badge>)}
+            {data.type?.filter(Boolean)?.map((type: AssignabilityType | null) => <Badge key={type} color={"green"} mx={2}>{formatKey(type!)}</Badge>)}
 
             {data.summary}
             <br />
@@ -187,7 +197,7 @@ export function FormattedInfoView(props: Props) {
             </div>
         })
     } else if (key === FormatterKeys.sourceCode) {
-       
+
         const data = props.infoArray[0].data as z.infer<typeof SourceCodeShape>
         return (<>
             {data.content}
@@ -195,7 +205,7 @@ export function FormattedInfoView(props: Props) {
             {data.license}
             <br />
             {data.releaseConditions}
-            
+
             {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)}
         </>)
     } else if (key === FormatterKeys.convenantNotToSue) {
@@ -208,7 +218,7 @@ export function FormattedInfoView(props: Props) {
         })
 
 
-    }  else if (key === FormatterKeys.mostFavoredNation) {
+    } else if (key === FormatterKeys.mostFavoredNation) {
         return props.infoArray.map((info) => {
             const data = info.data as z.infer<typeof MostFavoredNationShape>
             return <div key={info.formatter_key + info.id}>
@@ -218,7 +228,7 @@ export function FormattedInfoView(props: Props) {
         })
 
 
-    }  else if (key === FormatterKeys.nonSolicitHire) {
+    } else if (key === FormatterKeys.nonSolicitHire) {
         return props.infoArray.map((info) => {
             const data = info.data as z.infer<typeof NonSolicitHireShape>
             return <div key={info.formatter_key + info.id}>
@@ -228,7 +238,7 @@ export function FormattedInfoView(props: Props) {
         })
 
 
-    }  else if (key === FormatterKeys.rightOfFirstRefusal) {
+    } else if (key === FormatterKeys.rightOfFirstRefusal) {
         return props.infoArray.map((info) => {
             const data = info.data as z.infer<typeof RightOfFirstRefusalShape>
             return <div key={info.formatter_key + info.id}>
@@ -238,7 +248,7 @@ export function FormattedInfoView(props: Props) {
         })
 
 
-    }  else if (key === FormatterKeys.warranties) {
+    } else if (key === FormatterKeys.warranties) {
         return props.infoArray.map((info) => {
             const data = info.data as z.infer<typeof WarrantyShape>
             return <div key={info.formatter_key + info.id}>
@@ -302,15 +312,15 @@ export function FormattedInfoView(props: Props) {
 
 
     } else if (key === FormatterKeys.governingLaw) {
-            const data = props.infoArray[0].data as z.infer<typeof GoverningLawShape>
-            return <div >
-                {data.jurisdiction}
-                {data.condition}
-                {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)}
-            </div>
+        const data = props.infoArray[0].data as z.infer<typeof GoverningLawShape>
+        return <div >
+            {data.jurisdiction}
+            {data.condition}
+            {getAnnotationLinks(props.infoArray[0].annotation, props.projectId, props.infoArray[0].contract_id)}
+        </div>
 
 
-    } 
+    }
 
 
 

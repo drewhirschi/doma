@@ -31,12 +31,15 @@ export const AgreementInfoShape = z.object({
         .describe("What date did or will the agreement go into effect? Format the date as YYYY/MM/DD"),
     summary: z.string().nullable()
         .describe(`Summarize in the following format by replacing the brackets with the specified information if provided: "[Title] between [Counterparty] and [Target Entity] dated [Effective Date in long date format]". If there are amendments, addendums, or statements of work add the following wording with the brackets filled in with the applicable information: ", as amended [list amendment dates], including [Statement(s) of Work/Addend(um)/(a)] dated [list dates] [(as amended [list dates])]`),
-    incorporatedAgreements: z.string().array()
-        .describe(`List the names of any amendments, addendums, or statements of work that are incorporated into the agreement.`),
+
 });
 
 export type AgreementInfoFormatResponse = z.infer<typeof AgreementInfoShape>;
 
+export const IncorporatedAgreementsShape = z.object({
+    name: z.string()
+        .describe(`The name of the amendment, addendum, or statement of work that is incorporated into the agreement.`),
+});
 
 
 
