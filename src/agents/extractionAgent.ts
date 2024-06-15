@@ -106,8 +106,8 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
             const res: ChatCompletion = await openai.chat.completions.create({
                 messages: buildExtracitonMessages(extractor, xmlContractText),
-                model: 'gpt-4-turbo',
-                // model: 'gpt-3.5-turbo',
+                // model: 'gpt-4-turbo',
+                model: 'gpt-3.5-turbo',
                 temperature: 0,
                 response_format: { 'type': "json_object" }
             });
@@ -231,16 +231,17 @@ export async function saveExtraction(supabase: SupabaseClient<Database>, contrac
         }
     })
 
-    const { error: insertError } = await supabase
+    const { data: insertedAnnotations, error: insertError } = await supabase
         .from('annotation')
         // @ts-ignore
-        .insert(annotations);
+        .insert(annotations).select();
 
     if (insertError) {
         console.error('Error inserting data:', insertError);
         return
     } else {
         console.log(`Inserted ${annotations.length} ${extractor.display_name} extractions successfully`);
+        return insertedAnnotations
     }
 
 }

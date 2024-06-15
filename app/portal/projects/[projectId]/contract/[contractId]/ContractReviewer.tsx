@@ -6,7 +6,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css';
 import * as actions from "./ContractReviewer.actions";
 
 import { ActionIcon, Box, Button, Center, CopyButton, Divider, Drawer, Flex, Group, HoverCard, Menu, Paper, ScrollArea, SegmentedControl, Skeleton, Stack, Text, TextInput, Textarea, ThemeIcon, Title, Tooltip, UnstyledButton, rem } from "@mantine/core";
-import { IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTrash, IconUser } from "@tabler/icons-react";
+import { IconBlockquote, IconCheck, IconCloudCheck, IconCopy, IconDotsVertical, IconExclamationCircle, IconGripVertical, IconListSearch, IconMessageCircle, IconRefresh, IconRepeat, IconSettings, IconTextRecognition, IconTrash, IconUser } from "@tabler/icons-react";
 import { ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useRef, useState } from "react";
 
@@ -50,7 +50,6 @@ export function ContractReviewer(props: Props) {
     const [formatters, setFormatters] = useState(props.formatters)
 
 
-    // const [leftSegment, setLeftSegment] = useState('formatters');
     const [opened, { open: openDetailsDrawer, close }] = useDisclosure(false);
 
 
@@ -234,15 +233,58 @@ export function ContractReviewer(props: Props) {
             })
         }
 
-
-
-
-
-
-
-
     }
 
+
+    const handleExtraction = async (formatterKey?: string) => {
+
+        const id = notifications.show({
+            loading: true,
+            title: 'Reviewing...',
+            message: 'This may take up to a couple minutes.',
+            autoClose: false,
+            withCloseButton: false,
+        });
+        try {
+
+            const results = await actions.reviewContractAction(contract.id, formatterKey)
+
+            setHighlights(prevState => prevState.concat(results.annotations))
+
+            setFormatters((prevState) => {
+                const updatedFormatters = [...prevState]
+                results.formattedInfo.forEach(newFi => {
+                    const formatter = updatedFormatters.find(f => f.key === newFi.formatter_key)
+                    if (formatter) {
+                        formatter.formatted_info = formatter.formatted_info.filter(fi => newFi.id !== fi.id)
+                        formatter.formatted_info.push(newFi)
+                    }
+                })
+                return updatedFormatters
+            })
+
+            notifications.update({
+                id,
+                color: 'green',
+                title: 'Success',
+                message: 'Review completed',
+                icon: <IconCheck style={{ width: rem(18), height: rem(18) }} />,
+                loading: false,
+                autoClose: 2000,
+            });
+        } catch (error) {
+
+            notifications.update({
+                id,
+                color: 'red',
+                title: 'Error',
+                message: JSON.stringify(error),
+                icon: <IconExclamationCircle style={{ width: rem(18), height: rem(18) }} />,
+                loading: false,
+                autoClose: 2000,
+            });
+        }
+    }
 
 
     const backParams = new URLSearchParams()
@@ -274,7 +316,7 @@ export function ContractReviewer(props: Props) {
                                     >
                                         Mark completed
                                     </Menu.Item>
-                                    <Menu.Item leftSection={<IconCheck style={{ width: rem(14), height: rem(14) }} />}
+                                    <Menu.Item leftSection={<IconBlockquote style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={async () => {
                                             try {
 
@@ -292,22 +334,15 @@ export function ContractReviewer(props: Props) {
                                         Run description
                                     </Menu.Item>
 
-                                    <Menu.Label>AI</Menu.Label>
-                                    <Menu.Item disabled
+                                    {/* <Menu.Item disabled
                                         leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
                                             actions.zuvaExtraction(contract.id)
                                         }}
                                     >
                                         Zuva extraciton
-                                    </Menu.Item>
-                                    <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
-                                        onClick={() => {
-                                            actions.reviewContractAction(contract.id)
-                                        }}
-                                    >
-                                        Run extraciton
-                                    </Menu.Item>
+                                    </Menu.Item> */}
+
                                     {/* <SubMenu/> */}
                                     <Menu.Item color="red" leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
@@ -317,7 +352,7 @@ export function ContractReviewer(props: Props) {
                                         Reset contract
                                     </Menu.Item>
 
-                                    <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+                                    {/* <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
                                         onClick={() => {
                                             try {
 
@@ -333,11 +368,18 @@ export function ContractReviewer(props: Props) {
                                         }}
                                     >
                                         Run formatters
-                                    </Menu.Item>
+                                    </Menu.Item> */}
 
                                     <Menu.Divider />
                                     <Menu.Label>Extract</Menu.Label>
-                                    {formatters.map(f => (<Menu.Item key={f.key} onClick={() => actions.reExtractTopic(contract.id, f.key)}>{f.display_name}</Menu.Item>))}
+                                    <Menu.Item leftSection={<IconTextRecognition style={{ width: rem(14), height: rem(14) }} />}
+                                        onClick={() => handleExtraction()}
+                                    >All</Menu.Item>
+                                    {formatters.map(f => (
+                                        <Menu.Item key={f.key}
+                                            onClick={() => handleExtraction(f.key)}
+                                        >{f.display_name}</Menu.Item>
+                                    ))}
                                 </Menu.Dropdown>
                             </Menu>
                         </Group>
@@ -348,53 +390,27 @@ export function ContractReviewer(props: Props) {
                         >
                             <Title order={3}>{contract.display_name}</Title>
                         </UnstyledButton>
-                        {/* </HoverCard.Target>
-                            <HoverCard.Dropdown>
-                                <Group>
-                                    <MetadataItem header="Contract ID" text={contract.id} />
-                                    <CopyButton value={contract.id} timeout={2000}>
-                                        {({ copied, copy }) => (
-                                            <Tooltip label={copied ? 'Copied' : 'Copy'} withArrow position="right">
-                                                <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
-                                                    {copied ? (
-                                                        <IconCheck style={{ width: rem(16) }} />
-                                                    ) : (
-                                                        <IconCopy style={{ width: rem(16) }} />
-                                                    )}
-                                                </ActionIcon>
-                                            </Tooltip>
-                                        )}
-                                    </CopyButton>
-                                </Group>
-                            </HoverCard.Dropdown>
-                        </HoverCard> */}
+
                         <Divider />
                         <ScrollArea
                             offsetScrollbars
                             h={"100%"}
-                        // pl={"xs"}
                         >
 
 
                             <Stack gap={"lg"}>
 
                                 {formatters
-                                    // .filter(f => f.formatted_info.length > 0)
                                     .map(f => (
                                         <FormatterSwitch
                                             annotations={highlights.filter(h => h.formatter_key == f.key)}
                                             removeAnnotation={handleRemoveHighlight}
                                             removeItem={async (id) => handleRemoveFormattedItem(f.key, id)}
-                                            handleSave={async (itemId:number, data:any) => handleSaveFormattedItems(f.key, itemId, data)}
+                                            handleSave={async (itemId: number, data: any) => handleSaveFormattedItems(f.key, itemId, data)}
                                             formatter={f}
                                             contractId={contract.id}
                                             isLoading={loadingFormatters.includes(f.key)}
                                             key={f.key}
-                                            singleRun={() => {
-                                                // actions.format(f.key, contract.id, projectId, contract.target)
-
-                                            }}
-
                                         />
                                     ))
                                 }

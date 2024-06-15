@@ -7,15 +7,17 @@ import { categorize } from "@/agents/categoryAgent"
 import { getFormatterShape } from "@/shared/getFormatterShape"
 import { revalidatePath } from "next/cache"
 import { runContractExtraction } from "@/actions/extraction"
-import { runSingleExtraction } from "@/agents/extractionAgent"
 import { serverActionClient } from "@/supabase/ServerClients"
 import { startZuvaExtraction } from "@/zuva"
 import { zodObjectToXML } from "@/zodUtils"
 
-export async function reviewContractAction(contractId: string) {
+export async function reviewContractAction(contractId: string, formatterKey?: string) {
     const supabase = serverActionClient()
 
-    await runContractExtraction(supabase, contractId).then(console.log)
+    if (formatterKey) {
+        return await runContractExtraction(supabase, contractId, { formatterKeys: [formatterKey] })
+    }
+    return await runContractExtraction(supabase, contractId)
 }
 
 export async function completeContractAction(contractId: string) {
@@ -45,21 +47,7 @@ export async function deleteContractExtractedInfo(contractId: string, projectId:
 
 }
 
-export async function reExtractTopic(contractId: string, formatterKey: string) {
-    const supabase = serverActionClient()
 
-
-    // const { error: eiErr } = await supabase.from('annotation').delete().eq('contract_id', contractId).eq('is_user', false).
-    // const { error: jobErr } = await supabase.from('extract_jobs').delete().eq('contract_id', contractId)
-    // const { error: infoErr } = await supabase.from('formatted_info').delete().eq('contract_id', contractId)
-    // const { error: lineRefErr } = await supabase.from('line_ref').delete().eq('contract_id', contractId)
-
-
-    await runContractExtraction(supabase, contractId, {formatterKeys: [formatterKey]}).then(console.log)
-
-
-
-}
 
 export async function runFormatters(contractId: string, projectId: string, target: string | null | undefined) {
     const supabase = serverActionClient()
@@ -112,7 +100,7 @@ export async function describeAndTag(contractId: string, projectId: string, targ
 }
 
 
-export async function zuvaExtraction(contractId:string) {
+export async function zuvaExtraction(contractId: string) {
 
     const supabase = serverActionClient()
 

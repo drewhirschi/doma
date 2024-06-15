@@ -25,7 +25,6 @@ import { UnknownFormatter } from "./UnknownFormatter";
 
 interface Props {
     formatter: FormatterWithInfo,
-    singleRun: (key: string) => void,
     handleSave: (infoId: number, data: any) => Promise<void>,
     annotations: Annotation_SB[]
     removeAnnotation: (id: string) => Promise<void>
@@ -36,7 +35,8 @@ interface Props {
 
 export function FormatterSwitch({ formatter, isLoading, handleSave, annotations, removeAnnotation, contractId, removeItem }: Props) {
 
-    const [formattedInfo, setFormattedInfo] = useState(formatter.formatted_info)
+    // const [formattedInfo, setFormattedInfo] = useState(formatter.formatted_info)
+    const formattedInfo = formatter.formatted_info
 
 
     const insideView = () => {
@@ -143,7 +143,7 @@ export function FormatterSwitch({ formatter, isLoading, handleSave, annotations,
                     <ActionIcon variant="subtle" color="gray" onClick={async () => {
                         removeItem(0)
                         handleSave(0, {})
-                        setFormattedInfo([])
+                        // setFormattedInfo([])
                     }}>
 
                         <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
