@@ -15,7 +15,7 @@ export enum FormatterKeys {
     sourceCode = "sourceCode",
     ipOwnership = "ipOwnership",
     paymentTerms = "paymentTerms",
-    convenantNotToSue = "convenantNotToSue",
+    convenantNotToSue = "covenantNotToSue",
     mostFavoredNation = "mostFavoredNation",
     nonSolicitHire = "nonSolicitHire",
     rightOfFirstRefusal = "rightOfFirstRefusal",

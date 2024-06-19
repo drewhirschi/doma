@@ -26,21 +26,26 @@ export async function GET(request: NextRequest) {
         let completed = 0
         let failed = 0
         for (const job of jobs) {
-            const res = await runContractExtraction(supabase, job.contract_id)
 
-            
 
-            const statusUpdate = await supabase.from("contract_job_queue").update({status: "done"}).eq("id", job.id)
-            if (statusUpdate.error){ 
-                console.error(`failed to update status of job [${job.id}]`, statusUpdate.error)
-                failed++
-            } else {
+            try {
+
+                const res = await runContractExtraction(supabase, job.contract_id)
+                await supabase.from("contract_job_queue").update({ status: "done" }).eq("id", job.id).throwOnError()
                 completed++
+
+            } catch (error) {
+                console.error(`failed to run extraction for job [${job.id}]`, error)
+                failed++
+
             }
+
+
+
         }
 
 
-        return Response.json({completed, failed}, { status: 200, statusText: "success" });
+        return Response.json({ completed, failed }, { status: 200, statusText: "success" });
     } catch (error) {
         return Response.json({ error }, { status: 500 });
     }

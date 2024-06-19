@@ -37,7 +37,7 @@ import debounce from "lodash.debounce";
 import getAreaAsPng from "../lib/get-area-as-png";
 import getBoundingRect from "../lib/get-bounding-rect";
 import getClientRects from "../lib/get-client-rects";
-import { rangeToStringWithNewLines } from "@/utils"
+import { rangeToStringWithNewLines } from "@/utils/pdf"
 
 export type T_ViewportHighlight<T_HT> = { position: Position } & T_HT;
 

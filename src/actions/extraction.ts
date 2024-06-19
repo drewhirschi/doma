@@ -11,7 +11,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
 
 
     const { data: contractData, error: contractError } = await supabase.from('contract')
-        .select('*, contract_line(text, ntokens, id), formatted_info(*), project(target)')
+        .select('*, contract_line(text, ntokens, id), formatted_info(*), project(target, id)')
         .order("id", { referencedTable: "contract_line", ascending: true })
         .eq('id', contractId).single()
 
@@ -113,9 +113,17 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
     }
 
 
+    const projectFormatters = await supabase.from('project').select('formatters(*)').eq('id', contractData.project?.id!).single()
+
+    if (projectFormatters.error) {
+        console.error('Error loading project formatters:', projectFormatters.error);
+        throw projectFormatters.error
+    }
+
     const formatterFetch = supabase.from('formatters')
         .select('*, parslet(*, annotation(*))')
         .eq('parslet.annotation.contract_id', contractId)
+        .in('key', projectFormatters.data.formatters.map(f => f.key))
 
     if (options?.formatterKeys?.length) {
         formatterFetch.in('key', options.formatterKeys)

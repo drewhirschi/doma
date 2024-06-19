@@ -32,8 +32,10 @@ export default function Chart(props: Props) {
         xlsxUtils.book_append_sheet(wb, ws, 'Sheet1');
         writeFile(wb, `${fileName}.xlsx`);
     };
-
-    const formatterRows = props.contracts.map(contract => {
+    
+    const formatterRows = props.contracts
+    .filter(item => !item.name.includes(".emptyFolderPlaceholder"))
+    .map(contract => {
 
         return (
             <Table.Tr key={`row_${contract.id}`}>

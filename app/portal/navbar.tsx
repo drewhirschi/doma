@@ -22,14 +22,14 @@ export function NavBar() {
 
         <div className={classnames["nav-item"]}>
             <NavLink
-                href={`projects`}
+                href={`/portal/projects`}
                 leftSection={<IconFolderOpen />}
                 label={navbarHovered ? <Text>Projects</Text> : null}
                 component={Link}
                 active={pathname.split("/")[2] === "projects"}
             />
             <NavLink
-                href={`team`}
+                href={`/portal/team`}
                 leftSection={navbarHovered && <IconUsersGroup />}
                 label={navbarHovered ? <Text>Team</Text> : <IconUsersGroup />}
                 component={Link}

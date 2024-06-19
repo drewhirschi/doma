@@ -1,21 +1,27 @@
 "use server"
 
+import { IResp, rerm, rok } from "@/utils"
+
 import { getUserTenant } from "@/shared/getUserTenant"
 import { rFindFilenames } from "@/supabase/Storage"
 import { revalidatePath } from "next/cache"
 import { serverActionClient } from "@/supabase/ServerClients"
 
-export async function deleteProject(projectId: string): Promise<any> {
+export async function deleteProject(projectId: string): Promise<IResp<any>> {
     const supabase = serverActionClient()
 
-    const { error } = await supabase
+    const projectDelete = await supabase
         .from("project")
         .delete()
         .match({ id: projectId })
 
+    if (projectDelete.error) {
+        return rerm("Failed to delete project", projectDelete.error)
+    }
+
     const tenantId = await getUserTenant(supabase)
     if (!tenantId) {
-        throw new Error("failed to get tenant id")
+        return rerm("failed to get tenant id", {})
     }
 
     const projectFiles = await rFindFilenames(supabase, tenantId, `projects/${projectId}`, [])
@@ -30,7 +36,7 @@ export async function deleteProject(projectId: string): Promise<any> {
 
     revalidatePath("/portal/projects")
 
-    // return {  error }
+    return rok(null)
 }
 
 export async function changeProjectStatus(projectId: string, status: boolean): Promise<any> {

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 
 import { DatePickerInput } from '@mantine/dates';
 import { IconCalendar } from '@tabler/icons-react';
+import { LoadingState } from '@/types/loadingstate';
 import { browserClient } from '@/supabase/BrowserClient';
 import { createProject } from './AddProjectModal.action';
 import { useDisclosure } from '@mantine/hooks';
@@ -27,9 +28,9 @@ export interface CreateFormValues {
 
 export function AddProjectsModal(props: Props) {
   const [opened, { open, close }] = useDisclosure(false);
-  const [value, setValue] = useState<Date | null>(null);
+  const [createLoading, setCreateLoading] = useState<LoadingState>(LoadingState.IDLE)
+
   const icon = <IconCalendar style={{ width: rem(18), height: rem(18) }} stroke={1.5} />;
-  const supabase = browserClient()
 
   const uniqueNames = new Set(props.projects.map((d) => d.display_name));
 
@@ -58,24 +59,20 @@ export function AddProjectsModal(props: Props) {
         value == values.client ? 'Client and counterparty cannot be the same' : !value ? 'Enter the counterparty' : null,
       targetNames: isNotEmpty('Enter the company names the entity that is having due diligence performed on goes by')
     },
+
+
   });
 
-  
+
 
   return (
     <>
       <Modal opened={opened} onClose={() => {
         close()
         form.reset()
-      }} title="Authentication" closeOnClickOutside={false}>
+      }} title="New Project" closeOnClickOutside={false}>
 
-        <Box component="form" maw={400} mx="auto" onSubmit={form.onSubmit((values) => {
-          console.log("creating project")
-          createProject(values).then(() => {
-            close()
-            form.reset()
-          })
-        })}>
+        <Box maw={400} mx="auto" >
           <TextInput label="Project Name" placeholder="Project name" withAsterisk {...form.getInputProps('projectName')} />
           <MultiSelect
             label="Assigned Attorneys"
@@ -87,7 +84,7 @@ export function AddProjectsModal(props: Props) {
             nothingFoundMessage="Name not found..."
             {...form.getInputProps('assignedAttorneys')}
           />
-          <Select
+          {/* <Select
             label="Deal Structure"
             placeholder="Pick structure"
             data={['Asset Purchase', 'Stock Purchase', 'Reverse Triangle Merger', 'Forward Merger', 'Other']} // if other, add a text field to explain
@@ -115,6 +112,12 @@ export function AddProjectsModal(props: Props) {
             data={[{ value: form.values.client + "_client", label: form.values.client }, { value: form.values.counterparty + "_counterparty", label: form.values.counterparty }].filter((d) => d.label)}
             mt="md"
             {...form.getInputProps('targetNames')}
+          /> */}
+          <TextInput
+            label="Target (all known names)"
+            placeholder="Pick from list or type anything"
+            mt="md"
+            {...form.getInputProps('targetNames')}
           />
           <DatePickerInput
             label="Phase Deadline"
@@ -128,7 +131,19 @@ export function AddProjectsModal(props: Props) {
 
 
           <Group justify="flex-end" mt="md">
-            <Button type="submit">Submit</Button>
+            <Button
+              loading={createLoading == LoadingState.LOADING} onClick={() => {
+                const values = form.values
+                setCreateLoading(LoadingState.LOADING)
+
+                createProject(values).then(() => {
+                  setCreateLoading(LoadingState.LOADED)
+                  close()
+                  form.reset()
+                }).catch((e) => {
+                  setCreateLoading(LoadingState.ERROR)
+                })
+              }}>Create</Button>
           </Group>
         </Box>
 

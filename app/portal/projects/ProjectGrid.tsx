@@ -1,12 +1,15 @@
 "use client"
 
 import { ActionIcon, Anchor, Avatar, Badge, Box, Button, Flex, Grid, Group, Menu, RingProgress, Table, Text, rem } from "@mantine/core";
-import { IconDotsVertical, IconPlayerPause, IconPlayerPlay, IconTrash } from "@tabler/icons-react";
+import { IconCheck, IconDotsVertical, IconExclamationCircle, IconPlayerPause, IconPlayerPlay, IconTrash } from "@tabler/icons-react";
 import { changeProjectStatus, deleteProject } from "@/components/ProjectCard.actions";
 
 import { AddProjectsModal } from "./AddProjectsModal";
 import Link from "next/link";
+import { actionWithNotification } from "@/clientComp";
 import { getInitials } from "@/ux/helper";
+import { notifications } from "@mantine/notifications";
+import { title } from "process";
 
 interface Props {
     projects: (Project_SB & { profile: Profile_SB[], contract: { completed: boolean }[] })[]
@@ -97,7 +100,12 @@ export function ProjectGrid({ projects, users }: Props) {
                                 </Menu.Item>
                             )}
                             <Menu.Item
-                                onClick={() => deleteProject(project.id)}
+                                onClick={async () => {
+                                    actionWithNotification(() => deleteProject(project.id), {
+                                        title: `Deleting ${project.display_name}`,
+                                    })
+
+                                }}
                                 leftSection={<IconTrash style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
                                 color="red"
                             >

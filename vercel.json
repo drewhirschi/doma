@@ -1,8 +1,8 @@
 {
     "crons": [
       {
-        "path": "/cron/checkZuvaExtractions",
-        "schedule": "*/15 * * * *"
+        "path": "/cron/jobQueue",
+        "schedule": "* * * * *"
       }
     ]
   }

@@ -38,7 +38,7 @@ enum WizSteps {
 }
 
 export function AddContractsModalButton({ project }: Props) {
-    const [opened, { open: openModal, close: closeModal }] = useDisclosure(false);
+    const [opened, { open: openModal, close: partialCloseModal }] = useDisclosure(false);
 
     const supabase = browserClient()
     const [uploadStatus, setUploadStatus] = useState<WizStatus>(WizStatus.IDLE)
@@ -51,6 +51,12 @@ export function AddContractsModalButton({ project }: Props) {
     const prevStep = () => setActiveStep((current) => (current > 0 ? current - 1 : current));
 
 
+    const closeModal = () => {
+        partialCloseModal();
+        setUploadStatus(WizStatus.IDLE);
+        setFiles([]);
+        setUploadProgress(new Map())
+    }
 
     const uploadAndUnpackFiles = async (e: any) => {
         e.preventDefault();
@@ -62,7 +68,7 @@ export function AddContractsModalButton({ project }: Props) {
                 const uploadurl = await uploadTenantFile(supabase, fileName, file, {
                     updatePercentage: (percentage) => {
                         setUploadProgress((prevState) => {
-                            prevState.set(fileName, percentage)
+                            prevState.set(file.name, percentage)
                             return prevState
                         });
                     }
@@ -189,49 +195,53 @@ export function AddContractsModalButton({ project }: Props) {
                                         </div>
                                     </Group>
                                 </Dropzone>
-                                {files.map((file) => (
-                                    <Paper key={file.name} p={"sm"} shadow='sm'>
+                                {files.map((file) => {
+                                    const fileUploadProgress = (uploadProgress.get(file.name) ?? 0) * 100;
+                                    const fileuploadSuccess = fileUploadProgress === 100;
+                                    return (
+                                        <Paper key={file.name} p={"sm"} shadow='sm'>
 
-                                        <Group justify='space-between'>
-                                            <Group>
+                                            <Group justify='space-between'>
+                                                <Group>
 
-                                                <IconFileZip
-                                                    style={{ width: rem(52), height: rem(52), color: 'var(--mantine-color-dimmed)' }}
+                                                    <IconFileZip
+                                                        style={{ width: rem(52), height: rem(52), color: 'var(--mantine-color-dimmed)' }}
+                                                        stroke={1.5}
+                                                    />
+                                                    <div>
+                                                        <Text inline>
+                                                            {file.name}
+                                                        </Text>
+                                                        <Text size="sm" c="dimmed" inline mt={7}>
+                                                            {formatBytes(file.size)}
+                                                        </Text>
+                                                    </div>
+                                                </Group>
+                                                {fileuploadSuccess ? <IconCircleCheck
+                                                    style={{ color: "green" }}
                                                     stroke={1.5}
-                                                />
-                                                <div>
-                                                    <Text inline>
-                                                        {file.name}
-                                                    </Text>
-                                                    <Text size="sm" c="dimmed" inline mt={7}>
-                                                        {formatBytes(file.size)}
-                                                    </Text>
-                                                </div>
+                                                /> : <CloseButton onClick={() => {
+                                                    // Remove the file from the files array
+                                                    setFiles(files.filter(f => f !== file));
+                                                }} />}
                                             </Group>
-                                            {(uploadStatus == WizStatus.UPLOAD_SUCCESS) ? <IconCircleCheck
-                                                style={{ color: "green" }}
-                                                stroke={1.5}
-                                            /> : <CloseButton onClick={() => {
-                                                // Remove the file from the files array
-                                                setFiles(files.filter(f => f !== file));
-                                            }} />}
-                                        </Group>
-                                        {uploadStatus !== WizStatus.IDLE && (
-                                            <Progress.Root radius="xs" size="xs">
-                                                <Progress.Section
-                                                    color={uploadStatus === WizStatus.UPLOAD_SUCCESS ? "green" : "blue"}
-                                                    animated={uploadStatus === WizStatus.UPLOADING}
-                                                    value={uploadProgress.get(file?.path ?? "") ?? 0 * 100}
-                                                    style={{
-                                                        transform: `translateX(-${100 - (uploadProgress.get(file?.path ?? "") ?? 0) * 100}%)`,
-                                                        transition: "transform 200ms ease", // Add CSS transition
-                                                    }}
-                                                />
-                                            </Progress.Root>
-                                        )}
+                                            {uploadStatus !== WizStatus.IDLE && (
+                                                <Progress.Root radius="xs" size="xs">
+                                                    <Progress.Section
+                                                        color={fileuploadSuccess ? "green" : "blue"}
+                                                        animated={uploadStatus === WizStatus.UPLOADING}
+                                                        value={fileUploadProgress}
+                                                        style={{
+                                                            transform: `translateX(-${100 - fileUploadProgress}%)`,
+                                                            transition: "transform 200ms ease", // Add CSS transition
+                                                        }}
+                                                    />
+                                                </Progress.Root>
+                                            )}
 
-                                    </Paper>
-                                ))}
+                                        </Paper>
+                                    )
+                                })}
                             </Stack>
 
 
