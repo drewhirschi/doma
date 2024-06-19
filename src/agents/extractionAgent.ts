@@ -94,7 +94,7 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
     console.log(`executing extractor ${extractor.display_name}`)
 
 
-    const contractSegments = segmentContractLines(contract.contract_line)
+    const contractSegments = segmentContractLines(contract.contract_line, 120_000)
 
     const relevantHighlights: string[] = []
 
@@ -106,19 +106,13 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
             const res: ChatCompletion = await openai.chat.completions.create({
                 messages: buildExtracitonMessages(extractor, xmlContractText),
-                // model: 'gpt-4-turbo',
-                model: 'gpt-3.5-turbo',
+                model: 'gpt-4-turbo',
+                // model: 'gpt-3.5-turbo',
                 temperature: 0,
                 response_format: { 'type': "json_object" }
             });
 
-            // const res = await togetherLLM.chat.completions.create({
-            //     messages: buildExtracitonMessages(extractor, xmlContractText),
-            //     // model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
-            //     model: "mistralai/Mixtral-8x22B-Instruct-v0.1",
-            //     temperature: 0,
-            //     // response_format: { 'type': "json_object" }
-            //   });
+           
 
             // const res: ChatCompletion = await mindsdbLLM.chat.completions.create({
             //     messages: buildExtracitonMessages(extractor, xmlContractText),
@@ -316,13 +310,13 @@ async function createExtractionJob(supabase: SupabaseClient<Database>, contractI
 
 }
 
-function segmentContractLines(lines: ContractLine[]): ContractLine[][] {
+function segmentContractLines(lines: ContractLine[], tokensPerSegment = 120_000): ContractLine[][] {
     const segments: ContractLine[][] = [];
     let currentSegment: ContractLine[] = [];
     let currentTokenCount = 0;
 
     lines.forEach((line) => {
-        if (currentTokenCount + line.ntokens > 120_000) {
+        if (currentTokenCount + line.ntokens > tokensPerSegment) {
             segments.push(currentSegment);
             currentSegment = currentSegment.slice(-5);
             currentTokenCount = currentSegment.reduce((sum, item) => sum + item.ntokens, 0);

@@ -50,3 +50,8 @@ export enum AgreementTypes {
     MarketingCross = "marketing_cross_agreement",
     Unknown = "unknown",
 }
+
+export enum ContractJobTypes {
+    FullReview = "full_contract_review",
+    PdfContractParse = "pdf_contract_parse",
+}
