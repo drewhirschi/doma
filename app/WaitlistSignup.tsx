@@ -13,12 +13,19 @@ export function WaitlistSignup() {
     const [opened, { open, close: closeModal }] = useDisclosure(false);
     const largeScreen = useMediaQuery(`(min-width: ${theme.breakpoints?.sm || 48}em)`); // Ensure proper units
 
+    let pathname = '';
+    if (typeof window !== 'undefined') {
+        pathname = window.location.pathname;
+    }
+
     const form = useForm({
         initialValues: {
             email: "",
             first: "",
             last: "",
-            title: ""
+            title: "",
+            company: "",
+            url: pathname
         },
 
         validate: {
@@ -42,6 +49,7 @@ export function WaitlistSignup() {
                     onSubmit={form.onSubmit(async (values) => {
                         try {
 
+                            // await axios.post("https://submit-form.com/echo", {
                             await axios.post("https://submit-form.com/IkZtiKU2d", {
                                 method: "POST",
                                 body: values,
@@ -79,6 +87,7 @@ export function WaitlistSignup() {
                             <TextInput {...form.getInputProps("last")} label="Last Name" placeholder="Last Name" />
                             <TextInput {...form.getInputProps("email")} required label="Email" placeholder="Email" />
                             <TextInput {...form.getInputProps("title")} label="Title" placeholder="Title" />
+                            <TextInput {...form.getInputProps("company")} label="Company" placeholder="Company" />
 
                         </SimpleGrid>
 

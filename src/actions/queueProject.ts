@@ -1,7 +1,7 @@
 import { ContractJobTypes } from "@/types/enums";
 import { serverActionClient } from "@/supabase/ServerClients"
 
-type NewContractJob = Omit<ContractJob_SB, 'id' | 'created_at' | 'updated_at' | 'status'>;
+type NewContractJob = Omit<ContractJob_SB, 'id' | 'created_at' | 'updated_at' | 'status' | 'run_data'>;
 
 
 export async function queueProjectContracts(projectId: string) {

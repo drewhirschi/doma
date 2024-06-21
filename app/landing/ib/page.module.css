@@ -1,0 +1,48 @@
+.responsiveContainer {
+  @media (min-width: em(600px)) {
+    max-width: rem(900px);
+  }
+}
+.priceTitle {
+  font-size: 64px;
+  font-weight: 800;
+}
+
+.videoContainer {
+  position: relative;
+  width: 100%;
+  max-width: 750px; /* Max width for large screens */
+  margin: 0 auto; /* Center align on larger screens */
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  background-color: aquamarine;
+}
+
+.videoIframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0; /* Optional: Remove iframe border */
+}
+
+.landingPageContainer h1 {
+  font-size: 72px;
+}
+
+@media (max-width: 48em) {
+  .videoContainer {
+    max-width: 100%; /* Ensure full width on smaller screens */
+    padding-bottom: 56.25%; /* Maintain aspect ratio */
+  }
+  .priceTitle {
+    font-size: 52px;
+  }
+  .landingPageContainer h1 {
+    font-size: 48px;
+  }
+}
+
+
