@@ -46,7 +46,7 @@ export default async function SettingsPage({ params }: { params: { projectId: st
         .insert(addedIds.map(id => ({ project_id: params.projectId, profile_id: id })))
 
 
-      const { error: deleteErr } = await sb.from('project_assignment').delete().in('profile_id', removedIds)
+      const { error: deleteErr } = await sb.from('project_assignment').delete().in('profile_id', removedIds).eq('project_id', params.projectId)
 
       if (insertErr || deleteErr) {
         return rerm("Failed to update assignments", { insertErr, deleteErr })

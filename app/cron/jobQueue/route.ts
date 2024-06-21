@@ -1,6 +1,7 @@
 import Zuva, { checkExtractionJobs } from '@/zuva';
 import { fullAccessServiceClient, routeClient } from '@/supabase/ServerClients';
 
+import { ExtractJobStatus } from '@/types/enums';
 import type { NextRequest } from 'next/server';
 import { runContractExtraction } from '@/actions/extraction';
 
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
     try {
         const supabase = fullAccessServiceClient()
 
-        const { data: jobs, error } = await supabase.from("contract_job_queue").select().eq("status", "pending").limit(5)
+        const { data: jobs, error } = await supabase.from("contract_job_queue").select().in("status", [ExtractJobStatus.PENDING, ExtractJobStatus.FAILED]).limit(5)
 
         if (error) throw error
 
@@ -31,11 +32,12 @@ export async function GET(request: NextRequest) {
             try {
 
                 const res = await runContractExtraction(supabase, job.contract_id)
-                await supabase.from("contract_job_queue").update({ status: "done" }).eq("id", job.id).throwOnError()
+                await supabase.from("contract_job_queue").update({ status: ExtractJobStatus.COMPLETE }).eq("id", job.id).throwOnError()
                 completed++
 
             } catch (error) {
                 console.error(`failed to run extraction for job [${job.id}]`, error)
+                await supabase.from("contract_job_queue").update({ status: ExtractJobStatus.FAILED, run_data: error as any }).eq("id", job.id).throwOnError()
                 failed++
 
             }

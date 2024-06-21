@@ -19,7 +19,7 @@ export function AddReviewersPanel(props: {
     const [saving, setSaving] = useState(false)
 
     const form = useForm({
-        initialValues: props.members.reduce((acc:any, profile) => {
+        initialValues: props.members.reduce((acc: any, profile) => {
             acc[profile.id] = props.project.profile.some(p => p.id === profile.id)
             return acc
         }, {}),
@@ -63,13 +63,7 @@ export function AddReviewersPanel(props: {
 
                             const sb = browserClient();
 
-                            await actionWithNotification(
-
-                                () => props.updateProjectAssignments(added, removed)
-
-
-                                , { title: "Updating assignments" })
-
+                            await actionWithNotification(() => props.updateProjectAssignments(added, removed), { title: "Updating assignments" })
                             setSaving(false)
                             close()
 

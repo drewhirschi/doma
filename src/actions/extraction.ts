@@ -21,38 +21,36 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
     }
 
 
+    const extractorFetch = supabase.from("project")
+        .select("formatters(*, parslet(*))")
+        .eq("id", contractData.project_id)
+        .single()
 
 
 
-    const extractorFetch = supabase.from('parslet').select('*, formatters(key)')
-        .order("order", { ascending: true })
-    // .limit(10)
+    const projectFormatters = await extractorFetch
 
-    // if (options?.formatterKeys?.length) {
-    //     extractorFetch.eq('formatters.key', options.formatterKeys)
-    // }
-
-    let { data: extractors, error: extractorErr } = await extractorFetch
-
-    if (extractorErr) {
-        console.error('Error loading extractors:', extractorErr);
-        throw extractorErr
+    if (projectFormatters.error) {
+        console.error('Error loading extractors:', projectFormatters.error);
+        throw projectFormatters.error
     }
+
+    let extractors = projectFormatters.data.formatters.flatMap(pf => pf.parslet)
 
     if (options?.formatterKeys?.length) {
-        extractors = extractors!.filter(extractor => extractor.formatters.some(f => options.formatterKeys?.includes(f.key)))
+        extractors = projectFormatters.data.formatters.filter(pf => options.formatterKeys?.includes(pf.key)).flatMap(pf => pf.parslet)
     }
 
 
 
 
-    let tokensUsedThisMinute = 0;
-    const TOKEN_LIMIT_PER_MINUTE = 400_000;
-    const APX_TOKENS_PER_REQUEST = contractData.contract_line.reduce((sum, line) => sum + line.ntokens, 0) + contractData.contract_line.length * 8;
+    // let tokensUsedThisMinute = 0;
+    // const TOKEN_LIMIT_PER_MINUTE = 1_000_000;
+    // const APX_TOKENS_PER_REQUEST = contractData.contract_line.reduce((sum, line) => sum + line.ntokens, 0) + contractData.contract_line.length * 8;
 
-    const rateLimitInterval = setInterval(() => {
-        tokensUsedThisMinute = 0;
-    }, 60_000);
+    // const rateLimitInterval = setInterval(() => {
+    //     tokensUsedThisMinute = 0;
+    // }, 60_000);
 
 
     const newAnnotations = await new Promise<Annotation_SB[]>(async (resolve, reject) => {
@@ -60,28 +58,22 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
         const tasks = []
         while (extractors!.length > 0) {
 
-            if (tokensUsedThisMinute + APX_TOKENS_PER_REQUEST > TOKEN_LIMIT_PER_MINUTE) {
-                console.log('Rate limit reached, waiting 15 seconds')
-                await sleep(15_000)
-                continue
-            }
+            // if (tokensUsedThisMinute + APX_TOKENS_PER_REQUEST > TOKEN_LIMIT_PER_MINUTE) {
+            //     console.log('Rate limit reached, waiting 15 seconds')
+            //     await sleep(15_000)
+            //     continue
+            // }
 
             const extractor = extractors!.shift()
 
             const task = async () => {
-                tokensUsedThisMinute += APX_TOKENS_PER_REQUEST;
+                // tokensUsedThisMinute += APX_TOKENS_PER_REQUEST;
                 const extractedLines = await execExtractor(supabase, extractor!, contractData)
 
                 if (extractedLines.error) {
-                    console.error('Error extracting data:', extractedLines.error);
-                    reject()
+                    console.error(`Failed extracting [${extractor?.key}] on [${contractData.id}][${contractData.display_name}]`, extractedLines.error);
+                    //TODO: create a db record of the failed extraction
                 } else {
-
-                    // // ask the model to check one more time that the lines are accuarate.
-
-
-
-
 
                     const newAnnotations = await saveExtraction(supabase, contractId, extractor!, extractedLines.ok)
                     return newAnnotations
@@ -100,12 +92,12 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
         resolve(results.flat().filter(Boolean))
     })
 
-    clearInterval(rateLimitInterval);
-    console.log("Extraction finished")
+    // clearInterval(rateLimitInterval);
+    console.log(`Extraction finished for [${contractData.id}][${contractData.display_name}]`)
 
 
 
-    console.log("formatting extracted data")
+    console.log(`Formatting data extracted from [${contractData.id}][${contractData.display_name}]`)
 
     //run formatters
     if (!contractData.target) {
@@ -113,12 +105,7 @@ export async function runContractExtraction(supabase: SupabaseClient<Database>, 
     }
 
 
-    const projectFormatters = await supabase.from('project').select('formatters(*)').eq('id', contractData.project?.id!).single()
 
-    if (projectFormatters.error) {
-        console.error('Error loading project formatters:', projectFormatters.error);
-        throw projectFormatters.error
-    }
 
     const formatterFetch = supabase.from('formatters')
         .select('*, parslet(*, annotation(*))')

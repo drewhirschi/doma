@@ -88,13 +88,11 @@ export async function runSingleExtraction(supabase: SupabaseClient<Database>, co
 
 export async function execExtractor(sb: SupabaseClient<Database>, extractor: Parslet_SB, contract: Contract_SB & { contract_line: ContractLine[] }): Promise<IResp<string[]>> {
 
-    // const job = await createExtractionJob(sb, contract.id, extractor!.id)
 
-    await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.RUNNING)
     console.log(`executing extractor ${extractor.display_name}`)
 
 
-    const contractSegments = segmentContractLines(contract.contract_line, 120_000)
+    const contractSegments = segmentContractLines(contract.contract_line, 20_000)
 
     const relevantHighlights: string[] = []
 
@@ -103,11 +101,11 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
             const xmlContractText = buildXmlContract(contractSegment)
 
-
+            const messages = buildExtracitonMessages(extractor, xmlContractText)
+            
             const res: ChatCompletion = await openai.chat.completions.create({
-                messages: buildExtracitonMessages(extractor, xmlContractText),
+                messages,
                 model: 'gpt-4-turbo',
-                // model: 'gpt-3.5-turbo',
                 temperature: 0,
                 response_format: { 'type': "json_object" }
             });
@@ -115,10 +113,8 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
            
 
             // const res: ChatCompletion = await mindsdbLLM.chat.completions.create({
-            //     messages: buildExtracitonMessages(extractor, xmlContractText),
-            //     // model: 'llama-3-70b',
+            //     messages,
             //     model: 'mixtral-8x7b',
-            //     // model: 'gpt-3.5-turbo',
             //     temperature: 0,
             //     response_format: { 'type': "json_object" }
             // });
@@ -131,18 +127,15 @@ export async function execExtractor(sb: SupabaseClient<Database>, extractor: Par
 
             } catch (error) {
                 console.error("Failed to parse: ", responseMessage.content)
-                // await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
                 return rerm("Failed to parse response", { error })
             }
 
         }
 
-        // await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.COMPLETE)
         return rok(relevantHighlights)
 
     } catch (error) {
         console.error('Error extracting data:', error);
-        // await setJobStatus(sb, contract.id, extractor.id, ExtractJobStatus.FAILED)
         return rerm("Error extracting data", { error })
     }
 
@@ -311,18 +304,23 @@ async function createExtractionJob(supabase: SupabaseClient<Database>, contractI
 }
 
 function segmentContractLines(lines: ContractLine[], tokensPerSegment = 120_000): ContractLine[][] {
+
+    const XML_TOKENS_PER_LINE = 9
+    const SEGMENT_OVERLAP = 5
+
     const segments: ContractLine[][] = [];
     let currentSegment: ContractLine[] = [];
     let currentTokenCount = 0;
 
     lines.forEach((line) => {
-        if (currentTokenCount + line.ntokens > tokensPerSegment) {
+        if (currentTokenCount + line.ntokens + XML_TOKENS_PER_LINE > tokensPerSegment) {
+            console.log("pushing segment with token length: ", currentTokenCount)
             segments.push(currentSegment);
-            currentSegment = currentSegment.slice(-5);
-            currentTokenCount = currentSegment.reduce((sum, item) => sum + item.ntokens, 0);
+            currentSegment = currentSegment.slice(-SEGMENT_OVERLAP);
+            currentTokenCount = currentSegment.reduce((sum, item) => sum + item.ntokens + SEGMENT_OVERLAP * XML_TOKENS_PER_LINE, 0); 
         }
         currentSegment.push(line);
-        currentTokenCount += line.ntokens;
+        currentTokenCount += line.ntokens + XML_TOKENS_PER_LINE;
     });
 
     // Add the last segment if not empty

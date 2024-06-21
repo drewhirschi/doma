@@ -166,6 +166,7 @@ export type Database = {
           id: number
           job_type: string
           payload: Json | null
+          run_data: Json | null
           status: string
           updated_at: string
         }
@@ -175,6 +176,7 @@ export type Database = {
           id?: number
           job_type: string
           payload?: Json | null
+          run_data?: Json | null
           status?: string
           updated_at?: string
         }
@@ -184,6 +186,7 @@ export type Database = {
           id?: number
           job_type?: string
           payload?: Json | null
+          run_data?: Json | null
           status?: string
           updated_at?: string
         }
@@ -365,7 +368,7 @@ export type Database = {
           contract_id?: string
           created_at?: string
           data?: Json | null
-          formatter_key?: string
+          formatter_key: string
           id?: number
         }
         Update: {
@@ -376,6 +379,13 @@ export type Database = {
           id?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "formatted_info_formatter_key_fkey"
+            columns: ["formatter_key"]
+            isOneToOne: false
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
+          },
           {
             foreignKeyName: "public_formats_contract_id_fkey"
             columns: ["contract_id"]
@@ -399,6 +409,13 @@ export type Database = {
           formatter_key?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "formatter_dependencies_formatter_key_fkey"
+            columns: ["formatter_key"]
+            isOneToOne: false
+            referencedRelation: "formatters"
+            referencedColumns: ["key"]
+          },
           {
             foreignKeyName: "public_formatter_dependencies_extractor_id_fkey"
             columns: ["extractor_id"]
@@ -450,7 +467,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "line_ref_contract_line_fkey"
+            foreignKeyName: "line_ref_contract_id_line_id_fkey"
             columns: ["contract_id", "line_id"]
             isOneToOne: false
             referencedRelation: "contract_line"
@@ -544,10 +561,10 @@ export type Database = {
       }
       project: {
         Row: {
-          client: string
-          counterparty: string
+          client: string | null
+          counterparty: string | null
           created_at: string
-          deal_structure: string
+          deal_structure: string | null
           display_name: string | null
           id: string
           is_active: boolean
@@ -556,10 +573,10 @@ export type Database = {
           tenant_id: string
         }
         Insert: {
-          client: string
-          counterparty: string
+          client?: string | null
+          counterparty?: string | null
           created_at?: string
-          deal_structure: string
+          deal_structure?: string | null
           display_name?: string | null
           id?: string
           is_active?: boolean
@@ -568,10 +585,10 @@ export type Database = {
           tenant_id: string
         }
         Update: {
-          client?: string
-          counterparty?: string
+          client?: string | null
+          counterparty?: string | null
           created_at?: string
-          deal_structure?: string
+          deal_structure?: string | null
           display_name?: string | null
           id?: string
           is_active?: boolean
