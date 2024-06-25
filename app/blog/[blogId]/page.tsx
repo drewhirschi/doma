@@ -12,7 +12,7 @@ export default async function Page({ params }: { params: { blogId: string } }) {
 
     if (article.error) {
         console.error(article.error)
-        return <div>Sorry we couldn't find that article</div>
+        return <div>Article not found</div>
     }
 
     const date = new Date(article.data.created_at)
