@@ -15,7 +15,7 @@ export default async function Page({ params }: { params: { blogId: string } }) {
         return <div>Sorry we couldn't find that article</div>
     }
 
-    const date = new Date(article.data.created_at);
+    const date = new Date(article.data.created_at)
 
     return (
         <div>
