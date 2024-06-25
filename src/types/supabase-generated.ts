@@ -87,6 +87,33 @@ export type Database = {
           },
         ]
       }
+      blog_article: {
+        Row: {
+          author: string | null
+          cover_img: string | null
+          created_at: string
+          id: number
+          md: string | null
+          title: string
+        }
+        Insert: {
+          author?: string | null
+          cover_img?: string | null
+          created_at?: string
+          id?: number
+          md?: string | null
+          title: string
+        }
+        Update: {
+          author?: string | null
+          cover_img?: string | null
+          created_at?: string
+          id?: number
+          md?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       contract: {
         Row: {
           assigned_to: string | null
