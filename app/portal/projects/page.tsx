@@ -1,8 +1,10 @@
 import { Container } from "@mantine/core";
 import { ProjectGrid } from "./ProjectGrid";
 import { serverClient } from "@/supabase/ServerClients";
+import { sleep } from "@/utils";
 
 export default async function Page() {
+
 
     const supabase = serverClient()
     const projectFetch = await supabase.from("project").select("*, profile(*), contract(completed)")

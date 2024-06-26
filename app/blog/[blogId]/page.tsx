@@ -1,4 +1,4 @@
-import { Box, Container, Image } from '@mantine/core';
+import { Box, Container, Image, Text } from '@mantine/core';
 
 import Markdown from 'react-markdown'
 import React from 'react';
@@ -19,12 +19,15 @@ export default async function Page({ params }: { params: { blogId: string } }) {
 
     return (
         <div>
-            <Container>
+            <Container mb={"xl"}>
                 <Image
                     src={article.data.cover_img}
                 />
                 <h1>{article.data.title}</h1>
-                {date.toLocaleDateString()}
+                <Text c="dimmed" fw={600}>
+                {article.data.author} | {date.toLocaleDateString()}
+                </Text>
+                    
 
                 <Markdown >
                     {article.data.md}
