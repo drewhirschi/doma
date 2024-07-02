@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
 
-
+const callToAction = "Free Trial"
 
   return (
     <>
@@ -50,7 +50,7 @@ export default function HomePage() {
                 <Text style={{ textAlign: 'left', alignSelf: "flex-start", fontWeight: 400, fontSize: 64 }} variant="gradient" gradient={{ from: 'dark.8', to: 'dark.3', deg: -45 }}
                 >Parsl</Text>
                 <Title order={1} ta={"center"}>Drowning in M&A Documents?  We Can Help You Breathe.</Title>
-                <WaitlistSignup />
+                <WaitlistSignup callToAction={callToAction}/>
 
               </Stack>
             </Center>
@@ -77,7 +77,7 @@ export default function HomePage() {
 
                 <GridCol span={{ base: 12, md: 4 }}>
                   <Text mb={"sm"} size="xl">Parsl automates repetitive tasks like contract review, data extraction, and deal management so you can keep your head above water. This frees up valuable time to focus on higher-level tasks requiring strategic thinking and legal expertise.</Text>
-                  <WaitlistSignup />
+                  <WaitlistSignup callToAction={callToAction} />
                 </GridCol>
                 <GridCol span={{ base: 12, md: 8 }}>
 
@@ -124,7 +124,7 @@ export default function HomePage() {
                 </GridCol>
                 <GridCol span={{ base: 12, md: 4 }}>
                   <Text mb={"sm"} style={{ alignSelf: "flex-end" }} size="xl">M&A due diligence is ambiguous and often done by associates still in training. There’s a lot on the line and always a worry that crucial details might be overlooked in a sea of paperwork. Parsl utilizes AI to bring peace of mind by ensuring a thorough and standardized review process. Parsl increases confidence by catching potential issues early and enables review of documents that were before not feasible.</Text>
-                  <WaitlistSignup />
+                  <WaitlistSignup callToAction={callToAction} />
                 </GridCol>
               </Grid>
             </Stack>
@@ -149,7 +149,7 @@ export default function HomePage() {
 
                 <GridCol span={{ base: 12, sm: 4 }}>
                   <Text mb={"sm"} size="xl">The legal world is moving faster than it ever has and nobody wants to be left behind. Clients are looking for firms that are efficient, close deals fast, utilize technology enabled insights, and offer predictable pricing. With Parsl your M&A group will be at the forefront of the industry and in a prime position to provide your clients the value they want.</Text>
-                  <WaitlistSignup />
+                  <WaitlistSignup callToAction={callToAction} />
                 </GridCol>
                 <GridCol span={{ base: 12, sm: 8 }}>
                   <Image
@@ -175,7 +175,7 @@ export default function HomePage() {
               <Title order={1}>Parsl is unique</Title>
               <Text mb={"sm"} size="xl">No other AI platform is as purpose-built and easy to use for M&A as Parsl. Parsl goes beyond verbatim clause extraction by automating the backend work of interpreting and applying the clauses. The results are simple enough for nonlawyers to understand and are easily queried to make populating disclosure schedules seamless.</Text>
               <Group>
-                <WaitlistSignup />
+                <WaitlistSignup callToAction={callToAction} />
               </Group>
             </Stack>
           </Container>
@@ -188,7 +188,7 @@ export default function HomePage() {
               <Title order={1}>What integration risk?</Title>
               <Text mb={"sm"} size="xl">For early customers there will be zero setup or required training. Simply share a deal&apos;s data room permissions and receive a completed interactive due diligence chart in 24 hours. We will use Parsl on your behalf to smooth out the rough edges and cater it to your needs. Worried about AI accuracy? All results will be double checked by an attorney, like getting a lawyer at the price of a SaaS.</Text>
               <Group>
-                <WaitlistSignup />
+                <WaitlistSignup callToAction={callToAction} />
               </Group>
             </Stack>
           </Container>
@@ -212,7 +212,7 @@ export default function HomePage() {
 
               </Text>
               <Group>
-                <WaitlistSignup />
+                <WaitlistSignup callToAction={callToAction} />
               </Group>
             </Stack>
           </Container>

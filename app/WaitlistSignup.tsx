@@ -9,7 +9,11 @@ import { pixel } from "@/utils";
 import { theme } from "../theme";
 import { useForm } from "@mantine/form";
 
-export function WaitlistSignup() {
+interface Props {
+    callToAction?: string
+    secondaryDesription?: string
+}
+export function WaitlistSignup(props:Props) {
     const [opened, { open, close: closeModal }] = useDisclosure(false);
     const largeScreen = useMediaQuery(`(min-width: ${theme.breakpoints?.sm || 48}em)`); // Ensure proper units
 
@@ -39,7 +43,7 @@ export function WaitlistSignup() {
             <Modal
                 opened={opened}
                 onClose={closeModal}
-                title="Join the Waitlist"
+                title={ props.callToAction ?? "Join the Waitlist"}
                 size={largeScreen ? "lg" : "md"}
             >
 
