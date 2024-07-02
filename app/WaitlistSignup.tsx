@@ -13,7 +13,7 @@ interface Props {
     callToAction?: string
     secondaryDesription?: string
 }
-export function WaitlistSignup(props:Props) {
+export function WaitlistSignup({callToAction}:Props) {
     const [opened, { open, close: closeModal }] = useDisclosure(false);
     const largeScreen = useMediaQuery(`(min-width: ${theme.breakpoints?.sm || 48}em)`); // Ensure proper units
 
@@ -43,7 +43,7 @@ export function WaitlistSignup(props:Props) {
             <Modal
                 opened={opened}
                 onClose={closeModal}
-                title={ props.callToAction ?? "Join the Waitlist"}
+                title={ callToAction ?? "Join the Waitlist"}
                 size={largeScreen ? "lg" : "md"}
             >
 
@@ -96,10 +96,12 @@ export function WaitlistSignup(props:Props) {
                         </SimpleGrid>
 
 
+<Group justify="flex-end">
 
                         <Button mt={"xl"} type="submit" >
-                            Join
+                            Submit
                         </Button>
+</Group>
                     </Box>
 
                 </form>
@@ -111,7 +113,7 @@ export function WaitlistSignup(props:Props) {
                 variant="gradient"
                 gradient={{ "deg": 30, from: "blue.8", to: "blue.6" }}
                 fw={500}
-            >Join the Waitlist</Button >
+            >{callToAction ?? "Join the Waitlist"}</Button >
         </>
     );
 }
