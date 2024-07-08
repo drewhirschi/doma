@@ -4,6 +4,7 @@ import GridBackground from "@/components/GridBackground";
 import LoginButton from "./LoginButton";
 import { Metadata } from "next";
 import { Meteors } from "@/components/Meteors";
+import TopNav from "@/components/TopNav";
 import { WaitlistSignup } from "./WaitlistSignup";
 import styles, { } from './page.module.css';
 
@@ -32,7 +33,8 @@ export default function HomePage() {
 
         <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350} c={"gray.8"} className={styles.landingPageContainer}>
 
-            <Group justify="flex-end"><LoginButton /></Group>
+            <TopNav />
+
 
 
 
