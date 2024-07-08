@@ -13,7 +13,7 @@ interface Props {
     callToAction?: string
     secondaryDesription?: string
 }
-export function WaitlistSignup({callToAction}:Props) {
+export function WaitlistSignup({callToAction, secondaryDesription}:Props) {
     const [opened, { open, close: closeModal }] = useDisclosure(false);
     const largeScreen = useMediaQuery(`(min-width: ${theme.breakpoints?.sm || 48}em)`); // Ensure proper units
 
@@ -80,7 +80,7 @@ export function WaitlistSignup({callToAction}:Props) {
 
 
                     <Text py={"sm"}>
-                        As we have capacity, you can expect an email to schedule a get-to-know-you call.
+                        {!!secondaryDesription ? secondaryDesription : "As we have capacity, you can expect an email to schedule a get-to-know-you call."}
                     </Text>
 
                     <Box >
