@@ -6,6 +6,7 @@ import "./global.css";
 import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 
 import { Analytics } from "@vercel/analytics/react"
+import ApolloTracker from "@/components/ApolloTracker";
 import FacebookPixel from "@/components/FacebookPixel";
 import { Notifications } from "@mantine/notifications";
 import { theme } from "../theme";
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: any }) {
                 content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
               />
               <meta name="msvalidate.01" content="107AE4ACC58FF672DBC6CF79BCEA3965" />
+              <ApolloTracker/>
             </head>
             <body >
               <MantineProvider theme={theme}>
