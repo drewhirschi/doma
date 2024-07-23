@@ -1,12 +1,14 @@
 "use client"
 
-import { Box, Group, Pagination, Table, Text, TextInput, Title, rem } from '@mantine/core';
+import { ActionIcon, Box, Group, Pagination, Table, Text, TextInput, Title, rem } from '@mantine/core';
 
 import { AgreementTypeBadge } from '@/components/AgreementTypeBadge';
 import { ContractReviewerLink } from '@/components/PdfViewer/components/ContractReveiwerLink';
+import { IconDownload } from '@tabler/icons-react';
 import { ReviewerCombobox } from '@/components/ReviewerCombobox';
 import { SearchAndPage } from '../SearchAndPage';
 import { browserClient } from '@/supabase/BrowserClient';
+import { notifications } from '@mantine/notifications';
 
 interface Props {
     project: Project_SB & { profile: Profile_SB[] }
@@ -34,6 +36,33 @@ export function SearchTab({ project, contracts, contractCount }: Props) {
                         <Text>{contract.display_name}</Text>
                     )}
 
+                </Table.Td>
+
+                <Table.Td>
+                    <ActionIcon variant="filled" aria-label="Download" >
+                        <IconDownload style={{ width: '70%', height: '70%' }} stroke={1.5}
+                            onClick={async () => {
+                                const sb = browserClient();
+                                const { data, error } = await sb.storage.from('tenants').download(contract.name);
+                                if (error) {
+                                    notifications.show({
+                                        title: 'Error downloading',
+                                        message: error.message,
+                                        color: 'red',
+                                    });
+                                } else {
+                                    const url = URL.createObjectURL(data);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = contract.display_name ?? `${contract.id}.pdf`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(url);
+                                }
+                            }}
+                        />
+                    </ActionIcon>
                 </Table.Td>
                 <Table.Td>
                     {contract.description}
@@ -69,6 +98,7 @@ export function SearchTab({ project, contracts, contractCount }: Props) {
                 <Table.Thead>
                     <Table.Tr>
                         <Table.Th>Contract</Table.Th>
+                        <Table.Th></Table.Th>
                         <Table.Th>Description</Table.Th>
                         <Table.Th>Completed</Table.Th>
                         <Table.Th>Pages</Table.Th>

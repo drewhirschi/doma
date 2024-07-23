@@ -4,8 +4,8 @@ const supabase = fullAccessServiceClient()
 
 async function main() {
 
-    const userId = "47ff043c-6b54-42e7-84cd-4029435ea460"
-    const tenant_id = "565ee418-27bb-42c6-af96-4f78d8c476b3"
+    const userId = "c46aa845-9384-43d7-ae14-2648ac694450"
+    const tenant_id = "7713591f-c233-47a4-a285-dd2a035195ba"
 
     const { data: user, error: userError } = await supabase.auth.admin.getUserById(userId)
 

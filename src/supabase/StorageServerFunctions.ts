@@ -56,7 +56,7 @@ export async function unzipTenantFile(supabase: SupabaseClient<Database>, zipFil
 
 
     try {
-        const url = `${SUPABASE_URL}/storage/v1/object/${bucket}/${zipFilepath}`;
+        const url = `${SUPABASE_URL}/storage/v1/object/tenants/${zipFilepath}`;
 
         const response = await axios({
             method: 'get',
@@ -104,7 +104,7 @@ async function handleFileIngestion(supabase: SupabaseClient, jobQueue: any, tena
 
 
     // let { data: uploadData, error: fileuploadError } = await rateLimitter(() => supabase.storage.from(tenantId).upload(filepath, fileBuffer))
-    let { data: uploadData, error: fileuploadError } = await jobQueue.add(() => supabase.storage.from(tenantId).upload(filepath, fileBuffer))
+    let { data: uploadData, error: fileuploadError } = await jobQueue.add(() => supabase.storage.from("tenants").upload(filepath, fileBuffer))
     if (fileuploadError) console.error('Error uploading file:', fileuploadError);
 
 

@@ -27,7 +27,6 @@ const PDFView = dynamic(() => import('./PdfView'), { ssr: false, loading: () => 
 
 export type ParsletWithNotes = Parslet_SB & { contract_note: { content: string }[] }
 interface Props {
-    pdfUrl: string
     pdfBase64: string
     projectId: string
     contract: Contract_SB & {
@@ -35,6 +34,7 @@ interface Props {
         // annotation: Annotation_SB[],
         // annotation: (Annotation_SB & { contract_line: ContractLine_SB[] })[]
     }
+    signedDownloadContractUrl: string | undefined
     parslets: Parslet_SB[]
     formatters: FormatterWithInfo[]
     annotations: Annotation_SB[]
@@ -44,7 +44,7 @@ interface Props {
 
 export function ContractReviewer(props: Props) {
 
-    const { pdfUrl, contract, annotations, projectId, parslets } = props
+    const { contract, annotations, projectId, parslets } = props
 
     const searchParams = useSearchParams()
     const [formatters, setFormatters] = useState(props.formatters)
@@ -428,7 +428,6 @@ export function ContractReviewer(props: Props) {
                 </PanelResizeHandle>
                 <Panel minSize={30} defaultSize={60} ref={panelRef} >
                     <PDFView
-                        pdfUrl={pdfUrl}
                         pdfBase64={props.pdfBase64}
                         contract={contract}
                         formatters={formatters}
@@ -460,7 +459,7 @@ export function ContractReviewer(props: Props) {
 
             </PanelGroup >
             <Drawer position="right" offset={8} radius="md" opened={opened} onClose={close} size={"lg"} title="Contract details">
-                <ContractDetailsDrawer contract={contract} />
+                <ContractDetailsDrawer contract={contract} downloadContractUrl={props.signedDownloadContractUrl}/>
             </Drawer>
         </>
 

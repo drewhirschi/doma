@@ -22,7 +22,7 @@ export default function OverviewTab({ project, contracts, contractCount }: Props
                     <FileExplorer
                         members={members}
                         project={project}
-                        root={`projects/${projectId}`}
+                        root={`${project.tenant_id}/projects/${projectId}`}
                         tenantId={project.tenant_id}
                         setSelectedRows={setSelectedRows}
                         selectedRows={selectedRows}

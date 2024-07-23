@@ -46,7 +46,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, project, me
             setLoading(true);
             // Assuming 'list' is a method to fetch files; replace with actual Supabase Storage method
             const [{ data, error }, contractq] = await Promise.all([
-                supabase.storage.from(tenantId).list(currentPath, {
+                supabase.storage.from("tenants").list(currentPath, {
                     limit: 100, // Adjust based on your needs
                     offset: 0,
                 }),
@@ -191,7 +191,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ root, tenantId, project, me
             <Group my={"md"} justify="space-between">
                 <Group>
 
-                    {currentPath.replace(`projects/${project.id}`, "Home")
+                    {currentPath.replace(`${project.tenant_id}/projects/${project.id}`, "Home")
                         .split('/')
 
                         .map((path, index, array) => {

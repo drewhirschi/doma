@@ -11,7 +11,7 @@ import { FileInput } from '@mantine/core';
 import { FileObject } from '@supabase/storage-js'
 import { browserClient } from '@/supabase/BrowserClient';
 import { formatBytes } from '@/ux/helper';
-import { unzipFile } from './AddContractsModal.actions';
+import { unzipFileServerAction } from './AddContractsModal.actions';
 import { uploadTenantFile } from '@/supabase/Storage';
 import { useDisclosure } from '@mantine/hooks';
 
@@ -64,7 +64,7 @@ export function AddContractsModalButton({ project }: Props) {
             setUploadStatus(WizStatus.UPLOADING);
             const uploadProms = files.map(async (file) => {
 
-                const fileName = `projects/${project.id}/${file?.name}`
+                const fileName = `${project.tenant_id}/projects/${project.id}/${file?.name}`
                 const uploadurl = await uploadTenantFile(supabase, fileName, file, {
                     updatePercentage: (percentage) => {
                         setUploadProgress((prevState) => {
@@ -89,7 +89,7 @@ export function AddContractsModalButton({ project }: Props) {
         try {
             files.map(async (file) => {
                 if (file.type === "application/zip") {
-                    await unzipFile(`projects/${project.id}/${file?.name}`, project.id);
+                    await unzipFileServerAction(`${project.tenant_id}/projects/${project.id}/${file?.name}`, project.id);
 
                 }
             })
@@ -104,7 +104,7 @@ export function AddContractsModalButton({ project }: Props) {
         try {
 
 
-            const filesListRes = await supabase.storage.from(project.tenant_id).list(`projects/${project.id}/${files[0]?.name.replace(".zip", "")}`)
+            const filesListRes = await supabase.storage.from("tenants").list(`${project.tenant_id}/projects/${project.id}/${files[0]?.name.replace(".zip", "")}`)
             if (filesListRes.error) {
                 throw filesListRes.error
             }
@@ -115,23 +115,6 @@ export function AddContractsModalButton({ project }: Props) {
     }
 
 
-
-    // useEffect(() => {
-    //     let interval: NodeJS.Timeout | null = null;
-
-    //     if (uploadStatus === "unzipping") {
-    //         interval = setInterval(async () => {
-
-    //         }, 500);
-    //     }
-
-    //     return () => {
-    //         // Clean up the interval when the component unmounts or the upload status changes
-    //         if (interval) {
-    //             clearInterval(interval);
-    //         }
-    //     };
-    // }, [projectId, uploadStatus]);
 
 
 

@@ -24,7 +24,7 @@ export async function deleteProject(projectId: string): Promise<IResp<any>> {
         return rerm("failed to get tenant id", {})
     }
 
-    const projectFiles = await rFindFilenames(supabase, tenantId, `projects/${projectId}`, [])
+    const projectFiles = await rFindFilenames(supabase, "tenants", `${tenantId}/projects/${projectId}`, [])
 
 
     if (projectFiles) {

@@ -30,7 +30,7 @@ export async function uploadTenantFile(supabase: SupabaseClient<Database>, fileN
             uploadDataDuringCreation: true,
             removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
             metadata: {
-                bucketName: tenantId,
+                bucketName: "tenants",
                 objectName: fileName,
                 contentType: file.type,
                 cacheControl: "3600",

@@ -9,6 +9,7 @@ import { PAGE_SIZE } from '../shared';
 import { ProjectTabs } from '../ProjectTabs';
 import { SearchTab } from './SearchTab';
 import { getUserTenant } from '@/shared/getUserTenant';
+import { isValidUUID } from '@/utils';
 import { serverClient } from '@/supabase/ServerClients';
 import { useDebouncedCallback } from 'use-debounce';
 
@@ -37,10 +38,15 @@ export default async function Page({ params, searchParams }: { params: { project
         .select("*", { count: 'estimated' })
         .eq("project_id", params.projectId)
         .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
-        
+
     if (query) {
-        contractQBuilder = contractQBuilder
-            .ilike('display_name', `%${searchParams.query}%`)
+        const conditions = [`display_name.ilike.%${searchParams.query}%`];
+
+        if (isValidUUID(searchParams.query)) {
+            conditions.push(`id.eq.${searchParams.query}`);
+        }
+
+        contractQBuilder = contractQBuilder.or(conditions.join(','));
     }
 
     const contractQ = await contractQBuilder

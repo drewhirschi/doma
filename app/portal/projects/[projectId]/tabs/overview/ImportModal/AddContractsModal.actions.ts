@@ -5,7 +5,7 @@ import { serverActionClient } from "@/supabase/ServerClients"
 import { sleep } from "@/utils"
 import { unzipTenantFile } from "@/supabase/StorageServerFunctions"
 
-export async function unzipFile(filepath: string, project_id: string) {
+export async function unzipFileServerAction(filepath: string, project_id: string) {
     const supabase = serverActionClient()
 
      await unzipTenantFile(supabase, filepath) 

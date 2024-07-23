@@ -12,7 +12,6 @@ import { SelectFormatterButton } from "./SelectFormatterButton";
 import { theme } from "../../../../../../theme";
 
 interface Props {
-    pdfUrl: string
     pdfBase64: string
     contract: Contract_SB
     highlights: Annotation_SB[]
@@ -68,7 +67,7 @@ const computeOffsets = (highlights: Annotation_SB[]): { id: string, value: numbe
     return offsets;
 };
 
-export default function PDFView({ pdfBase64, pdfUrl, highlights, handleRemoveHighlight, handleAddHighlight, formatters, parslets, scrollFiIntoView }: Props) {
+export default function PDFView({ pdfBase64, highlights, handleRemoveHighlight, handleAddHighlight, formatters, parslets, scrollFiIntoView }: Props) {
 
 
     const pathname = usePathname()

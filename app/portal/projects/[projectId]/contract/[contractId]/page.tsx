@@ -34,7 +34,7 @@ export default async function Page({ params }: { params: { projectId: string, co
         throw new Error("Failed to fetch data")
     }
 
-    const fileRes = await supabase.storage.from(tenantId!).download(contractQ.data.name, {})
+    const fileRes = await supabase.storage.from("tenants").download(contractQ.data.name, {})
     if (!fileRes.data) {
         console.error(fileRes.error)
         throw new Error("Failed to download file")
@@ -43,22 +43,23 @@ export default async function Page({ params }: { params: { projectId: string, co
 
 
 
+    const signedDownloadContractUrlQ = await supabase
+        .storage
+        .from('tenants')
+        .createSignedUrl(contractQ.data.name, 60 * 60)
+
+    const signedDownloadContractUrl = new URL(signedDownloadContractUrlQ.data?.signedUrl ?? "")
+    signedDownloadContractUrl.searchParams.append('response-content-disposition', `attachment; filename="${contractQ.data.display_name ?? contractQ.data.id + '.pdf'}"`);
 
 
-    const signedUrlQ = await supabase.storage.from(tenantId!).createSignedUrl(contractQ.data.name, 60, {})
-
-    if (!signedUrlQ.data) {
-        console.error(signedUrlQ.error)
-        throw new Error("Failed to fetch contract url")
-    }
 
 
     return (
 
 
         <ContractReviewer
-            pdfUrl={signedUrlQ.data.signedUrl}
             pdfBase64={fileBase64}
+            signedDownloadContractUrl={signedDownloadContractUrl.toString()}
             contract={contractQ.data}
             projectId={params.projectId}
             parslets={parsletQ.data ?? []}
