@@ -245,14 +245,15 @@ export function formattedInfoStr({infoArray, projectId}: Props): string {
     } else if (key === FormatterKeys.limitationOfLiability) {
         return infoArray.map((info) => {
             const data = info.data as z.infer<typeof LimitationOfLiabilityShape>
-            let str = (data.consequentialDamagesLimit?.amount ?? '') + "\n" +
-                (data.consequentialDamagesExceptions ?? '') + "\n" +
-                (data.directDamagesLimit?.amount ?? '') + "\n" +
-                (data.directDamagesExceptions ?? '') + "\n" +
-                // {getAnnotationLinks(info.annotation, projectId, info.contract_id)}
-                ''
-            return str
-        }).join("\n")
+            return data.summary
+            // let str = (data.consequentialDamagesLimit?.amount ?? '') + "\n" +
+            //     (data.consequentialDamagesExceptions ?? '') + "\n" +
+            //     (data.directDamagesLimit?.amount ?? '') + "\n" +
+            //     (data.directDamagesExceptions ?? '') + "\n" +
+            //     // {getAnnotationLinks(info.annotation, projectId, info.contract_id)}
+            //     ''
+            // return str
+        }).join("\n\n")
 
 
 

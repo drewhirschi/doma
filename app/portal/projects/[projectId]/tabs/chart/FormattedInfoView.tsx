@@ -262,10 +262,11 @@ export function FormattedInfoView(props: Props) {
         return props.infoArray.map((info) => {
             const data = info.data as z.infer<typeof LimitationOfLiabilityShape>
             return <div key={info.formatter_key + info.id}>
-                {data.consequentialDamagesLimit?.amount}
+                {data.summary}
+                {/* {data.consequentialDamagesLimit?.amount}
                 {data.consequentialDamagesExceptions}
                 {data.directDamagesLimit?.amount}
-                {data.directDamagesExceptions}
+                {data.directDamagesExceptions} */}
                 {getAnnotationLinks(info.annotation, props.projectId, info.contract_id)}
             </div>
         })
