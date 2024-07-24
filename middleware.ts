@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (request.nextUrl.pathname.startsWith("/portal") && !user?.app_metadata?.tenant_id) {
-        return NextResponse.redirect(`/portal/no-tenant`)
+        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_AUTH_URL}/no-tenant`)
     }
 
 

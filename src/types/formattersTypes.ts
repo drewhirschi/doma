@@ -222,20 +222,23 @@ export const WarrantyShape = z.object({
 
 
 
+// export const LimitationOfLiabilityShape = z.object({
+//     directDamagesLimit: z.object({
+//         waived: z.boolean().nullable().describe("True if the limit is waived"),
+//         silent: z.boolean().nullable().describe("True if the limit is silent"),
+//         amount: z.string().nullable().describe("The amount of the limit"),
+//     }).describe("object must not be null but children may be."),
+//     directDamagesExceptions: z.string().nullable().array().describe(`specify the exceptions to the relevant limit for example: Indemnification obligations `),
+//     consequentialDamagesLimit: z.object({
+//         waived: z.boolean().nullable().describe("True if the limit is waived"),
+//         silent: z.boolean().nullable().describe("True if the limit is silent"),
+//         amount: z.string().nullable().describe("The amount of the limit"),
+//     }).describe("        Special, punitive, indirect, incidental or consequential damages all should be considered under consequential damages for our purposes."),
+//     consequentialDamagesExceptions: z.string().nullable().array().describe(`specify the exceptions to the relevant limit for example:  Breaches of confidentiality and indemnification obligations `),
+// }).describe("Summarize limitation of liability sections.");
 export const LimitationOfLiabilityShape = z.object({
-    directDamagesLimit: z.object({
-        waived: z.boolean().nullable().describe("True if the limit is waived"),
-        silent: z.boolean().nullable().describe("True if the limit is silent"),
-        amount: z.string().nullable().describe("The amount of the limit"),
-    }).nullable(),
-    directDamagesExceptions: z.string().nullable().array().describe(`specify the exceptions to the relevant limit for example: Indemnification obligations `),
-    consequentialDamagesLimit: z.object({
-        waived: z.boolean().nullable().describe("True if the limit is waived"),
-        silent: z.boolean().nullable().describe("True if the limit is silent"),
-        amount: z.string().nullable().describe("The amount of the limit"),
-    }).nullable().describe("        Special, punitive, indirect, incidental or consequential damages all should be considered under consequential damages for our purposes."),
-    consequentialDamagesExceptions: z.string().nullable().array().describe(`specify the exceptions to the relevant limit for example:  Breaches of confidentiality and indemnification obligations `),
-}).describe("Summarize and label the limitation of liability sections.");
+    summary: z.string().nullable().describe("Summarize limitation of liability sections. If there are no sections, then null."),
+})
 export type LimitationOfLiabilityFormatResponse = z.infer<typeof LimitationOfLiabilityShape>;
 
 export const IndemnitiesShape = z.object({

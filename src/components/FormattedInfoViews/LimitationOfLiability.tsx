@@ -11,12 +11,12 @@ export function FormattedLimitationOfLiability({ form, afterChange }: ViewProps<
     return (
         <Box>
             <Textarea
-                label="Summary (deprecated)"
+                label="Summary"
                 {...form.getInputProps(`summary`)}
                 value={form.getInputProps(`summary`).value ?? ""}
                 autosize
             />
-            <Fieldset legend="Direct Damages"
+            {/* <Fieldset legend="Direct Damages"
             // variant="unstyled"
             >
                 <Textarea
@@ -91,7 +91,7 @@ export function FormattedLimitationOfLiability({ form, afterChange }: ViewProps<
                     }}
                 />
 
-            </Fieldset>
+            </Fieldset> */}
         </Box>
 
     )
