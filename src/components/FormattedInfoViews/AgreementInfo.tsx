@@ -8,7 +8,6 @@ export function FormattedAgreementInfo({ form, afterChange }: ViewProps<Agreemen
 
 
 
-
     return (
 
         <Stack gap={4}>
@@ -37,8 +36,9 @@ export function FormattedAgreementInfo({ form, afterChange }: ViewProps<Agreemen
                     label="Effective date"
                     placeholder="No date"
                     clearable
+                    __timezoneApplied={true}
                     {...form.getInputProps('effective_date')}
-                    value={form.values.effective_date ? new Date(form.values.effective_date) : null}
+                    value={form.values.effective_date ? new Date(form.values.effective_date.toString().split('T')[0].replace(/-/g, '/')) : null}
                     onChange={(value) => {
                         form.setFieldValue('effective_date', value)
                         afterChange()
@@ -75,14 +75,14 @@ export function FormattedAgreementInfo({ form, afterChange }: ViewProps<Agreemen
 
             </SimpleGrid>
             <TagsInput
-                    label="Incorporated agreements"
-                    {...form.getInputProps("incorporatedAgreements")}
-                    onChange={(values: string[]) => {
-                        form.setFieldValue("incorporatedAgreements", values)
-                        afterChange()
-                    }}
-                    value={form.getInputProps(`incorporatedAgreements`).value ?? []}
-                />
+                label="Incorporated agreements"
+                {...form.getInputProps("incorporatedAgreements")}
+                onChange={(values: string[]) => {
+                    form.setFieldValue("incorporatedAgreements", values)
+                    afterChange()
+                }}
+                value={form.getInputProps(`incorporatedAgreements`).value ?? []}
+            />
 
         </Stack>
 

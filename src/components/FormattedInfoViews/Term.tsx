@@ -29,7 +29,8 @@ export function FormattedTerm({ form, afterChange: onChange }: ViewProps<TermFor
                     clearable
                     firstDayOfWeek={0}
                     {...form.getInputProps('expireDate')}
-                    value={form.values.expireDate ? new Date(form.values.expireDate) : null}
+                    value={form.values.expireDate ? new Date(form.values.expireDate.toString().split('T')[0].replace(/-/g, '/')) : null}
+
                     onChange={(value) => {
                         form.setFieldValue('expireDate', value)
                         onChange()
