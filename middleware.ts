@@ -1,6 +1,7 @@
 import { createMiddlewareClient } from '@/utils/supabase/middleware'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function middleware(request: NextRequest) {
 
@@ -12,13 +13,14 @@ export async function middleware(request: NextRequest) {
 
 
     if (!user && request.nextUrl.pathname.startsWith("/portal")) {
-        // const redirectUrl = request.url ? encodeURIComponent(request.url) : '/';
         return NextResponse.redirect(new URL(`/login`, request.url))
     }
 
     if (request.nextUrl.pathname.startsWith("/portal") && !user?.app_metadata?.tenant_id) {
         return NextResponse.redirect(`${process.env.AUTH_URL}/no-tenant`)
     }
+
+  
 
 
 

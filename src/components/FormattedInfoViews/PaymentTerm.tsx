@@ -26,6 +26,10 @@ export function FormattedPaymentTerms({ form, index, onChange }: ItemViewProps<z
                     label="Direction"
                     {...form.getInputProps(`infos.${index}.data.direction`)}
                     data={Object.keys(PaymentTermsDirection).map(k => ({ value: k, label: k.charAt(0) + k.slice(1).toLowerCase() }))}
+                    onChange={(value) => {
+                        form.setFieldValue(`infos.${index}.data.direction`, value)
+                        onChange()
+                    }}
                 />
 
 

@@ -27,8 +27,8 @@ export const AgreementInfoShape = z.object({
     target_entity: z.string().nullable(),
     alternate_target_entity_names: z.string().array()
         .describe("list of any other names, referential terms, or aliases of the target entity is referred to as. These are often mentioned right aftet the target's name in parentheses.  If only one party is named and the other party is given a generic title such as 'you', 'contracting party', 'licensor' then that generic title should be assumed as the Target Entity."),
-    effective_date: z.coerce.date().nullable()
-        .describe("What date did or will the agreement go into effect? Format the date as YYYY/MM/DD"),
+    effective_date: z.string().date().nullable()
+        .describe("What date did or will the agreement go into effect? Format the date as YYYY-MM-DD"),
     summary: z.string().nullable()
         .describe(`Summarize in the following format by replacing the brackets with the specified information if provided: "[Title] between [Counterparty] and [Target Entity] dated [Effective Date in long date format]". If there are amendments, addendums, or statements of work add the following wording with the brackets filled in with the applicable information: ", as amended [list amendment dates], including [Statement(s) of Work/Addend(um)/(a)] dated [list dates] [(as amended [list dates])]`),
 

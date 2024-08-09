@@ -1,4 +1,4 @@
-import { Anchor, Badge, Button, SimpleGrid, Stack, TagsInput, Text, TextInput, Textarea, Title } from "@mantine/core"
+import { Anchor, Badge, Button, Input, SimpleGrid, Stack, TagsInput, Text, TextInput, Textarea, Title } from "@mantine/core"
 
 import { AgreementInfoFormatResponse } from "@/types/formattersTypes"
 import { DatePickerInput } from "@mantine/dates";
@@ -6,7 +6,7 @@ import { ViewProps } from "./FormattedItemSingle";
 
 export function FormattedAgreementInfo({ form, afterChange }: ViewProps<AgreementInfoFormatResponse>) {
 
-
+   
 
     return (
 
@@ -31,19 +31,35 @@ export function FormattedAgreementInfo({ form, afterChange }: ViewProps<Agreemen
                     value={form.getInputProps(`title`).value ?? ""}
 
                 />
-                <DatePickerInput
+                {/* <DatePickerInput
                     firstDayOfWeek={0}
                     label="Effective date"
                     placeholder="No date"
                     clearable
-                    __timezoneApplied={true}
                     {...form.getInputProps('effective_date')}
-                    value={form.values.effective_date ? new Date(form.values.effective_date.toString().split('T')[0].replace(/-/g, '/')) : null}
+                    value={effectiveDate}
                     onChange={(value) => {
-                        form.setFieldValue('effective_date', value)
-                        afterChange()
+                        if (value != null) {
+                            form.setFieldValue('effective_date', value.toISOString())
+                            afterChange()
+                        }
                     }}
-                />
+                /> */}
+                <Input.Wrapper
+                    label="Effective date"
+                    placeholder="No date"
+                >
+
+                    <Input
+                        {...form.getInputProps('effective_date')}
+                        type="date"
+                        value={form.values.effective_date ?? undefined}
+                        onChange={(e) => {
+                            form.setFieldValue('effective_date', e.currentTarget.value)
+                            afterChange()
+                            console.log(e.currentTarget.value)
+                        }} />
+                </Input.Wrapper>
                 <TextInput
                     label="Target"
                     {...form.getInputProps('target_entity')}
