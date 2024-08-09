@@ -13,6 +13,10 @@ declare global {
     type FormattedInfo_SB<T = any> = Database['public']['Tables']['formatted_info']['Row'] & {data: T}
     type Formatter_SB = Database['public']['Tables']['formatters']['Row']
     type ContractJob_SB = Database['public']['Tables']['contract_job_queue']['Row']
+    
+    type Report_SB = Database['public']['Tables']['reports']['Row']
+    type ReportSection_SB = Database['public']['Tables']['report_sections']['Row']
+
 
     interface Window {
         fbq: any;

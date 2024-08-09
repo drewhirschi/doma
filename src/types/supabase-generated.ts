@@ -693,6 +693,82 @@ export type Database = {
           },
         ]
       }
+      report_sections: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: number
+          instruction: string | null
+          report_id: number
+          title: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: number
+          instruction?: string | null
+          report_id: number
+          title?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: number
+          instruction?: string | null
+          report_id?: number
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_sections_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: number
+          image_queries: string[] | null
+          published: boolean
+          slug: string | null
+          tenant_id: string | null
+          topic: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: number
+          image_queries?: string[] | null
+          published?: boolean
+          slug?: string | null
+          tenant_id?: string | null
+          topic?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: number
+          image_queries?: string[] | null
+          published?: boolean
+          slug?: string | null
+          tenant_id?: string | null
+          topic?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant: {
         Row: {
           created_at: string
@@ -863,6 +939,12 @@ export type Database = {
       user_tenant_owns_contract: {
         Args: {
           contract_id: string
+        }
+        Returns: boolean
+      }
+      user_tenant_owns_report: {
+        Args: {
+          report_id: number
         }
         Returns: boolean
       }

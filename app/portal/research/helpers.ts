@@ -39,6 +39,19 @@ Please generate a list of ${n} search queries that would be useful for writing a
     return completion.text?.split('\n').filter(s => s.trim().length > 0).slice(0, n) ?? [];
 }
 
+export async function generateImageQueries(topic: string, n: number = 4) {
+    const userPrompt = `I'm writing a research report on ${topic} and need help coming up with image search queries.
+Please generate a list of ${n}  queries that would be useful for finding images on ${topic}. These queries can be in various formats, from simple keywords to more complex phrases. Do not add any formatting or numbering to the queries.`;
+
+    const completion = await getLLMResponse({
+        system: 'The user will ask you to help generate some search queries. Respond with only the suggested queries in plain text with no extra formatting, each on its own line.',
+        user: userPrompt,
+        temperature: 1,
+        // model: 'llama-3.1-8b-instant'
+    });
+    return completion.text?.split('\n').filter(s => s.trim().length > 0).slice(0, n) ?? [];
+}
+
 export async function getSearchResults(queries: string[], linksPerQuery = 2): Promise<SearchResult<ContentsOptions>[]> {
     let results = [];
     for (const query of queries) {

@@ -38,7 +38,7 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
 
   return (
 
-    <Menu shadow="md" width={"target"} withinPortal={false}>
+    <Menu shadow="md" width={"target"} withinPortal={true}>
       <Menu.Target>
         <UnstyledButton className={classes.user} mx={4}>
           <Flex wrap={"nowrap"} direction={"row"} align={'center'}>
