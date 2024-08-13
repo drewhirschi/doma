@@ -4,7 +4,7 @@ import { AgreementTypes } from "@/types/enums";
 import { ISection } from "./types";
 import { IconDownload } from "@tabler/icons-react";
 import MetadataItem from "@/components/MetadataItem";
-import { SearchResultPreview } from "./search/SearchResultPreview";
+import { SearchResultPreview } from "./SearchResultPreview";
 import { browserClient } from "@/supabase/BrowserClient";
 import { draftSection } from "./actions";
 import { notifications } from "@mantine/notifications";
