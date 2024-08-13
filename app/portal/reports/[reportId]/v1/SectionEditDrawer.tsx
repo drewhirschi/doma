@@ -1,3 +1,5 @@
+"use client"
+
 import { ActionIcon, Box, Button, Grid, Group, Select, Stack, Text, TextInput, Textarea } from "@mantine/core";
 
 import { AgreementTypes } from "@/types/enums";
@@ -78,7 +80,7 @@ export function SectionDrawerContents({ sectionData, setSectionsData, allSection
             />
 
             <Text size="sm" fw={500}>Sources ({section.searchResults?.length ?? 0})</Text>
-            {section.searchResults?.map((searchResult, i) => (<SearchResultPreview searchResult={searchResult} key={searchResult.url} summary={section.summaries?.[i]?.text} />))}
+            {section.searchResults?.map((searchResult, i) => (<SearchResultPreview searchResult={searchResult} key={searchResult.url} summary={section.summaries?.[i]?.text ?? ""} />))}
         </Stack>
     );
 

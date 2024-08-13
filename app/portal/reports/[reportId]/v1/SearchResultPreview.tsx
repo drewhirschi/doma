@@ -2,15 +2,14 @@ import { Anchor, Box, Button, Card, CardSection, Checkbox, Container, Group, Ima
 import { ContentsOptions, SearchResult } from 'exa-js';
 
 import { Suspense } from 'react';
-import { getLLMResponse } from '../helpers';
-import { getLinkPreview } from 'link-preview-js';
 
 interface ISearchResultPreviewProps {
     // query: string;
     searchResult: SearchResult<ContentsOptions>;
+    summary: string;
 }
 
-export async function SearchResultPreview(props: ISearchResultPreviewProps) {
+export function SearchResultPreview(props: ISearchResultPreviewProps) {
 
     // console.log(props.searchResult)
     const domain = new URL(props.searchResult.url).hostname
