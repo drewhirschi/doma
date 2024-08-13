@@ -29,7 +29,7 @@ export default async function page() {
     }
 
     const sb = serverClient()
-    const reports = await sb.from('reports').select()
+    const reports = await sb.from('reports_pdf').select()
 
     return (
         <Box>

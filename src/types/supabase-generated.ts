@@ -545,6 +545,9 @@ export type Database = {
           email_confirmed_at: string | null
           id: string
           invited_at: string | null
+          send_email_provider: string | null
+          send_email_token_exp: number | null
+          send_email_tokens: Json | null
           tenant_id: string | null
         }
         Insert: {
@@ -556,6 +559,9 @@ export type Database = {
           email_confirmed_at?: string | null
           id: string
           invited_at?: string | null
+          send_email_provider?: string | null
+          send_email_token_exp?: number | null
+          send_email_tokens?: Json | null
           tenant_id?: string | null
         }
         Update: {
@@ -567,6 +573,9 @@ export type Database = {
           email_confirmed_at?: string | null
           id?: string
           invited_at?: string | null
+          send_email_provider?: string | null
+          send_email_token_exp?: number | null
+          send_email_tokens?: Json | null
           tenant_id?: string | null
         }
         Relationships: [
@@ -728,6 +737,38 @@ export type Database = {
           },
         ]
       }
+      report_views: {
+        Row: {
+          created_at: string
+          duration: number | null
+          id: number
+          parsluid: string
+          report_id: number
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          id?: number
+          parsluid: string
+          report_id: number
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          id?: number
+          parsluid?: string
+          report_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_views_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports_pdf"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -765,6 +806,95 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports_pdf: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          file_path: string
+          id: number
+          published: boolean
+          slug: string | null
+          tenant_id: string | null
+          topic: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          file_path: string
+          id?: number
+          published?: boolean
+          slug?: string | null
+          tenant_id?: string | null
+          topic?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          file_path?: string
+          id?: number
+          published?: boolean
+          slug?: string | null
+          tenant_id?: string | null
+          topic?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_pdf_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_result: {
+        Row: {
+          author: string | null
+          id: string
+          publish_date: string
+          report_id: number
+          section_id: number | null
+          text: string | null
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          author?: string | null
+          id: string
+          publish_date?: string
+          report_id: number
+          section_id?: number | null
+          text?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          author?: string | null
+          id?: string
+          publish_date?: string
+          report_id?: number
+          section_id?: number | null
+          text?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_result_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "report_sections"
             referencedColumns: ["id"]
           },
         ]

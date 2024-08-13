@@ -31,7 +31,7 @@ export default function ReportsTable({ reports }: IReportsTableProps) {
                         c={"dark"}
                         fw={500}
                         component={Link}
-                        href={`/portal/reports/${item.id}`}>
+                        href={`/portal/reports/pdf/${item.id}`}>
 
                         {item.display_name}
                     </Anchor>

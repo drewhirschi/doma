@@ -1,8 +1,8 @@
 "use client"
 
-import { Button, Group, Modal, TextInput } from '@mantine/core';
+import { Button, CloseButton, FileButton, Group, Modal, Text, TextInput } from '@mantine/core';
+import { IconFileAnalytics, IconPlus } from '@tabler/icons-react';
 
-import { IconPlus } from '@tabler/icons-react';
 import { title } from 'process';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
@@ -16,11 +16,13 @@ export function NewReportButton({ onCreateReport }: Props) {
         initialValues: {
             industry: '',
             title: '',
+            pdfFile: null
         },
 
         validate: {
             title: (value) => (value.length > 0 ? null : 'Title is required'),
             industry: (value) => (value.length > 0 ? null : 'Industry is required'),
+            pdfFile: (value) => (value ? null : 'Report is required'),
         },
 
     });
@@ -29,7 +31,7 @@ export function NewReportButton({ onCreateReport }: Props) {
 
     return (
         <>
-            <Modal opened={opened} onClose={close} title="New Report">
+            <Modal opened={opened} onClose={close} title="New Report" size={"md"}>
                 <form onSubmit={form.onSubmit(async (values) => {
                     try {
 
@@ -53,7 +55,31 @@ export function NewReportButton({ onCreateReport }: Props) {
                         {...form.getInputProps('industry')}
                     />
 
+                    <FileButton
 
+                        {...form.getInputProps('pdfFile')}
+                        //  onChange={setFile}
+                        accept="application/pdf,image/jpeg,image/png">
+                        {(props) =>
+                            <Group>
+
+                                <Button
+                                    leftSection={<IconFileAnalytics />}
+                                    mt={"sm"} {...props} >Add report</Button>
+                                {form.values.pdfFile && (
+                                    <Group>
+
+                                        <Text size="sm" ta="center" mt="sm">
+                                            {form.values.pdfFile.name!}
+                                        </Text>
+                                        <CloseButton 
+                                        onClick={() => form.setFieldValue('pdfFile', null)}
+                                        />
+                                    </Group>
+                                )}
+                            </Group>
+                        }
+                    </FileButton>
 
                     <Group justify="flex-end" mt="md">
                         <Button type="submit">Submit</Button>

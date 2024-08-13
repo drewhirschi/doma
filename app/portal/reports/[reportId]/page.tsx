@@ -55,7 +55,7 @@ export default async function Page({ params }: { params: { reportId: string } })
         return (
             <Container>
 
-                <ImageCarousel images={images} />
+                {/* <ImageCarousel images={images} /> */}
                 <Title>{report.data.display_name}</Title>
                 <ReportEditor report={report.data}/>
                 

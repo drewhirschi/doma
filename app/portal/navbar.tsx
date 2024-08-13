@@ -23,31 +23,28 @@ export function NavBar() {
             <div className={classnames["nav-item"]}>
                 <NavLink
                     href={`/portal/projects`}
-                    leftSection={<IconFolderOpen />}
-                    label={navbarHovered ? <Text>Projects</Text> : null}
+                    label={<IconFolderOpen />}
                     component={Link}
                     active={pathname.split("/")[2] === "projects"}
                 />
                 <NavLink
                     href={`/portal/team`}
-                    leftSection={navbarHovered && <IconUsersGroup />}
-                    label={navbarHovered ? <Text>Team</Text> : <IconUsersGroup />}
+                    label={<IconUsersGroup />}
                     component={Link}
                     active={pathname.split("/")[2] === "team"}
                 />
                 <NavLink
-                    href={`/portal/research`}
-                    leftSection={navbarHovered && <IconBook />}
-                    label={navbarHovered ? <Text>research</Text> : <IconBook />}
+                    href={`/portal/reports`}
+                    label={<IconBook />}
                     component={Link}
-                    active={pathname.split("/")[2] === "research"}
+                    active={pathname.split("/")[2] === "reports"}
                 />
 
             </div>
 
             <div className={classnames["nav-item"]}>
 
-                <UserButton collapsed={!navbarHovered} />
+                <UserButton collapsed={true} />
             </div>
         </Stack>
     )
