@@ -49,7 +49,7 @@ export function SearchAndPage({totalCount,}:{totalCount: number}) {
                 defaultValue={searchParams.get('query')?.toString()}
                 onChange={(event) => debouncedHandleSearch(event.currentTarget.value)}
             />
-            <Pagination total={totalCount / PAGE_SIZE} value={Number(searchParams.get("page") ?? 1)} onChange={updatePage} />
+            <Pagination total={Math.floor(totalCount / PAGE_SIZE) + 1} value={Number(searchParams.get("page") ?? 1)} onChange={updatePage} />
             <FilterPopover  />
         </Group>
     )
