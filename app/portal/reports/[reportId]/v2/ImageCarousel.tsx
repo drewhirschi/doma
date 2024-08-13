@@ -5,7 +5,7 @@ import { Image, rem } from '@mantine/core';
 import React, { useState } from 'react';
 
 import { Carousel } from '@mantine/carousel';
-import { PexelPhoto } from '../../research/types';
+import { PexelPhoto } from '../../../research/types';
 
 interface IImageCarouselProps {
     images: PexelPhoto[]

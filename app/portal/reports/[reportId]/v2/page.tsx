@@ -5,7 +5,7 @@ import { ImageCarousel } from './ImageCarousel';
 import React from 'react';
 import ReportEditor from './ReportEditor';
 import axios from 'axios';
-import { generateImageQueries } from '../../research/helpers';
+import { generateImageQueries } from '../../../research/helpers';
 import { serverClient } from '@/supabase/ServerClients';
 
 const images = [

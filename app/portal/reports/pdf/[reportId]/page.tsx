@@ -17,7 +17,7 @@ export default async function Page({ params }: { params: { reportId: string } })
         const sb = serverClient();
 
         const report = await sb
-            .from('reports_pdf')
+            .from('reports')
             .select('*, report_views(*)')
             .eq('id', Number(params.reportId))
             .single();

@@ -28,14 +28,15 @@ export function ReactPdfViewer({ reportId }: { reportId: number }) {
     useEffect(() => {
         const supabase = browserClient();
 
-        supabase.from("reports_pdf").select("*").eq("id", reportId).single().then(res => {
+        supabase.from("reports").select("*").eq("id", reportId).single().then(res => {
             if (res.error) {
                 console.error(res.error);
                 return;
             }
-            supabase.storage.from("tenants").createSignedUrl(res.data?.file_path, 3600).then(res => {
-                setFileUrl(res.data?.signedUrl);
-            });
+            if (res.data?.file_path)
+                supabase.storage.from("tenants").createSignedUrl(res.data?.file_path, 3600).then(res => {
+                    setFileUrl(res.data?.signedUrl);
+                });
         });
     }, [reportId]);
 
@@ -44,6 +45,7 @@ export function ReactPdfViewer({ reportId }: { reportId: number }) {
             (entries) => {
                 const visiblePages = entries
                     .filter(entry => entry.isIntersecting)
+                    //@ts-ignore this is available bc of the data-page-number attribute
                     .map(entry => parseInt(entry.target.dataset.pageNumber));
                 setVisiblePages(visiblePages);
             },

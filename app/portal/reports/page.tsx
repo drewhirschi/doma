@@ -5,8 +5,10 @@ import { NewReportButton } from './NewReportButton';
 import React from 'react';
 import ReportsTable from './ReportsTable';
 import axios from 'axios';
-import { generateImageQueries } from '../research/helpers';
 import { revalidatePath } from 'next/cache';
+
+// import { generateImageQueries } from '../research/helpers';
+
 
 interface IpageProps { }
 
@@ -16,20 +18,20 @@ export default async function page() {
         "use server"
         const sb = serverActionClient()
 
-        const imageQueries = await generateImageQueries(industry)
+        // const imageQueries = await generateImageQueries(industry)
 
         const insert = await sb.from('reports')
             .insert({ 
                 display_name: title, 
                 topic: industry, 
                 slug: title.replaceAll(' ', '-'),
-                image_queries: imageQueries
+                // image_queries: imageQueries
              })
         revalidatePath(`/portal/reports`)
     }
 
     const sb = serverClient()
-    const reports = await sb.from('reports_pdf').select()
+    const reports = await sb.from('reports').select()
 
     return (
         <Box>

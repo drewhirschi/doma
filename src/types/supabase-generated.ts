@@ -773,6 +773,7 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string | null
+          file_path: string | null
           id: number
           image_queries: string[] | null
           published: boolean
@@ -783,6 +784,7 @@ export type Database = {
         Insert: {
           created_at?: string
           display_name?: string | null
+          file_path?: string | null
           id?: number
           image_queries?: string[] | null
           published?: boolean
@@ -793,6 +795,7 @@ export type Database = {
         Update: {
           created_at?: string
           display_name?: string | null
+          file_path?: string | null
           id?: number
           image_queries?: string[] | null
           published?: boolean

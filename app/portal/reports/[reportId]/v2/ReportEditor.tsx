@@ -69,12 +69,12 @@ export default function ReportEditor({ report }: IReportEditorProps) {
                 </Button.Group>
             </BubbleMenu>
             {sections.map(section => <Markdown key={section.id}>{section.content}</Markdown>)}
-            <Divider my={"sm"}
+            {/* <Divider my={"sm"}
                 label={
                     <Button variant="subtle" rightSection={<IconPlus size={14} />}
                     >Add</Button>
                 }
-            />
+            /> */}
         </Box>
     );
 }

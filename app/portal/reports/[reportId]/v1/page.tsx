@@ -1,5 +1,6 @@
 import { Box, Button, Center, Container, Group, Text, TextInput, Textarea, Title } from "@mantine/core";
 
+import { ReportEditor } from "./ReportEditor";
 import { redirect } from "next/navigation";
 
 export default async function Page() {
@@ -21,20 +22,7 @@ export default async function Page() {
     return (
         <Box>
 
-            <Title pt={"xl"} order={2}>Research</Title>
-            <form action={onSubmitTopic}>
-
-                <Group align="flex-end" >
-
-                    <Textarea
-                        label="What topic would you like to research?"
-                        autosize
-                        name="topic"
-                        placeholder="Aerospace"
-                    />
-                    <Button type="submit">Submit</Button>
-                </Group>
-            </form>
+            <ReportEditor/>
         </Box>
     );
 }
