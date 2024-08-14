@@ -35,13 +35,13 @@ export function NavBar() {
                     component={Link}
                     active={pathname.split("/")[2] === "team"}
                 />
-                <NavLink
+                {/* <NavLink
                     href={`/portal/reports`}
                     leftSection={<IconBook />}
                     // label={<IconBook />}
                     component={Link}
                     active={pathname.split("/")[2] === "reports"}
-                />
+                /> */}
 
         </div>
 

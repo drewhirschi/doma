@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: "website",
         title: "Parsl AI",
-        description: "Accurate AI Legal Due Diligence for M&A",
+        description: "Automated Market Reports",
         images: "https://parslai.com/images/product/landing_preview.png",
         url: "https://parslai.com",
 
@@ -45,12 +45,12 @@ export default function HomePage() {
 
                 <Container style={{ zIndex: 2, position: "relative" }} >
                     <Center h={"95vh"}>
-                        <Stack align="center" maw={800}>
+                        <Stack align="center" maw={900}>
 
                             <Text style={{ textAlign: 'left', alignSelf: "flex-start", fontWeight: 400, fontSize: 64 }} variant="gradient" gradient={{ from: 'dark.8', to: 'dark.3', deg: -45 }}
                             >Parsl</Text>
-                            <Title order={1} ta={"center"}>Waiting too long for a CIM?  We automate the first draft.</Title>
-                            <WaitlistSignup callToAction="Get a free draft" secondaryDesription="We'll contact you to schedule a brief 20-minute introductory call. Within 24 hours after our conversation, we'll send you the first draft."/>
+                            <Title order={1} ta={"center"}>Waiting too long for a Market Report? <br/> We automate the first draft.</Title>
+                            <WaitlistSignup callToAction="Get a free draft" secondaryDesription="We'll contact you to schedule a 20-minute introductory call. After our conversation, we'll send you the first draft."/>
 
                         </Stack>
                     </Center>
