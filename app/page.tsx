@@ -44,7 +44,7 @@ export default function HomePage() {
                 <Meteors />
 
                 <Container h={"100%"} style={{ zIndex: 2, position: "relative" }} >
-                    <Center h={"100%"}>
+                    <Center h={"90%"}>
                         <Stack align="center" maw={720} gap={"xl"}>
 
 
