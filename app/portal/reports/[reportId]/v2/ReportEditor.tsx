@@ -6,10 +6,18 @@ import { IconPencil, IconPlus } from '@tabler/icons-react';
 import { useReducer, useState } from 'react';
 
 import Markdown from 'react-markdown';
+import { NewSectionDrawer } from './NewSectionDrawer';
+import Placeholder from '@tiptap/extension-placeholder'
 import StarterKit from '@tiptap/starter-kit'
 
 // define your extension array
-const extensions = [StarterKit]
+const extensions = [StarterKit,
+    Placeholder.configure({
+        placeholder: 'Write something... Or type / to use commands',
+        showOnlyWhenEditable: true
+
+    })
+]
 
 interface IReportEditorProps {
     report: Report_SB & { report_sections: ReportSection_SB[] }
@@ -22,6 +30,7 @@ export default function ReportEditor({ report }: IReportEditorProps) {
 
     const [content, setContent] = useState('<p>Hello World!</p>')
     const editor = useEditor({
+        immediatelyRender: false,
         extensions,
         content,
     })
@@ -39,8 +48,8 @@ export default function ReportEditor({ report }: IReportEditorProps) {
                 return line == "/"
             }} >
 
-                    <Paper w={200} shadow='md' radius={"md"} withBorder py={"xs"} >
-                        {/* <Title pl={"xs"} order={6} c={"dark.7"}>Basics</Title>
+                <Paper w={200} shadow='md' radius={"md"} withBorder py={"xs"} >
+                    {/* <Title pl={"xs"} order={6} c={"dark.7"}>Basics</Title>
                         <Button.Group variant='subtle' c={"gray"} orientation='vertical' px={"xs"} borderWidth={0}>
                             <Button variant="default" size='compact-sm'
                                 onClick={() => editor.chain().focus().toggleHeading({ level: 1 })}
@@ -48,17 +57,12 @@ export default function ReportEditor({ report }: IReportEditorProps) {
                             <Button variant="default" size='compact-sm'>Heading 2</Button>
                             <Button variant="default" size='compact-sm'>Heading 3</Button>
                         </Button.Group> */}
-                        <Title pl={"xs"} pt={4} order={5} c={"dark.7"}>AI Write</Title>
-                        <Stack>
-                            <Button
-                                leftSection={<IconPencil size={14} />}
-                                variant='subtle'
-                                color='dark'
-                                px={"xs"}
-                                mx={"xs"}>New Section</Button>
+                    <Title pl={"xs"} pt={4} order={5} c={"dark.7"}>AI Write</Title>
+                    <Stack>
+                        <NewSectionDrawer />
 
-                        </Stack>
-                    </Paper>
+                    </Stack>
+                </Paper>
             </FloatingMenu>
             <BubbleMenu editor={editor}>
                 <Button.Group>

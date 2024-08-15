@@ -1,9 +1,10 @@
-import { Button, Container, Divider, Title } from '@mantine/core';
+import { AppShell, AppShellMain, AppShellNavbar, Box, Button, Container, Divider, Flex, Grid, GridCol, Group, Title } from '@mantine/core';
 
 import { IconPlus } from '@tabler/icons-react';
 import { ImageCarousel } from './ImageCarousel';
 import React from 'react';
 import ReportEditor from './ReportEditor';
+import ReportEditorNavbar from './ReportEditorNavbar';
 import axios from 'axios';
 import { serverClient } from '@/supabase/ServerClients';
 
@@ -52,13 +53,28 @@ export default async function Page({ params }: { params: { reportId: string } })
 
 
         return (
-            <Container>
+            <Group
+                mih={"100vh"}
+                align='flex-start'
+                wrap='nowrap'
+            >
 
-                {/* <ImageCarousel images={images} /> */}
-                <Title>{report.data.display_name}</Title>
-                <ReportEditor report={report.data}/>
-                
-            </Container>
+
+                <Box
+                    flex={3}
+                    mih={"inherit"} bg={"gray.1"} maw={"280px"} p="md"
+                >
+                    <ReportEditorNavbar />
+
+                </Box>
+
+                <Container flex={9}>
+
+                    {/* <ImageCarousel images={images} /> */}
+                    <Title>{report.data.display_name}</Title>
+                    <ReportEditor report={report.data} />
+                </Container>
+            </Group>
         );
     } catch (error) {
         console.log(error)

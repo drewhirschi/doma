@@ -7,9 +7,7 @@ export default function Layout({
 }) {
     return <Box h="100%" mih={"100vh"} bg={"gray.0"}>
 
-        < Container >
 
             {children}
-        </Container>
     </Box>;
 }

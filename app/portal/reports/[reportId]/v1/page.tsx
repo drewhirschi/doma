@@ -2,8 +2,9 @@ import { Box, Button, Center, Container, Group, Text, TextInput, Textarea, Title
 
 import { ReportEditor } from "./ReportEditor";
 import { redirect } from "next/navigation";
+import { serverClient } from "@/supabase/ServerClients";
 
-export default async function Page() {
+export default async function Page({ params }: { params: { reportId: string } }) {
 
 
 
@@ -16,13 +17,18 @@ export default async function Page() {
         redirect('/portal/research/sections?' + searchParams.toString())
     }
 
+    const sb = serverClient()
+    const report = await sb.from('reports').select('*').eq('id', params.reportId).single()
+    const sections = await sb.from('report_sections').select('*').eq('report_id', params.reportId)
 
-
+    if (report.error || sections.error) {
+        return <div>Error loading data</div>
+    }
 
     return (
         <Box>
 
-            <ReportEditor/>
+            <ReportEditor report={report.data} sections={sections.data ?? []} />
         </Box>
     );
 }

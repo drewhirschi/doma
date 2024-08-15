@@ -708,6 +708,7 @@ export type Database = {
           created_at: string
           id: number
           instruction: string | null
+          is_generated: boolean
           report_id: number
           title: string | null
         }
@@ -716,6 +717,7 @@ export type Database = {
           created_at?: string
           id?: number
           instruction?: string | null
+          is_generated?: boolean
           report_id: number
           title?: string | null
         }
@@ -724,6 +726,7 @@ export type Database = {
           created_at?: string
           id?: number
           instruction?: string | null
+          is_generated?: boolean
           report_id?: number
           title?: string | null
         }
@@ -774,6 +777,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           file_path: string | null
+          has_outline: boolean
           id: number
           image_queries: string[] | null
           published: boolean
@@ -785,6 +789,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           file_path?: string | null
+          has_outline?: boolean
           id?: number
           image_queries?: string[] | null
           published?: boolean
@@ -796,6 +801,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           file_path?: string | null
+          has_outline?: boolean
           id?: number
           image_queries?: string[] | null
           published?: boolean

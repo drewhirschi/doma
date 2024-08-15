@@ -15,31 +15,23 @@ import { useForm } from '@mantine/form';
 import { useState } from "react";
 
 interface SectionDrawerProps {
-    sectionData: ISection | null
-    allSections: ISection[]
-    setSectionsData: (sections: ISection[]) => void
-    topic: string
+    sectionData: ReportSection_SB
+    // topic: string
 }
 
 
 
-export function SectionDrawerContents({ sectionData, setSectionsData, allSections, topic }: SectionDrawerProps) {
+export function SectionDrawerContents({ sectionData }: SectionDrawerProps) {
 
     const [section, setSection] = useState(sectionData)
     const [redraftState, setRedraftState] = useState("idle")
 
     const debouncedSetSections = useDebouncedCallback((sections: ISection[]) => {
-        const index = allSections.findIndex((s) => s.name === section?.name);
-        if (index !== -1 && section !== null) {
-            allSections[index] = section;
-        }
-        setSectionsData(sections);
+        
     }, 500);
 
 
-    if (section === null) {
-        return (<></>);
-    }
+    
 
     return (
         <Stack>
@@ -48,36 +40,28 @@ export function SectionDrawerContents({ sectionData, setSectionsData, allSection
                     <TextInput
                         label="Section description"
                         onChange={(e) => {
-                            setSection({ ...section, intr: e.target.value })
-                            debouncedSetSections(allSections)
+                            // setSection({ ...section, intr: e.target.value })
+                            // debouncedSetSections(allSections)
                         }}
-                        value={section.intr ?? ""}
+                        value={section.instruction ?? ""}
                     />
                 </Grid.Col>
                 <Grid.Col span="auto">
                     <Button
-                    loading={redraftState === "loading"}
-                    onClick={async () => {
-                        setRedraftState("loading")
-                        const redoneSection = await draftSection(section, topic)
-                        setRedraftState("idle")
-                        setSection(redoneSection)
-                        debouncedSetSections(allSections)
-                    }}
+                        loading={redraftState === "loading"}
+                        onClick={async () => {
+                            // setRedraftState("loading")
+                            // const redoneSection = await draftSection(section, topic)
+                            // setRedraftState("idle")
+                            // setSection(redoneSection)
+                            // debouncedSetSections(allSections)
+                        }}
                     >Redo</Button>
                 </Grid.Col>
             </Grid>
 
 
-            <Textarea
-                label="Content"
-                autosize
-                onChange={(e) => {
-                    setSection({ ...section, md: e.target.value })
-                    debouncedSetSections(allSections)
-                }}
-                value={section.md ?? ""}
-            />
+            
 
             <Text size="sm" fw={500}>Sources ({section.searchResults?.length ?? 0})</Text>
             {section.searchResults?.map((searchResult, i) => (<SearchResultPreview searchResult={searchResult} key={searchResult.url} summary={section.summaries?.[i]?.text ?? ""} />))}
