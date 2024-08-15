@@ -1,6 +1,6 @@
 "use client"
 
-import { Anchor, Box, Button, Divider, Group, NavLink, TabsList, TabsTab, UnstyledButton } from '@mantine/core';
+import { Anchor, Box, Button, Divider, Group, NavLink, TabsList, TabsTab, Text, UnstyledButton } from '@mantine/core';
 import { IconMessageCircle, IconPhoto, IconSettings } from '@tabler/icons-react';
 import { Tabs, rem } from '@mantine/core';
 
@@ -32,7 +32,9 @@ export default function TopNav() {
         <>
 
             <Group justify="space-between" h={66} >
-                <div className={classes.neonline}></div>
+                {/* <div className={classes.neonline}></div> */}
+                <Text ml={"md"} style={{ fontWeight: 400, fontSize: 42 }} variant="gradient" gradient={{ from: 'dark.8', to: 'dark.3', deg: -45 }}
+                >Parsl</Text>
 
 
                 <Group gap={48} justify='space-between' h={"100%"}>

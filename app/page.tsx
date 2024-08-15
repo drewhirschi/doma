@@ -1,4 +1,4 @@
-import { Anchor, Box, Center, Container, Divider, Grid, GridCol, Group, Image, List, ListItem, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { Anchor, Box, Center, Container, Stack, Text, Title } from "@mantine/core";
 
 import GridBackground from "@/components/GridBackground";
 import LoginButton from "./LoginButton";
@@ -45,12 +45,14 @@ export default function HomePage() {
 
                 <Container style={{ zIndex: 2, position: "relative" }} >
                     <Center h={"95vh"}>
-                        <Stack align="center" maw={900}>
+                        <Stack align="center" maw={720} gap={"xl"}>
 
-                            <Text style={{ textAlign: 'left', alignSelf: "flex-start", fontWeight: 400, fontSize: 64 }} variant="gradient" gradient={{ from: 'dark.8', to: 'dark.3', deg: -45 }}
-                            >Parsl</Text>
-                            <Title order={1} ta={"center"}>Waiting too long for a Market Report? <br/> We automate the first draft.</Title>
-                            <WaitlistSignup callToAction="Get a free draft" secondaryDesription="We'll contact you to schedule a 20-minute introductory call. After our conversation, we'll send you the first draft."/>
+
+                            <Title order={1} ta={"center"} >Struggling to keep your leads warm?</Title>
+                            <Text size={"20px"} ta={"center"} fw={500}>
+                                Our AI makes drafting quarterly, seller-specific reports seamless to ensure your valuable leads stay active and interested
+                            </Text>
+                            <WaitlistSignup callToAction="Book a Demo" secondaryDesription="We'll contact you to schedule a 20-minute introductory call." />
 
                         </Stack>
                     </Center>
