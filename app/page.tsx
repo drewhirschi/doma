@@ -31,7 +31,7 @@ export default function HomePage() {
 
     return (
 
-        <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} miw={350} c={"gray.8"} className={styles.landingPageContainer}>
+        <Box style={{ overflow: 'hidden', scrollBehavior: "smooth" }} h={"100vh"} miw={350} c={"gray.8"} className={styles.landingPageContainer}>
 
             <TopNav />
 
@@ -39,12 +39,12 @@ export default function HomePage() {
 
 
 
-            <div style={{ position: "relative" }}>
+            <div style={{ position: "relative", height: "100%" }}>
                 <GridBackground />
                 <Meteors />
 
-                <Container style={{ zIndex: 2, position: "relative" }} >
-                    <Center h={"95vh"}>
+                <Container h={"100%"} style={{ zIndex: 2, position: "relative" }} >
+                    <Center h={"100%"}>
                         <Stack align="center" maw={720} gap={"xl"}>
 
 
