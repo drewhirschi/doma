@@ -5,14 +5,14 @@ import { Suspense } from 'react';
 
 interface ISearchResultPreviewProps {
     // query: string;
-    searchResult: SearchResult<ContentsOptions>;
-    summary: string;
+    searchResult: SearchResult_SB;
+    // summary: string;
 }
 
 export function SearchResultPreview(props: ISearchResultPreviewProps) {
 
     // console.log(props.searchResult)
-    const domain = new URL(props.searchResult.url).hostname
+    const domain = new URL(props.searchResult.url ?? "").hostname
     // const preview = await getLinkPreview(props.searchResult.url)
     // const summary = await getLLMResponse({ user: "summarize the following article in 2-3 sentences: " + props.searchResult.text})
 
@@ -34,15 +34,15 @@ export function SearchResultPreview(props: ISearchResultPreviewProps) {
                     </CardSection> */}
 
                     <Group justify="space-between" mt="md" mb="xs">
-                        <Anchor href={props.searchResult.url} target="_blank" fw={500} c="black">
+                        { props.searchResult.url && <Anchor href={props.searchResult.url} target="_blank" fw={500} c="black">
 
                             {props.searchResult.title}
-                        </Anchor>
+                        </Anchor>}
                     </Group>
 
                     <Text size="sm" c="dimmed">
                         {/* {summary} */}
-                        {domain} | {props.searchResult.publishedDate} 
+                        {domain} | {props.searchResult.publish_date} 
                     </Text>
 
 

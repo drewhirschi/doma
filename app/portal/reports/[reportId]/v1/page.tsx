@@ -19,7 +19,7 @@ export default async function Page({ params }: { params: { reportId: string } })
 
     const sb = serverClient()
     const report = await sb.from('reports').select('*').eq('id', params.reportId).single()
-    const sections = await sb.from('report_sections').select('*').eq('report_id', params.reportId)
+    const sections = await sb.from('report_sections').select('*, search_result(*)').eq('report_id', params.reportId).order('id', { ascending: true })
 
     if (report.error || sections.error) {
         return <div>Error loading data</div>

@@ -6,11 +6,9 @@
     "bun.debugTerminal.enabled": true,
     // If the debugger should stop on the first line of the program.
     "bun.debugTerminal.stopOnEntry": true,
-<<<<<<< Updated upstream
     "typescript.tsdk": "node_modules\\typescript\\lib",
-=======
     "files.associations": {
         "*.css": "tailwindcss"
       }
->>>>>>> Stashed changes
+
 }

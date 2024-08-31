@@ -17,6 +17,7 @@ declare global {
     type Report_SB = Database['public']['Tables']['reports']['Row']
     type ReportSection_SB = Database['public']['Tables']['report_sections']['Row']
     type ReportView_SB = Database['public']['Tables']['report_views']['Row']
+    type SearchResult_SB = Database['public']['Tables']['search_result']['Row']
 
 
     interface Window {

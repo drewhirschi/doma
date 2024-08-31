@@ -1,28 +1,33 @@
 "use client"
 
-import { Button, CloseButton, FileButton, Group, Modal, Text, TextInput } from '@mantine/core';
+import { Button, CloseButton, FileButton, Group, Modal, Select, Text, TextInput } from '@mantine/core';
 import { IconFileAnalytics, IconPlus } from '@tabler/icons-react';
 
+import { Database } from '@/types/supabase';
 import { title } from 'process';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
 
 interface Props {
-    onCreateReport: (title: string, industry: string) => Promise<void>;
+    onCreateReport: (title: string, industry: string, templateId?: number) => Promise<void>;
+    templates: Database['public']['Tables']['report_templates']['Row'][]
 }
-export function NewReportButton({ onCreateReport }: Props) {
+
+
+export function NewReportButton({ onCreateReport, templates }: Props) {
     const [opened, { open, close }] = useDisclosure(false);
     const form = useForm({
         initialValues: {
             industry: '',
             title: '',
-            pdfFile: null
+            pdfFile: null,
+            template: -1
         },
 
         validate: {
             title: (value) => (value.length > 0 ? null : 'Title is required'),
             industry: (value) => (value.length > 0 ? null : 'Industry is required'),
-            pdfFile: (value) => (value ? null : 'Report is required'),
+            // pdfFile: (value) => (value ? null : 'Report is required'),
         },
 
     });
@@ -35,7 +40,7 @@ export function NewReportButton({ onCreateReport }: Props) {
                 <form onSubmit={form.onSubmit(async (values) => {
                     try {
 
-                        await onCreateReport(values.title, values.industry)
+                        await onCreateReport(values.title, values.industry, (values.template > -1 ? values.template : undefined))
                     } catch (error) {
                         console.log(error)
                     }
@@ -54,8 +59,14 @@ export function NewReportButton({ onCreateReport }: Props) {
                         placeholder="Aerospace"
                         {...form.getInputProps('industry')}
                     />
+                    <Select
+                        label="Template"
+                        data={templates.map(t => ({ value: String(t.id), label: t.display_name ?? "No name" }))}
+                        value={form.values.template >= 0 ? String(form.values.template) : null}
+                        onChange={(_value, option) => form.setFieldValue('template', Number(option.value))}
+                    />
 
-                    <FileButton
+                    {/* <FileButton
 
                         {...form.getInputProps('pdfFile')}
                         //  onChange={setFile}
@@ -79,7 +90,7 @@ export function NewReportButton({ onCreateReport }: Props) {
                                 )}
                             </Group>
                         }
-                    </FileButton>
+                    </FileButton> */}
 
                     <Group justify="flex-end" mt="md">
                         <Button type="submit">Submit</Button>

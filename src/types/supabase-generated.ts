@@ -114,6 +114,59 @@ export type Database = {
         }
         Relationships: []
       }
+      comp_pages: {
+        Row: {
+          company_id: number
+          created_at: string
+          emb: string | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          company_id: number
+          created_at?: string
+          emb?: string | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          company_id?: number
+          created_at?: string
+          emb?: string | null
+          title?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comp_pages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_profile: {
+        Row: {
+          created_at: string
+          id: number
+          name: string | null
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name?: string | null
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       contract: {
         Row: {
           assigned_to: string | null
@@ -473,6 +526,45 @@ export type Database = {
         }
         Relationships: []
       }
+      ib_projects: {
+        Row: {
+          cmp_id: number | null
+          created_at: string
+          id: number
+          tenant_id: string | null
+          title: string | null
+        }
+        Insert: {
+          cmp_id?: number | null
+          created_at?: string
+          id?: number
+          tenant_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          cmp_id?: number | null
+          created_at?: string
+          id?: number
+          tenant_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ib_projects_cmp_id_fkey"
+            columns: ["cmp_id"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ib_projects_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       line_ref: {
         Row: {
           contract_id: string
@@ -740,6 +832,56 @@ export type Database = {
           },
         ]
       }
+      report_template_sections: {
+        Row: {
+          created_at: string
+          id: number
+          instruction: string | null
+          template_id: number | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          instruction?: string | null
+          template_id?: number | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          instruction?: string | null
+          template_id?: number | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_template_sections_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_templates: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: number
+        }
+        Relationships: []
+      }
       report_views: {
         Row: {
           created_at: string
@@ -863,30 +1005,36 @@ export type Database = {
       search_result: {
         Row: {
           author: string | null
-          id: string
-          publish_date: string
+          exa_id: string
+          id: number
+          publish_date: string | null
           report_id: number
           section_id: number | null
+          summary: string | null
           text: string | null
           title: string | null
           url: string | null
         }
         Insert: {
           author?: string | null
-          id: string
-          publish_date?: string
+          exa_id: string
+          id?: number
+          publish_date?: string | null
           report_id: number
           section_id?: number | null
+          summary?: string | null
           text?: string | null
           title?: string | null
           url?: string | null
         }
         Update: {
           author?: string | null
-          id?: string
-          publish_date?: string
+          exa_id?: string
+          id?: number
+          publish_date?: string | null
           report_id?: number
           section_id?: number | null
+          summary?: string | null
           text?: string | null
           title?: string | null
           url?: string | null
@@ -923,6 +1071,84 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      transaction_participant: {
+        Row: {
+          cmp_id: number
+          role: string | null
+          trans_id: number
+        }
+        Insert: {
+          cmp_id: number
+          role?: string | null
+          trans_id: number
+        }
+        Update: {
+          cmp_id?: number
+          role?: string | null
+          trans_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_participant_cmp_id_fkey"
+            columns: ["cmp_id"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_participant_trans_id_fkey"
+            columns: ["trans_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_search_res"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaction_search_res: {
+        Row: {
+          buyer: string | null
+          created_at: string
+          date: string | null
+          description: string | null
+          emb: string | null
+          id: number
+          others: Json | null
+          reason: string | null
+          seller: string | null
+          snippet: string | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          buyer?: string | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          emb?: string | null
+          id?: number
+          others?: Json | null
+          reason?: string | null
+          seller?: string | null
+          snippet?: string | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          buyer?: string | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          emb?: string | null
+          id?: number
+          others?: Json | null
+          reason?: string | null
+          seller?: string | null
+          snippet?: string | null
+          title?: string | null
+          url?: string
         }
         Relationships: []
       }
@@ -1070,6 +1296,30 @@ export type Database = {
           project_id_param: string
         }
         Returns: boolean
+      }
+      match_cmp_pages: {
+        Args: {
+          query_embedding: string
+          match_threshold: number
+          match_count: number
+          company_id: number
+        }
+        Returns: {
+          url: string
+          similarity: number
+        }[]
+      }
+      match_documents: {
+        Args: {
+          query_embedding: string
+          match_threshold: number
+          match_count: number
+        }
+        Returns: {
+          id: string
+          content: string
+          similarity: number
+        }[]
       }
       random_color: {
         Args: Record<PropertyKey, never>

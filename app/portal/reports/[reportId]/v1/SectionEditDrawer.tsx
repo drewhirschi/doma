@@ -3,35 +3,34 @@
 import { ActionIcon, Box, Button, Grid, Group, Select, Stack, Text, TextInput, Textarea } from "@mantine/core";
 
 import { AgreementTypes } from "@/types/enums";
+import { Editor } from "@tiptap/react";
 import { ISection } from "./types";
-import { IconDownload } from "@tabler/icons-react";
-import MetadataItem from "@/components/MetadataItem";
 import { SearchResultPreview } from "./SearchResultPreview";
 import { browserClient } from "@/supabase/BrowserClient";
-import { draftSection } from "./actions";
-import { notifications } from "@mantine/notifications";
 import { useDebouncedCallback } from "use-debounce";
 import { useForm } from '@mantine/form';
 import { useState } from "react";
+import { writeSection } from "./actions";
 
 interface SectionDrawerProps {
-    sectionData: ReportSection_SB
-    // topic: string
+    sectionData: ReportSection_SB & { search_result: SearchResult_SB[] }
+    topic: string
+    editor:Editor
 }
 
 
 
-export function SectionDrawerContents({ sectionData }: SectionDrawerProps) {
+export function SectionDrawerContents({ sectionData, topic, editor }: SectionDrawerProps) {
 
     const [section, setSection] = useState(sectionData)
     const [redraftState, setRedraftState] = useState("idle")
 
     const debouncedSetSections = useDebouncedCallback((sections: ISection[]) => {
-        
+
     }, 500);
 
 
-    
+
 
     return (
         <Stack>
@@ -50,21 +49,29 @@ export function SectionDrawerContents({ sectionData }: SectionDrawerProps) {
                     <Button
                         loading={redraftState === "loading"}
                         onClick={async () => {
-                            // setRedraftState("loading")
-                            // const redoneSection = await draftSection(section, topic)
-                            // setRedraftState("idle")
+                            setRedraftState("loading")
+                            const draftedSection = await writeSection(section, topic)
+                            editor.commands.setContent(draftedSection.text)
+                            const sb = browserClient()
+                            const update = await sb.from('report_sections').update({ content:draftedSection.text }).eq('id', section.id!)
+                            setRedraftState("idle")
                             // setSection(redoneSection)
                             // debouncedSetSections(allSections)
                         }}
-                    >Redo</Button>
+                    >Write</Button>
                 </Grid.Col>
             </Grid>
 
 
-            
 
-            <Text size="sm" fw={500}>Sources ({section.searchResults?.length ?? 0})</Text>
-            {section.searchResults?.map((searchResult, i) => (<SearchResultPreview searchResult={searchResult} key={searchResult.url} summary={section.summaries?.[i]?.text ?? ""} />))}
+
+            <Text size="sm" fw={500}>Sources ({section.search_result?.length ?? 0})</Text>
+            {section.search_result?.map((searchResult, i) => (
+                <SearchResultPreview
+                    searchResult={searchResult}
+                    key={searchResult.url}
+                // summary={section.summaries?.[i]?.text ?? ""}
+                />))}
         </Stack>
     );
 

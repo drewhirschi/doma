@@ -1,7 +1,7 @@
 "use client"
 
 import { Anchor, AppShell, Box, Breadcrumbs, Code, Flex, Group, NavLink, ScrollArea, Space, Stack, Text, UnstyledButton } from '@mantine/core';
-import { Icon24Hours, IconBook, IconFolderOpen, IconUsersGroup } from '@tabler/icons-react';
+import { Icon24Hours, IconBook, IconFolderOpen, IconSearch, IconUsersGroup } from '@tabler/icons-react';
 
 import Link from 'next/link';
 import { UserButton } from '@/components/UserButton';
@@ -38,6 +38,12 @@ export function NavBar() {
                     label={<IconBook />}
                     component={Link}
                     active={pathname.split("/")[2] === "reports"}
+                />
+                <NavLink
+                    href={`/portal/research`}
+                    label={<IconSearch />}
+                    component={Link}
+                    active={pathname.split("/")[2] === "research"}
                 />
 
             </div>

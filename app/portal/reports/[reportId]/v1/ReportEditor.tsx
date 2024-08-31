@@ -2,7 +2,7 @@
 
 import { ActionIcon, Box, Button, Center, Container, Divider, Drawer, Grid, Group, Loader, Stack, Stepper, Text, TextInput, Textarea, Title, UnstyledButton, rem } from "@mantine/core";
 import { IconExternalLink, IconPlus } from "@tabler/icons-react";
-import { saveSections, search, writeDraft } from "./actions";
+import { saveSections, searchAllSections, writeDraft } from "./actions";
 import { useEffect, useState } from "react";
 
 import { ISection } from "./types";
@@ -13,7 +13,7 @@ import { browserClient } from "@/supabase/BrowserClient";
 
 interface IReportEditorProps {
     report: Report_SB
-    sections: ReportSection_SB[]
+    sections: (ReportSection_SB & { search_result: SearchResult_SB[] })[]
 }
 
 export function ReportEditor({ report, sections }: IReportEditorProps) {
@@ -70,7 +70,7 @@ export function ReportEditor({ report, sections }: IReportEditorProps) {
                 <Stack gap={"xs"}>
                     {sectionsData.map((section, i: number) => (
 
-                        <SectionView key={i} section={section} />
+                        <SectionView key={i} section={section} report={report} />
 
                     ))}
 
@@ -87,7 +87,7 @@ export function ReportEditor({ report, sections }: IReportEditorProps) {
                         }).select().single()
 
                         if (!insert.error) {
-                            setSectionsData([...sectionsData, insert.data])
+                            setSectionsData([...sectionsData, { ...insert.data, search_result: [] }])
                         }
 
                     }}

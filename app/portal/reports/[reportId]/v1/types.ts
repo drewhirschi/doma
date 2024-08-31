@@ -34,3 +34,37 @@ export interface PexelPhotoSrc {
     landscape: string;
     tiny: string;
 }
+
+type ISO8601Date = string;
+
+export interface ExaSearchParams {
+    query: string;
+    useAutoprompt?: boolean;
+    type?: 'keyword' | 'neural' | 'auto';
+    category?: 'company' | 'research paper' | 'news' | 'github' | 'tweet' | 'movie' | 'song' | 'personal site' | 'pdf';
+    numResults?: number;
+    includeDomains?: string[];
+    excludeDomains?: string[];
+    startCrawlDate?: ISO8601Date;
+    endCrawlDate?: ISO8601Date;
+    startPublishedDate?: ISO8601Date;
+    endPublishedDate?: ISO8601Date;
+    includeText?: string[];
+    excludeText?: string[];
+    contents?: {
+
+        text?: {
+            maxCharacters?: number;
+            includeHtmlTags?: boolean;
+        };
+        highlights?: {
+            numSentences?: number;
+            highlightsPerUrl?: number;
+            query?: string;
+        };
+        summary?: {
+            query?: string;
+
+        };
+    };
+}

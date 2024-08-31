@@ -1,3 +1,5 @@
+"use server"
+
 import Exa, { ContentsOptions, SearchResult } from "exa-js"
 
 import OpenAI from "openai";
@@ -52,14 +54,17 @@ Please generate a list of ${n}  queries that would be useful for finding images 
     return completion.text?.split('\n').filter(s => s.trim().length > 0).slice(0, n) ?? [];
 }
 
-export async function getSearchResults(queries: string[], linksPerQuery = 2): Promise<SearchResult<ContentsOptions>[]> {
+export async function getSearchResults(queries: string[], linksPerQuery = 25, lookbackMonths: number = 3): Promise<SearchResult<ContentsOptions>[]> {
+    const date = new Date();
+    date.setMonth(date.getMonth() - lookbackMonths);
+    const publishedAfter = date.toISOString().split('T')[0];
+    
     let results = [];
     for (const query of queries) {
         const searchResponse = await exa.searchAndContents(query, {
-            // const searchResponse = await exa.search(query, {
             numResults: linksPerQuery,
-            useAutoprompt: false,
-            startPublishedDate: "2023-07-01"
+            useAutoprompt: true,
+            startPublishedDate: publishedAfter
         });
         results.push(...searchResponse.results);
     }
