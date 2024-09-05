@@ -49,7 +49,7 @@ export async function transactionCompanyLinking(job: Job) {
     companyProfiles.map(async profile => {
 
         let companyId = 0
-        const companyCheck = await supabase.from("company_profile").select().eq("website", profile.websiteOrigin).limit(1)
+        const companyCheck = await supabase.from("company_profile").select().eq("origin", profile.websiteOrigin).limit(1)
 
 
         if (companyCheck.error) {

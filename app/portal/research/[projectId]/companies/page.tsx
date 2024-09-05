@@ -1,25 +1,21 @@
 import { ActionIcon, Anchor, Group, Image, Table, TableTbody, TableTd, TableTh, TableThead, TableTr, } from '@mantine/core';
 import { IconAlertCircle, IconChevronLeft, IconExternalLink, IconFileArrowLeft, IconHome, IconMessageCircle, IconPhoto, IconSettings } from '@tabler/icons-react';
-import { RedirectType, redirect, } from 'next/navigation';
 
-import { BackButton } from '@/components/BackButton';
 import Link from 'next/link';
-import { PAGE_SIZE } from '../shared';
-import { ProjectTabs } from '../ProjectTabs';
 import { ProjectWithModelCmp } from '../types';
-import { getUserTenant } from '@/shared/getUserTenant';
 import { isDefined } from '@/utils/typeHelpers';
 import { serverClient } from '@/supabase/ServerClients';
 
-export default async function Page({ params, searchParams }: { params: { projectId: string }, searchParams: { query: string, page: number } }) {
+export default async function Page({ params, searchParams }: { params: { projectId: string }, searchParams: { query: string, page: number, cmpId: number } }) {
 
     const query = searchParams?.query || '';
     const page = Number(searchParams?.page) - 1 || 0;
+    const cmpId = Number(searchParams?.cmpId)
 
     const supabase = serverClient()
     const project = await supabase.from("ib_projects").select("*, model_cmp(*)").eq("id", params.projectId).single<ProjectWithModelCmp>();
 
-    console.log("project", project.data)
+    // console.log("project", project.data)
     const companiesGet = await supabase
         .from('company_profile')
         .select('*')
@@ -43,7 +39,14 @@ export default async function Page({ params, searchParams }: { params: { project
         query_embedding: modelCmp.web_summary_emb!
     })
 
-    // console.log(similarCompaniesGet.data?.map(c => ({ name: c.name, sim: c.similarity })))
+    if (similarCompaniesGet.error) {
+        throw new Error(similarCompaniesGet.error.message)
+    }
+
+    console.log(similarCompaniesGet.data?.map(c => ({ name: c.name, sim: c.similarity })))
+
+
+    // console.log("companies", companies)
 
     const sortedCompanies = similarCompaniesGet.data
         ?.map(c => ({ ...c, similarity: Number(c.similarity) }))
@@ -55,13 +58,16 @@ export default async function Page({ params, searchParams }: { params: { project
 
     const rows = sortedCompanies?.map((element) => (
 
-        <TableTr key={element.id}>
+        <TableTr key={element.id} >
             <TableTd>
                 <Group>
                     {element.favicon != null &&
                         <Image src={element.favicon} width={16} height={16} />
                     }
-                    {element.name || element.website}
+                    <Anchor c={"dark"} fw={500} component={Link} href={`/portal/research/companies/${element.id}`}>
+
+                        {element.name || element.origin}
+                    </Anchor>
 
                 </Group>
             </TableTd>
@@ -71,11 +77,11 @@ export default async function Page({ params, searchParams }: { params: { project
 
             <TableTd>
                 <Group>
-                    {element.website && <ActionIcon
+                    {element.origin && <ActionIcon
                         p={"xs"}
                         variant='subtle'
                         component={Link}
-                        href={element.website}
+                        href={element.origin}
                         size="xl"
                         aria-label="Open in a new tab"
                     >
@@ -90,17 +96,20 @@ export default async function Page({ params, searchParams }: { params: { project
     ));
 
     return (
-        <Table>
-            <TableThead>
-                <TableTr>
-                    <TableTh>Name</TableTh>
-                    <TableTh>Relevance score</TableTh>
-                    <TableTh>Website</TableTh>
+        <>
+            <Table>
+                <TableThead>
+                    <TableTr>
+                        <TableTh>Name</TableTh>
+                        <TableTh>Relevance score</TableTh>
+                        <TableTh>Website</TableTh>
 
-                </TableTr>
-            </TableThead>
-            <TableTbody>{rows}</TableTbody>
-        </Table>
+                    </TableTr>
+                </TableThead>
+                <TableTbody>{rows}</TableTbody>
+            </Table>
+            {/* <CompanyProfile companyId={cmpId} /> */}
+        </>
     );
 
 

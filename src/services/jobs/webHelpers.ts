@@ -291,3 +291,21 @@ async function getLogo(url: string) {
     console.log(logoUrl)
     // return logoUrl ? new URL(logoUrl, url).href : null;
 }
+
+export async function getCompanyName(url: string) {
+    const { data } = await axios.get(url);
+    const $ = load(data);
+
+    // Extract relevant content: title, meta, headers, etc.
+    const title = $('title').text();
+    const metaDescription = $('meta[name="description"]').attr('content');
+    const h1 = $('h1').text();
+
+    const companyName = await getCompletion({
+        system: `You will be provided with content scraped from a webpage of a company's website, your job is to respond with the name of the company and nothing else.`,
+        user: `Title: ${title}\n\nMeta Description: ${metaDescription}\n\nH1: ${h1}`
+    })
+
+    return companyName
+
+}

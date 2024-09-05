@@ -1,13 +1,13 @@
 import { Job, Queue } from "bullmq";
+import { getCompanyName, getFaviconUrl, getPageLinks, indexPage } from "../webHelpers.js";
 import { getCompletion, getEmbedding, recursiveDocumentReduction } from "../llmHelpers.js";
-import { getFaviconUrl, getPageLinks, indexPage } from "../webHelpers.js";
 
 import { fullAccessServiceClient } from "@/supabase/ServerClients.js";
 import { isNotNull } from "@/utils/typeHelpers.js";
 
 export async function scrapeCompanyWebsite(job: Job) {
 
-    const companyWebsite = job.data.url; // startUrl
+    const companyWebsite = new URL(job.data.url).origin; // startUrl
     if (!companyWebsite) {
         throw new Error("Property 'url' is required in data payload");
     }
@@ -15,7 +15,7 @@ export async function scrapeCompanyWebsite(job: Job) {
     const supabase = fullAccessServiceClient()
 
     let company: CompanyProfile_SB
-    const companyGet = await supabase.from("company_profile").select().eq("website", companyWebsite);
+    const companyGet = await supabase.from("company_profile").select().eq("origin", companyWebsite);
     if (companyGet.error) {
         throw companyGet.error;
     } else if (companyGet.data.length > 0) {
@@ -24,12 +24,12 @@ export async function scrapeCompanyWebsite(job: Job) {
         company = companyGet.data[0]
 
         if (company.web_summary) {
-            console.log("web summary already exists", company.website)
+            console.log("web summary already exists", company.origin)
             return "already indexed"
         }
     } else {
         const createCompany = await supabase.from("company_profile").insert({
-            website: companyWebsite,
+            origin: companyWebsite,
         }).select().single()
 
         if (createCompany.error) {
@@ -40,11 +40,9 @@ export async function scrapeCompanyWebsite(job: Job) {
 
     }
 
-
-
-    const favicon = await getFaviconUrl(companyWebsite)
-    if (favicon) {
-        await supabase.from("company_profile").update({ favicon }).eq("id", company.id!)
+    const [companyName, favicon] = await Promise.all([getCompanyName(companyWebsite), getFaviconUrl(companyWebsite)])
+    if (favicon || companyName) {
+        await supabase.from("company_profile").update({ favicon, name: companyName }).eq("id", company.id!)
     }
 
 
@@ -143,7 +141,7 @@ export async function reduceCompanyPagesToProfile(job: Job) {
     const bmEmb = await getEmbedding(businessModel)
 
 
-    const emb = weightedAverage(summaryEmb, bmEmb, 1, 4)
+    const emb = weightedAverage(summaryEmb, bmEmb, 1, 9)
 
 
 

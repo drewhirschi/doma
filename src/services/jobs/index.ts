@@ -58,6 +58,6 @@ const worker = new Worker('industry', async (job: Job) => {
     removeOnComplete: { count: 1000 },
     removeOnFail: { count: 5000 },
     // drainDelay: 60,
-    concurrency: 10
+    concurrency: 5
 });
 

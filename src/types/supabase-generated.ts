@@ -155,27 +155,30 @@ export type Database = {
           favicon: string | null
           id: number
           name: string | null
+          origin: string | null
+          updated_at: string
           web_summary: string | null
           web_summary_emb: string | null
-          website: string | null
         }
         Insert: {
           created_at?: string
           favicon?: string | null
           id?: number
           name?: string | null
+          origin?: string | null
+          updated_at?: string
           web_summary?: string | null
           web_summary_emb?: string | null
-          website?: string | null
         }
         Update: {
           created_at?: string
           favicon?: string | null
           id?: number
           name?: string | null
+          origin?: string | null
+          updated_at?: string
           web_summary?: string | null
           web_summary_emb?: string | null
-          website?: string | null
         }
         Relationships: []
       }
@@ -1299,6 +1302,12 @@ export type Database = {
       }
       current_user_tenant_id: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      extract_origin: {
+        Args: {
+          url: string
+        }
         Returns: string
       }
       generate_random_key: {

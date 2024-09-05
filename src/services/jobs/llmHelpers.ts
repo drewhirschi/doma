@@ -77,6 +77,17 @@ export function cosinesim(a: number[], b: number[]): number {
 
 }
 
+
+function splitArrayIntoGroups(arr: any[], numGroups = 4) {
+    const result = [];
+    const groupSize = Math.ceil(arr.length / numGroups);
+
+    for (let i = 0; i < arr.length; i += groupSize) {
+        result.push(arr.slice(i, i + groupSize));
+    }
+
+    return result;
+}
 export async function recursiveDocumentReduction({ documents, instruction }: { documents: string[], instruction: string }) : Promise<string> {
 
     async function mergeDocs(docs: string[]) {
@@ -97,12 +108,9 @@ export async function recursiveDocumentReduction({ documents, instruction }: { d
         return await mergeDocs(documents)
 
     } else {
-        const middle = Math.floor(documents.length / 2);
-        const left = documents.slice(0, middle);
-        const right = documents.slice(middle);
-        const leftReduced = await recursiveDocumentReduction({ documents: left, instruction })
-        const rightReduced = await recursiveDocumentReduction({ documents: right, instruction })
-        return await mergeDocs([leftReduced, rightReduced])
+        const documentGroups = splitArrayIntoGroups(documents, 4);
+        const reductions = await Promise.all(documentGroups.map(docGroup => recursiveDocumentReduction({ documents: docGroup, instruction })))
+        return await mergeDocs(reductions)
 
     }
 
