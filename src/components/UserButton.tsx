@@ -1,9 +1,10 @@
 'use client'
 
 import { Avatar, Box, Flex, Group, Menu, Popover, Text, UnstyledButton, rem } from '@mantine/core';
-import { IconChevronRight, IconLogout, } from '@tabler/icons-react';
+import { IconChevronRight, IconLogout, IconSettings, } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
+import Link from 'next/link';
 import { Session } from '@supabase/supabase-js';
 import { browserClient } from '@/supabase/BrowserClient';
 import classes from './UserButton.module.css';
@@ -38,7 +39,7 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
 
   return (
 
-    <Menu shadow="md" width={"target"} withinPortal={false}>
+    <Menu shadow="md" width={200} withinPortal={true}>
       <Menu.Target>
         <UnstyledButton className={classes.user} mx={4}>
           <Flex wrap={"nowrap"} direction={"row"} align={'center'}>
@@ -75,6 +76,13 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
           Settings
         </Menu.Item>
         <Menu.Divider /> */}
+        <Menu.Item
+        component={Link}
+        href={'/portal/settings'}
+          leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}
+        >
+          Settings
+        </Menu.Item>
         <Menu.Item
           onClick={handleSignOut}
           color="red"

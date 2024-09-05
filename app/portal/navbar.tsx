@@ -1,7 +1,7 @@
 "use client"
 
 import { Anchor, AppShell, Box, Breadcrumbs, Code, Flex, Group, NavLink, ScrollArea, Space, Stack, Text, UnstyledButton } from '@mantine/core';
-import { Icon24Hours, IconBook, IconFolderOpen, IconUsersGroup } from '@tabler/icons-react';
+import { Icon24Hours, IconBook, IconFolderOpen, IconSearch, IconUsersGroup } from '@tabler/icons-react';
 
 import Link from 'next/link';
 import { UserButton } from '@/components/UserButton';
@@ -23,29 +23,32 @@ export function NavBar() {
             <div className={classnames["nav-item"]}>
                 <NavLink
                     href={`/portal/projects`}
-                    leftSection={<IconFolderOpen />}
-                    // label={navbarHovered ? <Text>Projects</Text> : null}
+                    label={<IconFolderOpen />}
                     component={Link}
                     active={pathname.split("/")[2] === "projects"}
                 />
                 <NavLink
                     href={`/portal/team`}
-                    leftSection={<IconUsersGroup />}
-                    // label={<IconUsersGroup />}
+                    label={<IconUsersGroup />}
                     component={Link}
                     active={pathname.split("/")[2] === "team"}
                 />
-                {/* <NavLink
+                <NavLink
                     href={`/portal/reports`}
-                    leftSection={<IconBook />}
-                    // label={<IconBook />}
+                    label={<IconBook />}
                     component={Link}
                     active={pathname.split("/")[2] === "reports"}
-                /> */}
+                />
+                <NavLink
+                    href={`/portal/research`}
+                    label={<IconSearch />}
+                    component={Link}
+                    active={pathname.split("/")[2] === "research"}
+                />
 
-        </div>
+            </div>
 
-        <div className={classnames["nav-item"]}>
+            <div className={classnames["nav-item"]}>
 
                 <UserButton collapsed={true} />
             </div>

@@ -1,0 +1,157 @@
+import { Job, Queue } from "bullmq";
+import { getCompletion, getEmbedding, recursiveDocumentReduction } from "../llmHelpers.js";
+import { getFaviconUrl, getPageLinks, indexPage } from "../webHelpers.js";
+
+import { fullAccessServiceClient } from "@/supabase/ServerClients.js";
+import { isNotNull } from "@/utils/typeHelpers.js";
+
+export async function scrapeCompanyWebsite(job: Job) {
+
+    const companyWebsite = job.data.url; // startUrl
+    if (!companyWebsite) {
+        throw new Error("Property 'url' is required in data payload");
+    }
+
+    const supabase = fullAccessServiceClient()
+
+    let company: CompanyProfile_SB
+    const companyGet = await supabase.from("company_profile").select().eq("website", companyWebsite);
+    if (companyGet.error) {
+        throw companyGet.error;
+    } else if (companyGet.data.length > 0) {
+        // console.log("company already exists", companyGet.data[0].id)
+        
+        company = companyGet.data[0]
+
+        if (company.web_summary) {
+            console.log("web summary already exists", company.website)
+            return "already indexed"
+        }
+    } else {
+        const createCompany = await supabase.from("company_profile").insert({
+            website: companyWebsite,
+        }).select().single()
+
+        if (createCompany.error) {
+            throw createCompany.error
+        }
+
+        company = createCompany.data
+
+    }
+
+
+
+    const favicon = await getFaviconUrl(companyWebsite)
+    if (favicon) {
+        await supabase.from("company_profile").update({ favicon }).eq("id", company.id!)
+    }
+
+
+    const pagesUrls = Array.from(await getPageLinks(companyWebsite, {limit:50}))
+
+
+    const scrapeProms = pagesUrls.map(async (page) => {
+        const indexResults = await indexPage(page)
+
+        if (!indexResults) {
+            console.warn("Failed to index", page)
+        }
+
+        const upsert = await supabase.from("comp_pages")
+            .upsert({ ...indexResults, company_id: company.id!, url: page })
+            .select()
+            .single()
+
+        if (upsert.error) {
+            throw upsert.error
+        }
+
+        return upsert.data
+    });
+    const indexedPages = await Promise.all(scrapeProms);
+
+
+    const industryQueue = new Queue('industry');
+    await industryQueue.add('reduce_company_pages', { cmpId: company.id });
+    await industryQueue.close()
+
+    return company.id
+}
+
+export function weightedAverage(
+    vectorA: number[],
+    vectorB: number[],
+    weightA: number,
+    weightB: number
+): number[] {
+    if (vectorA.length !== vectorB.length) {
+        throw new Error("Vectors must be of the same length");
+    }
+
+    const weightedSum: number[] = vectorA.map((a, i) => (a * weightA) + (vectorB[i] * weightB));
+    const totalWeight = weightA + weightB;
+
+    return weightedSum.map(value => value / totalWeight);
+}
+
+
+export async function reduceCompanyPagesToProfile(job: Job) {
+    const supabase = fullAccessServiceClient()
+    const { cmpId } = job.data
+
+    if (!cmpId) {
+        throw new Error("Property 'cmpId' is required in data payload");
+    }
+
+    const companyGet = await supabase.from("company_profile").select("*, comp_pages(*)").eq("id", cmpId).single();
+
+    if (companyGet.error) {
+        throw companyGet.error
+    }
+
+
+    if (companyGet.data.web_summary) {
+        console.log("web summary already exists", cmpId)
+        return
+    }
+
+    const indexedPages = companyGet.data.comp_pages
+
+
+
+    const companySummary = await recursiveDocumentReduction({
+        documents: indexedPages.map(ip => ip.cmp_info).filter(isNotNull),
+        instruction: `The following info is important:
+- What industry the company is in
+- Their bussiness model, how do they generate revenue, what are their core products, services, and target markets,
+- Size, how many employees they have, how many assets they have
+- What stage are they in: start up, small business, mid-sized, enterprise, etc
+- Geographic Presence: Consider where they operate and their market share in those regions`
+    })
+    const summaryEmb = await getEmbedding(companySummary)
+
+    const businessModel = await getCompletion({
+        system: "extract what products and services the company offers",
+        user: companySummary
+    })
+
+    if (businessModel == null) {
+        throw new Error("failed to get business products and services")
+    }
+
+    const bmEmb = await getEmbedding(businessModel)
+
+
+    const emb = weightedAverage(summaryEmb, bmEmb, 1, 4)
+
+
+
+    const update = await supabase.from("company_profile")
+        .update({ web_summary: companySummary, web_summary_emb: JSON.stringify(emb) })
+        .eq("id", cmpId)
+    if (update.error) {
+        throw update.error
+    }
+
+}

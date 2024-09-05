@@ -25,35 +25,49 @@
         }
       },
       {
+        "name": "Debug TypeScript with ESM",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/${relativeFile}",
+        "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+        "runtimeArgs": ["--loader", "ts-node/esm"],
+        "sourceMaps": true,
+        "resolveSourceMapLocations": [
+          "${workspaceFolder}/**",
+          "!**/node_modules/**"
+        ],
+        "skipFiles": ["<node_internals>/**"]
+      },
+      {
         "type": "bun",
         "request": "launch",
         "name": "Debug Bun",
-  
+
         "program": "${file}",
         "args": [],
         "cwd": "${workspaceFolder}",
         "env": {},
-  
+
         // If the environment variables should not be inherited from the parent process.
         "strictEnv": false,
-  
+
         // If the program should be run in watch mode.
         // This is equivalent to passing `--watch` to the `bun` executable.
         // You can also set this to "hot" to enable hot reloading using `--hot`.
         "watchMode": false,
-  
+
         // If the debugger should stop on the first line of the program.
         "stopOnEntry": true,
-  
+
         // If the debugger should be disabled. (for example, breakpoints will not be hit)
         "noDebug": false,
-  
+
         // The path to the `bun` executable, defaults to your `PATH` environment variable.
         "runtime": "bun",
-  
+
         // The arguments to pass to the `bun` executable, if any.
         // Unlike `args`, these are passed to the executable itself, not the program.
-        "runtimeArgs": [],
+        "runtimeArgs": []
       }
     ]
   }

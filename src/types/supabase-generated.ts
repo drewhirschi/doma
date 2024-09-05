@@ -114,6 +114,71 @@ export type Database = {
         }
         Relationships: []
       }
+      comp_pages: {
+        Row: {
+          cmp_info: string | null
+          company_id: number
+          created_at: string
+          emb: string | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          cmp_info?: string | null
+          company_id: number
+          created_at?: string
+          emb?: string | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          cmp_info?: string | null
+          company_id?: number
+          created_at?: string
+          emb?: string | null
+          title?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comp_pages_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_profile: {
+        Row: {
+          created_at: string
+          favicon: string | null
+          id: number
+          name: string | null
+          web_summary: string | null
+          web_summary_emb: string | null
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          favicon?: string | null
+          id?: number
+          name?: string | null
+          web_summary?: string | null
+          web_summary_emb?: string | null
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          favicon?: string | null
+          id?: number
+          name?: string | null
+          web_summary?: string | null
+          web_summary_emb?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       contract: {
         Row: {
           assigned_to: string | null
@@ -473,6 +538,58 @@ export type Database = {
         }
         Relationships: []
       }
+      ib_projects: {
+        Row: {
+          cmp_id: number | null
+          created_at: string
+          id: number
+          industry: string | null
+          model_cmp: number | null
+          tenant_id: string | null
+          title: string | null
+        }
+        Insert: {
+          cmp_id?: number | null
+          created_at?: string
+          id?: number
+          industry?: string | null
+          model_cmp?: number | null
+          tenant_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          cmp_id?: number | null
+          created_at?: string
+          id?: number
+          industry?: string | null
+          model_cmp?: number | null
+          tenant_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ib_projects_cmp_id_fkey"
+            columns: ["cmp_id"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ib_projects_model_cmp_fkey"
+            columns: ["model_cmp"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ib_projects_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       line_ref: {
         Row: {
           contract_id: string
@@ -545,6 +662,9 @@ export type Database = {
           email_confirmed_at: string | null
           id: string
           invited_at: string | null
+          send_email_provider: string | null
+          send_email_token_exp: number | null
+          send_email_tokens: Json | null
           tenant_id: string | null
         }
         Insert: {
@@ -556,6 +676,9 @@ export type Database = {
           email_confirmed_at?: string | null
           id: string
           invited_at?: string | null
+          send_email_provider?: string | null
+          send_email_token_exp?: number | null
+          send_email_tokens?: Json | null
           tenant_id?: string | null
         }
         Update: {
@@ -567,6 +690,9 @@ export type Database = {
           email_confirmed_at?: string | null
           id?: string
           invited_at?: string | null
+          send_email_provider?: string | null
+          send_email_token_exp?: number | null
+          send_email_tokens?: Json | null
           tenant_id?: string | null
         }
         Relationships: [
@@ -693,6 +819,268 @@ export type Database = {
           },
         ]
       }
+      report_sections: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: number
+          instruction: string | null
+          is_generated: boolean
+          report_id: number
+          title: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: number
+          instruction?: string | null
+          is_generated?: boolean
+          report_id: number
+          title?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: number
+          instruction?: string | null
+          is_generated?: boolean
+          report_id?: number
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_sections_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_template_sections: {
+        Row: {
+          created_at: string
+          id: number
+          instruction: string | null
+          template_id: number | null
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          instruction?: string | null
+          template_id?: number | null
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          instruction?: string | null
+          template_id?: number | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_template_sections_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "report_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      report_templates: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: number
+        }
+        Relationships: []
+      }
+      report_views: {
+        Row: {
+          created_at: string
+          duration: number | null
+          id: number
+          parsluid: string
+          report_id: number
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          id?: number
+          parsluid: string
+          report_id: number
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          id?: number
+          parsluid?: string
+          report_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_views_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports_pdf"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          file_path: string | null
+          has_outline: boolean
+          id: number
+          image_queries: string[] | null
+          published: boolean
+          slug: string | null
+          tenant_id: string | null
+          topic: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          file_path?: string | null
+          has_outline?: boolean
+          id?: number
+          image_queries?: string[] | null
+          published?: boolean
+          slug?: string | null
+          tenant_id?: string | null
+          topic?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          file_path?: string | null
+          has_outline?: boolean
+          id?: number
+          image_queries?: string[] | null
+          published?: boolean
+          slug?: string | null
+          tenant_id?: string | null
+          topic?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports_pdf: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          file_path: string
+          id: number
+          published: boolean
+          slug: string | null
+          tenant_id: string | null
+          topic: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          file_path: string
+          id?: number
+          published?: boolean
+          slug?: string | null
+          tenant_id?: string | null
+          topic?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          file_path?: string
+          id?: number
+          published?: boolean
+          slug?: string | null
+          tenant_id?: string | null
+          topic?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_pdf_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenant"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      search_result: {
+        Row: {
+          author: string | null
+          exa_id: string
+          id: number
+          publish_date: string | null
+          report_id: number
+          section_id: number | null
+          summary: string | null
+          text: string | null
+          title: string | null
+          url: string | null
+        }
+        Insert: {
+          author?: string | null
+          exa_id: string
+          id?: number
+          publish_date?: string | null
+          report_id: number
+          section_id?: number | null
+          summary?: string | null
+          text?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Update: {
+          author?: string | null
+          exa_id?: string
+          id?: number
+          publish_date?: string | null
+          report_id?: number
+          section_id?: number | null
+          summary?: string | null
+          text?: string | null
+          title?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "search_result_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "search_result_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "report_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant: {
         Row: {
           created_at: string
@@ -708,6 +1096,90 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      transaction_participant: {
+        Row: {
+          cmp_id: number
+          role: string | null
+          trans_id: number
+        }
+        Insert: {
+          cmp_id: number
+          role?: string | null
+          trans_id: number
+        }
+        Update: {
+          cmp_id?: number
+          role?: string | null
+          trans_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_participant_cmp_id_fkey"
+            columns: ["cmp_id"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_participant_trans_id_fkey"
+            columns: ["trans_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_search_res"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaction_search_res: {
+        Row: {
+          article_date: string | null
+          buyer_name: string | null
+          created_at: string
+          date: string | null
+          description: string | null
+          emb: string | null
+          id: number
+          others: Json | null
+          reason: string | null
+          seller_details: string | null
+          seller_name: string | null
+          snippet: string | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          article_date?: string | null
+          buyer_name?: string | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          emb?: string | null
+          id?: number
+          others?: Json | null
+          reason?: string | null
+          seller_details?: string | null
+          seller_name?: string | null
+          snippet?: string | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          article_date?: string | null
+          buyer_name?: string | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          emb?: string | null
+          id?: number
+          others?: Json | null
+          reason?: string | null
+          seller_details?: string | null
+          seller_name?: string | null
+          snippet?: string | null
+          title?: string | null
+          url?: string
         }
         Relationships: []
       }
@@ -856,6 +1328,58 @@ export type Database = {
         }
         Returns: boolean
       }
+      match_cmp_pages: {
+        Args: {
+          query_embedding: string
+          match_threshold: number
+          match_count: number
+          company_id: number
+        }
+        Returns: {
+          url: string
+          similarity: number
+        }[]
+      }
+      match_cmp_summaries:
+        | {
+            Args: {
+              query_embedding: string
+              match_threshold: number
+              match_count: number
+            }
+            Returns: {
+              id: number
+              name: string
+              website: string
+              similarity: number
+            }[]
+          }
+        | {
+            Args: {
+              query_embedding: string
+              match_threshold: number
+              match_count: number
+              company_id: number
+            }
+            Returns: {
+              id: number
+              name: string
+              website: string
+              similarity: number
+            }[]
+          }
+      match_documents: {
+        Args: {
+          query_embedding: string
+          match_threshold: number
+          match_count: number
+        }
+        Returns: {
+          id: string
+          content: string
+          similarity: number
+        }[]
+      }
       random_color: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -863,6 +1387,12 @@ export type Database = {
       user_tenant_owns_contract: {
         Args: {
           contract_id: string
+        }
+        Returns: boolean
+      }
+      user_tenant_owns_report: {
+        Args: {
+          report_id: number
         }
         Returns: boolean
       }
