@@ -1,6 +1,7 @@
 import { rerm, rok } from "@/utils"
 
 import { Database } from "@/types/supabase"
+import { Json } from "@/types/supabase-generated"
 import { SupabaseClient } from "@supabase/supabase-js"
 import axios from "axios"
 
@@ -48,7 +49,7 @@ export async function exchangeCodeForToken(sb: SupabaseClient<Database>, code: s
     const update = await sb.from("profile")
         .update({
             send_email_provider: "microsoft",
-            send_email_tokens: tokenRes.data!,
+            send_email_tokens: tokenRes.data! as unknown as Json,
             send_email_token_exp: Math.floor(Date.now() / 1000) + tokenRes.data.expires_in
         })
         .eq("id", userId!)
@@ -76,7 +77,7 @@ export async function refreshToken(sb: SupabaseClient<Database>) {
     const data = {
         client_id: process.env.MICROSOFT_CLIENT_ID ?? "",
         scope: EMAIL_SCOPES,
-        refresh_token: user.data.send_email_tokens.refresh_token,
+        refresh_token: (user.data.send_email_tokens as MicrosoftTokenResponse).refresh_token,
         grant_type: "refresh_token",
         client_secret: process.env.MICROSOFT_CLIENT_SECRET ?? "",
     };

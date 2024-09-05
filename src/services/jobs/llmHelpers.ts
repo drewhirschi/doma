@@ -1,0 +1,109 @@
+import 'dotenv/config'
+
+import OpenAI from "openai";
+import { z, } from "zod";
+import { zodResponseFormat } from 'openai/helpers/zod';
+
+const openai = new OpenAI();
+
+interface CompletionOptions {
+    system: string,
+    user: string,
+    model?: string,
+}
+
+export async function getCompletion({ model = "gpt-4o-mini-2024-07-18", system, user }: CompletionOptions): Promise<string | null> {
+
+    const completion = await openai.chat.completions.create({
+        model,
+        messages: [
+            { role: "system", content: system },
+            { role: "user", content: user },
+        ],
+        response_format: { type: "text" },
+    });
+
+    return completion.choices[0].message.content
+}
+
+interface StructuredCompletionOptions<Z extends z.ZodTypeAny> extends CompletionOptions {
+    schema: Z
+}
+export async function getStructuredCompletion<Z extends z.ZodTypeAny = z.ZodNever>({ model = "gpt-4o-mini-2024-07-18", system, user, schema }: StructuredCompletionOptions<Z>): Promise<z.infer<Z> | null> {
+
+
+    const timeout = setTimeout(() => {
+        console.warn("getStructuredCompletion has not finished in 15 seconds");
+    }, 15000);
+    try {
+        const response = await openai.beta.chat.completions.parse({
+            model,
+            messages: [
+                { role: "system", content: system },
+                { role: "user", content: user },
+            ],
+            response_format: zodResponseFormat(schema, "company_profile"),
+        });
+        clearTimeout(timeout);
+        const responseParsed = response.choices[0].message.parsed
+        if (!responseParsed) {
+            return null
+        }
+
+        return responseParsed as z.infer<Z>;
+    } finally {
+        clearTimeout(timeout);
+    }
+
+
+
+}
+
+export async function getEmbedding(text: string): Promise<number[]> {
+    const embedding = await openai.embeddings.create({
+        model: "text-embedding-3-large",
+        // model: "text-embedding-3-small",
+        input: text,
+    });
+    return embedding.data[0].embedding;
+}
+
+export function cosinesim(a: number[], b: number[]): number {
+    const dotProduct = a.reduce((acc, val, idx) => acc + val * b[idx], 0);
+    const magnitudeA = Math.sqrt(a.reduce((acc, val) => acc + val ** 2, 0));
+    const magnitudeB = Math.sqrt(b.reduce((acc, val) => acc + val ** 2, 0));
+
+    return dotProduct / (magnitudeA * magnitudeB);
+
+}
+
+export async function recursiveDocumentReduction({ documents, instruction }: { documents: string[], instruction: string }) : Promise<string> {
+
+    async function mergeDocs(docs: string[]) {
+        const doc = await getCompletion({
+            system: `You will receive a list of documents. Merge their information into one document. \nAdditional information:\n ${instruction}`,
+            "user": docs.map((doc, idx) => `<doc${idx + 1}>\n${doc}\n</doc${idx + 1}>`).join("\n") ,
+        })
+        if (!doc) {
+            console.warn("Could not get completion")
+            return docs[1]
+        }
+        return doc
+    }
+
+    if (documents.length === 1) {
+        return documents[0]
+    } else if (documents.length <= 4) {
+        return await mergeDocs(documents)
+
+    } else {
+        const middle = Math.floor(documents.length / 2);
+        const left = documents.slice(0, middle);
+        const right = documents.slice(middle);
+        const leftReduced = await recursiveDocumentReduction({ documents: left, instruction })
+        const rightReduced = await recursiveDocumentReduction({ documents: right, instruction })
+        return await mergeDocs([leftReduced, rightReduced])
+
+    }
+
+}

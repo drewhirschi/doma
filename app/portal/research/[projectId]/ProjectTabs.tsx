@@ -1,7 +1,7 @@
 "use client"
 
 import { Box, Stack, Tabs, TabsList, TabsTab, rem } from '@mantine/core';
-import { IconFileSpreadsheet, IconFlag, IconHome, IconSearch, IconSettings, IconSwitchHorizontal } from '@tabler/icons-react';
+import { IconBuildingSkyscraper, IconFileSpreadsheet, IconFlag, IconHome, IconSearch, IconSettings, IconSwitchHorizontal } from '@tabler/icons-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 interface Props {
@@ -33,6 +33,9 @@ export function ProjectTabs({ children }: Props) {
                 <TabsList miw={860}>
                     <TabsTab value="overview" leftSection={<IconHome style={iconStyle} />}>
                         Overview
+                    </TabsTab>
+                    <TabsTab value="companies" leftSection={<IconBuildingSkyscraper style={iconStyle} />}>
+                        Companies
                     </TabsTab>
                     <TabsTab value="activity" leftSection={<IconSwitchHorizontal style={iconStyle} />}>
                         M&A Activity

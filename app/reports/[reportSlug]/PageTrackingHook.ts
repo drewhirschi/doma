@@ -9,11 +9,11 @@ export const usePageTracking = (reportId:number) => {
 
     const userId = Cookies.get('parsluid')
 
-    if (!userId) return
-
+    
     const sb = browserClient()
-
+    
     useEffect(() => {
+        if (!userId) return
         const startTime = Date.now();
 
         // Track page view on component mount

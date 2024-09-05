@@ -1,0 +1,31 @@
+version: "3.5"
+
+services:
+  my-redis-stack:
+    container_name: my-redis-stack
+    image: redis/redis-stack:latest
+    ports:
+      - 6379:6379
+      - 8001:8001
+    restart: no
+    volumes:
+      - redis-data:/data
+    # command: redis-server --appendonly yes
+
+  bullboard:
+    container_name: bullboard
+    image: deadly0/bull-board
+    restart: always
+    environment:
+      REDIS_HOST: my-redis-stack
+      REDIS_PORT: 6379
+      REDIS_USE_TLS: false
+      BULL_PREFIX: bull
+      # REDIS_PASSWORD: example-password
+    ports:
+      - 8002:3000
+    depends_on:
+      - my-redis-stack
+
+volumes:
+  redis-data:

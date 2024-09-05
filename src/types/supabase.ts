@@ -1,7 +1,7 @@
 import { Database as DatabaseGenerated, Json } from './supabase-generated'
 
 import { MergeDeep } from 'type-fest'
-import { MicrosoftTokenResponse } from '../../app/api/v1/auth/callback/microsoft/route'
+import { MicrosoftTokenResponse } from '@/oauth/microsoft'
 import { ScaledPosition } from '@/components/PdfViewer/types'
 
 export type Database = MergeDeep<

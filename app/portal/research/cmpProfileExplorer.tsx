@@ -38,7 +38,7 @@ export default function Page() {
             <Stack style={{ borderRight: "1px solid black" }}>
 
                 {cmps.map(cmp => (
-                    <Button variant="default" onClick={() => setActiveCmp(cmp)}>
+                    <Button key={cmp.id} variant="default" onClick={() => setActiveCmp(cmp)}>
                         {cmp.name}
                     </Button>
                 ))}
@@ -50,7 +50,7 @@ export default function Page() {
 
                     return (
 
-                        <Button variant="default" onClick={() => setActivePage(page)}>
+                        <Button key={page.url} variant="default" onClick={() => setActivePage(page)}>
                             {pathname}
                         </Button>
                     )
@@ -60,7 +60,7 @@ export default function Page() {
             <Stack>
                 {activePage?.url}
                 {/* {activePage?.md} */}
-                <Markdown>{activePage?.md}</Markdown>
+                <Markdown>{activePage?.cmp_info}</Markdown>
             </Stack>
         </Group>
     );

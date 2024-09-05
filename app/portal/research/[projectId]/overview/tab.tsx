@@ -1,0 +1,138 @@
+"use client"
+
+import { ActionIcon, Box, Button, Container, Group, Paper, TextInput } from '@mantine/core';
+import { BubbleMenu, EditorContent, FloatingMenu, useEditor } from '@tiptap/react';
+import { queueCompanyProfiling, queueFindIndustryCompanies, queueFindIndustyActivity } from './actions';
+
+import { IconTrash } from '@tabler/icons-react';
+import { Markdown } from 'tiptap-markdown';
+import MetadataItem from '@/components/MetadataItem';
+import Placeholder from '@tiptap/extension-placeholder';
+import { ProjectWithModelCmp } from '../types';
+import React from 'react';
+import StarterKit from '@tiptap/starter-kit';
+import { browserClient } from '@/supabase/BrowserClient';
+import { serverClient } from '@/supabase/ServerClients';
+import { useDebouncedCallback } from 'use-debounce';
+import { useForm } from '@mantine/form';
+
+const extensions = [StarterKit,
+    Placeholder.configure({
+        placeholder: 'Write something... Or type / to use commands',
+        showOnlyWhenEditable: true
+    }),
+    Markdown,
+
+]
+
+export default function OverviewTab({
+    project
+}: {
+    project: ProjectWithModelCmp
+}) {
+
+    const form = useForm({
+        initialValues: {
+            url: "https://www.keshot.com/",
+        }
+    })
+
+    const editor = useEditor({
+        immediatelyRender: false,
+        extensions,
+        content: project.model_cmp?.web_summary || "",
+        onUpdate: ({ editor }) => {
+            debouncedSaveContent(editor.getHTML())
+        }
+    })
+
+    const sb = browserClient()
+
+    const debouncedSaveContent = useDebouncedCallback(async (content: string) => {
+        if (!project.model_cmp) return
+        const update = await sb.from('company_profile').update({ web_summary: content }).eq('id', project.model_cmp.id!).select().single()
+        if (update.error) {
+            console.log(update.error)
+        }
+    }, 300)
+
+
+    return (
+        <Group align='flex-start' m={"sm"}>
+
+            <Paper
+                // m={"sm"}
+                radius={8}
+                withBorder
+                // bg={"none"}
+                p={"xs"}
+            >                <Group>
+
+                    <MetadataItem header={"Model Company"} text={project.model_cmp?.name ?? "Not set"} />
+                    {/* <MetadataItem header={"Industry"} text={project.industry ?? "Not set"} /> */}
+                </Group>
+
+                <Box maw={600}>
+                    <Group w={600} align='flex-end' justify='space-between'>
+
+                        <TextInput
+                            flex={1}
+                            label="Profile company"
+                            placeholder="Enter a url"
+                            {...form.getInputProps('url')}
+                        />
+                        <Button onClick={() => {
+                            queueCompanyProfiling(form.values.url)
+                        }}>Profile</Button>
+                    </Group>
+                </Box>
+
+                <Box my={"xs"}>
+
+                    <Button disabled={project.model_cmp == null} onClick={() => {
+                        queueFindIndustryCompanies(String(project.model_cmp!.id))
+                    }}>Find companies</Button>
+                    <Button disabled={project.industry == null} onClick={() => {
+                        queueFindIndustyActivity(project.industry!)
+                    }}>Find Transactions</Button>
+                </Box>
+            </Paper>
+            <Paper
+                // m={"sm"}
+                flex={1}
+                radius={8}
+                withBorder
+                p={"xs"}
+            >
+                <EditorContent editor={editor} />
+
+                <FloatingMenu editor={editor} tippyOptions={{ placement: 'bottom-start' }} shouldShow={(props) => {
+                    const { selection } = props.editor.state;
+                    const { $from } = selection;
+                    const line = $from.nodeBefore?.textContent || '';
+                    return line == "/"
+                }} >
+
+                    <Paper w={200} shadow='md' radius={"md"} withBorder py={"xs"} >
+
+
+                    </Paper>
+                </FloatingMenu>
+                <BubbleMenu editor={editor}>
+                    <Button.Group>
+
+                        <Button miw={40} variant="default" size='compact-sm' onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()} >H1</Button>
+                        <Button miw={40} variant="default" size='compact-sm'>H2</Button>
+                        <Button miw={40} variant="default" size='compact-sm'>H3</Button>
+                        <Button miw={40} variant="default" size='compact-sm'>P</Button>
+                        <Button miw={40} variant="default" size='compact-sm' onClick={() => editor?.chain().focus().toggleBold().run()}>B</Button>
+                    </Button.Group>
+                </BubbleMenu>
+
+
+            </Paper>
+            {/* </Box> */}
+        </Group>
+
+    );
+}

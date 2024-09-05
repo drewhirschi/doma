@@ -11,7 +11,7 @@ interface IParams {
     reportSlug: string
 }
 
-export default function page({ params, searchParams }: { params: any, searchParams: any }) {
+export default function Page({ params, searchParams }: { params: any, searchParams: any }) {
 
     if (searchParams.parsluid) {
         Cookies.set('parsluid', searchParams.parsluid)

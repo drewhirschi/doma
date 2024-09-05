@@ -32,8 +32,8 @@ export default async function Page({ params, searchParams }: { params: { project
 
     const rows = transactions.map((element) => (
         <TableTr key={element.id}>
-            <TableTd>{element.seller}</TableTd>
-            <TableTd>{element.buyer}</TableTd>
+            <TableTd>{element.seller_name}</TableTd>
+            <TableTd>{element.buyer_name}</TableTd>
             <TableTd>{element.date}</TableTd>
             <TableTd>{element.reason}</TableTd>
         </TableTr>

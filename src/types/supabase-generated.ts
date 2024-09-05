@@ -116,6 +116,7 @@ export type Database = {
       }
       comp_pages: {
         Row: {
+          cmp_info: string | null
           company_id: number
           created_at: string
           emb: string | null
@@ -123,6 +124,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          cmp_info?: string | null
           company_id: number
           created_at?: string
           emb?: string | null
@@ -130,6 +132,7 @@ export type Database = {
           url: string
         }
         Update: {
+          cmp_info?: string | null
           company_id?: number
           created_at?: string
           emb?: string | null
@@ -149,20 +152,29 @@ export type Database = {
       company_profile: {
         Row: {
           created_at: string
+          favicon: string | null
           id: number
           name: string | null
+          web_summary: string | null
+          web_summary_emb: string | null
           website: string | null
         }
         Insert: {
           created_at?: string
+          favicon?: string | null
           id?: number
           name?: string | null
+          web_summary?: string | null
+          web_summary_emb?: string | null
           website?: string | null
         }
         Update: {
           created_at?: string
+          favicon?: string | null
           id?: number
           name?: string | null
+          web_summary?: string | null
+          web_summary_emb?: string | null
           website?: string | null
         }
         Relationships: []
@@ -531,6 +543,8 @@ export type Database = {
           cmp_id: number | null
           created_at: string
           id: number
+          industry: string | null
+          model_cmp: number | null
           tenant_id: string | null
           title: string | null
         }
@@ -538,6 +552,8 @@ export type Database = {
           cmp_id?: number | null
           created_at?: string
           id?: number
+          industry?: string | null
+          model_cmp?: number | null
           tenant_id?: string | null
           title?: string | null
         }
@@ -545,6 +561,8 @@ export type Database = {
           cmp_id?: number | null
           created_at?: string
           id?: number
+          industry?: string | null
+          model_cmp?: number | null
           tenant_id?: string | null
           title?: string | null
         }
@@ -552,6 +570,13 @@ export type Database = {
           {
             foreignKeyName: "ib_projects_cmp_id_fkey"
             columns: ["cmp_id"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ib_projects_model_cmp_fkey"
+            columns: ["model_cmp"]
             isOneToOne: false
             referencedRelation: "company_profile"
             referencedColumns: ["id"]
@@ -1109,7 +1134,8 @@ export type Database = {
       }
       transaction_search_res: {
         Row: {
-          buyer: string | null
+          article_date: string | null
+          buyer_name: string | null
           created_at: string
           date: string | null
           description: string | null
@@ -1117,13 +1143,15 @@ export type Database = {
           id: number
           others: Json | null
           reason: string | null
-          seller: string | null
+          seller_details: string | null
+          seller_name: string | null
           snippet: string | null
           title: string | null
           url: string
         }
         Insert: {
-          buyer?: string | null
+          article_date?: string | null
+          buyer_name?: string | null
           created_at?: string
           date?: string | null
           description?: string | null
@@ -1131,13 +1159,15 @@ export type Database = {
           id?: number
           others?: Json | null
           reason?: string | null
-          seller?: string | null
+          seller_details?: string | null
+          seller_name?: string | null
           snippet?: string | null
           title?: string | null
           url: string
         }
         Update: {
-          buyer?: string | null
+          article_date?: string | null
+          buyer_name?: string | null
           created_at?: string
           date?: string | null
           description?: string | null
@@ -1145,7 +1175,8 @@ export type Database = {
           id?: number
           others?: Json | null
           reason?: string | null
-          seller?: string | null
+          seller_details?: string | null
+          seller_name?: string | null
           snippet?: string | null
           title?: string | null
           url?: string
@@ -1309,6 +1340,34 @@ export type Database = {
           similarity: number
         }[]
       }
+      match_cmp_summaries:
+        | {
+            Args: {
+              query_embedding: string
+              match_threshold: number
+              match_count: number
+            }
+            Returns: {
+              id: number
+              name: string
+              website: string
+              similarity: number
+            }[]
+          }
+        | {
+            Args: {
+              query_embedding: string
+              match_threshold: number
+              match_count: number
+              company_id: number
+            }
+            Returns: {
+              id: number
+              name: string
+              website: string
+              similarity: number
+            }[]
+          }
       match_documents: {
         Args: {
           query_embedding: string

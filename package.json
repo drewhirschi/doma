@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sb:types": "supabase gen types typescript --linked --schema public > src/types/supabase-generated.ts"
+    "sb:types": "supabase gen types typescript --linked --schema public > src/types/supabase-generated.ts",
+    "jobs": "bun ./src/services/jobs/index.ts"
   },
   "dependencies": {
     "@mantine/carousel": "^7.4.2",
@@ -29,14 +30,17 @@
     "@tiptap/starter-kit": "^2.5.9",
     "@vercel/analytics": "^1.2.2",
     "axios": "^1.6.2",
+    "bullmq": "^5.12.12",
+    "cheerio": "^1.0.0",
     "date-fns": "^3.3.1",
     "embla-carousel-react": "^7.1.0",
     "exa-js": "^1.0.14",
     "framer-motion": "^11.1.9",
+    "ioredis": "^5.4.1",
     "js-cookie": "^3.0.5",
     "lodash.debounce": "^4.0.8",
     "next": "^14.0.4",
-    "openai": "^4.20.1",
+    "openai": "^4.56.0",
     "p-queue": "^8.0.1",
     "pdfjs-dist": "^2.16.105",
     "react": "18.2.0",

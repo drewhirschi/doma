@@ -4,6 +4,7 @@ import * as microsoftOauth from "@/oauth/microsoft"
 
 import axios, { AxiosError } from "axios"
 
+import { MicrosoftTokenResponse } from "@/oauth/microsoft"
 import { serverActionClient } from "@/supabase/ServerClients"
 
 export async function sendEmail(recipients: string, emailContent: string) {
@@ -45,7 +46,7 @@ async function sendMicrosoftEmail(recipients: string[], user: Profile_SB) {
         }))
 
     const headers = {
-        Authorization: `Bearer ${user.send_email_tokens.access_token}`,
+        Authorization: `Bearer ${(user.send_email_tokens as MicrosoftTokenResponse).access_token}`,
         "Content-Type": "application/json",
     };
 
