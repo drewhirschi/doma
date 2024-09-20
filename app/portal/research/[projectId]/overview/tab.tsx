@@ -1,8 +1,8 @@
 "use client"
 
-import { ActionIcon, Box, Button, Container, Group, Paper, TextInput } from '@mantine/core';
+import { ActionIcon, Box, Button, Container, Group, Paper, Stack, TextInput } from '@mantine/core';
 import { BubbleMenu, EditorContent, FloatingMenu, useEditor } from '@tiptap/react';
-import { queueCompanyProfiling, queueFindIndustryCompanies, queueFindIndustyActivity } from './actions';
+import { queueCompanyProfiling, queueFindIndustryCompanies, queueFindIndustyActivity, setModelCompany } from './actions';
 
 import { IconTrash } from '@tabler/icons-react';
 import { Markdown } from 'tiptap-markdown';
@@ -10,6 +10,7 @@ import MetadataItem from '@/components/MetadataItem';
 import Placeholder from '@tiptap/extension-placeholder';
 import { ProjectWithModelCmp } from '../types';
 import React from 'react';
+import { SetTargetPanel } from './SetTargetPanel';
 import StarterKit from '@tiptap/starter-kit';
 import { browserClient } from '@/supabase/BrowserClient';
 import { serverClient } from '@/supabase/ServerClients';
@@ -33,7 +34,7 @@ export default function OverviewTab({
 
     const form = useForm({
         initialValues: {
-            url: "https://www.keshot.com/",
+            url: "",
         }
     })
 
@@ -59,44 +60,61 @@ export default function OverviewTab({
 
     return (
         <Group align='flex-start' m={"sm"}>
+            <Stack>
 
-            <Paper
-                // m={"sm"}
-                radius={8}
-                withBorder
-                // bg={"none"}
-                p={"xs"}
-            >                <Group>
+                <Paper
+                    radius={8}
+                    withBorder
+                    p={"xs"}
+                >
+                    <Group>
+                        {project.model_cmp ? <MetadataItem header={"Model Company"} text={project.model_cmp?.name ?? "Not set"} />
 
-                    <MetadataItem header={"Model Company"} text={project.model_cmp?.name ?? "Not set"} />
-                    {/* <MetadataItem header={"Industry"} text={project.industry ?? "Not set"} /> */}
-                </Group>
+                            : <SetTargetPanel setCmpId={(id: number) => setModelCompany(id, project.id)} />
+                        }
 
-                <Box maw={600}>
-                    <Group w={600} align='flex-end' justify='space-between'>
-
-                        <TextInput
-                            flex={1}
-                            label="Profile company"
-                            placeholder="Enter a url"
-                            {...form.getInputProps('url')}
-                        />
-                        <Button onClick={() => {
-                            queueCompanyProfiling(form.values.url)
-                        }}>Profile</Button>
                     </Group>
-                </Box>
 
-                <Box my={"xs"}>
+                  
 
-                    <Button disabled={project.model_cmp == null} onClick={() => {
-                        queueFindIndustryCompanies(String(project.model_cmp!.id))
-                    }}>Find companies</Button>
-                    <Button disabled={project.industry == null} onClick={() => {
-                        queueFindIndustyActivity(project.industry!)
-                    }}>Find Transactions</Button>
-                </Box>
-            </Paper>
+                    <Box my={"xs"}>
+
+                        <Button disabled={project.model_cmp == null} onClick={() => {
+                            queueFindIndustryCompanies(project.model_cmp!.id)
+                        }}>Find companies</Button>
+                        <Button disabled={project.model_cmp == null} onClick={() => {
+                            queueFindIndustyActivity(project.model_cmp!.id)
+                        }}>Find Transactions</Button>
+                    </Box>
+                </Paper>
+                <Paper
+                    radius={8}
+                    withBorder
+                    p={"xs"}
+                >
+
+                    <Box maw={600}>
+                        <Group w={600} align='flex-end' justify='space-between'>
+
+                            <TextInput
+                                flex={1}
+                                label="Profile a company"
+                                placeholder="Enter a url"
+                                {...form.getInputProps('url')}
+                            />
+                            <Button onClick={async () => {
+                                try {
+
+                                    await queueCompanyProfiling(form.values.url)
+                                    form.reset()
+                                } catch (error) {
+
+                                }
+                            }}>Profile</Button>
+                        </Group>
+                    </Box>
+                </Paper>
+            </Stack>
             <Paper
                 // m={"sm"}
                 flex={1}

@@ -35,7 +35,7 @@ export async function getPageContents(url: string) {
     const timeoutId = setTimeout(() => {
         console.warn(`Timed out crawling: ${url}`);
         controller.abort()
-    }, 5000);
+    }, 7000);
 
     try {
         const response = await axiosInstance.get(url, {
@@ -48,7 +48,6 @@ export async function getPageContents(url: string) {
             return tagVisible($(this));
         }).text();
 
-        clearTimeout(timeoutId);
         return texts.trim();
     } catch (e) {
         if (axios.isAxiosError(e)) {
@@ -60,6 +59,7 @@ export async function getPageContents(url: string) {
             console.error(`Unknow error crawling ${url}: ${e}`);
         }
     } finally {
+        console.log('Done scraping', url);
         clearTimeout(timeoutId);
     }
 }

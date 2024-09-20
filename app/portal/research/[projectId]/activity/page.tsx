@@ -1,12 +1,8 @@
-import { IconAlertCircle, IconChevronLeft, IconFileArrowLeft, IconHome, IconMessageCircle, IconPhoto, IconSettings } from '@tabler/icons-react';
 import { RedirectType, redirect, } from 'next/navigation';
 import { Table, TableTbody, TableTd, TableTh, TableThead, TableTr, } from '@mantine/core';
 
-import { BackButton } from '@/components/BackButton';
 import Link from 'next/link';
-import { PAGE_SIZE } from '../shared';
-import { ProjectTabs } from '../ProjectTabs';
-import { getUserTenant } from '@/shared/getUserTenant';
+import { isDefined } from '@/utils/typeHelpers';
 import { serverClient } from '@/supabase/ServerClients';
 
 export default async function Page({ params, searchParams }: { params: { projectId: string }, searchParams: { query: string, page: number } }) {
@@ -16,9 +12,15 @@ export default async function Page({ params, searchParams }: { params: { project
 
     const supabase = serverClient()
 
+
+    const projectGet = await supabase.from("ib_projects").select("*, company_profile(*)").eq("id", params.projectId).single();
+
+
     const transactionsGet = await supabase
         .from('transaction_search_res')
-        .select('*, transaction_participant(*)')
+        .select('*, company_profile(*)')
+        .order('id', { ascending: false })
+    // .limit(30)
     // .eq('project_id', params.projectId)
     // .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 
@@ -29,24 +31,46 @@ export default async function Page({ params, searchParams }: { params: { project
     const transactions = transactionsGet.data
     // console.log(transactions)
 
+    const similarityGet = await supabase.rpc('match_transactions_seller', {
+        match_count: 30,
+        match_threshold: 0.05,
+        query_embedding: projectGet.data?.company_profile?.web_summary_emb!
+    })
 
-    const rows = transactions.map((element) => (
-        <TableTr key={element.id}>
+
+    const rows = similarityGet.data?.map((sim) => {
+
+        const element = transactions?.find(x => x.id === sim.transaction_id)
+
+
+        if (!element) {
+            return undefined
+        }
+
+
+        return <TableTr key={element.id}>
+            <TableTd><Link href={element.url} target='_blank'>{element.id}</Link></TableTd>
+            {/* <TableTd><Link href={element.url} target='_blank'>{element.url}</Link></TableTd> */}
             <TableTd>{element.seller_name}</TableTd>
             <TableTd>{element.buyer_name}</TableTd>
             <TableTd>{element.date}</TableTd>
             <TableTd>{element.reason}</TableTd>
+            <TableTd>{element.company_profile?.map(x => x.name).join(", ") ?? ""}</TableTd>
         </TableTr>
-    ));
+    }
+    ).filter(isDefined) ?? [];
 
     return (
         <Table>
             <TableThead>
                 <TableTr>
+                    <TableTh>ID</TableTh>
                     <TableTh>Seller</TableTh>
                     <TableTh>Buyer</TableTh>
                     <TableTh>Date</TableTh>
                     <TableTh>Reason</TableTh>
+                    <TableTh>Participants</TableTh>
+
                 </TableTr>
             </TableThead>
             <TableTbody>{rows}</TableTbody>

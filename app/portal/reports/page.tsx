@@ -1,7 +1,8 @@
-import { Box, Container, Group } from '@mantine/core';
+import { Box, Container, Divider, Group, Title } from '@mantine/core';
 import { serverActionClient, serverClient } from '@/supabase/ServerClients';
 
 import { NewReportButton } from './NewReportButton';
+import { NewTemplateButton } from './NewTemplate';
 import React from 'react';
 import ReportsTable from './ReportsTable';
 import axios from 'axios';
@@ -52,11 +53,17 @@ export default async function page() {
     return (
         <Box>
             <Container mt={120}>
-
+                <Title>Decks</Title>
+                <Divider mb={"sm"} />
                 <Group justify='flex-end'>
                     <NewReportButton onCreateReport={onCreateReport} templates={templates.data ?? []} />
                 </Group>
                 <ReportsTable reports={reports.data ?? []} />
+                <Title>Slide templates</Title>
+                <Divider mb={"sm"} />
+                <Group justify='flex-end'>
+                    <NewTemplateButton onCreateReport={onCreateReport} templates={templates.data ?? []} />
+                </Group>
             </Container>
         </Box>
     );

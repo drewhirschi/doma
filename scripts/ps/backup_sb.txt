@@ -1,0 +1,27 @@
+
+pg_dump -v ^
+-p 6543 ^
+-h aws-0-us-west-1.pooler.supabase.com ^
+-U postgres.utlmfaaustebkmpcwlhx ^
+-Fc -d postgres ^
+--schema=public ^
+-f dumps/sb_.dump
+
+--exclude-table=comp_pages
+
+
+
+pg_restore -v `
+-h aws-0-us-west-1.pooler.supabase.com  `
+-p 6543 `
+-U postgres.hqeqjrbzmachofyfobed `
+-d postgres `
+dumps\sb_parsl_.dump
+
+
+--data-only -t transaction_search_res `
+--disable-triggers 
+
+
+
+

@@ -31,10 +31,10 @@ interface StructuredCompletionOptions<Z extends z.ZodTypeAny> extends Completion
 }
 export async function getStructuredCompletion<Z extends z.ZodTypeAny = z.ZodNever>({ model = "gpt-4o-mini-2024-07-18", system, user, schema }: StructuredCompletionOptions<Z>): Promise<z.infer<Z> | null> {
 
-
+    const TIMEOUT_SECONDS = 20; // TIMEOUT_SECONDS
     const timeout = setTimeout(() => {
-        console.warn("getStructuredCompletion has not finished in 15 seconds");
-    }, 15000);
+        console.warn("getStructuredCompletion has not finished in " + TIMEOUT_SECONDS + " seconds");
+    }, TIMEOUT_SECONDS * 1000);
     try {
         const response = await openai.beta.chat.completions.parse({
             model,

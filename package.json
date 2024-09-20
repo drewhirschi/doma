@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "sb:types": "supabase gen types typescript --linked --schema public > src/types/supabase-generated.ts",
-    "jobs": "bun ./src/services/jobs/index.ts"
+    "jobs": "bun ./src/services/jobs/index.ts",
+    "jobs:watch": "bun --watch ./src/services/jobs/index.ts"
   },
   "dependencies": {
     "@mantine/carousel": "^7.4.2",

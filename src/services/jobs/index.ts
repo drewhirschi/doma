@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import { Job, Worker } from 'bullmq';
+import { JobDataType, JobType, jobSchemas } from "./jobTypes.js";
 import { reduceCompanyPagesToProfile, scrapeCompanyWebsite } from "./handlers/scrapeCompanyWebsite.js";
 
 import { Redis } from "ioredis";
@@ -13,13 +14,21 @@ const redisConnection = new Redis(process.env.REDIS_URL!, {
     maxRetriesPerRequest: null,
 });
 
-const machineToken = process.env.MACHINE_NAME;
-if (!machineToken) {
-    throw new Error('MACHINE_NAME is not set');
-}
 
 
-const worker = new Worker('industry', async (job: Job) => {
+
+const worker = new Worker<JobDataType>('industry', async (job: Job) => {
+    const schema = jobSchemas[job.name as JobType];
+    if (!schema) {
+        throw new Error(`Unknown job type: ${job.name}`);
+    }
+    const result = schema.safeParse(job.data);
+    if (!result.success) {
+        console.error("Bad job data", job.id)
+        throw new Error(`Invalid job data for ${job.name}: ${result.error.message}`);
+    }
+
+
     try {
 
         console.log(`Got ${job.name}, id: ${job.id}`, job.data)
@@ -43,7 +52,7 @@ const worker = new Worker('industry', async (job: Job) => {
                 break;
 
             default:
-                rv = await job.moveToFailed(new Error('unknown_job_name'), job.token || machineToken);
+                throw new Error('unknown_job_name');
                 break;
         }
 
@@ -58,6 +67,6 @@ const worker = new Worker('industry', async (job: Job) => {
     removeOnComplete: { count: 1000 },
     removeOnFail: { count: 5000 },
     // drainDelay: 60,
-    concurrency: 5
+    concurrency: 15
 });
 

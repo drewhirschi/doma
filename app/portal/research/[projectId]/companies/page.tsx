@@ -74,6 +74,10 @@ export default async function Page({ params, searchParams }: { params: { project
             <TableTd>
                 {similarCompaniesGet.data?.find(c => c.name === element.name)?.similarity}
             </TableTd>
+            <TableTd>
+                {element.origin}
+            </TableTd>
+
 
             <TableTd>
                 <Group>

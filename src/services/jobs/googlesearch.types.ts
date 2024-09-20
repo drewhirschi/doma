@@ -61,6 +61,7 @@ export const InvolvedParty = z.object({
 })
 
 export const TransactionExtractionSchema = z.object({
+    is_transaction_article: z.boolean(),
     transactions: z.array(
         z.object({
             buyer_name: z.string(),

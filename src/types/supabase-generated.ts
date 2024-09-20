@@ -543,7 +543,6 @@ export type Database = {
       }
       ib_projects: {
         Row: {
-          cmp_id: number | null
           created_at: string
           id: number
           industry: string | null
@@ -552,7 +551,6 @@ export type Database = {
           title: string | null
         }
         Insert: {
-          cmp_id?: number | null
           created_at?: string
           id?: number
           industry?: string | null
@@ -561,7 +559,6 @@ export type Database = {
           title?: string | null
         }
         Update: {
-          cmp_id?: number | null
           created_at?: string
           id?: number
           industry?: string | null
@@ -570,13 +567,6 @@ export type Database = {
           title?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "ib_projects_cmp_id_fkey"
-            columns: ["cmp_id"]
-            isOneToOne: false
-            referencedRelation: "company_profile"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "ib_projects_model_cmp_fkey"
             columns: ["model_cmp"]
@@ -1143,8 +1133,12 @@ export type Database = {
           date: string | null
           description: string | null
           emb: string | null
+          full_query: string | null
           id: number
+          linked: boolean
           others: Json | null
+          query: string | null
+          query_emb: string | null
           reason: string | null
           seller_details: string | null
           seller_name: string | null
@@ -1159,8 +1153,12 @@ export type Database = {
           date?: string | null
           description?: string | null
           emb?: string | null
+          full_query?: string | null
           id?: number
+          linked?: boolean
           others?: Json | null
+          query?: string | null
+          query_emb?: string | null
           reason?: string | null
           seller_details?: string | null
           seller_name?: string | null
@@ -1175,8 +1173,12 @@ export type Database = {
           date?: string | null
           description?: string | null
           emb?: string | null
+          full_query?: string | null
           id?: number
+          linked?: boolean
           others?: Json | null
+          query?: string | null
+          query_emb?: string | null
           reason?: string | null
           seller_details?: string | null
           seller_name?: string | null
@@ -1386,6 +1388,19 @@ export type Database = {
         Returns: {
           id: string
           content: string
+          similarity: number
+        }[]
+      }
+      match_transactions_seller: {
+        Args: {
+          query_embedding: string
+          match_threshold: number
+          match_count: number
+        }
+        Returns: {
+          transaction_id: number
+          seller_name: string
+          transaction_title: string
           similarity: number
         }[]
       }
