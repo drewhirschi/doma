@@ -4,7 +4,7 @@ import { Anchor, AppShell, Box, Breadcrumbs, Code, Flex, Group, NavLink, ScrollA
 import { Icon24Hours, IconBook, IconFolderOpen, IconSearch, IconUsersGroup } from '@tabler/icons-react';
 
 import Link from 'next/link';
-import { UserButton } from '@/components/UserButton';
+import { UserButton } from '@/ux/components/UserButton';
 import classnames from "./layout.module.css"
 import { useHover } from '@mantine/hooks';
 import { usePathname } from 'next/navigation';

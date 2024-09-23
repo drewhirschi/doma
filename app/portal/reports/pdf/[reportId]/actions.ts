@@ -1,11 +1,11 @@
 "use server"
 
-import * as microsoftOauth from "@/oauth/microsoft"
+import * as microsoftOauth from "@/backend/oauth/microsoft"
 
 import axios, { AxiosError } from "axios"
 
-import { MicrosoftTokenResponse } from "@/oauth/microsoft"
-import { serverActionClient } from "@/supabase/ServerClients"
+import { MicrosoftTokenResponse } from "@/backend/oauth/microsoft"
+import { serverActionClient } from "@/shared/supabase-client/ServerClients"
 
 export async function sendEmail(recipients: string, emailContent: string) {
     console.log("sending email")
@@ -46,7 +46,7 @@ async function sendMicrosoftEmail(recipients: string[], user: Profile_SB) {
         }))
 
     const headers = {
-        Authorization: `Bearer ${(user.send_email_tokens as MicrosoftTokenResponse).access_token}`,
+        Authorization: `Bearer ${(user.send_email_tokens as unknown as MicrosoftTokenResponse).access_token}`,
         "Content-Type": "application/json",
     };
 

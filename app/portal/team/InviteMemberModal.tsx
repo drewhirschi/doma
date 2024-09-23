@@ -2,10 +2,10 @@
 
 import { Button, Modal, Select, TextInput } from '@mantine/core';
 
-import { TeamRoleSelect } from '@/components/TeamRoleSelect';
+import { TeamRoleSelect } from '@/ux/components/TeamRoleSelect';
+import { createProfile } from './InviteMemberModal.action';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';
-import { createProfile } from './InviteMemberModal.action';
 
 export interface CreateProfileValues {
     email: string,

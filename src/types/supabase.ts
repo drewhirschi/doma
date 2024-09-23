@@ -1,29 +1,14 @@
 import { Database as DatabaseGenerated, Json } from './supabase-generated'
 
 import { MergeDeep } from 'type-fest'
-import { MicrosoftTokenResponse } from '@/oauth/microsoft'
-import { ScaledPosition } from '@/components/PdfViewer/types'
+import { MicrosoftTokenResponse } from '@/backend/oauth/microsoft'
 
 export type Database = MergeDeep<
   DatabaseGenerated,
   {
     public: {
       Tables: {
-        profile: {
-          Row: {
-            send_email_tokens: MicrosoftTokenResponse | Json
-          }
-        },
-        annotation: {
-          Row: {
-            position: ScaledPosition
-          }
-        },
-        project: {
-          Row: {
-            profile: Profile_SB[]
-          }
-        }
+       
       }
     }
   }

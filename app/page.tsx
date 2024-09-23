@@ -1,10 +1,10 @@
 import { Anchor, Box, Center, Container, Stack, Text, Title } from "@mantine/core";
 
-import GridBackground from "@/components/GridBackground";
+import GridBackground from "@/ux/components/GridBackground";
 import LoginButton from "./LoginButton";
 import { Metadata } from "next";
-import { Meteors } from "@/components/Meteors";
-import TopNav from "@/components/TopNav";
+import { Meteors } from "@/ux/components/Meteors";
+import TopNav from "@/ux/components/TopNav";
 import { WaitlistSignup } from "./WaitlistSignup";
 import styles, { } from './page.module.css';
 

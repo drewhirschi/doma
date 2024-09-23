@@ -1,5 +1,5 @@
 import { Box } from "@mantine/core";
-import TopNav from "@/components/TopNav";
+import TopNav from "@/ux/components/TopNav";
 
 export default function Layout({
    children,

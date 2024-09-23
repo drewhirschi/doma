@@ -8,7 +8,7 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { useDisclosure, useScrollIntoView } from '@mantine/hooks';
 import { useEffect, useRef, useState } from 'react';
 
-import { browserClient } from '@/supabase/BrowserClient';
+import { browserClient } from '@/shared/supabase-client/BrowserClient';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 

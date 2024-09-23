@@ -2,8 +2,8 @@
 
 import Cookies from "js-cookie"
 import { ReactPdfViewer } from "./ReactPdfViewer"
-import { browserClient } from "@/supabase/BrowserClient"
-import { serverClient } from "@/supabase/ServerClients"
+import { browserClient } from "@/shared/supabase-client/BrowserClient"
+import { serverClient } from "@/shared/supabase-client/ServerClients"
 import { usePageTracking } from "./PageTrackingHook"
 import { useRouter } from "next/navigation"
 

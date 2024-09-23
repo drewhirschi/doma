@@ -2,7 +2,7 @@ import { Button, Card, CardSection, Container, Divider, Group, Image, SimpleGrid
 
 import Link from 'next/link';
 import React from 'react';
-import { serverClient } from '@/supabase/ServerClients';
+import { serverClient } from '@/shared/supabase-client/ServerClients';
 
 export default async function Page() {
 

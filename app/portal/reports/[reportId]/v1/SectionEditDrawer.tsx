@@ -2,11 +2,10 @@
 
 import { ActionIcon, Box, Button, Grid, Group, Select, Stack, Text, TextInput, Textarea } from "@mantine/core";
 
-import { AgreementTypes } from "@/types/enums";
 import { Editor } from "@tiptap/react";
 import { ISection } from "./types";
 import { SearchResultPreview } from "./SearchResultPreview";
-import { browserClient } from "@/supabase/BrowserClient";
+import { browserClient } from "@/shared/supabase-client/BrowserClient";
 import { useDebouncedCallback } from "use-debounce";
 import { useForm } from '@mantine/form';
 import { useState } from "react";

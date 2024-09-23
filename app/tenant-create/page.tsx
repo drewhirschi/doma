@@ -7,7 +7,7 @@ import { createTenantAndAssignUser } from './actions';
 
 interface IpageProps { }
 
-export default function page() {
+export default function Page() {
     const [tenantName, setTenantName] = useState("");
     return (
         <Box h="100vh" w="100vw">

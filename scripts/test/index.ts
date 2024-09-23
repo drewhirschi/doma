@@ -1,10 +1,9 @@
-import { getEmbedding, getStructuredCompletion } from "@/services/jobs/llmHelpers";
+import { getEmbedding, getStructuredCompletion } from "@/backend/services/jobs/llmHelpers";
 
 import { Queue } from "bullmq";
-import { TransactionExtractionSchema } from "@/services/jobs/googlesearch.types";
-import { fullAccessServiceClient } from "@/supabase/ServerClients";
-import { getPageContents } from "@/services/jobs/webHelpers";
-import { isNotNull } from "@/utils/typeHelpers";
+import { TransactionExtractionSchema } from "@/backend/services/jobs/googlesearch.types";
+import { fullAccessServiceClient } from "@/shared/supabase-client/ServerClients";
+import { getPageContents } from "@/backend/services/jobs/webHelpers";
 
 async function main() {
 

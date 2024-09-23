@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
-import { browserClient } from '@/supabase/BrowserClient';
+import { browserClient } from '@/shared/supabase-client/BrowserClient';
 
 function PasswordLoginForm() {
 

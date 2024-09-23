@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { serverActionClient } from "@/supabase/ServerClients"
+import { serverActionClient } from "@/shared/supabase-client/ServerClients"
 
 export async function createProject(title:string) {
     const sb = serverActionClient()

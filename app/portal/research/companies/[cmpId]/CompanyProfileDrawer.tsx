@@ -2,11 +2,11 @@
 
 import { ActionIcon, Group, Title } from '@mantine/core';
 
-import { BackButton } from '@/components/BackButton';
+import { BackButton } from '@/ux/components/BackButton';
 import { IconExternalLink } from '@tabler/icons-react';
 import Link from 'next/link';
 import Markdown from 'react-markdown';
-import { browserClient } from '@/supabase/BrowserClient';
+import { browserClient } from '@/shared/supabase-client/BrowserClient';
 import { useSBFetch } from '@/ux/hooks';
 
 type Props = {

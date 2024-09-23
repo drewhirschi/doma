@@ -3,8 +3,8 @@ import { IconAlertCircle, IconChevronLeft, IconExternalLink, IconFileArrowLeft, 
 
 import Link from 'next/link';
 import { ProjectWithModelCmp } from '../types';
-import { isDefined } from '@/utils/typeHelpers';
-import { serverClient } from '@/supabase/ServerClients';
+import { isDefined } from '@/types/typeHelpers';
+import { serverClient } from '@/shared/supabase-client/ServerClients';
 
 export default async function Page({ params, searchParams }: { params: { projectId: string }, searchParams: { query: string, page: number, cmpId: number } }) {
 

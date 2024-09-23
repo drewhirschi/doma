@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import { QueryData } from "@supabase/supabase-js";
 import { Tables } from "@/types/supabase-generated";
-import { browserClient } from "@/supabase/BrowserClient";
-import { serverClient } from "@/supabase/ServerClients";
+import { browserClient } from "@/shared/supabase-client/BrowserClient";
+import { serverClient } from "@/shared/supabase-client/ServerClients";
 
 type ArrayElement<ArrayType extends readonly unknown[]> =
     ArrayType extends readonly (infer ElementType)[] ? ElementType : never;

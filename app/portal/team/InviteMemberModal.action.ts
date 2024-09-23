@@ -1,9 +1,9 @@
 "use server"
 
 import { CreateProfileValues } from "./InviteMemberModal";
-import { fullAccessServiceClient } from "@/supabase/ServerClients";
+import { fullAccessServiceClient } from "@/shared/supabase-client/ServerClients";
 import { getUserTenant } from "@/shared/getUserTenant";
-import { serverActionClient } from "@/supabase/ServerClients";
+import { serverActionClient } from "@/shared/supabase-client/ServerClients";
 
 function getRandomColor(): string {
     const saturation = 100; // Adjust for vibrancy

@@ -4,8 +4,8 @@ import { Anchor, Box, Button, Checkbox, Container, Divider, Grid, Group, Modal, 
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 
 import axios from "axios";
+import { fbPixel } from "@/ux/helper";
 import { notifications } from "@mantine/notifications";
-import { pixel } from "@/utils";
 import { theme } from "../theme";
 import { useForm } from "@mantine/form";
 
@@ -58,7 +58,7 @@ export function WaitlistSignup({callToAction, secondaryDesription}:Props) {
                                 method: "POST",
                                 body: values,
                             })
-                            pixel.event("WaitlistJoin")
+                            fbPixel.event("WaitlistJoin")
                             form.reset()
                             closeModal()
                             notifications.show({

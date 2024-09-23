@@ -6,7 +6,7 @@ import React from 'react';
 import ReportEditor from './ReportEditor';
 import ReportEditorNavbar from './ReportEditorNavbar';
 import axios from 'axios';
-import { serverClient } from '@/supabase/ServerClients';
+import { serverClient } from '@/shared/supabase-client/ServerClients';
 
 const images = [
     {

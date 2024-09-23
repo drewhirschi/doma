@@ -6,14 +6,14 @@ import { queueCompanyProfiling, queueFindIndustryCompanies, queueFindIndustyActi
 
 import { IconTrash } from '@tabler/icons-react';
 import { Markdown } from 'tiptap-markdown';
-import MetadataItem from '@/components/MetadataItem';
+import MetadataItem from '@/ux/components/MetadataItem';
 import Placeholder from '@tiptap/extension-placeholder';
 import { ProjectWithModelCmp } from '../types';
 import React from 'react';
 import { SetTargetPanel } from './SetTargetPanel';
 import StarterKit from '@tiptap/starter-kit';
-import { browserClient } from '@/supabase/BrowserClient';
-import { serverClient } from '@/supabase/ServerClients';
+import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { serverClient } from '@/shared/supabase-client/ServerClients';
 import { useDebouncedCallback } from 'use-debounce';
 import { useForm } from '@mantine/form';
 

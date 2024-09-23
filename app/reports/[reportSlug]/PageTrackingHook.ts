@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import Cookies from "js-cookie"
-import { browserClient } from '@/supabase/BrowserClient';
+import { browserClient } from '@/shared/supabase-client/BrowserClient';
 
 export const usePageTracking = (reportId:number) => {
 

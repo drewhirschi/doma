@@ -1,7 +1,5 @@
-import { createMiddlewareClient } from '@/utils/supabase/middleware'
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { cookies } from 'next/headers'
+import { createMiddlewareClient } from '@/shared/supabase-client/middleware';
 
 export async function middleware(request: NextRequest) {
 

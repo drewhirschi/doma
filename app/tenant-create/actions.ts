@@ -1,6 +1,6 @@
 "use server"
 
-import { fullAccessServiceClient, serverActionClient } from "@/supabase/ServerClients"
+import { fullAccessServiceClient, serverActionClient } from "@/shared/supabase-client/ServerClients"
 
 import { redirect } from "next/navigation"
 

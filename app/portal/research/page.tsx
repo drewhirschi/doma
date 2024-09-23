@@ -3,10 +3,10 @@ import { IconAlertCircle, IconChevronLeft, IconFileArrowLeft, IconHome, IconMess
 import { RedirectType, redirect, } from 'next/navigation';
 
 import { AddProjectModal } from './AddProject';
-import { BackButton } from '@/components/BackButton';
+import { BackButton } from '@/ux/components/BackButton';
 import Link from 'next/link';
 import { getUserTenant } from '@/shared/getUserTenant';
-import { serverClient } from '@/supabase/ServerClients';
+import { serverClient } from '@/shared/supabase-client/ServerClients';
 
 export default async function Page({ params, searchParams }: { params: { projectId: string }, searchParams: { query: string, page: number } }) {
 

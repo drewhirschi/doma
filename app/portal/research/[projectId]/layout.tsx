@@ -1,9 +1,9 @@
 import { Box, Flex, Group, SimpleGrid, Space, Stack, Tabs, TabsList, TabsTab, Text, Title, rem } from "@mantine/core";
 import { IconFileSpreadsheet, IconHome } from "@tabler/icons-react";
 
-import { BackButton } from "@/components/BackButton";
+import { BackButton } from "@/ux/components/BackButton";
 import { ProjectTabs } from "./ProjectTabs";
-import { serverClient } from "@/supabase/ServerClients";
+import { serverClient } from "@/shared/supabase-client/ServerClients";
 
 export default async function Layout({
     children,

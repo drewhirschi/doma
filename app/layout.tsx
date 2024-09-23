@@ -6,8 +6,8 @@ import "./global.css";
 import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 
 import { Analytics } from "@vercel/analytics/react"
-import ApolloTracker from "@/components/ApolloTracker";
-import FacebookPixel from "@/components/FacebookPixel";
+import ApolloTracker from "@/ux/components/ApolloTracker";
+import FacebookPixel from "@/ux/components/FacebookPixel";
 import { Notifications } from "@mantine/notifications";
 import { theme } from "../theme";
 

@@ -2,10 +2,10 @@ import { Button, Group, Text, Title } from '@mantine/core';
 import { IconBrandGoogle, IconBrandGoogleFilled, IconBrandOffice } from '@tabler/icons-react';
 
 import Link from 'next/link';
-import MetadataItem from '@/components/MetadataItem';
+import MetadataItem from '@/ux/components/MetadataItem';
 import React from 'react';
-import { authUrl as microsoftAuthUrl } from '@/oauth/microsoft';
-import { serverClient } from '@/supabase/ServerClients';
+import { authUrl as microsoftAuthUrl } from '@/backend/oauth/microsoft';
+import { serverClient } from '@/shared/supabase-client/ServerClients';
 
 interface IpageProps { }
 

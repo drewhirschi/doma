@@ -2,8 +2,8 @@ import { RedirectType, redirect, } from 'next/navigation';
 import { Table, TableTbody, TableTd, TableTh, TableThead, TableTr, } from '@mantine/core';
 
 import Link from 'next/link';
-import { isDefined } from '@/utils/typeHelpers';
-import { serverClient } from '@/supabase/ServerClients';
+import { isDefined } from '@/types/typeHelpers';
+import { serverClient } from '@/shared/supabase-client/ServerClients';
 
 export default async function Page({ params, searchParams }: { params: { projectId: string }, searchParams: { query: string, page: number } }) {
 

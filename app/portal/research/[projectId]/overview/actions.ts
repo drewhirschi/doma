@@ -3,7 +3,7 @@
 import { Queue } from 'bullmq';
 import Redis from "ioredis"
 import { revalidatePath } from 'next/cache';
-import { serverActionClient } from '@/supabase/ServerClients';
+import { serverActionClient } from '@/shared/supabase-client/ServerClients';
 
 const redisConnection = new Redis(process.env.REDIS_URL!, {
     // tls: {}
