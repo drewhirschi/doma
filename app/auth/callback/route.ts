@@ -7,15 +7,27 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
 
-  if (code) {
-    const supabase = routeClient()
-    const authRes = await supabase.auth.exchangeCodeForSession(code)
-    // URL to redirect to after sign in process completes
-    const redirectUrl = requestUrl.origin + "/portal/projects"
+  if (!code) {
+    const redirectUrl = requestUrl.origin + `/login?${encodeURIComponent("errorMessage=no code was provided")}`
     return NextResponse.redirect(redirectUrl)
   }
 
-  // URL to redirect to after sign in process completes
-  const redirectUrl = requestUrl.origin + `/login?${encodeURIComponent("errorMessage=no code was provided")}`
-  return NextResponse.redirect(redirectUrl)
+  const supabase = routeClient()
+  const authRes = await supabase.auth.exchangeCodeForSession(code)
+
+
+  if (authRes.error) {
+    console.log(authRes.error)
+    return NextResponse.redirect("/login?errorMessage=" + authRes.error.message)
+  }
+
+  if (authRes.data.user.app_metadata.tenant_id) {
+    const redirectUrl = requestUrl.origin + "/portal/settings"
+    return NextResponse.redirect(redirectUrl)
+  } else {
+    const redirectUrl = requestUrl.origin + "/tenant-create"
+    return NextResponse.redirect(redirectUrl)
+  }
+
+
 }

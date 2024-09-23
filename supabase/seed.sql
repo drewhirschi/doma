@@ -45,3 +45,15 @@ BEGIN
 
 END
 $$;
+
+
+CREATE OR REPLACE FUNCTION auth.tenant_id()
+ RETURNS uuid
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  RETURN (
+    SELECT (current_setting('request.jwt.claims', true)::jsonb -> 'app_metadata' ->> 'tenant_id')::uuid
+  );
+END;
+$function$;

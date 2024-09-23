@@ -1,26 +1,22 @@
 import { Avatar, Progress, Select, TableScrollContainer, TableTbody, TableTd, TableTh, TableThead, TableTr, Tabs, TabsList, TabsPanel, TabsTab, rem } from '@mantine/core';
 import { Badge, Button, Card, Container, Grid, Group, Image, Space, Table, Text } from "@mantine/core";
 import { IconUserPlus, IconUsers } from '@tabler/icons-react';
-import { getCompletedContracts, getInitials, getTotalContracts } from '@/ux/helper';
 
 import { InviteMemberModal } from './InviteMemberModal';
+import { getInitials } from '@/ux/helper';
 import { serverClient } from "@/supabase/ServerClients";
 
 export default async function Page() {
 
     const supabase = serverClient()
     const userFetch = await supabase.from("profile").select("*")
-    const contractFetch = await supabase.from("contract").select("*")
 
     if (!userFetch.data) {
         console.error(userFetch.error)
         throw new Error("Failed to fetch user data")
     }
 
-    if (!contractFetch.data) {
-        console.error(contractFetch.error)
-        throw new Error("Failed to fetch contract data")
-    }
+
 
 
     const iconStyle = { width: rem(12), height: rem(12) };
@@ -48,17 +44,7 @@ export default async function Page() {
                 </TableTd>
 
                 <TableTd>
-                    <Group gap="sm" grow>
-                        {typeof getCompletedContracts(contractFetch.data, profile.id) === 'number' && typeof getTotalContracts(contractFetch.data, profile.id) === 'number' ? (
-                            <>
-                                <Progress value={(getCompletedContracts(contractFetch.data, profile.id) / getTotalContracts(contractFetch.data, profile.id)) * 100} />
-                                {`${getCompletedContracts(contractFetch.data, profile.id)}`} / {`${getTotalContracts(contractFetch.data, profile.id)}`}
-                            </>
-                        ) : (
-                            // Display a message if the values are not valid numbers
-                            <Text>Error: Invalid contract values</Text>
-                        )}
-                    </Group>
+
                 </TableTd>
             </TableTr>
         ));

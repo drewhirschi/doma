@@ -2,6 +2,7 @@ import { Button, Group, Text, Title } from '@mantine/core';
 import { IconBrandGoogle, IconBrandGoogleFilled, IconBrandOffice } from '@tabler/icons-react';
 
 import Link from 'next/link';
+import MetadataItem from '@/components/MetadataItem';
 import React from 'react';
 import { authUrl as microsoftAuthUrl } from '@/oauth/microsoft';
 import { serverClient } from '@/supabase/ServerClients';
@@ -21,6 +22,11 @@ export default async function page() {
     return (
         <div>
             <h1>Settings</h1>
+            {JSON.stringify(user)}
+            <Group>
+                <MetadataItem header='Name' text={user?.display_name ?? "Not set"} copyButton={false} />
+                <MetadataItem header='Email' text={user?.email ?? "Not set"} copyButton={false} />
+            </Group>
 
             <Title order={3}>Email</Title>
             {user?.send_email_provider ? 

@@ -21,12 +21,12 @@ export function NavBar() {
             className={classnames.navbar}>
 
             <div className={classnames["nav-item"]}>
-                <NavLink
+                {/* <NavLink
                     href={`/portal/projects`}
                     label={<IconFolderOpen />}
                     component={Link}
                     active={pathname.split("/")[2] === "projects"}
-                />
+                /> */}
                 <NavLink
                     href={`/portal/team`}
                     label={<IconUsersGroup />}
