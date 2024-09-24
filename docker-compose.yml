@@ -27,5 +27,19 @@ services:
     depends_on:
       - my-redis-stack
 
+  prod-bullboard:
+    container_name: prod-bullboard
+    image: deadly0/bull-board
+    restart: always
+    environment:
+      REDIS_HOST: diverse-flounder-22113.upstash.io
+      REDIS_PORT: 6379
+      REDIS_USE_TLS: true
+      BULL_PREFIX: bull
+      REDIS_PASSWORD: AVZhAAIjcDFjMDViYmU3ODU5MzM0YWQzOTg1N2Y5ZjBkMjAzMmI2NXAxMA
+    ports:
+      - 8003:3000
+
+
 volumes:
   redis-data:

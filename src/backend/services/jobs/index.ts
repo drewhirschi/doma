@@ -5,14 +5,25 @@ import { JobDataType, JobType, jobSchemas } from "./jobTypes.js";
 import { reduceCompanyPagesToProfile, scrapeCompanyWebsite } from "./handlers/scrapeCompanyWebsite.js";
 
 import { Redis } from "ioredis";
+import RedisSingleton from "@/backend/redis.js";
 import { companyDiscovery } from "./handlers/companyDiscovery.js";
 import { transactionCompanyLinking } from "./handlers/transactionLinking.js";
 import { transactionDiscovery } from "./handlers/transactionDiscovery.js";
 
-const redisConnection = new Redis(process.env.REDIS_URL!, {
-    // tls: {},
+// const redisConnection = RedisSingleton.getInstance()
+
+
+if (!process.env.UPSTASH_REDIS_URL) {
+    throw new Error("Missing UPSTASH_REDIS_URL")
+}
+const redisConnection = new Redis(process.env.UPSTASH_REDIS_URL, {
     maxRetriesPerRequest: null,
-});
+    tls: {}
+})
+
+// if (!process.env.UPSTASH_REDIS_PWD || !process.env.UPSTASH_REDIS_HOST) {
+//     throw new Error("Missing UPSTASH_REDIS_PWD or UPSTASH_REDIS_HOST")
+// }
 
 
 
@@ -69,4 +80,11 @@ const worker = new Worker<JobDataType>('industry', async (job: Job) => {
     // drainDelay: 60,
     concurrency: 15
 });
+
+worker.on("completed", (job) =>
+    console.log(`Completed job ${job.id} successfully`)
+);
+worker.on("failed", (job, err) =>
+    console.log(`Failed job ${job?.id} with ${err}`)
+);
 
