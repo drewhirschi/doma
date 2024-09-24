@@ -1,6 +1,8 @@
 import { Job, Queue } from "bullmq";
 import { getEmbedding, getStructuredCompletion } from "../llmHelpers.js";
 
+import { IndustryQueueClient } from "../industry-queue.js";
+import { Redis } from "ioredis";
 import { TransactionExtractionSchema } from "../googlesearch.types.js";
 import { fullAccessServiceClient } from "@/shared/supabase-client/ServerClients.js";
 import { getPageContents } from "../webHelpers.js";
@@ -9,8 +11,6 @@ import { isNotNull } from "@/types/typeHelpers.js";
 import { title } from "process";
 import { transactionDiscoverySchema } from "../jobTypes.js";
 import { z } from "zod";
-
-const queue = new Queue('industry');
 
 export async function transactionDiscovery(job: Job<z.infer<typeof transactionDiscoverySchema>>) {
     const sb = fullAccessServiceClient()
@@ -148,7 +148,9 @@ export async function transactionDiscovery(job: Job<z.infer<typeof transactionDi
         throw insert.error
     }
 
-    await queue.addBulk(insert.data?.map(transaction => ({
+    const queue = new IndustryQueueClient()
+
+    await queue.enqueueBulk(insert.data?.map(transaction => ({
         name: "transaction_linking",
         data: {
             trans_news_id: transaction.id,
