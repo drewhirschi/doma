@@ -5,7 +5,7 @@ import { PostgrestError, } from "@supabase/supabase-js";
 
 export function useSBFetch<T>(fn: () => PostgrestBuilder<T>, deps: any[] = []) {
     const [data, setData] = useState<null | T>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<null | PostgrestError>(null);
 
     useEffect(() => {

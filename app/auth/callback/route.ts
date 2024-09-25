@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (authRes.data.user.app_metadata.tenant_id) {
-    const redirectUrl = requestUrl.origin + "/portal/settings"
+    const redirectUrl = requestUrl.origin + "/portal/research"
     return NextResponse.redirect(redirectUrl)
   } else {
     const redirectUrl = requestUrl.origin + "/tenant-create"

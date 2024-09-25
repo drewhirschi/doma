@@ -37,9 +37,7 @@ export function ProjectTabs({ children }: Props) {
                     <TabsTab value="companies" leftSection={<IconBuildingSkyscraper style={iconStyle} />}>
                         Companies
                     </TabsTab>
-                    <TabsTab value="activity" leftSection={<IconSwitchHorizontal style={iconStyle} />}>
-                        M&A Activity
-                    </TabsTab>
+
                 </TabsList>
 
                 {children}

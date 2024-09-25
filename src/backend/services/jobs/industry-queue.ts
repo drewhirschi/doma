@@ -23,13 +23,24 @@ export class IndustryQueueClient {
         );
     }
 
-    async enqueue(jobName: string, data: JobDataType) {
-        await this.queue.add(jobName, data);
-
+    async companyDiscovery(cmpId: number) {
+        return await this.queue.add("company_discovery", { cmpId });
+    }
+    async transactionDiscovery(cmpId: number) {
+        return await this.queue.add("transaction_discovery", { cmpId });
+    }
+    async scrapeCompanyWebsite(url: string) {
+        return await this.queue.add("scrape_company_website", { url });
     }
 
+
+
+    async enqueue(jobName: string, data: JobDataType) {
+        return await this.queue.add(jobName, data);
+
+    }
     async enqueueBulk(jobs: { name: string, data: JobDataType }[]) {
-        await this.queue.addBulk(jobs);
+        return await this.queue.addBulk(jobs);
     }
 
     close() {

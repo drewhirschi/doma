@@ -1,5 +1,4 @@
-import { Box, Flex, Group, SimpleGrid, Space, Stack, Tabs, TabsList, TabsTab, Text, Title, rem } from "@mantine/core";
-import { IconFileSpreadsheet, IconHome } from "@tabler/icons-react";
+import { Group, Stack, Title } from "@mantine/core";
 
 import { BackButton } from "@/ux/components/BackButton";
 import { ProjectTabs } from "./ProjectTabs";
@@ -14,7 +13,7 @@ export default async function Layout({
 }) {
 
     const project = await serverClient().from("ib_projects").select("*").eq("id", params.projectId).single();
- 
+
 
     return (
         <Stack h={"100vh"} gap={0} w="calc(100vw - 60px)" >
@@ -22,10 +21,11 @@ export default async function Layout({
 
                 {/* <div> */}
 
-                    <BackButton href={"/portal/research"} />
-                    <Title order={1}>{project.data?.title}</Title>
+                <BackButton href={"/portal/projects"} />
+                <Title order={1}>{project.data?.title}</Title>
                 {/* </div> */}
-                
+
+
             </Group>
             <ProjectTabs >
                 {children}

@@ -11,11 +11,14 @@ export async function createProject(title:string) {
         .from('ib_projects')
         .insert([{ title }])
         .select()
-        .single()
+        .single().throwOnError()
 
 
-        revalidatePath('/portal/research')
+        revalidatePath('/portal/projects')
 
     return { data, error }
 
 }
+
+
+

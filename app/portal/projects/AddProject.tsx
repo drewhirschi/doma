@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { DatePickerInput } from '@mantine/dates';
 import { IconCalendar } from '@tabler/icons-react';
 import { LoadingState } from '@/types/loadingstate';
+import { actionWithNotification } from '@/ux/clientComp';
 import { browserClient } from '@/shared/supabase-client/BrowserClient';
 import { createProject } from './actions';
 import { useDisclosure } from '@mantine/hooks';
@@ -47,17 +48,20 @@ export function AddProjectModal(props: Props) {
 
                     <Group justify="flex-end" mt="md">
                         <Button
-                            loading={createLoading == LoadingState.LOADING} onClick={() => {
+                            loading={createLoading == LoadingState.LOADING} onClick={async () => {
                                 const values = form.values
                                 setCreateLoading(LoadingState.LOADING)
+                                await actionWithNotification(() => createProject(values.title), {
 
-                                createProject(values.title).then(() => {
-                                    setCreateLoading(LoadingState.LOADED)
-                                    close()
-                                    form.reset()
-                                }).catch((e) => {
-                                    setCreateLoading(LoadingState.ERROR)
+                                    successMessage: "Project created",
+                                    errorMessage: "Error creating project",
+                                    loadingMessage: "Creating project"
                                 })
+
+                                close()
+                                form.reset()
+                                setCreateLoading(LoadingState.IDLE)
+
                             }}>Create</Button>
                     </Group>
                 </Box>
