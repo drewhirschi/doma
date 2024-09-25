@@ -36,6 +36,38 @@ export type Database = {
         }
         Relationships: []
       }
+      cmp_logos: {
+        Row: {
+          alt: string | null
+          cmp_id: number
+          created_at: string
+          path: string
+          url: string
+        }
+        Insert: {
+          alt?: string | null
+          cmp_id: number
+          created_at?: string
+          path: string
+          url: string
+        }
+        Update: {
+          alt?: string | null
+          cmp_id?: number
+          created_at?: string
+          path?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cmp_logos_cmp_id_fkey"
+            columns: ["cmp_id"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comp_pages: {
         Row: {
           cmp_info: string | null
@@ -74,6 +106,7 @@ export type Database = {
       company_profile: {
         Row: {
           created_at: string
+          emb_v2: string | null
           favicon: string | null
           id: number
           name: string | null
@@ -84,6 +117,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          emb_v2?: string | null
           favicon?: string | null
           id?: number
           name?: string | null
@@ -94,6 +128,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          emb_v2?: string | null
           favicon?: string | null
           id?: number
           name?: string | null
@@ -638,6 +673,23 @@ export type Database = {
         }
         Returns: boolean
       }
+      match_cmp_adaptive: {
+        Args: {
+          query_embedding: string
+          match_count: number
+        }
+        Returns: {
+          created_at: string
+          emb_v2: string | null
+          favicon: string | null
+          id: number
+          name: string | null
+          origin: string | null
+          updated_at: string
+          web_summary: string | null
+          web_summary_emb: string | null
+        }[]
+      }
       match_cmp_pages: {
         Args: {
           query_embedding: string
@@ -705,6 +757,20 @@ export type Database = {
       }
       random_color: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      sub_vector: {
+        Args: {
+          v: string
+          dimensions: number
+        }
+        Returns: string
+      }
+      truncate_vector: {
+        Args: {
+          vector_column: string
+          new_dim: number
+        }
         Returns: string
       }
       user_tenant_owns_contract: {

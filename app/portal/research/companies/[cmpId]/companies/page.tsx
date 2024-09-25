@@ -2,7 +2,7 @@
 
 import { ActionIcon, Anchor, Button, Checkbox, Group, Image, Table, TableTbody, TableTd, TableTh, TableThead, TableTr, } from '@mantine/core';
 import { IconExternalLink, IconPlus, } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 
 import { AddToDealModal } from './AddToDealModal';
 import Link from 'next/link';
@@ -107,6 +107,45 @@ export default function Page({ params, searchParams }: { params: { cmpId: string
         return () => {
 
         }
+    }, [])
+
+    useEffect(() => {
+
+        const loadData = async () => {
+
+            const supabase = browserClient()
+
+            const companyGet = await supabase
+                .from('company_profile')
+                .select('*')
+                .eq('id', params.cmpId)
+                .single()
+
+            if (companyGet.error) {
+                throw new Error(companyGet.error.message)
+            }
+            const modelCmp = companyGet.data
+
+            if (!modelCmp.web_summary_emb) {
+                return
+            }
+            console.log("modelCmp", modelCmp)
+            const companiesGet = await supabase.rpc('match_cmp_adaptive', {
+                match_count: 50,
+                query_embedding: modelCmp.web_summary_emb
+            })
+
+            if (companiesGet.error) {
+                throw new Error(companiesGet.error.message)
+            }
+            console.log("adaptive",companiesGet.data.map(c => c.name))
+
+        }
+
+        loadData()
+
+       
+
     }, [])
 
     const rows = sortedCompanies?.map((element) => (

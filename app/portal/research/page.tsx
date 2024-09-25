@@ -1,6 +1,7 @@
 import { Anchor, Box, Button, Checkbox, Container, Group, Paper, Table, TableTbody, TableTd, TableTh, TableThead, TableTr, Text, TextInput } from '@mantine/core';
 import { RedirectType, useRouter, useSearchParams } from 'next/navigation';
 
+import { EmptyCompanyListState } from '@/ux/components/CompanyList.EmptyState';
 import { IconSearch } from '@tabler/icons-react';
 import Link from 'next/link';
 import { redirect } from "next/navigation"
@@ -58,7 +59,7 @@ export default async function CompaniesPage({ searchParams }: { searchParams: { 
             </Paper>
 
             <Table striped highlightOnHover>
-                {companies.length > 0 ? (
+                
                     <TableThead>
                         <TableTr>
                             <TableTh></TableTh>
@@ -66,16 +67,12 @@ export default async function CompaniesPage({ searchParams }: { searchParams: { 
                             <TableTh>URL</TableTh>
                         </TableTr>
                     </TableThead>
-                ) : (
-                    <Box py="md" ta="center">
-                        <Text mb="md">No companies found. Would you like to add a new one?</Text>
-                        <Button component={Link} href="/portal/research/add-company">
-                            Add New Company
-                        </Button>
-                    </Box>
-                )}
+               
                 <TableTbody>{rows}</TableTbody>
             </Table>
+            {companies?.length === 0 && (
+                <EmptyCompanyListState/>
+            )}
         </Container>
     );
 }

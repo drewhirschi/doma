@@ -27,7 +27,7 @@ export function BackButton(props: BackButtonProps) {
             component={Link}
             leftSection={<IconChevronLeft size={14} />} variant="subtle"
             {...props}>
-            Back
+            
         </Button>
     )
 }

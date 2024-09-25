@@ -13,11 +13,13 @@ export default async function Page({
     const sb = serverClient();
 
 
-    const companyProfileGet = await sb.from("company_profile").select("*").eq("id", params.cmpId).single();
+    const companyProfileGet = await sb.from("company_profile").select("*, cmp_logos(*)").eq("id", params.cmpId).single();
+    const logos = companyProfileGet.data?.cmp_logos ?? []
+    console.log(logos)
 
     return (
         <Box bg={"gray.1"} h={"100%"} w={"100%"}>
-            <Tab companyProfile={companyProfileGet.data!} />
+            <Tab companyProfile={companyProfileGet.data!} logos={logos} />
         </Box>
 
     );

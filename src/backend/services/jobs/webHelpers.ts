@@ -1,7 +1,9 @@
 import axios, { AxiosError } from "axios";
 import { getCompletion, getEmbedding } from "./llmHelpers.js";
 
+import axiosRetry from "axios-retry";
 import { load } from 'cheerio';
+import retry from 'retry'
 import { z } from "zod";
 
 const axiosInstance = axios.create({
@@ -191,9 +193,21 @@ export async function getPageLinks(url: string, options?: { limit?: number }): P
 }
 
 
-export async function indexPage(url: string, options?: { retries?: number }) {
+export async function indexPage(url: string) {
+
+
+    const client = axios.create({
+        headers: {
+            'User-Agent': 'google-bot',
+        }
+    })
+
+    axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+
+
+
     try {
-        const response = await axios.get(url);
+        const response = await client.get(url);
         const $ = load(response.data);
 
         const title = $("title").text();
@@ -240,11 +254,9 @@ We are looking for data that helps us understand
 
     } catch (error: any) {
         if (axios.isAxiosError(error) && error.response?.status === 429) {
-            if (options?.retries === undefined || options?.retries === 0) {
-                console.warn(`Rate limit exceeded for ${url}, waiting 0.5 seconds and retrying`)
-                await new Promise(resolve => setTimeout(resolve, 500));
-                return indexPage(url, { retries: (options?.retries ?? 0) + 1 });
-            }
+
+            console.error(`Rate limit exceeded for ${url}`);
+
         } else {
 
             console.error(`Error indexing ${url}:`, error.message);
@@ -280,16 +292,19 @@ export async function getFaviconUrl(url: string) {
 
 }
 
-async function getLogo(url: string) {
+export async function getLogo(url: string) {
     const { data } = await axios.get(url);
     const $ = load(data);
 
-    const logoUrl = $('.logo')
-    // .attr('src');
-    //  || $('img[alt*="logo"]').attr('src') 
+    // Get all img elements
+    const images = $('img').map((i, el) => ({
+        src: $(el).attr('src'),
+        alt: $(el).attr('alt'),
+        width: $(el).attr('width'),
+        height: $(el).attr('height')
+    })).get();
 
-    console.log(logoUrl)
-    // return logoUrl ? new URL(logoUrl, url).href : null;
+    return images;
 }
 
 export async function getCompanyName(url: string) {

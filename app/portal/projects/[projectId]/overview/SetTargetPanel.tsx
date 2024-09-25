@@ -1,6 +1,7 @@
 import { Button, Checkbox, Drawer, Group, Table, TextInput } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
+import { EmptyCompanyListState } from '@/ux/components/CompanyList.EmptyState';
 import { browserClient } from '@/shared/supabase-client/BrowserClient';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDisclosure } from '@mantine/hooks';
@@ -94,6 +95,7 @@ export function SetTargetPanel(props: Props) {
                     </Table.Thead>
                     <Table.Tbody>{rows}</Table.Tbody>
                 </Table>
+                {companies.length === 0 && loading === false && <EmptyCompanyListState/>}
                 <Group justify='flex-end'>
                     <Button disabled={selectedRows.length !== 1} onClick={async () => {
                         await props.setCmpId(selectedRows[0])
@@ -103,7 +105,7 @@ export function SetTargetPanel(props: Props) {
                 </Group>
             </Drawer>
 
-            <Button onClick={open} >Set Target</Button>
+            <Button size='compact-sm' variant='default' onClick={open} >Change</Button>
         </>
     );
 }

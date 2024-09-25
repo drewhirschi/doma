@@ -5,8 +5,18 @@ import Redis from "ioredis";
 
 export class IndustryQueueClient {
     private queue: Queue;
+    private connection: Redis;
 
     constructor(opts?: QueueOptions) {
+
+        if (!process.env.UPSTASH_REDIS_URL) {
+            throw new Error("Missing UPSTASH_REDIS_URL");
+        }
+
+        this.connection = new Redis(process.env.UPSTASH_REDIS_URL, {
+            maxRetriesPerRequest: null,
+        });
+
         this.queue = new Queue<JobDataType>("industry", {
             defaultJobOptions: {
                 attempts: 3,
@@ -16,9 +26,7 @@ export class IndustryQueueClient {
                 },
             },
             ...opts,
-            connection: new Redis(process.env.UPSTASH_REDIS_URL!, {
-                maxRetriesPerRequest: null,
-            })
+            connection: this.connection,
         },
         );
     }
@@ -32,6 +40,12 @@ export class IndustryQueueClient {
     async scrapeCompanyWebsite(url: string) {
         return await this.queue.add("scrape_company_website", { url });
     }
+    async reduceCompanyPages(cmpId: number) {
+        return await this.queue.add('reduce_company_pages', { cmpId});
+    }
+    async scrapeLogo(url: string) {
+        return await this.queue.add("scrape_logo", { url });
+    }
 
 
 
@@ -43,7 +57,8 @@ export class IndustryQueueClient {
         return await this.queue.addBulk(jobs);
     }
 
-    close() {
-        return this.queue.close();
+    async close() {
+        await this.queue.close();
+        this.connection.disconnect()
     }
 }

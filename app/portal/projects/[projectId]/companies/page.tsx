@@ -62,7 +62,7 @@ export default function Page({ params }: { params: { projectId: string }}) {
                     {element.favicon != null &&
                         <Image src={element.favicon} width={16} height={16} />
                     }
-                    <Anchor c={"dark"} fw={500} component={Link} href={`/portal/research/companies/${element.id}`}>
+                    <Anchor c={"dark"} fw={500} component={Link} href={`/portal/research/companies/${element.id}/overview`}>
 
                         {element.name || element.origin}
                     </Anchor>

@@ -1,29 +1,21 @@
 "use client"
 
 import { ActionIcon, Box, Button, Container, Group, Paper, Stack, TextInput } from '@mantine/core';
-import { BubbleMenu, EditorContent, FloatingMenu, useEditor } from '@tiptap/react';
-import { queueCompanyProfiling, queueFindIndustryCompanies, queueFindIndustyActivity, setModelCompany } from './actions';
+import { queueFindIndustryCompanies, queueFindIndustyActivity } from './actions';
 
 import CompanySummaryEditor from '@/ux/components/CompanySummaryEditor';
-import MetadataItem from '@/ux/components/MetadataItem';
-import { ProjectWithModelCmp } from '../types';
-import React from 'react';
-import { SetTargetPanel } from './SetTargetPanel';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
-import { useDebouncedCallback } from 'use-debounce';
-import { useForm } from '@mantine/form';
+import Image from 'next/image';
+import type { Tables } from '@/types/supabase-generated';
 
 export default function OverviewTab({
-    companyProfile
+    companyProfile,
+    logos
 }: {
     companyProfile: CompanyProfile_SB
+    logos: Tables<'cmp_logos'>[]
 }) {
 
-    const form = useForm({
-        initialValues: {
-            url: "",
-        }
-    })
+
 
 
     return (
@@ -35,7 +27,7 @@ export default function OverviewTab({
                     withBorder
                     p={"xs"}
                 >
-                  
+
 
                     <Box my={"xs"}>
 
@@ -47,7 +39,16 @@ export default function OverviewTab({
                         }}>Find Transactions</Button>
                     </Box>
                 </Paper>
-              
+                <Paper
+                    bg={"gray.9"}
+                    radius={8}
+                    withBorder
+                    p={"xs"}
+                >
+                    {logos.map(l => <img alt={l.alt ?? ""} src={l.url} height={100} />)}
+
+                </Paper>
+
             </Stack>
             <CompanySummaryEditor companyProfile={companyProfile} />
         </Group>

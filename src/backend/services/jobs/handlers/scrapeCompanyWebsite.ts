@@ -2,8 +2,10 @@ import { Job, Queue } from "bullmq";
 import { getCompanyName, getFaviconUrl, getPageLinks, indexPage } from "../webHelpers.js";
 import { getCompletion, getEmbedding, recursiveDocumentReduction } from "../llmHelpers.js";
 
+import { IndustryQueueClient } from "../industry-queue.js";
 import { fullAccessServiceClient } from "@/shared/supabase-client/ServerClients.js";
 import { isNotNull } from "@/types/typeHelpers.js";
+import { pages } from "next/dist/build/templates/app-page.js";
 
 export async function scrapeCompanyWebsite(job: Job) {
 
@@ -20,7 +22,7 @@ export async function scrapeCompanyWebsite(job: Job) {
         throw companyGet.error;
     } else if (companyGet.data.length > 0) {
         // console.log("company already exists", companyGet.data[0].id)
-        
+
         company = companyGet.data[0]
 
         if (company.web_summary) {
@@ -46,10 +48,24 @@ export async function scrapeCompanyWebsite(job: Job) {
     }
 
 
-    const pagesUrls = Array.from(await getPageLinks(companyWebsite, {limit:50}))
+    const pagesUrls = Array.from(await getPageLinks(companyWebsite, { limit: 50 }))
 
+    const pagesGet = await supabase.from("comp_pages").select().in("url", pagesUrls)
 
-    const scrapeProms = pagesUrls.map(async (page) => {
+    const pagesToIndex = pagesUrls.filter(page => {
+        const dbPage = pagesGet.data?.find(p => p.url === page)
+        if (!dbPage) {
+            return true
+        }
+
+        return dbPage.cmp_info == null
+
+    })
+
+    console.log("indexing pages", pagesToIndex.join("\n"))
+    // return
+
+    const scrapeProms = pagesToIndex.map(async (page) => {
         const indexResults = await indexPage(page)
 
         if (!indexResults) {
@@ -70,8 +86,8 @@ export async function scrapeCompanyWebsite(job: Job) {
     const indexedPages = await Promise.all(scrapeProms);
 
 
-    const industryQueue = new Queue('industry');
-    await industryQueue.add('reduce_company_pages', { cmpId: company.id });
+    const industryQueue = new IndustryQueueClient();
+    await industryQueue.reduceCompanyPages(company.id)
     await industryQueue.close()
 
     return company.id
