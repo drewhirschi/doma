@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -360,7 +359,7 @@ export type Database = {
           display_name?: string | null
           file_path?: string | null
           has_outline?: boolean
-          id: number
+          id?: number
           image_queries?: string[] | null
           published?: boolean
           slug?: string | null
