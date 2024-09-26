@@ -291,19 +291,31 @@ export async function getFaviconUrl(url: string) {
 
 }
 
-export async function getLogo(url: string) {
+export async function getImgs(url: string) {
     const { data } = await axios.get(url);
     const $ = load(data);
 
     // Get all img elements
-    const images = $('img').map((i, el) => ({
-        src: $(el).attr('src'),
-        alt: $(el).attr('alt'),
-        width: $(el).attr('width'),
-        height: $(el).attr('height')
-    })).get();
+    const images = $('img').map((i, el) => el.attribs).get();
 
     return images;
+}
+export async function getSVGs(url: string) {
+    const { data } = await axios.get(url);
+    const $ = load(data);
+
+    const svgData = $('svg')
+        .map((_, svg) => {
+            const svgElement = $(svg);
+            return {
+                html: $.html(svgElement), // Get the full HTML of the SVG element
+                title: svgElement.find('title').text() || '', // Get the title text or default to an empty string
+            };
+        })
+        .get();
+
+
+    return svgData;
 }
 
 export async function getCompanyName(url: string) {

@@ -16,6 +16,7 @@ export default async function CompaniesPage({ searchParams }: { searchParams: { 
         .from('company_profile')
         .select('*')
         .or(`name.ilike.%${searchTerm}%,origin.ilike.%${searchTerm}%`)
+        .not('web_summary', 'eq', null)
         .limit(50);
 
     if (error) {

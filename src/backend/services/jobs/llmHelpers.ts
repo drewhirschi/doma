@@ -1,5 +1,6 @@
 import 'dotenv/config'
 
+import { ChatCompletionContentPart } from 'openai/resources/chat/completions';
 import OpenAI from "openai";
 import { z, } from "zod";
 import { zodResponseFormat } from 'openai/helpers/zod';
@@ -10,6 +11,7 @@ interface CompletionOptions {
     system: string,
     user: string,
     model?: string,
+    imageUrl?: string
 }
 
 export async function getCompletion({ model = "gpt-4o-mini-2024-07-18", system, user }: CompletionOptions): Promise<string | null> {
@@ -29,22 +31,27 @@ export async function getCompletion({ model = "gpt-4o-mini-2024-07-18", system, 
 interface StructuredCompletionOptions<Z extends z.ZodTypeAny> extends CompletionOptions {
     schema: Z
 }
-export async function getStructuredCompletion<Z extends z.ZodTypeAny = z.ZodNever>({ model = "gpt-4o-mini-2024-07-18", system, user, schema }: StructuredCompletionOptions<Z>): Promise<z.infer<Z> | null> {
+export async function getStructuredCompletion<Z extends z.ZodTypeAny = z.ZodNever>({ model = "gpt-4o-mini-2024-07-18", system, user, schema, imageUrl }: StructuredCompletionOptions<Z>): Promise<z.infer<Z> | null> {
 
-    const TIMEOUT_SECONDS = 20; // TIMEOUT_SECONDS
+    const TIMEOUT_SECONDS = 20;
     const timeout = setTimeout(() => {
         console.warn("getStructuredCompletion has not finished in " + TIMEOUT_SECONDS + " seconds");
     }, TIMEOUT_SECONDS * 1000);
     try {
+        const userMessageContent: Array<ChatCompletionContentPart> = [
+            { type: 'text', text: user },
+        ]
+        if (imageUrl) {
+            userMessageContent.push({ type: 'image_url', image_url: { url: imageUrl } })
+        }
         const response = await openai.beta.chat.completions.parse({
             model,
             messages: [
                 { role: "system", content: system },
-                { role: "user", content: user },
+                { role: "user", content: userMessageContent }
             ],
             response_format: zodResponseFormat(schema, "company_profile"),
         });
-        clearTimeout(timeout);
         const responseParsed = response.choices[0].message.parsed
         if (!responseParsed) {
             return null
@@ -58,6 +65,11 @@ export async function getStructuredCompletion<Z extends z.ZodTypeAny = z.ZodNeve
 
 
 }
+
+
+
+
+
 
 export async function getEmbedding(text: string): Promise<number[]> {
     const embedding = await openai.embeddings.create({
@@ -88,12 +100,12 @@ function splitArrayIntoGroups(arr: any[], numGroups = 4) {
 
     return result;
 }
-export async function recursiveDocumentReduction({ documents, instruction }: { documents: string[], instruction: string }) : Promise<string> {
+export async function recursiveDocumentReduction({ documents, instruction }: { documents: string[], instruction: string }): Promise<string> {
 
     async function mergeDocs(docs: string[]) {
         const doc = await getCompletion({
             system: `You will receive a list of documents. Merge their information into one document. \nAdditional information:\n ${instruction}`,
-            "user": docs.map((doc, idx) => `<doc${idx + 1}>\n${doc}\n</doc${idx + 1}>`).join("\n") ,
+            "user": docs.map((doc, idx) => `<doc${idx + 1}>\n${doc}\n</doc${idx + 1}>`).join("\n"),
         })
         if (!doc) {
             console.warn("Could not get completion")
