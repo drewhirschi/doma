@@ -3,7 +3,6 @@ import { getCompletion, getEmbedding } from "./llmHelpers.js";
 
 import axiosRetry from "axios-retry";
 import { load } from 'cheerio';
-import retry from 'retry'
 import { z } from "zod";
 
 const axiosInstance = axios.create({

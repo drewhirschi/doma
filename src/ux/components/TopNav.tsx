@@ -4,7 +4,6 @@ import { Anchor, Box, Button, Divider, Group, NavLink, TabsList, TabsTab, Text, 
 import { IconMessageCircle, IconPhoto, IconSettings } from '@tabler/icons-react';
 import { Tabs, rem } from '@mantine/core';
 
-import { Lamp } from '../../../app/lamp';
 import Link from 'next/link';
 import LoginButton from '../../../app/LoginButton';
 import React from 'react';

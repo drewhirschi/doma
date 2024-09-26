@@ -45,7 +45,7 @@ export default function OverviewTab({
                     withBorder
                     p={"xs"}
                 >
-                    {logos.map(l => <img alt={l.alt ?? ""} src={l.url} height={100} />)}
+                    {logos.map(l => <img key={l.url} alt={l.alt ?? ""} src={l.url} height={100} />)}
 
                 </Paper>
 
