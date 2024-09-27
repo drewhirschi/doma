@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import { actionWithNotification } from '@/ux/clientComp';
 import { addCompaniesToProject } from './actions';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDisclosure } from '@mantine/hooks';
 import { useParams } from 'next/navigation';

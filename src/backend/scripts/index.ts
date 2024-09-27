@@ -1,18 +1,18 @@
-import { Queue, Worker } from "bullmq";
-import { getImgs, getSVGs } from "@/backend/services/jobs/webHelpers";
+require("dotenv").config({ path: "./.env.local" });
 
-import { IndustryQueueClient } from "@/backend/services/jobs/industry-queue";
+import { Queue, Worker } from "bullmq";
+import { getImgs, getSVGs } from "~/services/jobs/webHelpers";
+
+import { IndustryQueueClient } from "~/services/jobs/industry-queue";
 import Redis from "ioredis";
 import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
-import { fullAccessServiceClient } from "@/shared/supabase-client/ServerClients";
-import { getStructuredCompletion } from "@/backend/services/jobs/llmHelpers";
+import { fullAccessServiceClient } from "@shared/supabase-client/server";
+import { getStructuredCompletion } from "~/services/jobs/llmHelpers";
 import { is } from "cheerio/dist/commonjs/api/traversing";
 import { randomUUID } from "crypto";
 import svg2img from "svg2img"
 import { z } from "zod";
-
-require("dotenv").config({ path: "./.env.local" });
 
 async function main() {
 
@@ -40,10 +40,10 @@ async function main() {
   // industryQueue.close()
 
   const company = companies[0]
-  
 
 
- 
+
+
   await scrapeSvgLogos(sb, company)
   // await scrapeImgLogos(sb, company)
   return
@@ -62,7 +62,7 @@ async function scrapeSvgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
 
   const svgs = await getSVGs(company.origin)
   // const svgWithTitles = svgs.filter((svg, i) => svg.title)
-  
+
 
 
   // const svgLogoCompletion = await getStructuredCompletion({
@@ -94,7 +94,7 @@ async function scrapeSvgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
   //       })
   //     );
   //     const pngBuffer = await svgToPngPromise;
-      
+
 
   //     const fileName = `logo/${company.id}/${svg.title}`;
   //     const { data, error } = await sb.storage
@@ -131,7 +131,7 @@ async function scrapeSvgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
   //   }
   // })
 
-  const svgWithoutTitles = svgs.filter((svg, i) => !svg.title).slice(0, 10)
+  const svgWithoutTitles = svgs.filter((svg, i) => !svg.title).slice(0, 3)
   console.log("svg without titles", svgWithoutTitles.length)
 
   const nonTitledProms = svgWithoutTitles.map(async (svg, i) => {
@@ -147,7 +147,7 @@ async function scrapeSvgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
       );
       const pngBuffer = await svgToPngPromise;
 
-      const fileName = `logo/${company.id}/${randomUUID()}.png`;
+      const fileName = `logo/${company.id}/${randomUUID().split("-")[0]}.png`;
       const { data, error } = await sb.storage
         .from('cmp_assets')
         .upload(fileName, pngBuffer, {
@@ -158,7 +158,7 @@ async function scrapeSvgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
       if (error) {
         console.error(`Failed to upload logo for company ${company.id}:`, error);
         return null
-      } 
+      }
 
       const { data: { publicUrl } } = sb.storage
         .from('cmp_assets')
@@ -166,24 +166,29 @@ async function scrapeSvgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
 
 
       const isLogoCheck = await getStructuredCompletion({
-        schema: z.object({isCompanyLogo: z.boolean(), altText: z.string()}),
+        schema: z.object({ isCompanyLogo: z.boolean(), altText: z.string() }),
         system: `You will be provided with an image and company name, your job is to respond with true if the image is a logo of the company.`,
         user: `Company name: ${company.name}`,
-        imageUrl: publicUrl
+        imageUrl: publicUrl,
+        model: "gpt-4o-2024-08-06"
       })
 
       if (!isLogoCheck?.isCompanyLogo) {
         //remove stored file
-        await sb.storage
+        const deleteNonLogo = await sb.storage
           .from('cmp_assets')
           .remove([fileName])
-      } 
+        if (deleteNonLogo.error) {
+          console.error("Failed to delete non-logo", deleteNonLogo.error)
+        }
+        return
+      }
 
 
       const { error: updateError } = await sb
         .from('cmp_logos')
         .upsert({ url: publicUrl, path: data.path, cmp_id: company.id, alt: isLogoCheck?.altText || `${company.name} logo ${i}` })
-        
+
 
     } catch (error) {
       console.error("Failed to process non-titled svg", error)
@@ -191,7 +196,7 @@ async function scrapeSvgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
   })
 
   await Promise.all(nonTitledProms)
-  
+
 }
 
 async function scrapeImgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {

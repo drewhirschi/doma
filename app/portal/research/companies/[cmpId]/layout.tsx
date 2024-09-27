@@ -4,7 +4,7 @@ import { IconExternalLink, IconFileSpreadsheet, IconHome } from "@tabler/icons-r
 import { BackButton } from "@/ux/components/BackButton";
 import Link from "next/link";
 import { ProjectTabs } from "./ProjectTabs";
-import { serverClient } from "@/shared/supabase-client/ServerClients";
+import { serverClient } from "@/shared/supabase-client/server";
 
 export default async function Layout({
     children,

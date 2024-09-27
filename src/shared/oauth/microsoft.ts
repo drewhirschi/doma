@@ -1,7 +1,7 @@
-import { rerm, rok } from "@/shared/utils"
+import { rerm, rok } from "../utils"
 
-import { Database } from "@/types/supabase"
-import { Json } from "@/types/supabase-generated"
+import { Database } from "../types/supabase"
+import { Json } from "../types/supabase-generated"
 import { SupabaseClient } from "@supabase/supabase-js"
 import axios from "axios"
 

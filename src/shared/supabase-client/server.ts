@@ -2,7 +2,7 @@ import { type CookieOptions, createServerClient } from '@supabase/ssr';
 
 import { cookies } from 'next/headers'
 import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/types/supabase';
+import { Database } from '../types/supabase';
 import { SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL } from './envs';
 
 

@@ -4,8 +4,8 @@ import { IconBrandGoogle, IconBrandGoogleFilled, IconBrandOffice } from '@tabler
 import Link from 'next/link';
 import MetadataItem from '@/ux/components/MetadataItem';
 import React from 'react';
-import { authUrl as microsoftAuthUrl } from '@/backend/oauth/microsoft';
-import { serverClient } from '@/shared/supabase-client/ServerClients';
+import { authUrl as microsoftAuthUrl } from '@/shared/oauth/microsoft';
+import { serverClient } from '@/shared/supabase-client/server';
 
 interface IpageProps { }
 

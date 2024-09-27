@@ -2,7 +2,7 @@ import { Box, Button, Center, Container, Group, Text, TextInput, Textarea, Title
 
 import { ReportEditor } from "./ReportEditor";
 import { redirect } from "next/navigation";
-import { serverClient } from "@/shared/supabase-client/ServerClients";
+import { serverClient } from '@/shared/supabase-client/server';
 
 export default async function Page({ params }: { params: { reportId: string } }) {
 

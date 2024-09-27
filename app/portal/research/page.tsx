@@ -5,7 +5,7 @@ import { EmptyCompanyListState } from '@/ux/components/CompanyList.EmptyState';
 import { IconSearch } from '@tabler/icons-react';
 import Link from 'next/link';
 import { redirect } from "next/navigation"
-import { serverClient } from '@/shared/supabase-client/ServerClients';
+import { serverClient } from '@/shared/supabase-client/server';
 
 export default async function CompaniesPage({ searchParams }: { searchParams: { search?: string } }) {
     const searchTerm = searchParams.search || '';

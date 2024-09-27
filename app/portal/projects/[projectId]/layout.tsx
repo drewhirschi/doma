@@ -2,7 +2,7 @@ import { Group, Stack, Title } from "@mantine/core";
 
 import { BackButton } from "@/ux/components/BackButton";
 import { ProjectTabs } from "./ProjectTabs";
-import { serverClient } from "@/shared/supabase-client/ServerClients";
+import { serverClient } from '@/shared/supabase-client/server';
 
 export default async function Layout({
     children,

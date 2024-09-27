@@ -1,8 +1,7 @@
 "use server"
 
-import { serverActionClient, serverClient } from '@/shared/supabase-client/ServerClients';
-
 import { revalidatePath } from 'next/cache';
+import { serverActionClient } from '@/shared/supabase-client/server';
 
 export async function renameProject(projectId: number, newName: string) {
   const supabase = serverActionClient();

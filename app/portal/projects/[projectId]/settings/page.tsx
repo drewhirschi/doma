@@ -4,7 +4,7 @@ import { Button, Modal, Text, TextInput } from '@mantine/core';
 import { deleteProject, renameProject } from './actions';
 
 import { actionWithNotification } from '@/ux/clientComp';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
 import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

@@ -1,7 +1,7 @@
 import Login from './LoginComponent';
 import React from 'react';
 import { redirect } from 'next/navigation';
-import { serverClient } from '@/shared/supabase-client/ServerClients';
+import { serverClient } from '@/shared/supabase-client/server';
 
 interface IpageProps {}
 

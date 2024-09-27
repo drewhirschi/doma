@@ -4,7 +4,7 @@ import { IconUserPlus, IconUsers } from '@tabler/icons-react';
 
 import { InviteMemberModal } from './InviteMemberModal';
 import { getInitials } from '@/ux/helper';
-import { serverClient } from "@/shared/supabase-client/ServerClients";
+import { serverClient } from '@/shared/supabase-client/server';
 
 export default async function Page() {
 

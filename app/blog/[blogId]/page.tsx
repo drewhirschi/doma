@@ -2,7 +2,7 @@ import { Box, Container, Image, Text } from '@mantine/core';
 
 import Markdown from 'react-markdown'
 import React from 'react';
-import { serverClient } from '@/shared/supabase-client/ServerClients';
+import { serverClient } from '@/shared/supabase-client/server';
 
 export default async function Page({ params }: { params: { blogId: string } }) {
 

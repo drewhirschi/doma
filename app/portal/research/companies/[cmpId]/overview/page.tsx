@@ -3,7 +3,7 @@ import { Box, Button } from '@mantine/core';
 import { ProjectWithModelCmp } from '../types';
 import React from 'react';
 import Tab from './tab';
-import { serverClient } from '@/shared/supabase-client/ServerClients';
+import { serverClient } from '@/shared/supabase-client/server';
 
 export default async function Page({
     params,

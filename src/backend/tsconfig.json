@@ -1,13 +1,21 @@
 {
   // "extends": "./src/backend/tsconfig.json",
   "compilerOptions": {
+    "target": "ES2022",
     "module": "commonjs",
-    "outDir": ".build/backend",
+    "outDir": "../../.dist/",
     "sourceMap": true,
-    "rootDir": "./src/backend",
+    "rootDir": "../../",
     "esModuleInterop": true,
-    "strict": true
+    "strict": true,
+    "paths": {
+      "@shared/*": ["../shared/*"],
+      "~/*": ["./*"],
+    },
+    "typeRoots": ["./node_modules/@types", "../shared/types"],
+    "skipLibCheck": true,
+    "incremental": true
   },
-  "include": ["./**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["./**/*.ts", "../shared/**/*.ts"],
+  "exclude": ["node_modules", "tsconfig.json"]
 }

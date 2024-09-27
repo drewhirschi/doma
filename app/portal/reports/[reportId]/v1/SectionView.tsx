@@ -13,7 +13,7 @@ import { NewSectionDrawer } from '../v2/NewSectionDrawer';
 import Placeholder from '@tiptap/extension-placeholder'
 import { SectionDrawerContents } from './SectionEditDrawer';
 import StarterKit from '@tiptap/starter-kit'
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';

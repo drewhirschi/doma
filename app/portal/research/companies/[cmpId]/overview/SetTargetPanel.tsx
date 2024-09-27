@@ -1,7 +1,7 @@
 import { Button, Checkbox, Drawer, Group, Table, TextInput } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDisclosure } from '@mantine/hooks';
 

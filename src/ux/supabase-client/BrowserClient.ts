@@ -1,6 +1,6 @@
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./envs";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/shared/supabase-client/envs";
 
-import { Database } from "@/types/supabase";
+import { Database } from "@/shared/types/supabase";
 import { createBrowserClient } from "@supabase/ssr";
 
 if (SUPABASE_ANON_KEY === undefined) {

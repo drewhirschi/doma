@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Button } from '@mantine/core';
 import Link from 'next/link';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
 
 // interface ILoginButtonProps { }
 

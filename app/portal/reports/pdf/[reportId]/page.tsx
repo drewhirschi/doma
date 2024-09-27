@@ -5,7 +5,7 @@ import EmailBuilder from './EmailBuilder';
 import { IconExternalLink } from '@tabler/icons-react';
 import Link from 'next/link';
 import { ViewershipStats } from './ViewershipStats';
-import { serverClient } from '@/shared/supabase-client/ServerClients';
+import { serverClient } from '@/shared/supabase-client/server';
 
 export default async function Page({ params }: { params: { reportId: string } }) {
 

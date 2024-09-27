@@ -1,5 +1,5 @@
 import { Box, Container, Divider, Group, Title } from '@mantine/core';
-import { serverActionClient, serverClient } from '@/shared/supabase-client/ServerClients';
+import { serverActionClient, serverClient } from '@/shared/supabase-client/server';
 
 import { NewReportButton } from './NewReportButton';
 import { NewTemplateButton } from './NewTemplate';

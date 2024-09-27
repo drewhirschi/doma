@@ -4,7 +4,7 @@ import { RedirectType, redirect, } from 'next/navigation';
 
 import { AddProjectModal } from './AddProject';
 import Link from 'next/link';
-import { serverClient } from '@/shared/supabase-client/ServerClients';
+import { serverClient } from '@/shared/supabase-client/server';
 
 export default async function Page({ params, searchParams }: { params: { projectId: string }, searchParams: { query: string, page: number } }) {
 

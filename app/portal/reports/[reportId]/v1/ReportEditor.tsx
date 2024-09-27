@@ -9,7 +9,7 @@ import { ISection } from "./types";
 import Link from "next/link";
 import { SectionDrawerContents } from "./SectionEditDrawer";
 import { SectionView } from "./SectionView";
-import { browserClient } from "@/shared/supabase-client/BrowserClient";
+import { browserClient } from "@/ux/supabase-client/BrowserClient";
 
 interface IReportEditorProps {
     report: Report_SB

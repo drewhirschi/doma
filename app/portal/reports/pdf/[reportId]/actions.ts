@@ -1,11 +1,11 @@
 "use server"
 
-import * as microsoftOauth from "@/backend/oauth/microsoft"
+import * as microsoftOauth from "@/shared/oauth/microsoft"
 
 import axios, { AxiosError } from "axios"
 
-import { MicrosoftTokenResponse } from "@/backend/oauth/microsoft"
-import { serverActionClient } from "@/shared/supabase-client/ServerClients"
+import { MicrosoftTokenResponse } from "@/shared/oauth/microsoft"
+import { serverActionClient } from '@/shared/supabase-client/server';
 
 export async function sendEmail(recipients: string, emailContent: string) {
     console.log("sending email")

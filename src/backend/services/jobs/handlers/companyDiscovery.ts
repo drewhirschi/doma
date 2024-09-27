@@ -1,9 +1,8 @@
 import { Job, Queue } from "bullmq";
 
 import Exa from 'exa-js'
-import { fullAccessServiceClient } from "@/shared/supabase-client/ServerClients.js";
+import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import { getStructuredCompletion } from "../llmHelpers.js";
-import { googleSearch } from "../googlesearch.js";
 import { z } from "zod";
 
 export async function companyDiscovery(job: Job) {

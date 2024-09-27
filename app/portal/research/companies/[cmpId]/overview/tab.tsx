@@ -6,7 +6,7 @@ import { queueFindIndustryCompanies, queueFindIndustyActivity } from './actions'
 import CompanySummaryEditor from '@/ux/components/CompanySummaryEditor';
 import { IconDownload } from '@tabler/icons-react';
 import Image from 'next/image';
-import type { Tables } from '@/types/supabase-generated';
+import type { Tables } from '@/shared/types/supabase-generated';
 
 export default function OverviewTab({
     companyProfile,

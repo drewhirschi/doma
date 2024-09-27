@@ -1,4 +1,4 @@
-import { fullAccessServiceClient } from '@/shared/supabase-client/ServerClients'
+import { fullAccessServiceClient } from "@/shared/supabase-client/server"
 
 const supabase = fullAccessServiceClient()
 

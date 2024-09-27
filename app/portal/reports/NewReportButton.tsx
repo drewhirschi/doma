@@ -3,7 +3,7 @@
 import { Button, CloseButton, FileButton, Group, Modal, Select, Text, TextInput } from '@mantine/core';
 import { IconFileAnalytics, IconPlus } from '@tabler/icons-react';
 
-import { Database } from '@/types/supabase';
+import { Database } from '@/shared/types/supabase';
 import { title } from 'process';
 import { useDisclosure } from '@mantine/hooks';
 import { useForm } from '@mantine/form';

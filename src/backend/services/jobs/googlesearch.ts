@@ -3,7 +3,6 @@ import 'dotenv/config'
 import axios, { AxiosError } from "axios";
 
 import { CustomSearchResult, } from './googlesearch.types.js';
-import { fullAccessServiceClient } from '@/shared/supabase-client/ServerClients.js';
 
 const engineId = "347b99699576c4846"
 const google = axios.create({
@@ -17,7 +16,6 @@ const google = axios.create({
 })
 
 
-const supabase = fullAccessServiceClient()
 
 
 export async function googleSearch(query: string, startIndex = 1): Promise<CustomSearchResult> {

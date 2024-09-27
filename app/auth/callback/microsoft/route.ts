@@ -1,10 +1,10 @@
 import { RedirectType, redirect } from 'next/navigation';
 
-import { Json } from '@/types/supabase-generated';
+import { Json } from '@/shared/types/supabase-generated';
 import type { NextRequest } from 'next/server';
 import axios from 'axios'
-import { exchangeCodeForToken } from '@/backend/oauth/microsoft';
-import { routeClient } from '@/shared/supabase-client/ServerClients';
+import { exchangeCodeForToken } from '@/shared/oauth/microsoft';
+import { routeClient } from '@/shared/supabase-client/server';
 
 export const dynamic = "force-dynamic"
 export async function GET(request: NextRequest) {

@@ -3,8 +3,8 @@ import { getCompanyName, getFaviconUrl, getPageLinks, indexPage } from "../webHe
 import { getCompletion, getEmbedding, recursiveDocumentReduction } from "../llmHelpers.js";
 
 import { IndustryQueueClient } from "../industry-queue.js";
-import { fullAccessServiceClient } from "@/shared/supabase-client/ServerClients.js";
-import { isNotNull } from "@/types/typeHelpers.js";
+import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
+import { isNotNull } from "@shared/types/typeHelpers";
 import { pages } from "next/dist/build/templates/app-page.js";
 
 export async function scrapeCompanyWebsite(job: Job) {

@@ -6,9 +6,9 @@ import { use, useEffect, useState } from 'react';
 
 import { AddToDealModal } from './AddToDealModal';
 import Link from 'next/link';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
-import { isDefined } from '@/types/typeHelpers';
-import { serverClient } from '@/shared/supabase-client/ServerClients';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
+import { isDefined } from '@/shared/types/typeHelpers';
+import { serverClient } from '@/shared/supabase-client/server';
 
 interface CompanyWithSimilarity extends CompanyProfile_SB {
     similarity: number;

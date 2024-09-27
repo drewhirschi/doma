@@ -1,8 +1,8 @@
 import { Button, Group, Modal, Text } from '@mantine/core';
 
-import { LoadingState } from '@/types/loadingstate';
+import { LoadingState } from '@/shared/types/loadingstate';
 import { actionWithNotification } from '@/ux/clientComp';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
 import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
 

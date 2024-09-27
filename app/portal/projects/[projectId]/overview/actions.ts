@@ -3,7 +3,7 @@
 import { IndustryQueueClient } from '@/backend/services/jobs/industry-queue';
 import { actionWithNotification } from '@/ux/clientComp';
 import { revalidatePath } from 'next/cache';
-import { serverActionClient } from '@/shared/supabase-client/ServerClients';
+import { serverActionClient } from '@/shared/supabase-client/server';
 
 export async function setModelCompany(cmpId: number, projectId: number) {
     const sb = serverActionClient()

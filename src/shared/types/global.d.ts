@@ -1,4 +1,4 @@
-import type { Database, } from "./supabase"
+import type { Database } from "./supabase"
 
 declare global {
     type Profile_SB = Database['public']['Tables']['profile']['Row']

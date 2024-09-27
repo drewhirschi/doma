@@ -6,8 +6,8 @@ import { IconAlertCircle, IconChevronLeft, IconExternalLink, IconFileArrowLeft, 
 import { AddCompaniesPanel } from './AddCompaniesPanel';
 import Link from 'next/link';
 import { RemoveCompaniesDialog } from './RemoveCompaniesDialog';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
-import { serverClient } from '@/shared/supabase-client/ServerClients';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
+import { serverClient } from '@/shared/supabase-client/server';
 import { useSBFetch } from '@/ux/hooks';
 import { useState } from 'react';
 

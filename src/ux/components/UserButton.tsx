@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 import Link from 'next/link';
 import { Session } from '@supabase/supabase-js';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
 import classes from './UserButton.module.css';
 import { getInitials } from '@/ux/helper';
 import { useRouter } from 'next/navigation';

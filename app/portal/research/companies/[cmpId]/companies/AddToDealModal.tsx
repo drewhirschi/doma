@@ -4,7 +4,7 @@ import { Button, Checkbox, Group, Modal, Table, TextInput } from '@mantine/core'
 
 import { IconPlus } from '@tabler/icons-react';
 import { actionWithNotification } from '@/ux/clientComp';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
 import { useDebouncedCallback } from 'use-debounce';
 import { useDisclosure } from '@mantine/hooks';
 import { useSBFetch } from '@/ux/hooks';

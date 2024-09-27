@@ -7,7 +7,7 @@ import { Markdown } from 'tiptap-markdown';
 import Placeholder from '@tiptap/extension-placeholder';
 import React from 'react';
 import StarterKit from '@tiptap/starter-kit';
-import { browserClient } from '@/shared/supabase-client/BrowserClient';
+import { browserClient } from '@/ux/supabase-client/BrowserClient';
 import { useDebouncedCallback } from 'use-debounce';
 
 const extensions = [StarterKit,

@@ -296,6 +296,7 @@ export async function getImgs(url: string) {
     const $ = load(data);
 
     // Get all img elements
+    // @ts-ignore
     const images = $('img').map((i, el) => el.attribs).get();
 
     return images;

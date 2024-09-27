@@ -10,7 +10,8 @@
     "lint": "next lint",
     "sb:types": "supabase gen types typescript --linked --schema public > src/types/supabase-generated.ts",
     "jobs": "bun ./src/backend/services/jobs/index.ts",
-    "jobs:watch": "bun --watch ./src/backend/services/jobs/index.ts"
+    "jobs:watch": "bun --watch ./src/backend/services/jobs/index.ts",
+    "jobs:build": "tsc --project ./src/backend/tsconfig.json && tsc-alias -p ./src/backend/tsconfig.json"
   },
   "dependencies": {
     "@mantine/carousel": "^7.4.2",
@@ -65,6 +66,7 @@
     "postcss-simple-vars": "^7.0.1",
     "supabase": "^1.131.5",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
     "typescript": "5.2.2",
     "typescript-plugin-css-modules": "^5.1.0",
     "worker-loader": "^3.0.8"

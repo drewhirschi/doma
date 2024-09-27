@@ -1,9 +1,9 @@
 import 'dotenv/config'
 
-import { CustomSearchResult, InvolvedParty, TransactionExtractionSchema } from '../googlesearch.types.js';
 import { Job, Queue } from 'bullmq';
 
-import { fullAccessServiceClient } from '@/shared/supabase-client/ServerClients.js';
+import { InvolvedParty } from '../googlesearch.types.js';
+import { fullAccessServiceClient } from '@shared/supabase-client/server.js';
 import { getStructuredCompletion } from '../llmHelpers.js';
 import { googleSearch } from '../googlesearch.js';
 import { transactionLinkingSchema } from '../jobTypes.js';
