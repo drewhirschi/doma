@@ -22,27 +22,25 @@
         "pattern": "started server on .+, url: (https?://.+)",
         "uriFormat": "%s",
         "action": "debugWithChrome"
-      }
+      },
+      "resolveSourceMapLocations": ["${workspaceFolder}/", "!/node_modules/**"]
     },
     {
-      "name": "Debug TypeScript with ESM",
-      "type": "node",
+      "name": "Debug jobs service",
+      "type": "node-terminal",
       "request": "launch",
-      "program": "${workspaceFolder}/${relativeFile}",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "runtimeArgs": ["--loader", "ts-node/esm"],
-      "sourceMaps": true,
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/**",
-        "!**/node_modules/**"
-      ],
-      "skipFiles": ["<node_internals>/**"]
+      "command": "npm run jobs",
+      // "program": "${workspaceFolder}/.build/src/backend/services/jobs/index.js", // Entry point of your backend
+      "preLaunchTask": "npm run jobs:build",
+      // "outFiles": ["${workspaceFolder}/.build/backend/**/*.js"],
+      // "sourceMaps": true,
+      "cwd": "${workspaceFolder}"
     },
     {
-      "type": "node",
-      "request": "launch",
       "name": "Debug script index",
-      "program": "${workspaceFolder}/.build/src/backend/scripts/index.js", // Entry point of your backend
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/.dist/src/backend/scripts/index.js", // Entry point of your backend
       "preLaunchTask": "npm run jobs:build",
       // "outFiles": ["${workspaceFolder}/.build/backend/**/*.js"],
       // "sourceMaps": true,

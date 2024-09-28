@@ -4,18 +4,20 @@ import { RedirectType, useRouter, useSearchParams } from 'next/navigation';
 import { EmptyCompanyListState } from '@/ux/components/CompanyList.EmptyState';
 import { IconSearch } from '@tabler/icons-react';
 import Link from 'next/link';
+import { SearchAndPage } from './SearchAndPage';
 import { redirect } from "next/navigation"
 import { serverClient } from '@/shared/supabase-client/server';
 
-export default async function CompaniesPage({ searchParams }: { searchParams: { search?: string } }) {
-    const searchTerm = searchParams.search || '';
+export default async function CompaniesPage({ searchParams }: { searchParams: { query?: string } }) {
+    const searchTerm = searchParams.query || '';
     const supabase = serverClient();
 
-
-    const { data: companies, error } = await supabase
+    const searchIsNumber = !isNaN(Number(searchTerm)) && searchTerm;
+    const orClause = `name.ilike.%${searchTerm}%,origin.ilike.%${searchTerm}%${searchIsNumber ? ',id.eq.' + searchTerm : ''}`
+    const { data: companies, error, count } = await supabase
         .from('company_profile')
         .select('*')
-        .or(`name.ilike.%${searchTerm}%,origin.ilike.%${searchTerm}%`)
+        .or(orClause)
         .not('web_summary', 'eq', null)
         .limit(50);
 
@@ -46,7 +48,7 @@ export default async function CompaniesPage({ searchParams }: { searchParams: { 
     return (
         <Container size="xl">
             <Paper shadow="xs" p="md" mb="md">
-                <form action={handleSearch}>
+                {/* <form action={handleSearch}>
                     <Group>
                         <TextInput
                             name="search"
@@ -56,23 +58,24 @@ export default async function CompaniesPage({ searchParams }: { searchParams: { 
                         />
                         <Button type="submit" leftSection={<IconSearch size={14} />}>Search</Button>
                     </Group>
-                </form>
+                </form> */}
+            <SearchAndPage totalCount={count ?? 0}/>
             </Paper>
 
             <Table striped highlightOnHover>
-                
-                    <TableThead>
-                        <TableTr>
-                            <TableTh></TableTh>
-                            <TableTh>Company Name</TableTh>
-                            <TableTh>URL</TableTh>
-                        </TableTr>
-                    </TableThead>
-               
+
+                <TableThead>
+                    <TableTr>
+                        <TableTh></TableTh>
+                        <TableTh>Company Name</TableTh>
+                        <TableTh>URL</TableTh>
+                    </TableTr>
+                </TableThead>
+
                 <TableTbody>{rows}</TableTbody>
             </Table>
             {companies?.length === 0 && (
-                <EmptyCompanyListState/>
+                <EmptyCompanyListState />
             )}
         </Container>
     );

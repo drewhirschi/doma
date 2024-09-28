@@ -1,18 +1,18 @@
-import { Job, Queue } from "bullmq";
+import { Job, Queue, SandboxedJob } from "bullmq";
 import { getEmbedding, getStructuredCompletion } from "../llmHelpers.js";
 
 import { IndustryQueueClient } from "../industry-queue.js";
 import { Redis } from "ioredis";
 import { TransactionExtractionSchema } from "../googlesearch.types.js";
+import { companyIdSchema } from "../jobTypes.js";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import { getPageContents } from "../webHelpers.js";
 import { googleSearch } from "../googlesearch.js";
 import { isNotNull } from "@shared/types/typeHelpers";
 import { title } from "process";
-import { transactionDiscoverySchema } from "../jobTypes.js";
 import { z } from "zod";
 
-export async function transactionDiscovery(job: Job<z.infer<typeof transactionDiscoverySchema>>) {
+export async function transactionDiscovery(job: SandboxedJob<z.infer<typeof companyIdSchema>>) {
     const sb = fullAccessServiceClient()
 
     const cmpGet = await sb.from("company_profile").select().eq("id", job.data.cmpId).single();

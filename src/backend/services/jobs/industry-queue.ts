@@ -41,10 +41,12 @@ export class IndustryQueueClient {
         return await this.queue.add("scrape_company_website", { url });
     }
     async reduceCompanyPages(cmpId: number) {
-        return await this.queue.add('reduce_company_pages', { cmpId});
+        return await this.queue.add('reduce_company_pages', { cmpId });
     }
-    async scrapeLogo(url: string) {
-        return await this.queue.add("scrape_logo", { url });
+    async scrapeLogo(cmpId: number) {
+        return await this.queue.add("scrape_logo", { cmpId }, {
+            attempts: 2
+        });
     }
 
 

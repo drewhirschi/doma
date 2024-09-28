@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-import { Job, Queue } from 'bullmq';
+import { Job, Queue, SandboxedJob } from 'bullmq';
 
 import { InvolvedParty } from '../googlesearch.types.js';
 import { fullAccessServiceClient } from '@shared/supabase-client/server.js';
@@ -11,7 +11,7 @@ import { z } from 'zod';
 
 const supabase = fullAccessServiceClient()
 
-export async function transactionCompanyLinking(job: Job<z.infer<typeof transactionLinkingSchema>>) {
+export async function transactionCompanyLinking(job: SandboxedJob<z.infer<typeof transactionLinkingSchema>>) {
 
     const id = job.data.trans_news_id
 

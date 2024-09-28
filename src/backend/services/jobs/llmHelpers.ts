@@ -1,7 +1,6 @@
-import 'dotenv/config'
-
 import { ChatCompletionContentPart } from 'openai/resources/chat/completions';
 import OpenAI from "openai";
+import path from 'path';
 import { z, } from "zod";
 import { zodResponseFormat } from 'openai/helpers/zod';
 

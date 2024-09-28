@@ -32,6 +32,7 @@ export function AddToDealModal({ selectedCompanies }: { selectedCompanies: numbe
         <Table.Tr
             key={project.id}
             bg={selectedProject == project.id ? 'var(--mantine-color-blue-light)' : undefined}
+            onClick={() => selectedProject == project.id ? setSelectedProject(null) : setSelectedProject(project.id)}
         >
             <Table.Td>
                 <Checkbox
@@ -63,7 +64,7 @@ export function AddToDealModal({ selectedCompanies }: { selectedCompanies: numbe
                     onChange={(e) => debouncedSetSearchTerm(e.currentTarget.value)}
                 />
 
-                <Table>
+                <Table highlightOnHover>
                     <Table.Thead>
                         <Table.Tr>
                             <Table.Th />

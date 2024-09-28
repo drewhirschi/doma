@@ -1,13 +1,12 @@
-import { Job, Queue } from "bullmq";
-import { getCompanyName, getFaviconUrl, getPageLinks, indexPage } from "../webHelpers.js";
-import { getCompletion, getEmbedding, recursiveDocumentReduction } from "../llmHelpers.js";
+import { Queue, SandboxedJob } from "bullmq";
+import { getCompanyName, getFaviconUrl, getImgs, getPageLinks, getSVGs, indexPage } from "../webHelpers.js";
+import { getCompletion, getEmbedding, getStructuredCompletion, recursiveDocumentReduction } from "../llmHelpers.js";
 
 import { IndustryQueueClient } from "../industry-queue.js";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import { isNotNull } from "@shared/types/typeHelpers";
-import { pages } from "next/dist/build/templates/app-page.js";
 
-export async function scrapeCompanyWebsite(job: Job) {
+export async function scrapeCompanyWebsite(job: SandboxedJob) {
 
     const companyWebsite = new URL(job.data.url).origin; // startUrl
     if (!companyWebsite) {
@@ -87,6 +86,7 @@ export async function scrapeCompanyWebsite(job: Job) {
 
 
     const industryQueue = new IndustryQueueClient();
+    await industryQueue.scrapeLogo(company.id)
     await industryQueue.reduceCompanyPages(company.id)
     await industryQueue.close()
 
@@ -110,7 +110,7 @@ export function weightedAverage(
 }
 
 
-export async function reduceCompanyPagesToProfile(job: Job) {
+export async function reduceCompanyPagesToProfile(job: SandboxedJob) {
     const supabase = fullAccessServiceClient()
     const { cmpId } = job.data
 
@@ -169,3 +169,5 @@ export async function reduceCompanyPagesToProfile(job: Job) {
     }
 
 }
+
+

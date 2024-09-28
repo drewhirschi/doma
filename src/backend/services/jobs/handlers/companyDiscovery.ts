@@ -1,17 +1,22 @@
-import { Job, Queue } from "bullmq";
+import { Job, SandboxedJob } from "bullmq";
 
 import Exa from 'exa-js'
+import { IndustryQueueClient } from "../industry-queue.js";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import { getStructuredCompletion } from "../llmHelpers.js";
 import { z } from "zod";
 
-export async function companyDiscovery(job: Job) {
-    const sb = fullAccessServiceClient();
+export async function companyDiscovery(job: SandboxedJob) {
     const modelCmpId = job.data.cmpId; // startUrl
     if (!modelCmpId) {
         throw new Error("Property 'cmpId' is required in data payload");
     }
 
+    return await findSimilarCompanies(modelCmpId)
+}
+
+export async function findSimilarCompanies(modelCmpId: number) {
+    const sb = fullAccessServiceClient();
     const cmpGet = await sb.from("company_profile").select().eq("id", modelCmpId).single();
     if (cmpGet.error) {
         throw cmpGet.error;
@@ -27,7 +32,14 @@ export async function companyDiscovery(job: Job) {
 
     const queriesRes = await getStructuredCompletion({
         model: "gpt-4o-2024-08-06",
-        system: "List 5 few-word-descriptions of what the company does based on their products and services",
+        system: `List 3 search queries based of the summary of the company that will be provided.
+        use short descriptions of what the company does based on their products and services.
+        If the business operates on a local scale, include the locaiton in the query.
+        Examples:
+        - an hvac company in scotsdale, arizona
+        - an electric company in seattle, washington
+        - cloud communications, Unified Communications as a Service (UCaaS) sector, and Contact Center as a Service (CCaaS) company
+        `,
         user: cmp.web_summary!,
         schema: SearchQuerySchema,
     })
@@ -37,6 +49,7 @@ export async function companyDiscovery(job: Job) {
     }
 
     console.log(queriesRes?.queries)
+    
     // return
     const exa = new Exa(process.env.EXA_API_KEY)
 
@@ -56,7 +69,7 @@ export async function companyDiscovery(job: Job) {
 
             // return flatResults
 
-            return await exa.search(query, {
+            return await exa.search("the home page of " + query, {
                 type: "neural",
                 useAutoprompt: true,
                 numResults: 25,
@@ -67,7 +80,7 @@ export async function companyDiscovery(job: Job) {
 
     const searchRes = (await Promise.all(searchProms)).flatMap(res => res.results)
 
-    const insert = await sb.from('company_profile').upsert(searchRes.map(item => ({origin: item.url})), { ignoreDuplicates: true, onConflict: 'origin' }).select()
+    const insert = await sb.from('company_profile').upsert(searchRes.map(item => ({ origin: item.url })), { ignoreDuplicates: true, onConflict: 'origin' }).select()
 
 
     if (insert.error) {
@@ -79,10 +92,11 @@ export async function companyDiscovery(job: Job) {
 
 
 
-    const industryQueue = new Queue('industry');
+    const industryQueue = new IndustryQueueClient();
 
     for (const item of insert.data) {
-        await industryQueue.add('scrape_company_website', { url: item.origin });
+        if (item.origin)
+            await industryQueue.scrapeCompanyWebsite(item.origin);
 
     }
     await industryQueue.close()
