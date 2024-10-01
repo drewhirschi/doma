@@ -10,7 +10,7 @@
     "strict": true,
     "paths": {
       "@shared/*": ["../shared/*"],
-      "~/*": ["./*"],
+      "~/*": ["./*"]
     },
     "typeRoots": ["./node_modules/@types", "../shared/types"],
     "skipLibCheck": true,

@@ -1,3 +1,10 @@
 # Ignore artifacts:
 build
 coverage
+
+
+.venv/
+.dist/
+.next/
+dump/
+tmp/

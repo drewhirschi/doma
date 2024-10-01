@@ -2,9 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  webpack: (config ) => {
+  webpack: (config) => {
     config.resolve.alias.canvas = false;
-   
+
     return config;
   },
   images: {
@@ -12,12 +12,11 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "placehold.co",
-        pathname: '/**',
-        port: ""
-
-      }
-    ]
-  }
+        pathname: "/**",
+        port: "",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

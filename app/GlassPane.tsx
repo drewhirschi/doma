@@ -1,12 +1,11 @@
-"use client"
+"use client";
 
-import { Box, Flex, SimpleGrid } from '@mantine/core';
+import { Box, Flex, SimpleGrid } from "@mantine/core";
 
-export const FrostedGlassSVG = ({ children }:{children:any}) => {
-    return (
-        <Flex
-        direction={"column"}>
-            {/* <SimpleGrid cols={2} py={80} verticalSpacing={40}>
+export const FrostedGlassSVG = ({ children }: { children: any }) => {
+  return (
+    <Flex direction={"column"}>
+      {/* <SimpleGrid cols={2} py={80} verticalSpacing={40}>
 
                 {[1, 2, 3, 4].map(idx => (
 
@@ -23,23 +22,21 @@ export const FrostedGlassSVG = ({ children }:{children:any}) => {
                 ))}
             </SimpleGrid> */}
 
-
-              <Box style={{
-                 zIndex: 3,
-                //  position: 'absolute',
-                 // top: '0',
-                 // left: '0',
-                 // right: '0',
-                 // bottom: '0',
-                 // display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center',
-             }}>
-                 {children}
-             </Box> 
-        </Flex>
-    );
+      <Box
+        style={{
+          zIndex: 3,
+          //  position: 'absolute',
+          // top: '0',
+          // left: '0',
+          // right: '0',
+          // bottom: '0',
+          // display: 'flex',
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {children}
+      </Box>
+    </Flex>
+  );
 };
-
-
-

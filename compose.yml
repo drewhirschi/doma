@@ -1,4 +1,3 @@
-
 services:
   my-redis-stack:
     container_name: my-redis-stack
@@ -39,8 +38,5 @@ services:
     ports:
       - 8003:3000
 
-
 volumes:
   redis-data:
-
-  

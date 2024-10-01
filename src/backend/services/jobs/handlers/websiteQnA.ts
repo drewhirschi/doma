@@ -1,5 +1,3 @@
-
-
 // const queryEmbedding = await getEmbedding("offered services")
 // const match = await supabase.rpc("match_cmp_pages", {
 //     query_embedding: queryEmbedding as unknown as string,

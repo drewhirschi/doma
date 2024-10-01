@@ -1,8 +1,8 @@
 {
-    "crons": [
-      {
-        "path": "/cron/jobQueue",
-        "schedule": "* * * * *"
-      }
-    ]
-  }
+  "crons": [
+    {
+      "path": "/cron/jobQueue",
+      "schedule": "* * * * *"
+    }
+  ]
+}

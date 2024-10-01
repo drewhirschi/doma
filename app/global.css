@@ -1,14 +1,13 @@
 @keyframes meteorMove {
-    from {
-      transform: translate(-50%, -50%) translateX(-500px) translateY(-500px);
-    }
-    to {
-      transform: translate(-50%, -50%) translateX(500px) translateY(500px);
-    }
+  from {
+    transform: translate(-50%, -50%) translateX(-500px) translateY(-500px);
   }
+  to {
+    transform: translate(-50%, -50%) translateX(500px) translateY(500px);
+  }
+}
 
-
-  .tiptap p.is-empty::before {
+.tiptap p.is-empty::before {
   color: #adb5bd;
   content: attr(data-placeholder);
   float: left;
@@ -16,8 +15,6 @@
   pointer-events: none;
 }
 
-
 .ProseMirror:focus {
-    outline: none;
+  outline: none;
 }
-  
