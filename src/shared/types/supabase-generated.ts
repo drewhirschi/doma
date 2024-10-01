@@ -108,6 +108,7 @@ export type Database = {
           created_at: string
           emb_v2: string | null
           favicon: string | null
+          headquaters: unknown | null
           id: number
           name: string | null
           origin: string | null
@@ -119,6 +120,7 @@ export type Database = {
           created_at?: string
           emb_v2?: string | null
           favicon?: string | null
+          headquaters?: unknown | null
           id?: number
           name?: string | null
           origin?: string | null
@@ -130,6 +132,7 @@ export type Database = {
           created_at?: string
           emb_v2?: string | null
           favicon?: string | null
+          headquaters?: unknown | null
           id?: number
           name?: string | null
           origin?: string | null
@@ -682,6 +685,7 @@ export type Database = {
           created_at: string
           emb_v2: string | null
           favicon: string | null
+          headquaters: unknown | null
           id: number
           name: string | null
           origin: string | null

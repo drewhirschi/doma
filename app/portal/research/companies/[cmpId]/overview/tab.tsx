@@ -1,5 +1,8 @@
 "use client"
 
+import 'maplibre-gl/dist/maplibre-gl.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
+
 import { ActionIcon, Box, Button, Container, Group, Paper, Stack, TextInput } from '@mantine/core';
 import { queueFindIndustryCompanies, queueFindIndustyActivity } from './actions';
 
@@ -7,7 +10,12 @@ import { AddToDealModal } from '../companies/AddToDealModal';
 import CompanySummaryEditor from '@/ux/components/CompanySummaryEditor';
 import { IconDownload } from '@tabler/icons-react';
 import { LogosMeun } from './LogosMenu';
+import Map from 'react-map-gl/maplibre';
+import { Protocol } from "pmtiles";
 import type { Tables } from '@/shared/types/supabase-generated';
+import { actionWithNotification } from '@/ux/clientComp';
+import maplibregl from 'maplibre-gl';
+import { useEffect } from 'react';
 
 export default function OverviewTab({
     companyProfile,
@@ -19,6 +27,18 @@ export default function OverviewTab({
 
 
 
+    useEffect(() => {
+
+        let protocol = new Protocol();
+        maplibregl.addProtocol("pmtiles", protocol.tile);
+        return () => {
+            maplibregl.removeProtocol("pmtiles");
+        }
+    }, [])
+
+
+
+    console.log("hq", companyProfile.headquaters)
 
     return (
         <Group align='flex-start' m={"sm"}>
@@ -34,12 +54,16 @@ export default function OverviewTab({
                     <Box my={"xs"}>
 
                         <Button disabled={companyProfile == null} onClick={() => {
-                            queueFindIndustryCompanies(companyProfile!.id)
+                            actionWithNotification(() =>
+                                queueFindIndustryCompanies(companyProfile!.id)
+                            )
                         }}>Find companies</Button>
                         <Button disabled={companyProfile == null} onClick={() => {
-                            queueFindIndustyActivity(companyProfile!.id)
+                            actionWithNotification(() =>
+                                queueFindIndustyActivity(companyProfile!.id)
+                            )
                         }}>Find Transactions</Button>
-                        <AddToDealModal selectedCompanies={[companyProfile.id]}/>
+                        <AddToDealModal selectedCompanies={[companyProfile.id]} />
                     </Box>
                 </Paper>
                 <Paper
@@ -56,7 +80,7 @@ export default function OverviewTab({
 
                             <img alt={l.alt ?? ""} src={l.url} height={100} />
                             <Group
-                            gap={"xs"}
+                                gap={"xs"}
                                 pos="absolute"
                                 right={0}
                                 bottom={0}>
@@ -88,6 +112,23 @@ export default function OverviewTab({
                             </Group>
                         </Box>
                     ))}
+
+                </Paper>
+                <Paper
+                    id='hq-map'
+                    radius={8}
+                    withBorder
+                    p={"xs"}
+                >
+                    {/* <Map
+                        initialViewState={{
+                            longitude: companyProfile.headquaters,
+                            latitude: 37.8,
+                            zoom: 14
+                        }}
+                        style={{ width: 600, height: 400 }}
+                        mapStyle="https://demotiles.maplibre.org/style.json"
+                    /> */}
 
                 </Paper>
 
