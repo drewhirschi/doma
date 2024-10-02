@@ -117,8 +117,6 @@ export function AddToDealModal({
       </Modal>
 
       <Button
-        m={"xs"}
-        mb={0}
         onClick={open}
         disabled={selectedCompanies.length === 0}
         leftSection={<IconPlus size={14} />}

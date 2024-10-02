@@ -7,7 +7,7 @@ import { scrapeSvgLogos } from "~/services/jobs/handlers/scrapeLogos";
 
 async function main() {
   const sb = fullAccessServiceClient();
-  const companiesGet = await sb.from("company_profile").select().gt("id", 1327);
+  const companiesGet = await sb.from("company_profile").select().gte("id", 1404);
 
   if (companiesGet.error) {
     console.log("failed to get companies", companiesGet.error);

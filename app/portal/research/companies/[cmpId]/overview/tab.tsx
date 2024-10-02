@@ -1,7 +1,6 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
-import "maplibre-gl/dist/maplibre-gl.css";
 
 import {
   ActionIcon,
@@ -13,6 +12,8 @@ import {
   Stack,
   TextInput,
 } from "@mantine/core";
+import { IconDownload, IconMapPinFilled } from "@tabler/icons-react";
+import Map, { Marker } from "react-map-gl/maplibre";
 import {
   queueFindIndustryCompanies,
   queueFindIndustyActivity,
@@ -20,12 +21,11 @@ import {
 
 import { AddToDealModal } from "../companies/AddToDealModal";
 import CompanySummaryEditor from "@/ux/components/CompanySummaryEditor";
-import { IconDownload } from "@tabler/icons-react";
 import { LogosMeun } from "./LogosMenu";
-import Map from "react-map-gl/maplibre";
 import { Protocol } from "pmtiles";
 import type { Tables } from "@/shared/types/supabase-generated";
 import { actionWithNotification } from "@/ux/clientComp";
+import { default as layers } from "protomaps-themes-base";
 import maplibregl from "maplibre-gl";
 import { useEffect } from "react";
 
@@ -44,35 +44,31 @@ export default function OverviewTab({
     };
   }, []);
 
-  console.log("hq", companyProfile.headquaters);
-
   return (
     <Group align="flex-start" m={"sm"}>
       <Stack>
         <Paper radius={8} withBorder p={"xs"}>
-          <Box my={"xs"}>
-            <Button
-              disabled={companyProfile == null}
-              onClick={() => {
-                actionWithNotification(() =>
-                  queueFindIndustryCompanies(companyProfile!.id),
-                );
-              }}
-            >
-              Find companies
-            </Button>
-            <Button
-              disabled={companyProfile == null}
-              onClick={() => {
-                actionWithNotification(() =>
-                  queueFindIndustyActivity(companyProfile!.id),
-                );
-              }}
-            >
-              Find Transactions
-            </Button>
-            <AddToDealModal selectedCompanies={[companyProfile.id]} />
-          </Box>
+          <Button
+            disabled={companyProfile == null}
+            onClick={() => {
+              actionWithNotification(() =>
+                queueFindIndustryCompanies(companyProfile!.id),
+              );
+            }}
+          >
+            Find companies
+          </Button>
+          <Button
+            disabled={companyProfile == null}
+            onClick={() => {
+              actionWithNotification(() =>
+                queueFindIndustyActivity(companyProfile!.id),
+              );
+            }}
+          >
+            Find Transactions
+          </Button>
+          <AddToDealModal selectedCompanies={[companyProfile.id]} />
         </Paper>
         <Paper
           style={{
@@ -120,15 +116,40 @@ export default function OverviewTab({
           ))}
         </Paper>
         <Paper id="hq-map" radius={8} withBorder p={"xs"}>
-          {/* <Map
-                        initialViewState={{
-                            longitude: companyProfile.headquaters,
-                            latitude: 37.8,
-                            zoom: 14
-                        }}
-                        style={{ width: 600, height: 400 }}
-                        mapStyle="https://demotiles.maplibre.org/style.json"
-                    /> */}
+          {companyProfile.hq_lon && companyProfile.hq_lat && (
+            <Map
+              initialViewState={{
+                longitude: companyProfile.hq_lon,
+                latitude: companyProfile.hq_lat,
+                zoom: 14, // fix zoom
+              }}
+              style={{ width: 600, height: 400 }}
+              mapStyle={{
+                version: 8,
+                glyphs:
+                  "https://cdn.protomaps.com/fonts/pbf/{fontstack}/{range}.pbf",
+                sources: {
+                  protomaps: {
+                    attribution:
+                      '<a href="https://github.com/protomaps/basemaps">Protomaps</a> © <a href="https://openstreetmap.org">OpenStreetMap</a>',
+                    type: "vector",
+                    // url: "pmtiles://https://hqeqjrbzmachofyfobed.supabase.co/storage/v1/object/public/maps/contig_us.pmtiles",
+                    url: "pmtiles://https://hqeqjrbzmachofyfobed.supabase.co/storage/v1/object/public/maps/my_area.pmtiles",
+                  },
+                },
+                layers: layers("protomaps", "light"),
+              }}
+              mapLib={maplibregl}
+            >
+              <Marker
+                longitude={companyProfile.hq_lon}
+                latitude={companyProfile.hq_lat}
+                anchor="bottom"
+              >
+                <IconMapPinFilled color="red" />
+              </Marker>
+            </Map>
+          )}
         </Paper>
       </Stack>
       <CompanySummaryEditor companyProfile={companyProfile} />

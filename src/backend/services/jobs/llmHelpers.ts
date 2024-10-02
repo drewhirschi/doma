@@ -47,10 +47,11 @@ export async function getStructuredCompletion<
   const timeout = setTimeout(() => {
     console.warn(
       "getStructuredCompletion has not finished in " +
-        TIMEOUT_SECONDS +
-        " seconds",
+      TIMEOUT_SECONDS +
+      " seconds",
     );
   }, TIMEOUT_SECONDS * 1000);
+
   try {
     const userMessageContent: Array<ChatCompletionContentPart> = [
       { type: "text", text: user },
@@ -73,6 +74,7 @@ export async function getStructuredCompletion<
     if (!responseParsed) {
       return null;
     }
+
 
     return responseParsed as z.infer<Z>;
   } finally {

@@ -1,4 +1,6 @@
 {
+  "explorer.sortOrder": "filesFirst",
+
   // The path to the `bun` executable.
   "bun.runtime": "/home/drew/.bun/bin/bun",
   // "bun.runtime": "C:\\Users\\drew\\.bun\\bin\\bun.exe",
@@ -11,5 +13,8 @@
     "*.css": "tailwindcss"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
