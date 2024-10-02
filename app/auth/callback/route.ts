@@ -25,10 +25,10 @@ export async function GET(request: NextRequest) {
   }
 
   if (authRes.data.user.app_metadata.tenant_id) {
-    const redirectUrl = requestUrl.origin + "/portal/research";
+    const redirectUrl = new URL("/portal/research", process.env.AUTH_URL);
     return NextResponse.redirect(redirectUrl);
   } else {
-    const redirectUrl = requestUrl.origin + "/tenant-create";
+    const redirectUrl = new URL("/tenant-create", process.env.AUTH_URL);
     return NextResponse.redirect(redirectUrl);
   }
 }
