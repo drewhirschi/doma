@@ -1,6 +1,5 @@
 "use client";
 
-import { AuthTokenResponse, Session } from "@supabase/supabase-js";
 import {
   Box,
   Button,
@@ -17,8 +16,8 @@ import { IconLogin2, IconPhoto } from "@tabler/icons-react";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
+import GoogleButton from "./GoogleButton";
+import MicrosoftButton from "./MicrosoftButton";
 import { browserClient } from "@/ux/supabase-client/BrowserClient";
 
 function PasswordLoginForm() {
@@ -83,23 +82,11 @@ export default function Login() {
             </ThemeIcon>
             <Title order={2}>Login to Parsl</Title>
           </Group>
-          <Auth
-            supabaseClient={supabase}
-            onlyThirdPartyProviders
-            // view='sign_in'
-            appearance={{ theme: ThemeSupa }}
-            providers={["google", "azure"]}
-            providerScopes={{
-              azure: "openid, profile, email",
-              google: "https://www.googleapis.com/auth/userinfo.email",
-            }}
-            queryParams={{
-              access_type: "offline",
-              prompt: "consent",
-            }}
-            redirectTo={`${origin}/auth/callback`}
-          />
-          {/* <PasswordLoginForm /> */}
+
+          <Stack>
+            <MicrosoftButton authCallbackUrl={`${origin}/auth/callback`} />
+            <GoogleButton authCallbackUrl={`${origin}/auth/callback`} />
+          </Stack>
         </Stack>
       </Paper>
     </Center>
