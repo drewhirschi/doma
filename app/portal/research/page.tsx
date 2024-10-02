@@ -15,11 +15,11 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { RedirectType, useRouter, useSearchParams } from "next/navigation";
 
 import { EmptyCompanyListState } from "@/ux/components/CompanyList.EmptyState";
 import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
+import { RedirectType } from "next/navigation";
 import { SearchAndPage } from "./SearchAndPage";
 import { redirect } from "next/navigation";
 import { serverClient } from "@/shared/supabase-client/server";
