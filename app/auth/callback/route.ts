@@ -2,33 +2,34 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { routeClient } from "@/shared/supabase-client/server";
 
-export async function GET(request: NextRequest) {
-  console.log(request.url);
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url)
+  const code = searchParams.get('code')
+  // const next = searchParams.get('next') ?? '/'
 
-  if (!code) {
-    const redirectUrl =
-      requestUrl.origin +
-      `/login?${encodeURIComponent("errorMessage=no code was provided")}`;
-    return NextResponse.redirect(redirectUrl);
+  if (code) {
+    const supabase = routeClient()
+    const { error, data: session } = await supabase.auth.exchangeCodeForSession(code)
+
+    let next = "/tenant-create"
+    if (session.user?.app_metadata?.tenant_id) {
+      next = "/portal/projects"
+    }
+
+    if (!error) {
+      const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
+      const isLocalEnv = process.env.NODE_ENV === 'development'
+      if (isLocalEnv) {
+        // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
+        return NextResponse.redirect(`${origin}${next}`)
+      } else if (forwardedHost) {
+        return NextResponse.redirect(`https://${forwardedHost}${next}`)
+      } else {
+        return NextResponse.redirect(`${origin}${next}`)
+      }
+    }
   }
 
-  const supabase = routeClient();
-  const authRes = await supabase.auth.exchangeCodeForSession(code);
-
-  if (authRes.error) {
-    console.log(authRes.error);
-    return NextResponse.redirect(
-      "/login?errorMessage=" + authRes.error.message,
-    );
-  }
-
-  if (authRes.data.user.app_metadata.tenant_id) {
-    const redirectUrl = new URL("/portal/research", process.env.AUTH_URL);
-    return NextResponse.redirect(redirectUrl);
-  } else {
-    const redirectUrl = new URL("/tenant-create", process.env.AUTH_URL);
-    return NextResponse.redirect(redirectUrl);
-  }
+  // return the user to an error page with instructions
+  return NextResponse.redirect(`${origin}/login?${encodeURIComponent("errorMessage=no code was provided")}`)
 }
