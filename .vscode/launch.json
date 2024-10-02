@@ -5,7 +5,11 @@
       "name": "Next.js: debug server-side",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm run dev"
+      "command": "npm run dev",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "/turbopack/[project]/*": "${webRoot}/*"
+      }
     },
     {
       "name": "Next.js: debug client-side",
@@ -22,8 +26,7 @@
         "pattern": "started server on .+, url: (https?://.+)",
         "uriFormat": "%s",
         "action": "debugWithChrome"
-      },
-      "resolveSourceMapLocations": ["${workspaceFolder}/", "!/node_modules/**"]
+      }
     },
     {
       "name": "Debug jobs service",

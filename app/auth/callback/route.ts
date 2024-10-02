@@ -4,6 +4,7 @@ import { routeClient } from "@/shared/supabase-client/server";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
+  console.log({ sp: searchParams.toString(), origin })
   const code = searchParams.get('code')
   // const next = searchParams.get('next') ?? '/'
 
@@ -15,10 +16,13 @@ export async function GET(request: Request) {
     if (session.user?.app_metadata?.tenant_id) {
       next = "/portal/projects"
     }
+    console.log({ next })
 
     if (!error) {
       const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
+      console.log({ forwardedHost })
       const isLocalEnv = process.env.NODE_ENV === 'development'
+      console.log({ isLocalEnv })
       if (isLocalEnv) {
         // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
         return NextResponse.redirect(`${origin}${next}`)
@@ -33,3 +37,4 @@ export async function GET(request: Request) {
   // return the user to an error page with instructions
   return NextResponse.redirect(`${origin}/login?${encodeURIComponent("errorMessage=no code was provided")}`)
 }
+// 

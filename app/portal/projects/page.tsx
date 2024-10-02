@@ -9,16 +9,6 @@ import {
   TableThead,
   TableTr,
 } from "@mantine/core";
-import {
-  IconAlertCircle,
-  IconChevronLeft,
-  IconFileArrowLeft,
-  IconHome,
-  IconMessageCircle,
-  IconPhoto,
-  IconSettings,
-} from "@tabler/icons-react";
-import { RedirectType, redirect } from "next/navigation";
 
 import { AddProjectModal } from "./AddProject";
 import Link from "next/link";
