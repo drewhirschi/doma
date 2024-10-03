@@ -8,7 +8,7 @@ import { deleteLogo } from "./actions";
 interface Props {
   logo: CompanyLogo_SB;
 }
-export function LogosMeun(props: Props) {
+export function LogosMenu(props: Props) {
   return (
     <Menu shadow="md" width={200}>
       <Menu.Target>

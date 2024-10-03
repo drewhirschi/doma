@@ -1,6 +1,6 @@
 import { Box, Button } from "@mantine/core";
 
-import { ProjectWithModelCmp } from "../types";
+import { ProjectWithModelCmp } from "../../[cmpId]/types";
 import React from "react";
 import Tab from "./tab";
 import { serverClient } from "@/shared/supabase-client/server";

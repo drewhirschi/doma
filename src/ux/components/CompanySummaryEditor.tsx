@@ -63,54 +63,54 @@ export default function CompanySummaryEditor({
   }, 300);
 
   return (
-    <Group align="flex-start" m={"sm"}>
-      <Paper flex={1} radius={8} withBorder p={"xs"} maw={900}>
-        <EditorContent editor={editor} />
+    //<Group align="flex-start" m={"sm"}>
+    <Paper flex={1} radius={8} withBorder p={"xs"} maw={900}>
+      <EditorContent editor={editor} />
 
-        <FloatingMenu
-          editor={editor}
-          tippyOptions={{ placement: "bottom-start" }}
-          shouldShow={(props) => {
-            const { selection } = props.editor.state;
-            const { $from } = selection;
-            const line = $from.nodeBefore?.textContent || "";
-            return line == "/";
-          }}
-        >
-          <Paper w={200} shadow="md" radius={"md"} withBorder py={"xs"}></Paper>
-        </FloatingMenu>
-        <BubbleMenu editor={editor}>
-          <Button.Group>
-            <Button
-              miw={40}
-              variant="default"
-              size="compact-sm"
-              onClick={() =>
-                editor?.chain().focus().toggleHeading({ level: 1 }).run()
-              }
-            >
-              H1
-            </Button>
-            <Button miw={40} variant="default" size="compact-sm">
-              H2
-            </Button>
-            <Button miw={40} variant="default" size="compact-sm">
-              H3
-            </Button>
-            <Button miw={40} variant="default" size="compact-sm">
-              P
-            </Button>
-            <Button
-              miw={40}
-              variant="default"
-              size="compact-sm"
-              onClick={() => editor?.chain().focus().toggleBold().run()}
-            >
-              B
-            </Button>
-          </Button.Group>
-        </BubbleMenu>
-      </Paper>
-    </Group>
+      <FloatingMenu
+        editor={editor}
+        tippyOptions={{ placement: "bottom-start" }}
+        shouldShow={(props) => {
+          const { selection } = props.editor.state;
+          const { $from } = selection;
+          const line = $from.nodeBefore?.textContent || "";
+          return line == "/";
+        }}
+      >
+        <Paper w={200} shadow="md" radius={"md"} withBorder py={"xs"}></Paper>
+      </FloatingMenu>
+      <BubbleMenu editor={editor}>
+        <Button.Group>
+          <Button
+            miw={40}
+            variant="default"
+            size="compact-sm"
+            onClick={() =>
+              editor?.chain().focus().toggleHeading({ level: 1 }).run()
+            }
+          >
+            H1
+          </Button>
+          <Button miw={40} variant="default" size="compact-sm">
+            H2
+          </Button>
+          <Button miw={40} variant="default" size="compact-sm">
+            H3
+          </Button>
+          <Button miw={40} variant="default" size="compact-sm">
+            P
+          </Button>
+          <Button
+            miw={40}
+            variant="default"
+            size="compact-sm"
+            onClick={() => editor?.chain().focus().toggleBold().run()}
+          >
+            B
+          </Button>
+        </Button.Group>
+      </BubbleMenu>
+    </Paper>
+    //</Group>
   );
 }

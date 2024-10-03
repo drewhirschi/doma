@@ -25,7 +25,7 @@ export default async function Page({
     const searchParams = new URLSearchParams();
     searchParams.set("topic", formData.get("topic") as string);
 
-    redirect("/portal/research/sections?" + searchParams.toString());
+    redirect("/portal/companies/sections?" + searchParams.toString());
   }
 
   const sb = serverClient();

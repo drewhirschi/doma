@@ -1,11 +1,10 @@
 "use client";
 
 import { Group, Pagination, TextInput, rem } from "@mantine/core";
-import { IconSearch, IconSettings } from "@tabler/icons-react";
+import { IconSearch } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-import { PAGE_SIZE } from "./companies/[cmpId]/shared";
 import { useDebouncedCallback } from "use-debounce";
+import { PAGE_SIZE } from "./[cmpId]/shared";
 
 export function SearchAndPage({ totalCount }: { totalCount: number }) {
   const searchParams = useSearchParams();
@@ -20,19 +19,16 @@ export function SearchAndPage({ totalCount }: { totalCount: number }) {
     } else {
       params.delete("query");
     }
-    console.log("?" + params.toString());
     replace(`${pathname}?${params.toString()}`);
   }, 300);
 
   function updatePage(value: number) {
-    //@ts-ignore
     const params = new URLSearchParams(searchParams);
     if (value) {
       params.set("page", value.toString());
     } else {
       params.delete("page");
     }
-
     replace(`${pathname}?${params.toString()}`);
   }
 
@@ -47,11 +43,11 @@ export function SearchAndPage({ totalCount }: { totalCount: number }) {
             stroke={1.5}
           />
         }
-        defaultValue={searchParams.get("query")?.toString()}
+        defaultValue={searchParams.get("query")?.toString() ?? ""}
         onChange={(event) => debouncedHandleSearch(event.currentTarget.value)}
       />
       <Pagination
-        total={totalCount / PAGE_SIZE}
+        total={Math.ceil(totalCount / PAGE_SIZE)}
         value={Number(searchParams.get("page") ?? 1)}
         onChange={updatePage}
       />

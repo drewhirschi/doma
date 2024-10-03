@@ -18,5 +18,5 @@ export async function setModelCompany(cmpId: number, projectId: number) {
     throw update.error;
   }
 
-  revalidatePath(`/portal/research/${projectId}`);
+  revalidatePath(`/portal/companies/${projectId}`);
 }

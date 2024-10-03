@@ -31,6 +31,7 @@ import { browserClient } from "@/ux/supabase-client/BrowserClient";
 import { serverClient } from "@/shared/supabase-client/server";
 import { useSBFetch } from "@/ux/hooks";
 import { useState } from "react";
+import Loading from "@/ux/components/Loading";
 
 export default function Page({ params }: { params: { projectId: string } }) {
   const supabase = browserClient();
@@ -95,7 +96,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
             c={"dark"}
             fw={500}
             component={Link}
-            href={`/portal/research/companies/${element.id}/overview`}
+            href={`/portal/companies/${element.id}/overview`}
           >
             {element.name || element.origin}
           </Anchor>
@@ -122,6 +123,10 @@ export default function Page({ params }: { params: { projectId: string } }) {
       </TableTd>
     </TableTr>
   ));
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <>

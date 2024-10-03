@@ -40,7 +40,7 @@ export default function OverviewTab({
           ) : (
             <Anchor
               component={Link}
-              href={`/portal/research/companies/${project.model_cmp?.id}/overview`}
+              href={`/portal/companies/${project.model_cmp?.id}/overview`}
             >
               {project.model_cmp?.name ?? "Not set"}
             </Anchor>

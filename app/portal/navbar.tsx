@@ -47,23 +47,23 @@ export function NavBar() {
           active={pathname.split("/")[2] === "projects"}
         />
         <NavLink
-          href={`/portal/research`}
+          href={`/portal/companies`}
           label={<IconSearch />}
           component={Link}
-          active={pathname.split("/")[2] === "research"}
+          active={pathname.split("/")[2] === "companies"}
         />
         {/* <NavLink
-                    href={`/portal/team`}
-                    label={<IconUsersGroup />}
-                    component={Link}
-                    active={pathname.split("/")[2] === "team"}
-                /> */}
-        <NavLink
+          href={`/portal/team`}
+          label={<IconUsersGroup />}
+          component={Link}
+          active={pathname.split("/")[2] === "team"}
+        /> */}
+        {/* <NavLink
           href={`/portal/reports`}
           label={<IconBook />}
           component={Link}
           active={pathname.split("/")[2] === "reports"}
-        />
+        /> */}
       </div>
 
       <div className={classnames["nav-item"]}>

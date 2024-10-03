@@ -48,12 +48,12 @@ export function ProjectTabs({ children }: Props) {
           >
             Companies
           </TabsTab>
-          <TabsTab
+          {/* <TabsTab
             value="activity"
             leftSection={<IconSwitchHorizontal style={iconStyle} />}
           >
             M&A Activity
-          </TabsTab>
+          </TabsTab> */}
           <TabsTab
             value="settings"
             leftSection={<IconSettings style={iconStyle} />}

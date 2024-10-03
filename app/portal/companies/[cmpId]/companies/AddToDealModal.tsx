@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Box,
   Button,
   Checkbox,
   Group,
@@ -116,14 +117,16 @@ export function AddToDealModal({
         </Group>
       </Modal>
 
-      <Button
-        onClick={open}
-        disabled={selectedCompanies.length === 0}
-        leftSection={<IconPlus size={14} />}
-        variant="white"
-      >
-        Add to Deal
-      </Button>
+      <Box mt="md" mr="md">
+        <Button
+          onClick={open}
+          disabled={selectedCompanies.length === 0}
+          leftSection={<IconPlus size={14} />}
+          variant="white"
+        >
+          Add to Deal
+        </Button>
+      </Box>
     </>
   );
 }

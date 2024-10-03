@@ -2,7 +2,6 @@ import {
   Anchor,
   Box,
   Button,
-  Checkbox,
   Container,
   Group,
   Paper,
@@ -23,13 +22,17 @@ import { RedirectType } from "next/navigation";
 import { SearchAndPage } from "./SearchAndPage";
 import { redirect } from "next/navigation";
 import { serverClient } from "@/shared/supabase-client/server";
+import { PAGE_SIZE } from "./[cmpId]/shared";
 
 export default async function CompaniesPage({
   searchParams,
 }: {
-  searchParams: { query?: string };
+  searchParams: { query?: string; page?: string };
 }) {
   const searchTerm = searchParams.query || "";
+  const page = parseInt(searchParams.page ?? "1", 10);
+  const offset = (page - 1) * PAGE_SIZE;
+
   const supabase = serverClient();
 
   const searchIsNumber = !isNaN(Number(searchTerm)) && searchTerm;
@@ -40,10 +43,10 @@ export default async function CompaniesPage({
     count,
   } = await supabase
     .from("company_profile")
-    .select("*")
+    .select("*", { count: "estimated" })
     .or(orClause)
     .not("web_summary", "eq", null)
-    .limit(50);
+    .range(offset, offset + PAGE_SIZE - 1);
 
   if (error) {
     console.error("Error fetching companies:", error);
@@ -53,12 +56,9 @@ export default async function CompaniesPage({
   const rows = companies.map((company) => (
     <TableTr key={company.id}>
       <TableTd>
-        <Checkbox />
-      </TableTd>
-      <TableTd>
         <Anchor
           component={Link}
-          href={`/portal/research/companies/${company.id}/overview`}
+          href={`/portal/companies/${company.id}/overview`}
         >
           {company.name ?? company.origin}
         </Anchor>
@@ -71,7 +71,7 @@ export default async function CompaniesPage({
     "use server";
     const search = formData.get("search") as string;
     redirect(
-      `/portal/research?search=${encodeURIComponent(search)}`,
+      `/portal/companies?search=${encodeURIComponent(search)}`,
       RedirectType.replace,
     );
   }
@@ -79,24 +79,12 @@ export default async function CompaniesPage({
   return (
     <Container size="xl">
       <Paper shadow="xs" p="md" mb="md">
-        {/* <form action={handleSearch}>
-                    <Group>
-                        <TextInput
-                            name="search"
-                            placeholder="Search by company name or URL"
-                            defaultValue={searchTerm}
-                            style={{ flex: 1 }}
-                        />
-                        <Button type="submit" leftSection={<IconSearch size={14} />}>Search</Button>
-                    </Group>
-                </form> */}
         <SearchAndPage totalCount={count ?? 0} />
       </Paper>
 
       <Table striped highlightOnHover>
         <TableThead>
           <TableTr>
-            <TableTh></TableTh>
             <TableTh>Company Name</TableTh>
             <TableTh>URL</TableTh>
           </TableTr>

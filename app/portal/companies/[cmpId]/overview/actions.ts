@@ -33,5 +33,5 @@ export async function deleteLogo(logo: CompanyLogo_SB) {
     throw new Error("Failed to delete logo file", deleteFile.error);
   }
 
-  revalidatePath(`/portal/research/companies/${logo.cmp_id}/overview`);
+  revalidatePath(`/portal/companies/${logo.cmp_id}/overview`);
 }

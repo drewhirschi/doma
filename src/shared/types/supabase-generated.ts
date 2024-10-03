@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -106,6 +107,7 @@ export type Database = {
       company_profile: {
         Row: {
           created_at: string
+          description: string | null
           emb_v2: string | null
           favicon: string | null
           hq_geo: unknown | null
@@ -120,6 +122,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           emb_v2?: string | null
           favicon?: string | null
           hq_geo?: unknown | null
@@ -134,6 +137,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           emb_v2?: string | null
           favicon?: string | null
           hq_geo?: unknown | null
@@ -682,6 +686,23 @@ export type Database = {
         }
         Returns: boolean
       }
+      match_and_nearby_cmp: {
+        Args: {
+          query_embedding: string
+          lat: number
+          long: number
+          distance: number
+          match_count: number
+          apply_distance_filter: boolean
+        }
+        Returns: {
+          id: number
+          name: string
+          origin: string
+          similarity: number
+          geo_distance: number
+        }[]
+      }
       match_cmp_adaptive: {
         Args: {
           query_embedding: string
@@ -689,6 +710,7 @@ export type Database = {
         }
         Returns: {
           created_at: string
+          description: string | null
           emb_v2: string | null
           favicon: string | null
           hq_geo: unknown | null
@@ -767,6 +789,48 @@ export type Database = {
           similarity: number
         }[]
       }
+      nearby_relevant_cmp:
+        | {
+            Args: {
+              lat: number
+              long: number
+            }
+            Returns: {
+              id: number
+              name: string
+              lat: number
+              long: number
+              dist_meters: number
+            }[]
+          }
+        | {
+            Args: {
+              lat: number
+              long: number
+              distance: number
+              relevant_company_ids: number[]
+            }
+            Returns: {
+              id: number
+              name: string
+              origin: string
+              similarity: number
+            }[]
+          }
+        | {
+            Args: {
+              lat: number
+              long: number
+              relevant_company_ids: number[]
+            }
+            Returns: {
+              id: number
+              name: string
+              lat: number
+              long: number
+              dist_meters: number
+            }[]
+          }
       random_color: {
         Args: Record<PropertyKey, never>
         Returns: string

@@ -81,7 +81,9 @@ export function AddProjectModal(props: Props) {
         </Box>
       </Modal>
 
-      <Button onClick={open}>New</Button>
+      <Box mt="md" mr="md">
+        <Button onClick={open}>New Project</Button>
+      </Box>
     </>
   );
 }
