@@ -7,6 +7,7 @@ export const companyIdSchema = z.object({
 
 export const scrapeWebsiteSchema = z.object({
   url: z.string(),
+  force: z.boolean().optional(),
 });
 
 export const transactionLinkingSchema = z.object({

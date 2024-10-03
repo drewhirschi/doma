@@ -37,7 +37,7 @@ export async function scrapeCompanyWebsite(job: SandboxedJob) {
 
         company = companyGet.data[0];
 
-        if (company.web_summary) {
+        if (company.web_summary && !job.data.force) {
             console.log("web summary already exists", company.origin);
             return "already indexed";
         }

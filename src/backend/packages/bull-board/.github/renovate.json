@@ -1,0 +1,51 @@
+{
+	"extends": [
+		"config:base"
+	],
+	"baseBranches": ["master"],
+	"autodiscover": false,
+	"repositories": [
+		"Venatum/bull-board-docker",
+		"Venatum/docker-arena"
+	],
+	"labels": ["dependencies"],
+	"assignAutomerge": true,
+	"assignees": ["Venatum"],
+	"automerge": false,
+	"automergeStrategy": "merge-commit",
+	"automergeType": "pr",
+	"ignoreTests": true,
+	"rebaseWhen": "conflicted",
+	"semanticCommitScope": "deps",
+	"packageRules": [
+		{
+			"packageNames": ["semantic-release"],
+			"matchPackagePatterns": ["^@semantic-release/"],
+			"semanticCommitType": "ci",
+			"semanticCommitScope": "semantic-release",
+			"automerge": true
+		},
+		{
+			"matchManagers": ["github-actions"],
+			"semanticCommitType": "ci",
+			"semanticCommitScope": "actions",
+			"automerge": true
+		},
+		{
+			"matchDepTypes": ["dependencies"],
+			"semanticCommitType": "chore",
+			"semanticCommitScope": "deps"
+		},
+		{
+			"depTypeList": ["devDependencies"],
+			"semanticCommitType": "chore",
+			"semanticCommitScope": "dev-deps",
+			"automerge": true
+		},
+		{
+			"matchDatasources": ["docker"],
+			"semanticCommitType": "build",
+			"semanticCommitScope": "docker"
+		}
+	]
+}

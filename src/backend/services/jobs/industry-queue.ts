@@ -35,8 +35,8 @@ export class IndustryQueueClient {
   async transactionDiscovery(cmpId: number) {
     return await this.queue.add("transaction_discovery", { cmpId });
   }
-  async scrapeCompanyWebsite(url: string) {
-    return await this.queue.add("scrape_company_website", { url });
+  async scrapeCompanyWebsite(url: string, opts?: { force?: boolean }) {
+    return await this.queue.add("scrape_company_website", { url, force: opts?.force });
   }
   async reduceCompanyPages(cmpId: number) {
     return await this.queue.add("reduce_company_pages", { cmpId });
