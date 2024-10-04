@@ -9,9 +9,9 @@
     "start": "next start",
     "lint": "next lint",
     "sb:types": "supabase gen types typescript --linked --schema public > src/shared/types/supabase-generated.ts",
-    "jobs": "node .dist/src/backend/services/jobs/index.js",
-    "jobs:watch": "bun --watch ./src/backend/services/jobs/index.ts",
-    "jobs:build": "tsc --project ./src/backend/tsconfig.json && tsc-alias -p ./src/backend/tsconfig.json"
+    "dev:jobs": "bun --watch ./src/backend/services/jobs/index.ts",
+    "start:jobs": "node .dist/src/backend/services/jobs/index.js",
+    "build:jobs": "tsc --project ./src/backend/tsconfig.json && tsc-alias -p ./src/backend/tsconfig.json"
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.0",

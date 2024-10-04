@@ -2,6 +2,7 @@ import axios, { AxiosError } from "axios";
 import { getCompletion, getEmbedding } from "./llmHelpers.js";
 
 import axiosRetry from "axios-retry";
+import { companyInfoScraping } from "./prompts.js";
 import { load } from "cheerio";
 import { z } from "zod";
 
@@ -243,16 +244,7 @@ export async function indexPage(url: string) {
       .join(" ");
 
     const companyInfo = await getCompletion({
-      system: `You will be provided with content scraped from a webpage of a company's website, your job is to respond with any details about the company. 
-We are looking for data that helps us understand
-- What industry the company is in
-- Their bussiness model, how do they generate revenue, what are their core products and services and how much do they cost; their target markets and any customers listed, 
-- Size, how many employees they have, how many assets they have
-- What stage are they in: start up, small business, mid-sized, enterprise, etc
-- Geographic Presence: Consider where they operate and their market share in those regions. Where are they headquarted and where do they have locations?
-- Names, contact details, position/role, etc of employees, especially if they are part of leadership.
-
-If these details are not available for any of these topics you can omit the topic from the response.`,
+      system: companyInfoScraping,
       user: visibleText,
     });
 

@@ -1,13 +1,13 @@
 import { Job, SandboxedJob } from "bullmq";
-import { getImgs, getSVGs } from "../webHelpers";
+import { getImgs, getSVGs } from "../../webHelpers";
 import { isDefined, isNotNull } from "@shared/types/typeHelpers";
 
 import { Database } from "@shared/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
-import { companyIdSchema } from "../jobTypes";
+import { companyIdSchema } from "../../jobTypes";
 import { fullAccessServiceClient } from "@shared/supabase-client/server";
-import { getStructuredCompletion } from "../llmHelpers";
+import { getStructuredCompletion } from "../../llmHelpers";
 import { randomUUID } from "crypto";
 import svg2img from "svg2img";
 import { z } from "zod";

@@ -21,7 +21,7 @@ export class IndustryQueueClient {
         attempts: 3,
         backoff: {
           type: "exponential",
-          delay: 3000,
+          delay: 10_000,
         },
       },
       ...opts,

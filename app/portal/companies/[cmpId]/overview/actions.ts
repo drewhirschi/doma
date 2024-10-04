@@ -18,7 +18,7 @@ export async function queueFindIndustyActivity(cmpId: number) {
 
 export async function queueCompanyProfiling(url: string) {
   const queue = new IndustryQueueClient();
-  await queue.scrapeCompanyWebsite(url);
+  await queue.scrapeCompanyWebsite(url, { force: true });
   queue.close();
 }
 

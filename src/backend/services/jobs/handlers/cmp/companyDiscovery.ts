@@ -1,9 +1,9 @@
 import { Job, SandboxedJob } from "bullmq";
 
 import Exa from "exa-js";
-import { IndustryQueueClient } from "../industry-queue.js";
+import { IndustryQueueClient } from "../../industry-queue";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
-import { getStructuredCompletion } from "../llmHelpers.js";
+import { getStructuredCompletion } from "../../llmHelpers";
 import { z } from "zod";
 
 export async function companyDiscovery(job: SandboxedJob) {

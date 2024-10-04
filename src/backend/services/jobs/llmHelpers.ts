@@ -91,13 +91,6 @@ export async function getEmbedding(text: string): Promise<number[]> {
   return embedding.data[0].embedding;
 }
 
-export function cosinesim(a: number[], b: number[]): number {
-  const dotProduct = a.reduce((acc, val, idx) => acc + val * b[idx], 0);
-  const magnitudeA = Math.sqrt(a.reduce((acc, val) => acc + val ** 2, 0));
-  const magnitudeB = Math.sqrt(b.reduce((acc, val) => acc + val ** 2, 0));
-
-  return dotProduct / (magnitudeA * magnitudeB);
-}
 
 function splitArrayIntoGroups(arr: any[], numGroups = 4) {
   const result = [];
@@ -118,7 +111,8 @@ export async function recursiveDocumentReduction({
 }): Promise<string> {
   async function mergeDocs(docs: string[]) {
     const doc = await getCompletion({
-      system: `You will receive a list of documents. Merge their information into one document. \nAdditional information:\n ${instruction}`,
+      system: `You will receive a list of documents. Merge their information into one document. No need to mention in the final output that it is multiple documents merged.
+      Additional information:\n ${instruction}`,
       user: docs
         .map((doc, idx) => `<doc${idx + 1}>\n${doc}\n</doc${idx + 1}>`)
         .join("\n"),

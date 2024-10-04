@@ -3,10 +3,10 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "jobs:build",
+      "script": "build:jobs",
       "group": "build",
       "problemMatcher": ["$tsc"],
-      "label": "npm run jobs:build",
+      "label": "build jobs service",
       "detail": "Build the jobs"
     }
   ]

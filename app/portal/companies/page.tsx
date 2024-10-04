@@ -63,7 +63,18 @@ export default async function CompaniesPage({
           {company.name ?? company.origin}
         </Anchor>
       </TableTd>
-      <TableTd>{company.origin}</TableTd>
+      <TableTd
+        maw={"600px"}
+        style={{
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        c={"dimmed"}
+        fz={"sm"}
+      >
+        {company.description}
+      </TableTd>
     </TableTr>
   ));
 
@@ -77,22 +88,22 @@ export default async function CompaniesPage({
   }
 
   return (
-    <Container size="xl">
+    <Box maw={"100vw"}>
       <Paper shadow="xs" p="md" mb="md">
         <SearchAndPage totalCount={count ?? 0} />
       </Paper>
 
-      <Table striped highlightOnHover>
+      <Table highlightOnHover>
         <TableThead>
           <TableTr>
             <TableTh>Company Name</TableTh>
-            <TableTh>URL</TableTh>
+            <TableTh>Description</TableTh>
           </TableTr>
         </TableThead>
 
         <TableTbody>{rows}</TableTbody>
       </Table>
       {companies?.length === 0 && <EmptyCompanyListState />}
-    </Container>
+    </Box>
   );
 }

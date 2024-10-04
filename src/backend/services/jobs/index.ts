@@ -2,20 +2,11 @@ require("dotenv").config({
   path: [".env.production", ".env.local", ".env"],
 });
 
-import { Job, RedisConnection, Worker } from "bullmq";
+import { Job, Worker } from "bullmq";
 import { JobDataType, JobType, jobSchemas } from "./jobTypes";
-import {
-  reduceCompanyPagesToProfile,
-  scrapeCompanyWebsite,
-} from "./handlers/scrapeCompanyWebsite";
 
 import Redis from "ioredis";
-import { companyDiscovery } from "./handlers/companyDiscovery";
-import path from "path";
 import { pathToFileURL } from "url";
-import { scrapeCompanyLogos } from "./handlers/scrapeLogos";
-import { transactionCompanyLinking } from "./handlers/transactionLinking";
-import { transactionDiscovery } from "./handlers/transactionDiscovery";
 
 async function main() {
   if (!process.env.UPSTASH_REDIS_URL) {
@@ -32,18 +23,37 @@ async function main() {
     removeOnComplete: { count: 1000 },
     removeOnFail: { count: 5000 },
     // drainDelay: 60,
-    concurrency: 5,
+    concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
   });
+
+  worker.on("active", (job) => {
+    const schema = jobSchemas[job.name as JobType];
+    if (!schema) {
+      throw new Error(`Unknown job type: ${job.name}`);
+    }
+    const result = schema.safeParse(job.data);
+    if (!result.success) {
+      console.error("Bad job data", job.id);
+      throw new Error(
+        `Invalid job data for ${job.name}: ${result.error.message}`,
+      );
+    }
+
+
+    console.log(`Got ${job.name}, id: ${job.id}`, job.data);
+  });
+
 
   worker.on("completed", (job: Job) =>
     console.log(`Finished ${job.name}, id: ${job.id}`),
   );
+
+
   worker.on("failed", (job, err) =>
     console.error(`Failed ${job?.name}, id: ${job?.id}`, job?.data, err),
   );
-  worker.on("active", (job) => {
-    console.log(`Got ${job.name}, id: ${job.id}`, job.data);
-  });
+
+
 }
 
 main();

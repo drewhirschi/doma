@@ -32,11 +32,9 @@
       "name": "Debug jobs service",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm run jobs",
-      // "program": "${workspaceFolder}/.build/src/backend/services/jobs/index.js", // Entry point of your backend
-      "preLaunchTask": "npm run jobs:build",
-      // "outFiles": ["${workspaceFolder}/.build/backend/**/*.js"],
-      // "sourceMaps": true,
+      "command": "npm run start:jobs",
+      "preLaunchTask": "build jobs service",
+
       "cwd": "${workspaceFolder}"
     },
     {
@@ -44,9 +42,8 @@
       "type": "node",
       "request": "launch",
       "program": "${workspaceFolder}/.dist/src/backend/scripts/index.js", // Entry point of your backend
-      "preLaunchTask": "npm run jobs:build",
-      // "outFiles": ["${workspaceFolder}/.build/backend/**/*.js"],
-      // "sourceMaps": true,
+      "preLaunchTask": "build jobs service",
+
       "cwd": "${workspaceFolder}"
     },
     {
