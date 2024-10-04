@@ -47,7 +47,7 @@ export async function createTenantAndAssignUser(tenantName: string) {
     throw profileUpdateError;
   }
 
-  await supabase.auth.getUser();
+  await supabase.auth.refreshSession();
 
   redirect("/portal/projects");
 }
