@@ -1,10 +1,10 @@
 import { Job, Queue, SandboxedJob } from "bullmq";
 import { getEmbedding, getStructuredCompletion } from "../llmHelpers.js";
 
-import { IndustryQueueClient } from "../industry-queue.js";
+import { IndustryQueueClient } from "../../../../shared/queues/industry-queue.js";
 import { Redis } from "ioredis";
 import { TransactionExtractionSchema } from "../googlesearch.types.js";
-import { companyIdSchema } from "../jobTypes.js";
+import { companyIdSchema } from "@shared/queues/industry-queue.types.js";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import { getPageContents } from "../webHelpers.js";
 import { googleSearch } from "../googlesearch.js";

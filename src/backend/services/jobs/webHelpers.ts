@@ -267,15 +267,22 @@ export async function indexPage(url: string) {
 }
 
 export async function getFaviconUrl(url: string) {
-  const origin = new URL(url).origin;
-
   try {
-    const { data } = await axios.get(origin + "/favicon.ico", {
+    const origin = new URL(url).origin;
+
+    const response = await axios.get(origin + "/favicon.ico", {
       responseType: "arraybuffer",
     });
 
     return origin + "/favicon.ico";
   } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) { }
+      else console.log(`Request failed`, error.response?.data);
+    } else {
+      console.error(`Unknown error getting favicon ${url}:`, error);
+    }
+
     const { data } = await axios.get(url);
     const $ = load(data);
 

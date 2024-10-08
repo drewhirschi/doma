@@ -1,9 +1,6 @@
-import { JobType, jobSchemas } from "./jobTypes";
-
 import { SandboxedJob } from "bullmq";
 import { companyDiscovery } from "./handlers/cmp/companyDiscovery";
 import { reduceCompanyPagesToProfile } from "./handlers/cmp/profileCompany";
-import sandbox from "bullmq/dist/esm/classes/sandbox";
 import { scrapeCompanyLogos } from "./handlers/cmp/scrapeLogos";
 import {
   scrapeCompanyWebsite,

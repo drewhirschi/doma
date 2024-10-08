@@ -6,7 +6,7 @@ import { InvolvedParty } from "../googlesearch.types.js";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import { getStructuredCompletion } from "../llmHelpers.js";
 import { googleSearch } from "../googlesearch.js";
-import { transactionLinkingSchema } from "../jobTypes.js";
+import { transactionLinkingSchema } from "@shared/queues/industry-queue.types.js";
 import { z } from "zod";
 
 const supabase = fullAccessServiceClient();

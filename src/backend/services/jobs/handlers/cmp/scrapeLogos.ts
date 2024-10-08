@@ -5,7 +5,7 @@ import { isDefined, isNotNull } from "@shared/types/typeHelpers";
 import { Database } from "@shared/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
-import { companyIdSchema } from "../../jobTypes";
+import { companyIdSchema } from "@shared/queues/industry-queue.types";
 import { fullAccessServiceClient } from "@shared/supabase-client/server";
 import { getStructuredCompletion } from "../../llmHelpers";
 import { randomUUID } from "crypto";
