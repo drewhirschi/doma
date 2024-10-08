@@ -163,7 +163,7 @@ export async function geocodeCompany(cmpSummary: string) {
     const geocodeRes = await googleMaps.geocode({
         params: {
             address: queriesRes.headquaters,
-            key: process.env.GOOGLE_MAPS_API_KEY!,
+            key: process.env.GEOCODE_API_KEY!,
         },
     });
 

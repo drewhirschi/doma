@@ -11,6 +11,20 @@ export function AddCompanyDrawer() {
     initialValues: {
       url: "",
     },
+
+    validate: {
+      url: (value) => {
+        const domainRegex =
+          /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
+
+        const isValidDomain = (url: string) => domainRegex.test(url);
+        if (!isValidDomain(value)) {
+          return "Invalid domain";
+        }
+
+        return null;
+      },
+    },
   });
   return (
     <>
@@ -33,6 +47,12 @@ export function AddCompanyDrawer() {
               />
               <Button
                 onClick={async () => {
+                  const validationRes = form.validate();
+
+                  if (validationRes.hasErrors) {
+                    return;
+                  }
+
                   await actionWithNotification(async () => {
                     await queueCompanyProfiling(form.values.url);
                   });

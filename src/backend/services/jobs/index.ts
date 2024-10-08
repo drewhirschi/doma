@@ -3,23 +3,19 @@ require("dotenv").config({
 });
 
 import { Job, Worker } from "bullmq";
-import { JobDataType, JobType, jobSchemas } from "./jobTypes";
+import { JobDataType, JobType, jobSchemas } from "@shared/queues/industry-queue.types";
 
+import { IndustryQueueClient } from "@shared/queues/industry-queue";
 import Redis from "ioredis";
 import { pathToFileURL } from "url";
 
 async function main() {
-  if (!process.env.UPSTASH_REDIS_URL) {
-    throw new Error("Missing UPSTASH_REDIS_URL");
-  }
-  const redisConnection = new Redis(process.env.UPSTASH_REDIS_URL, {
-    maxRetriesPerRequest: null,
-  });
+  const industryQueue = new IndustryQueueClient();
 
   const processorUrl = pathToFileURL(__dirname + "/worker.js");
 
   const worker = new Worker<JobDataType>("industry", processorUrl, {
-    connection: redisConnection,
+    connection: industryQueue.connection,
     removeOnComplete: { count: 1000 },
     removeOnFail: { count: 5000 },
     // drainDelay: 60,

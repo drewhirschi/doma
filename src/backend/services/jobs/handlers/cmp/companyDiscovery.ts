@@ -1,7 +1,7 @@
 import { Job, SandboxedJob } from "bullmq";
 
 import Exa from "exa-js";
-import { IndustryQueueClient } from "../../industry-queue";
+import { IndustryQueueClient } from "../../../../../shared/queues/industry-queue";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import { getStructuredCompletion } from "../../llmHelpers";
 import { z } from "zod";

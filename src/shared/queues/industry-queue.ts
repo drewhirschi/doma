@@ -1,18 +1,22 @@
+import { JobDataType, scrapeWebsiteSchema } from "./industry-queue.types";
 import { Queue, QueueOptions, RepeatStrategy } from "bullmq";
 
-import { JobDataType } from "./jobTypes";
 import Redis from "ioredis";
+import { z } from "zod";
 
 export class IndustryQueueClient {
   private queue: Queue;
-  private connection: Redis;
+  connection: Redis;
 
   constructor(opts?: QueueOptions) {
-    if (!process.env.UPSTASH_REDIS_URL) {
-      throw new Error("Missing UPSTASH_REDIS_URL");
+
+    const CONNECTION_URL = process.env.LOCAL_REDIS === 'true' ? "127.0.0.1" : process.env.UPSTASH_REDIS_URL
+
+    if (CONNECTION_URL === undefined) {
+      throw new Error("Set UPSTASH_REDIS_URL or LOCAL_REDIS");
     }
 
-    this.connection = new Redis(process.env.UPSTASH_REDIS_URL, {
+    this.connection = new Redis(CONNECTION_URL, {
       maxRetriesPerRequest: null,
     });
 
@@ -35,8 +39,14 @@ export class IndustryQueueClient {
   async transactionDiscovery(cmpId: number) {
     return await this.queue.add("transaction_discovery", { cmpId });
   }
-  async scrapeCompanyWebsite(url: string, opts?: { force?: boolean }) {
-    return await this.queue.add("scrape_company_website", { url, force: opts?.force });
+  async scrapeCompanyWebsite(url: string, opts?: { force?: boolean, scrapeComps?: boolean }) {
+    const params = {
+      url,
+      force: opts?.force,
+      scrapeComps: opts?.scrapeComps
+    } as z.infer<typeof scrapeWebsiteSchema>;
+
+    return await this.queue.add("scrape_company_website", params);
   }
   async reduceCompanyPages(cmpId: number) {
     return await this.queue.add("reduce_company_pages", { cmpId });
@@ -57,6 +67,9 @@ export class IndustryQueueClient {
   async enqueueBulk(jobs: { name: string; data: JobDataType }[]) {
     return await this.queue.addBulk(jobs);
   }
+
+
+
 
   async close() {
     await this.queue.close();

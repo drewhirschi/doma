@@ -5,12 +5,19 @@ import {
     indexPage,
 } from "../../webHelpers.js";
 
-import { IndustryQueueClient } from "../../industry-queue.js";
+import { IndustryQueueClient } from "@shared/queues/industry-queue.js";
 import { SandboxedJob } from "bullmq";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
+import { scrapeWebsiteSchema } from "@shared/queues/industry-queue.types.js";
+import { z } from "zod";
 
-export async function scrapeCompanyWebsite(job: SandboxedJob) {
-    const companyWebsite = new URL(job.data.url).origin; // startUrl
+const addProtocolIfNeeded = (url: string) => {
+    // Check if the URL already starts with a protocol (http:// or https://)
+    const hasProtocol = /^https?:\/\//i.test(url);
+    return hasProtocol ? url : `https://${url}`;
+};
+export async function scrapeCompanyWebsite(job: SandboxedJob<z.infer<typeof scrapeWebsiteSchema>>) {
+    const companyWebsite = new URL(addProtocolIfNeeded(job.data.url)).origin; // startUrl
     if (!companyWebsite) {
         throw new Error("Property 'url' is required in data payload");
     }
@@ -51,7 +58,7 @@ export async function scrapeCompanyWebsite(job: SandboxedJob) {
 
     const [companyName, favicon] = await Promise.all([
         getCompanyName(companyWebsite),
-        getFaviconUrl(companyWebsite),
+        getFaviconUrl(companyWebsite).catch(() => null),
     ]);
 
     if (favicon || companyName) {
@@ -72,7 +79,7 @@ export async function scrapeCompanyWebsite(job: SandboxedJob) {
 
     const pagesToIndex = pagesUrls.filter((page) => {
         const dbPage = pagesGet.data?.find((p) => p.url === page);
-        if (!dbPage) {
+        if (!dbPage || job.data.force) {
             return true;
         }
         return dbPage.cmp_info == null;
