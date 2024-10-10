@@ -25,12 +25,12 @@ export default async function Layout({
   return (
     <Stack h={"100vh"} gap={0} w="calc(100vw - 60px)">
       <Stack p="sm" mb={"sm"} miw={860}>
+        <BreadcrumbsComponent />
         <CompanyTitleEditor
           companyId={companyGet.data.id.toString() || ""}
           initialName={companyGet.data.name || ""}
           origin={companyGet.data.origin || ""}
         />
-        <BreadcrumbsComponent />
       </Stack>
       <ProjectTabs>{children}</ProjectTabs>
     </Stack>
