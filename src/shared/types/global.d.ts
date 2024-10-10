@@ -12,6 +12,7 @@ declare global {
   type CompanyProfile_SB =
     Database["public"]["Tables"]["company_profile"]["Row"];
   type CompanyLogo_SB = Database["public"]["Tables"]["cmp_logos"]["Row"];
+  type LinkedInProfile_SB = Database["public"]["Tables"]["li_profile"]["Row"];
 
   interface Window {
     fbq: any;

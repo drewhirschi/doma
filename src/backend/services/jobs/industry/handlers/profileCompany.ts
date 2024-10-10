@@ -83,6 +83,7 @@ export async function reduceCompanyPagesToProfile(job: SandboxedJob) {
 
     //TODO: parse summary into structured data
 
+    //add job to linkedin queue
 
 
     // const industryQueue = new IndustryQueueClient();

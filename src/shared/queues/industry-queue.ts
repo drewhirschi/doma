@@ -61,6 +61,16 @@ export class IndustryQueueClient {
     );
   }
 
+  async getCompanyLinkedInProfile(cmpId: number, url: string) {
+    return await this.queue.add(
+      "get_li_profile",
+      { cmpId, liProfileUrl: url },
+      {
+        attempts: 2,
+      },
+    );
+  }
+
   async enqueue(jobName: string, data: JobDataType) {
     return await this.queue.add(jobName, data);
   }

@@ -2,10 +2,10 @@ import "dotenv/config";
 
 import { Job, Queue, SandboxedJob } from "bullmq";
 
-import { InvolvedParty } from "../googlesearch.types.js";
+import { InvolvedParty } from "../../googlesearch.types";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
-import { getStructuredCompletion } from "../llmHelpers.js";
-import { googleSearch } from "../googlesearch.js";
+import { getStructuredCompletion } from "../../llmHelpers";
+import { googleSearch } from "../../googlesearch";
 import { transactionLinkingSchema } from "@shared/queues/industry-queue.types.js";
 import { z } from "zod";
 

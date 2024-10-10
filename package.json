@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "sb:types": "supabase gen types typescript --linked --schema public > src/shared/types/supabase-generated.ts",
-    "dev:jobs": "bun --watch ./src/backend/services/jobs/index.ts",
+    "dev:jobs": "tsx watch ./src/backend/services/jobs/index.ts",
     "start:jobs": "node .dist/src/backend/services/jobs/index.js",
     "build:jobs": "tsc --project ./src/backend/tsconfig.json && tsc-alias -p ./src/backend/tsconfig.json"
   },
@@ -63,6 +63,7 @@
     "@types/react": "18.2.36",
     "@types/react-dom": "18.2.14",
     "@types/uuid": "^9.0.7",
+    "bottleneck": "^2.19.5",
     "chalk": "^5.3.0",
     "dotenv": "^16.4.1",
     "eslint": "8.53.0",

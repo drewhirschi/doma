@@ -29,6 +29,13 @@
       }
     },
     {
+      "name": "Current file",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "tsx ${file}",
+      "cwd": "${workspaceFolder}"
+    },
+    {
       "name": "Debug jobs service",
       "type": "node-terminal",
       "request": "launch",

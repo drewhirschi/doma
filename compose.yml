@@ -26,7 +26,7 @@ services:
       REDIS_PORT: 6379
       REDIS_USE_TLS: false
       BULL_PREFIX: bull
-      BULL_QUEUES: industry
+      BULL_QUEUES: industry,linkedin
     ports:
       - 8002:3000
     depends_on:
@@ -42,7 +42,7 @@ services:
       REDIS_PORT: 6379
       REDIS_USE_TLS: true
       BULL_PREFIX: bull
-      BULL_QUEUES: industry
+      BULL_QUEUES: industry,linkedin
     ports:
       - 8003:3000
 
