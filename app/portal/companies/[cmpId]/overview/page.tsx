@@ -10,15 +10,18 @@ export default async function Page({ params }: { params: { cmpId: string } }) {
 
   const companyProfileGet = await sb
     .from("company_profile")
-    .select("*, cmp_logos(*)")
+    .select("*, cmp_logos(*), li_profile(*)")
     .eq("id", params.cmpId)
     .single();
   const logos = companyProfileGet.data?.cmp_logos ?? [];
-  console.log(logos);
 
   return (
     <Box bg={"gray.1"} h={"100%"} w={"100%"}>
-      <Tab companyProfile={companyProfileGet.data!} logos={logos} />
+      <Tab
+        companyProfile={companyProfileGet.data!}
+        logos={logos}
+        linkedInProfile={companyProfileGet.data?.li_profile}
+      />
     </Box>
   );
 }

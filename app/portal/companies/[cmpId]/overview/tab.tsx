@@ -1,14 +1,36 @@
 "use client";
 
-import { ActionIcon, Box, Button, Group, Paper, Stack } from "@mantine/core";
-import { queueFindIndustryCompanies } from "./actions";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Group,
+  Paper,
+  SimpleGrid,
+  Space,
+  Spoiler,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
+import {
+  IconBrandLinkedin,
+  IconDownload,
+  IconExternalLink,
+  IconMapPinFilled,
+} from "@tabler/icons-react";
+
 import { AddToDealModal } from "../companies/AddToDealModal";
+import { ChangeLinkedInProfileModal } from "./ChangeLinkedInProfileModal";
 import CompanySummaryEditor from "@/ux/components/CompanySummaryEditor";
+import Link from "next/link";
 import { LogosMenu } from "./LogosMenu";
+import MetadataItem from "@/ux/components/MetadataItem";
 import type { Tables } from "@/shared/types/supabase-generated";
 import { actionWithNotification } from "@/ux/clientComp";
-import { useJsApiLoader, GoogleMap, Marker } from "@react-google-maps/api";
-import { IconDownload, IconMapPinFilled } from "@tabler/icons-react";
+import { queueFindIndustryCompanies } from "./actions";
 import { renderToStaticMarkup } from "react-dom/server";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -25,8 +47,10 @@ const markerIcon = `data:image/svg+xml;utf8,${encodeURIComponent(
 export default function OverviewTab({
   companyProfile,
   logos,
+  linkedInProfile,
 }: {
   companyProfile: CompanyProfile_SB;
+  linkedInProfile: LinkedInProfile_SB | undefined;
   logos: Tables<"cmp_logos">[];
 }) {
   const { isLoaded } = useJsApiLoader({
@@ -49,7 +73,60 @@ export default function OverviewTab({
           </Button>
           <AddToDealModal selectedCompanies={[companyProfile.id]} />
         </Paper>
+        <Paper radius={8} withBorder p={"xs"}>
+          <Group justify="space-between">
+            <Title order={4} mb={"sm"}>
+              LinkedIn Profile{" "}
+              {linkedInProfile && (
+                <ActionIcon
+                  size={"xs"}
+                  variant="transparent"
+                  component={Link}
+                  href={linkedInProfile.url}
+                  target="_blank"
+                >
+                  <IconExternalLink />
+                </ActionIcon>
+              )}
+            </Title>
+            <ChangeLinkedInProfileModal
+              liProfile={linkedInProfile}
+              company={companyProfile}
+            />
+          </Group>
+          {linkedInProfile != null && (
+            <>
+              <Text fw={500}>Description</Text>
+              <Spoiler maxHeight={80} showLabel="Show more" hideLabel="Hide">
+                <Text size="sm">{linkedInProfile.description}</Text>
+              </Spoiler>
+              <Space h={"sm"} />
+              <SimpleGrid cols={2}>
+                <MetadataItem
+                  header="Area"
+                  text={linkedInProfile.hq_area ?? ""}
+                />
+                <MetadataItem
+                  header="Founded"
+                  text={linkedInProfile.founded_year?.toString() ?? ""}
+                />
+                <MetadataItem
+                  header="Head count"
+                  text={linkedInProfile.headcountRange ?? ""}
+                />
 
+                <Box>
+                  <Text fw={500}>Industries</Text>
+                  {linkedInProfile.industries?.map((i) => (
+                    <Badge variant="light" color="blue" key={i}>
+                      {i}
+                    </Badge>
+                  ))}
+                </Box>
+              </SimpleGrid>
+            </>
+          )}
+        </Paper>
         <Paper
           style={{
             backgroundSize: "20px 20px",
