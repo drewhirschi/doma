@@ -41,7 +41,6 @@ export async function deleteLogo(logo: CompanyLogo_SB) {
 export async function updateCompanyLinkedinProfile(
   company: CompanyProfile_SB,
   newLiUrl: string,
-  oldLiProfile?: LinkedInProfile_SB,
 ) {
 
 
@@ -56,26 +55,28 @@ export async function updateCompanyLinkedinProfile(
     throw new Error("Failed to get linkedin profile");
   }
 
-  const sbFormatProfile = linkedinApi.sbFormat(linkedinProfile, company.id);
+  const sbFormatProfile = linkedinApi.sbFormat(linkedinProfile);
 
   const sb = serverActionClient();
 
-  const insertProfile = await sb.from("cmp_li_profile").insert(sbFormatProfile);
+  const insertProfile = await sb.from("li_profile").insert(sbFormatProfile).select();
   if (insertProfile.error) {
     throw new Error("Failed to insert linkedin profile", {
       cause: insertProfile.error,
     });
   }
 
-
-  if (oldLiProfile) {
-    const deleteOld = await sb.from("cmp_li_profile").delete().eq("url", oldLiProfile.url);
-    if (deleteOld.error) {
-      throw new Error("Failed to unlink current profile", {
-        cause: deleteOld.error,
-      });
-    }
+  const updateProfile = await sb
+    .from("company_profile")
+    .update({ liprofile_slug: insertProfile.data[0].slug })
+    .eq("id", company.id);
+  if (updateProfile.error) {
+    throw new Error("Failed to attach linkedin profile to company", {
+      cause: updateProfile.error,
+    });
   }
+
+
 
 
   revalidatePath(`/portal/companies/${company.id}/overview`);

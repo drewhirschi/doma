@@ -6,7 +6,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 
 interface Props {
-  liProfile: LinkedInProfile_SB | undefined;
+  liProfile: LinkedInProfile_SB | undefined | null;
   company: CompanyProfile_SB;
 }
 export function ChangeLinkedInProfileModal(props: Props) {
@@ -59,7 +59,6 @@ export function ChangeLinkedInProfileModal(props: Props) {
                     await updateCompanyLinkedinProfile(
                       props.company,
                       form.values.url,
-                      props.liProfile,
                     );
                   });
                 }

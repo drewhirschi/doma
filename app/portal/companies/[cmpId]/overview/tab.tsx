@@ -50,7 +50,7 @@ export default function OverviewTab({
   linkedInProfile,
 }: {
   companyProfile: CompanyProfile_SB;
-  linkedInProfile: LinkedInProfile_SB | undefined;
+  linkedInProfile: LinkedInProfile_SB | undefined | null;
   logos: Tables<"cmp_logos">[];
 }) {
   const { isLoaded } = useJsApiLoader({

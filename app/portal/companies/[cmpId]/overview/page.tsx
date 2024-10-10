@@ -20,7 +20,7 @@ export default async function Page({ params }: { params: { cmpId: string } }) {
       <Tab
         companyProfile={companyProfileGet.data!}
         logos={logos}
-        linkedInProfile={companyProfileGet.data?.li_profile}
+        linkedInProfile={companyProfileGet.data!.li_profile}
       />
     </Box>
   );
