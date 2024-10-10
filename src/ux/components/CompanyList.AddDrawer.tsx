@@ -15,7 +15,8 @@ export function AddCompanyDrawer() {
     validate: {
       url: (value) => {
         const domainRegex =
-          /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
+          // /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
+          /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/[a-zA-Z0-9-._~:\/?#@!$&'()*+,;=]*)?$/;
 
         const isValidDomain = (url: string) => domainRegex.test(url);
         if (!isValidDomain(value)) {

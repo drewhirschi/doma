@@ -6,15 +6,14 @@ import { Job, Worker } from "bullmq";
 import { JobDataType, JobType, jobSchemas } from "@shared/queues/industry-queue.types";
 
 import { IndustryQueueClient } from "@shared/queues/industry-queue";
-import Redis from "ioredis";
 import { pathToFileURL } from "url";
 
 async function main() {
   const industryQueue = new IndustryQueueClient();
 
-  const processorUrl = pathToFileURL(__dirname + "/worker.js");
+  const industryProcessorUrl = pathToFileURL(__dirname + "industry/worker.js");
 
-  const worker = new Worker<JobDataType>("industry", processorUrl, {
+  const industryWorker = new Worker<JobDataType>("industry", industryProcessorUrl, {
     connection: industryQueue.connection,
     removeOnComplete: { count: 1000 },
     removeOnFail: { count: 5000 },
@@ -22,7 +21,7 @@ async function main() {
     concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
   });
 
-  worker.on("active", (job) => {
+  industryWorker.on("active", (job) => {
     const schema = jobSchemas[job.name as JobType];
     if (!schema) {
       throw new Error(`Unknown job type: ${job.name}`);
@@ -40,12 +39,12 @@ async function main() {
   });
 
 
-  worker.on("completed", (job: Job) =>
+  industryWorker.on("completed", (job: Job) =>
     console.log(`Finished ${job.name}, id: ${job.id}`),
   );
 
 
-  worker.on("failed", (job, err) =>
+  industryWorker.on("failed", (job, err) =>
     console.error(`Failed ${job?.name}, id: ${job?.id}`, job?.data, err),
   );
 

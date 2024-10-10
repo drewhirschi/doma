@@ -1,10 +1,10 @@
 import { SandboxedJob } from "bullmq";
-import { companyDiscovery } from "./handlers/cmp/companyDiscovery";
-import { reduceCompanyPagesToProfile } from "./handlers/cmp/profileCompany";
-import { scrapeCompanyLogos } from "./handlers/cmp/scrapeLogos";
+import { companyDiscovery } from "./handlers/companyDiscovery";
+import { reduceCompanyPagesToProfile } from "./handlers/profileCompany";
+import { scrapeCompanyLogos } from "./handlers/scrapeLogos";
 import {
   scrapeCompanyWebsite,
-} from "./handlers/cmp/scrapeCompanyWebsite";
+} from "./handlers/scrapeCompanyWebsite";
 import { transactionCompanyLinking } from "./handlers/transactionLinking";
 import { transactionDiscovery } from "./handlers/transactionDiscovery";
 
