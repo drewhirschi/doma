@@ -1,6 +1,8 @@
 "use server";
 
-import { IndustryQueueClient } from "@/backend/services/jobs/industry-queue";
+import { RapidApiLinkdeInScraper, parseCompanySlug } from "@/shared/LinkedIn";
+
+import { IndustryQueueClient } from "@/shared/queues/industry-queue";
 import { revalidatePath } from "next/cache";
 import { serverActionClient } from "@/shared/supabase-client/server";
 
@@ -34,4 +36,51 @@ export async function deleteLogo(logo: CompanyLogo_SB) {
   }
 
   revalidatePath(`/portal/companies/${logo.cmp_id}/overview`);
+}
+
+export async function updateCompanyLinkedinProfile(
+  company: CompanyProfile_SB,
+  newLiUrl: string,
+) {
+
+
+  const linkedinApi = new RapidApiLinkdeInScraper()
+  const companySlug = parseCompanySlug(newLiUrl);
+
+  if (!companySlug) {
+    throw new Error("Bad LinkedIn company Url.");
+  }
+  const linkedinProfile = await linkedinApi.getCompany(companySlug);
+  if (!linkedinProfile) {
+    throw new Error("Failed to get linkedin profile");
+  }
+
+  const sbFormatProfile = linkedinApi.sbFormat(linkedinProfile);
+
+  const sb = serverActionClient();
+
+  const insertProfile = await sb.from("li_profile").insert(sbFormatProfile).select();
+  if (insertProfile.error) {
+    throw new Error("Failed to insert linkedin profile", {
+      cause: insertProfile.error,
+    });
+  }
+
+  const updateProfile = await sb
+    .from("company_profile")
+    .update({ liprofile_slug: insertProfile.data[0].slug })
+    .eq("id", company.id);
+  if (updateProfile.error) {
+    throw new Error("Failed to attach linkedin profile to company", {
+      cause: updateProfile.error,
+    });
+  }
+
+
+
+
+  revalidatePath(`/portal/companies/${company.id}/overview`);
+
+
+
 }

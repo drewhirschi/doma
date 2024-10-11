@@ -83,6 +83,7 @@ export async function reduceCompanyPagesToProfile(job: SandboxedJob) {
 
     //TODO: parse summary into structured data
 
+    //add job to linkedin queue
 
 
     // const industryQueue = new IndustryQueueClient();
@@ -163,7 +164,7 @@ export async function geocodeCompany(cmpSummary: string) {
     const geocodeRes = await googleMaps.geocode({
         params: {
             address: queriesRes.headquaters,
-            key: process.env.GOOGLE_MAPS_API_KEY!,
+            key: process.env.GEOCODE_API_KEY!,
         },
     });
 

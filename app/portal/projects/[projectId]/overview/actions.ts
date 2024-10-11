@@ -1,7 +1,5 @@
 "use server";
 
-import { IndustryQueueClient } from "@/backend/services/jobs/industry-queue";
-import { actionWithNotification } from "@/ux/clientComp";
 import { revalidatePath } from "next/cache";
 import { serverActionClient } from "@/shared/supabase-client/server";
 

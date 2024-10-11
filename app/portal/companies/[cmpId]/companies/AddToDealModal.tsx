@@ -117,7 +117,7 @@ export function AddToDealModal({
         </Group>
       </Modal>
 
-      <Box mt="md" mr="md">
+      <Box mr="md">
         <Button
           onClick={open}
           disabled={selectedCompanies.length === 0}
