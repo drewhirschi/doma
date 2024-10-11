@@ -6,15 +6,14 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   console.log({ sp: searchParams.toString(), origin })
   const code = searchParams.get('code')
-  // const next = searchParams.get('next') ?? '/'
+  let next = searchParams.get('next') ?? '/portal/projects'
 
   if (code) {
     const supabase = routeClient()
     const { error, data: session } = await supabase.auth.exchangeCodeForSession(code)
 
-    let next = "/tenant-create"
-    if (session.user?.app_metadata?.tenant_id) {
-      next = "/portal/projects"
+    if (!session.user?.app_metadata?.tenant_id) {
+      next = "/tenant-create"
     }
     console.log({ next })
 
