@@ -45,17 +45,14 @@ const jobFailedHandler = (job: Job | undefined, err: Error) => {
 async function initIndustryWorker() {
   const industryQueue = new IndustryQueueClient();
 
-  const industryProcessorUrl = pathToFileURL(__dirname + "industry/worker.js");
+  const industryProcessorUrl = pathToFileURL(__dirname + "/industry/worker.js");
 
   const industryWorker = new Worker<JobDataType>("industry", industryProcessorUrl, {
     connection: industryQueue.connection,
     removeOnComplete: { count: 1000 },
     removeOnFail: { count: 5000 },
     concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
-    limiter: {
-      max: 40,
-      duration: 1000,
-    }
+
   });
 
   industryWorker.on("active", jobStartHandler);
@@ -66,12 +63,16 @@ async function initIndustryWorker() {
 async function initLinkedInWorker() {
   const linkedInQueue = new LinkedInQueueClient();
 
-  const linkedinProcessorUrl = pathToFileURL(__dirname + "linkedin/worker.js");
+  const linkedinProcessorUrl = pathToFileURL(__dirname + "/linkedin/worker.js");
 
   const linkedinWorker = new Worker<JobDataType>("linkedin", linkedinProcessorUrl, {
     connection: linkedInQueue.connection,
     removeOnComplete: { count: 200 },
     removeOnFail: { count: 1000 },
+    limiter: {
+      max: 40,
+      duration: 1000,
+    }
     // concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
   });
 

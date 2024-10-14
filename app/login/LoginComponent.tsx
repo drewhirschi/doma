@@ -66,6 +66,12 @@ function PasswordLoginForm() {
 
 export default function Login() {
   const supabase = browserClient();
+  const searchParams = useSearchParams();
+
+  let nextUrl;
+  if (searchParams.get("next")) {
+    nextUrl = searchParams.get("next");
+  }
 
   let origin = "";
   if (typeof window !== "undefined") {
@@ -84,8 +90,12 @@ export default function Login() {
           </Group>
 
           <Stack>
-            <MicrosoftButton authCallbackUrl={`${origin}/auth/callback`} />
-            <GoogleButton authCallbackUrl={`${origin}/auth/callback`} />
+            <MicrosoftButton
+              authCallbackUrl={`${origin}/auth/callback?next=${nextUrl}`}
+            />
+            <GoogleButton
+              authCallbackUrl={`${origin}/auth/callback?next=${nextUrl}`}
+            />
           </Stack>
         </Stack>
       </Paper>

@@ -331,11 +331,16 @@ export async function getCompanyName(url: string) {
   // Extract relevant content: title, meta, headers, etc.
   const title = $("title").text();
   const metaDescription = $('meta[name="description"]').attr("content");
-  const h1 = $("h1").text();
+
+  const pageText = await getPageContents(url);
+  if (!pageText) {
+    return null;
+  }
 
   const companyName = await getCompletion({
     system: `You will be provided with content scraped from a webpage of a company's website, your job is to respond with the name of the company and nothing else.`,
-    user: `Title: ${title}\n\nMeta Description: ${metaDescription}\n\nH1: ${h1}`,
+    // user: `Title: ${title}\n\nMeta Description: ${metaDescription}\n\nH1: ${h1}`,
+    user: `Title: ${title}\n\nMeta Description: ${metaDescription}\n\nContent: ${pageText}`,
   });
 
   return companyName;
