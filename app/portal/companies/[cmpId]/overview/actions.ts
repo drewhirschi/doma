@@ -50,7 +50,7 @@ export async function updateCompanyLinkedinProfile(
   if (!companySlug) {
     throw new Error("Bad LinkedIn company Url.");
   }
-  const linkedinProfile = await linkedinApi.getCompany(companySlug);
+  const linkedinProfile = await linkedinApi.getCompanyBySlug(companySlug);
   if (!linkedinProfile) {
     throw new Error("Failed to get linkedin profile");
   }

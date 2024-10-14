@@ -35,10 +35,10 @@ export class LinkedInQueueClient {
 
 
 
-    async getCompanyLinkedInProfile(cmpId: number, url: string) {
+    async getCompanyLinkedInProfile(cmpId: number) {
         return await this.queue.add(
             "get_li_profile",
-            { cmpId, liProfileUrl: url },
+            { cmpId },
             {
                 attempts: 2,
             },

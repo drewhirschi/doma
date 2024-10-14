@@ -3,6 +3,7 @@
 import {
   ActionIcon,
   Anchor,
+  Button,
   Checkbox,
   Group,
   Image,
@@ -14,13 +15,15 @@ import {
   TableThead,
   TableTr,
 } from "@mantine/core";
-import { IconExternalLink } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+
 import { AddToDealModal } from "./AddToDealModal";
+import { IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
-import { browserClient } from "@/ux/supabase-client/BrowserClient";
 import { PAGE_SIZE } from "../shared";
 import { SearchAndPage } from "../../SearchAndPage";
+import { SimilarityBadge } from "./SimilarityBadge";
+import { browserClient } from "@/ux/supabase-client/BrowserClient";
 
 interface CompanyWithSimilarity extends CompanyProfile_SB {
   similarity: number;
@@ -142,7 +145,7 @@ export default function Page({
           (company): company is CompanyWithSimilarity => company !== null,
         );
 
-      setSortedCompanies(sortedCompanies);
+      setSortedCompanies(sortedCompanies.slice(1));
       setLoading(false);
     };
 
@@ -172,23 +175,19 @@ export default function Page({
           </Anchor>
         </Group>
       </TableTd>
-      <TableTd>{element.similarity}</TableTd>
-      <TableTd>{element.origin}</TableTd>
       <TableTd>
-        <Group>
-          {element.origin && (
-            <ActionIcon
-              p={"xs"}
-              variant="subtle"
-              component={Link}
-              href={element.origin}
-              size="xl"
-              aria-label="Open in a new tab"
-            >
-              <IconExternalLink size={20} />
-            </ActionIcon>
-          )}
-        </Group>
+        <SimilarityBadge similarity={element.similarity} />
+      </TableTd>
+      <TableTd>{element.description}</TableTd>
+      <TableTd>
+        {element.origin && (
+          <Group>
+            <Anchor href={element.origin} c={"dark"} target="_blank">
+              {new URL(element.origin ?? "").hostname}
+            </Anchor>
+            <IconExternalLink size={16} />
+          </Group>
+        )}
       </TableTd>
     </TableTr>
   ));
@@ -243,6 +242,7 @@ export default function Page({
             </TableTd>
             <TableTh>Name</TableTh>
             <TableTh>Relevance score</TableTh>
+            <TableTh>Description</TableTh>
             <TableTh>Website</TableTh>
           </TableTr>
         </TableThead>
