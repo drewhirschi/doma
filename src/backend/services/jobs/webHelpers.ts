@@ -5,6 +5,7 @@ import axiosRetry from "axios-retry";
 import { companyInfoScraping } from "./prompts.js";
 import { load } from "cheerio";
 import { z } from "zod";
+import https from "https";
 
 const axiosInstance = axios.create({
   headers: {
@@ -12,6 +13,7 @@ const axiosInstance = axios.create({
     // 'Accept-Language': 'en-US,en;q=0.9',
     // Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
   },
+  httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 });
 
 function tagVisible(element: any) {
@@ -127,7 +129,7 @@ export async function crawlWebsite(
     console.log(`Crawling: ${normalizedUrl}`);
 
     try {
-      const response = await axios.get(url);
+      const response = await axiosInstance.get(url);
       const $ = load(response.data);
       const baseUrl = new URL(url);
 
@@ -185,7 +187,7 @@ export async function getPageLinks(
   linksSet.add(normalizedUrl);
 
   try {
-    const response = await axios.get(url);
+    const response = await axiosInstance.get(url);
     const $ = load(response.data);
     const baseUrl = new URL(url);
 
@@ -212,11 +214,13 @@ export async function getPageLinks(
 }
 
 export async function indexPage(url: string) {
-  const client = axios.create({
-    headers: {
-      "User-Agent": "google-bot",
-    },
-  });
+  // const client = axios.create({
+  //   headers: {
+  //     "User-Agent": "google-bot",
+  //   },
+  // });
+
+  const client = axiosInstance;
 
   axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
@@ -270,20 +274,20 @@ export async function getFaviconUrl(url: string) {
   try {
     const origin = new URL(url).origin;
 
-    const response = await axios.get(origin + "/favicon.ico", {
+    const response = await axiosInstance.get(origin + "/favicon.ico", {
       responseType: "arraybuffer",
     });
 
     return origin + "/favicon.ico";
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) { }
-      else console.log(`Request failed`, error.response?.data);
+      if (error.response?.status === 404) {
+      } else console.log(`Request failed`, error.response?.data);
     } else {
       console.error(`Unknown error getting favicon ${url}:`, error);
     }
 
-    const { data } = await axios.get(url);
+    const { data } = await axiosInstance.get(url);
     const $ = load(data);
 
     const faviconUrl =
@@ -296,7 +300,7 @@ export async function getFaviconUrl(url: string) {
 }
 
 export async function getImgs(url: string) {
-  const { data } = await axios.get(url);
+  const { data } = await axiosInstance.get(url);
   const $ = load(data);
 
   // Get all img elements
@@ -308,7 +312,7 @@ export async function getImgs(url: string) {
   return images;
 }
 export async function getSVGs(url: string) {
-  const { data } = await axios.get(url);
+  const { data } = await axiosInstance.get(url);
   const $ = load(data);
 
   const svgData = $("svg")
@@ -325,7 +329,7 @@ export async function getSVGs(url: string) {
 }
 
 export async function getCompanyName(url: string) {
-  const { data } = await axios.get(url);
+  const { data } = await axiosInstance.get(url);
   const $ = load(data);
 
   // Extract relevant content: title, meta, headers, etc.

@@ -3,19 +3,19 @@ require("dotenv").config({
 });
 
 import { Job, Worker } from "bullmq";
-import { JobDataType, JobType, jobSchemas } from "@shared/queues/industry-queue.types";
+import {
+  JobDataType,
+  JobType,
+  jobSchemas,
+} from "@shared/queues/industry-queue.types";
 
 import { IndustryQueueClient } from "@shared/queues/industry-queue";
 import { LinkedInQueueClient } from "@shared/queues/linkedin-queue";
 import { pathToFileURL } from "url";
 
 async function main() {
-
   await initIndustryWorker();
-
-
 }
-
 
 const jobStartHandler = (job: Job) => {
   const schema = jobSchemas[job.name as JobType];
@@ -30,33 +30,36 @@ const jobStartHandler = (job: Job) => {
     );
   }
 
-
   console.log(`Got ${job.name}, id: ${job.id}`, job.data);
-}
+};
 
 const jobEndHandler = (job: Job) => {
   console.log(`Finished ${job.name}, id: ${job.id}`);
-}
+};
 
 const jobFailedHandler = (job: Job | undefined, err: Error) => {
   console.error(`Failed ${job?.name}, id: ${job?.id}`, job?.data, err);
-}
+};
 
 async function initIndustryWorker() {
   const industryQueue = new IndustryQueueClient();
 
-  const industryProcessorUrl = pathToFileURL(__dirname + "industry/worker.js");
+  const industryProcessorUrl = pathToFileURL(__dirname + "/industry/worker.js");
 
-  const industryWorker = new Worker<JobDataType>("industry", industryProcessorUrl, {
-    connection: industryQueue.connection,
-    removeOnComplete: { count: 1000 },
-    removeOnFail: { count: 5000 },
-    concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
-    limiter: {
-      max: 40,
-      duration: 1000,
-    }
-  });
+  const industryWorker = new Worker<JobDataType>(
+    "industry",
+    industryProcessorUrl,
+    {
+      connection: industryQueue.connection,
+      removeOnComplete: { count: 1000 },
+      removeOnFail: { count: 5000 },
+      concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
+      limiter: {
+        max: 40,
+        duration: 1000,
+      },
+    },
+  );
 
   industryWorker.on("active", jobStartHandler);
   industryWorker.on("completed", jobEndHandler);
@@ -68,12 +71,16 @@ async function initLinkedInWorker() {
 
   const linkedinProcessorUrl = pathToFileURL(__dirname + "linkedin/worker.js");
 
-  const linkedinWorker = new Worker<JobDataType>("linkedin", linkedinProcessorUrl, {
-    connection: linkedInQueue.connection,
-    removeOnComplete: { count: 200 },
-    removeOnFail: { count: 1000 },
-    // concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
-  });
+  const linkedinWorker = new Worker<JobDataType>(
+    "linkedin",
+    linkedinProcessorUrl,
+    {
+      connection: linkedInQueue.connection,
+      removeOnComplete: { count: 200 },
+      removeOnFail: { count: 1000 },
+      // concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
+    },
+  );
 
   linkedinWorker.on("active", jobStartHandler);
   linkedinWorker.on("completed", jobEndHandler);
