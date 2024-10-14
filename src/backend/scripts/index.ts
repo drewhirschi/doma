@@ -1,15 +1,11 @@
 // require("dotenv").config({ path: "./.env.local" });
 
-
-
-
 // async function main() {
 //   const sb = fullAccessServiceClient();
 //   const companiesGet = await sb.from("company_profile").select("*, cmp_li_profile(*)")
 //     .gte("id", 1863)
 //     .limit(100)
 //     .not("web_summary", "is", null)
-
 
 //   if (companiesGet.error || companiesGet.data.length < 1) {
 //     console.log("failed to get companies", companiesGet.error);
@@ -18,9 +14,7 @@
 
 //   // const company = companiesGet.data;
 
-
 //   const linkedin = new RapidApiLinkdeInScraper()
-
 
 //   for (const company of companiesGet.data) {
 
@@ -35,13 +29,11 @@
 
 //         const linkedinProfile = await linkedin.getCompany(candidate);
 
-
 //         return linkedinProfile
 
 //       })
 
 //       const candidateProfiles = (await Promise.all(candidateProfileProms)).filter(isNotNull)
-
 
 //       let profile
 //       if (candidateProfiles.length > 1) {
@@ -55,11 +47,7 @@
 //         continue
 //       }
 
-
-
-
 //       const insertData = linkedin.sbFormat(profile);
-
 
 //       const insertProfile = await sb.from("cmp_li_profile").insert(insertData);
 //       if (insertProfile.error) {

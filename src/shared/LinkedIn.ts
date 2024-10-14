@@ -98,20 +98,20 @@ interface RapidApiRes<T> {
     data: T | null
 };
 export class RapidApiLinkdeInScraper implements LinkedInDataProvider {
-
     rapidapiLinkedIn = axios.create({
         headers: {
-            'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-            'x-rapidapi-host': 'linkedin-api8.p.rapidapi.com'
-
+            "x-rapidapi-key": process.env.RAPIDAPI_KEY,
+            "x-rapidapi-host": "linkedin-api8.p.rapidapi.com",
         },
-        baseURL: 'https://linkedin-api8.p.rapidapi.com',
-    })
+        baseURL: "https://linkedin-api8.p.rapidapi.com",
+    });
 
     limiter = new Bottleneck({
         minTime: 25,
-        maxConcurrent: 1
+        maxConcurrent: 1,
     });
+
+
 
     async getCompanyBySlug(companySlug: string): Promise<ILinkedInCompany | null> {
 
@@ -201,8 +201,8 @@ export class RapidApiLinkdeInScraper implements LinkedInDataProvider {
 }
 
 
-export async function searchForLinkedInCompanySlug(cmpSummary: string) {
 
+export async function searchForLinkedInCompanySlug(cmpSummary: string) {
     try {
         const searchQuery = await getCompletion({
             system: `Create a Google search query to find the LinkedIn page of a company based on the provided company summary.
@@ -219,60 +219,64 @@ Present the Google search query as a simple text string. Don't wrap the query in
 - For companies with common names, consider adding additional unique identifiers from the summary if available.
 - For companies where location is important, include the location.`,
             user: cmpSummary,
-        })
+        });
         if (!searchQuery) {
-            throw new Error('Failed to get search query')
+            throw new Error("Failed to get search query");
         }
 
-        const results = await googleSearch(searchQuery)
+        const results = await googleSearch(searchQuery);
 
+        const possilbeLiUrls = new Set<string>();
 
-        const possilbeLiUrls = new Set<string>()
-
-        results.items.filter((item) => item.link.startsWith('https://www.linkedin.com/company/'))
+        results.items
+            .filter((item) =>
+                item.link.startsWith("https://www.linkedin.com/company/"),
+            )
             .map((item) => parseCompanySlug(item.link))
             .filter(isNotNull)
-            .forEach((url) => possilbeLiUrls.add(url))
+            .forEach((url) => possilbeLiUrls.add(url));
 
-        return Array.from(possilbeLiUrls)
-
+        return Array.from(possilbeLiUrls);
     } catch (error) {
-        console.error(error)
-        return []
+        console.error(error);
+        return [];
     }
 }
 
 export function parseCompanySlug(url: string) {
     try {
         const parsedUrl = new URL(url);
-        const pathSegments = parsedUrl.pathname.split('/').filter(segment => segment);
+        const pathSegments = parsedUrl.pathname
+            .split("/")
+            .filter((segment) => segment);
 
-        if (pathSegments[0] !== 'company' || pathSegments.length < 2) {
-            console.warn('Invalid linkedin company URL:', url);
+        if (pathSegments[0] !== "company" || pathSegments.length < 2) {
+            console.warn("Invalid linkedin company URL:", url);
             return null;
         }
 
         return pathSegments[1];
     } catch (error) {
-        console.error('Invalid URL:', error);
+        console.error("Invalid URL:", error);
         return null;
     }
 }
 
-export async function llmChooseProfile(profiles: ILinkedInCompany[], webSummary: string): Promise<ILinkedInCompany | null> {
-
+export async function llmChooseProfile(
+    profiles: ILinkedInCompany[],
+    webSummary: string,
+): Promise<ILinkedInCompany | null> {
     const universalName = await getCompletion({
         system: `Return the universalName and nothing else of the LinkedIn profile JSON that matchings the given summary more closely.`,
         user: `## Summary:\n${webSummary}\n\n## Profiles:\n${JSON.stringify(profiles)}`, // webSummary
-    })
+    });
 
     if (!universalName) {
-        console.warn('Failed to get universalName')
-        return null
+        console.warn("Failed to get universalName");
+        return null;
     }
 
-
-    return profiles.find((profile) => profile.universalName === universalName) || null
+    return (
+        profiles.find((profile) => profile.universalName === universalName) || null
+    );
 }
-
-
