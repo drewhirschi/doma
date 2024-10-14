@@ -85,7 +85,7 @@ export async function scrapeCompanyWebsite(job: SandboxedJob<z.infer<typeof scra
         return dbPage.cmp_info == null;
     });
 
-    console.log("indexing pages", pagesToIndex.join("\n"));
+    // job.log("indexing pages", pagesToIndex.join("\n"));
     // return
 
     const scrapeProms = pagesToIndex.map(async (page) => {
@@ -112,6 +112,10 @@ export async function scrapeCompanyWebsite(job: SandboxedJob<z.infer<typeof scra
     const industryQueue = new IndustryQueueClient();
     await industryQueue.scrapeLogo(company.id);
     await industryQueue.reduceCompanyPages(company.id);
+
+    if (job.data.scrapeComps) {
+        await industryQueue.companyDiscovery(company.id);
+    }
     await industryQueue.close();
 
     return company.id;

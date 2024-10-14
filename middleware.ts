@@ -9,7 +9,9 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user && request.nextUrl.pathname.startsWith("/portal")) {
-    return NextResponse.redirect(new URL(`/login`, request.url));
+    return NextResponse.redirect(
+      new URL(`/login?next=${encodeURIComponent(request.nextUrl.pathname)}`, request.url)
+    );
   }
 
   if (

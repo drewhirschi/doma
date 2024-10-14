@@ -54,10 +54,6 @@ async function initIndustryWorker() {
       removeOnComplete: { count: 1000 },
       removeOnFail: { count: 5000 },
       concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
-      limiter: {
-        max: 40,
-        duration: 1000,
-      },
     },
   );
 
@@ -69,7 +65,7 @@ async function initIndustryWorker() {
 async function initLinkedInWorker() {
   const linkedInQueue = new LinkedInQueueClient();
 
-  const linkedinProcessorUrl = pathToFileURL(__dirname + "linkedin/worker.js");
+  const linkedinProcessorUrl = pathToFileURL(__dirname + "/linkedin/worker.js");
 
   const linkedinWorker = new Worker<JobDataType>(
     "linkedin",
@@ -78,6 +74,10 @@ async function initLinkedInWorker() {
       connection: linkedInQueue.connection,
       removeOnComplete: { count: 200 },
       removeOnFail: { count: 1000 },
+      limiter: {
+        max: 40,
+        duration: 1000,
+      },
       // concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
     },
   );

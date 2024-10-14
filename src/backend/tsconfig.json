@@ -17,5 +17,5 @@
     "incremental": true
   },
   "include": ["./**/*.ts", "../shared/**/*.ts"],
-  "exclude": ["node_modules", "tsconfig.json", "./scripts/**/*.ts"]
+  "exclude": ["node_modules", "tsconfig.json"]
 }

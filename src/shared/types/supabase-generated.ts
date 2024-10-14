@@ -243,9 +243,11 @@ export type Database = {
           hq_area: string | null
           hq_country: string | null
           hq_postal_code: string | null
+          id: string | null
           industries: string[] | null
           slug: string
           specialities: string[] | null
+          type: string | null
           updated_at: string
           url: string
           website: string | null
@@ -258,9 +260,11 @@ export type Database = {
           hq_area?: string | null
           hq_country?: string | null
           hq_postal_code?: string | null
+          id?: string | null
           industries?: string[] | null
           slug: string
           specialities?: string[] | null
+          type?: string | null
           updated_at?: string
           url: string
           website?: string | null
@@ -273,9 +277,11 @@ export type Database = {
           hq_area?: string | null
           hq_country?: string | null
           hq_postal_code?: string | null
+          id?: string | null
           industries?: string[] | null
           slug?: string
           specialities?: string[] | null
+          type?: string | null
           updated_at?: string
           url?: string
           website?: string | null

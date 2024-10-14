@@ -1,8 +1,7 @@
-import { Box, Paper } from "@mantine/core";
-import React from "react";
-import { serverClient } from "@/shared/supabase-client/server";
-import { PAGE_SIZE } from "../shared";
+import { Box } from "@mantine/core";
 import CompanyList from "./CompanyList";
+import { PAGE_SIZE } from "../shared";
+import { serverClient } from "@/shared/supabase-client/server";
 
 interface CompanyWithSimilarity extends CompanyProfile_SB {
   similarity: number;

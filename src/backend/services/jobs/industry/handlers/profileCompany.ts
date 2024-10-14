@@ -1,6 +1,7 @@
 import { getCompletion, getEmbedding, getStructuredCompletion, recursiveDocumentReduction } from "../../llmHelpers.js";
 
 import { Client } from "@googlemaps/google-maps-services-js";
+import { LinkedInQueueClient } from "@shared/queues/linkedin-queue.js";
 import { SandboxedJob } from 'bullmq';
 import { companyInfoCombination } from '../../prompts.js';
 import { fullAccessServiceClient } from '@shared/supabase-client/server';
@@ -83,7 +84,10 @@ export async function reduceCompanyPagesToProfile(job: SandboxedJob) {
 
     //TODO: parse summary into structured data
 
-    //add job to linkedin queue
+
+    const linkedinQueue = new LinkedInQueueClient();
+    await linkedinQueue.getCompanyLinkedInProfile(companyGet.data.id)
+    await linkedinQueue.close();
 
 
     // const industryQueue = new IndustryQueueClient();
