@@ -1,5 +1,3 @@
-"use client";
-
 import { Box } from "@mantine/core";
 import CompanyList from "./CompanyList";
 import { PAGE_SIZE } from "../shared";
