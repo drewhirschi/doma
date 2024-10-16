@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -288,6 +289,126 @@ export type Database = {
         }
         Relationships: []
       }
+      ma_articles: {
+        Row: {
+          author: string | null
+          publish_date: string | null
+          summary: string | null
+          text: string | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          author?: string | null
+          publish_date?: string | null
+          summary?: string | null
+          text?: string | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          author?: string | null
+          publish_date?: string | null
+          summary?: string | null
+          text?: string | null
+          title?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
+      ma_partcpnt: {
+        Row: {
+          cmp_id: number
+          role: string | null
+          trans_id: number
+        }
+        Insert: {
+          cmp_id: number
+          role?: string | null
+          trans_id: number
+        }
+        Update: {
+          cmp_id?: number
+          role?: string | null
+          trans_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_participant_cmp_id_fkey"
+            columns: ["cmp_id"]
+            isOneToOne: false
+            referencedRelation: "company_profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_participant_trans_id_fkey"
+            columns: ["trans_id"]
+            isOneToOne: false
+            referencedRelation: "ma_transaction"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_trans_support: {
+        Row: {
+          article_id: string
+          trans_id: number
+        }
+        Insert: {
+          article_id: string
+          trans_id: number
+        }
+        Update: {
+          article_id?: string
+          trans_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ma_trans_support_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "ma_articles"
+            referencedColumns: ["url"]
+          },
+          {
+            foreignKeyName: "ma_trans_support_trans_id_fkey"
+            columns: ["trans_id"]
+            isOneToOne: false
+            referencedRelation: "ma_transaction"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ma_transaction: {
+        Row: {
+          amount: number | null
+          created_at: string
+          date: string | null
+          description: string | null
+          emb: string | null
+          id: number
+          reason: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          emb?: string | null
+          id?: number
+          reason?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          emb?: string | null
+          id?: number
+          reason?: string | null
+        }
+        Relationships: []
+      }
       profile: {
         Row: {
           avatar_url: string | null
@@ -541,53 +662,6 @@ export type Database = {
           },
         ]
       }
-      search_result: {
-        Row: {
-          author: string | null
-          exa_id: string
-          id: number
-          publish_date: string | null
-          report_id: number
-          section_id: number | null
-          summary: string | null
-          text: string | null
-          title: string | null
-          url: string | null
-        }
-        Insert: {
-          author?: string | null
-          exa_id: string
-          id?: number
-          publish_date?: string | null
-          report_id: number
-          section_id?: number | null
-          summary?: string | null
-          text?: string | null
-          title?: string | null
-          url?: string | null
-        }
-        Update: {
-          author?: string | null
-          exa_id?: string
-          id?: number
-          publish_date?: string | null
-          report_id?: number
-          section_id?: number | null
-          summary?: string | null
-          text?: string | null
-          title?: string | null
-          url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "search_result_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "report_sections"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       tenant: {
         Row: {
           created_at: string
@@ -603,102 +677,6 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
-        }
-        Relationships: []
-      }
-      transaction_participant: {
-        Row: {
-          cmp_id: number
-          role: string | null
-          trans_id: number
-        }
-        Insert: {
-          cmp_id: number
-          role?: string | null
-          trans_id: number
-        }
-        Update: {
-          cmp_id?: number
-          role?: string | null
-          trans_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "transaction_participant_cmp_id_fkey"
-            columns: ["cmp_id"]
-            isOneToOne: false
-            referencedRelation: "company_profile"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transaction_participant_trans_id_fkey"
-            columns: ["trans_id"]
-            isOneToOne: false
-            referencedRelation: "transaction_search_res"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      transaction_search_res: {
-        Row: {
-          article_date: string | null
-          buyer_name: string | null
-          created_at: string
-          date: string | null
-          description: string | null
-          emb: string | null
-          full_query: string | null
-          id: number
-          linked: boolean
-          others: Json | null
-          query: string | null
-          query_emb: string | null
-          reason: string | null
-          seller_details: string | null
-          seller_name: string | null
-          snippet: string | null
-          title: string | null
-          url: string
-        }
-        Insert: {
-          article_date?: string | null
-          buyer_name?: string | null
-          created_at?: string
-          date?: string | null
-          description?: string | null
-          emb?: string | null
-          full_query?: string | null
-          id?: number
-          linked?: boolean
-          others?: Json | null
-          query?: string | null
-          query_emb?: string | null
-          reason?: string | null
-          seller_details?: string | null
-          seller_name?: string | null
-          snippet?: string | null
-          title?: string | null
-          url: string
-        }
-        Update: {
-          article_date?: string | null
-          buyer_name?: string | null
-          created_at?: string
-          date?: string | null
-          description?: string | null
-          emb?: string | null
-          full_query?: string | null
-          id?: number
-          linked?: boolean
-          others?: Json | null
-          query?: string | null
-          query_emb?: string | null
-          reason?: string | null
-          seller_details?: string | null
-          seller_name?: string | null
-          snippet?: string | null
-          title?: string | null
-          url?: string
         }
         Relationships: []
       }
@@ -1016,4 +994,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never

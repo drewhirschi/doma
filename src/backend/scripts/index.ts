@@ -1,67 +1,63 @@
-// require("dotenv").config({ path: "./.env.local" });
+require("dotenv").config({ path: "./.env.local" });
+import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
+import Exa from "exa-js";
 
-// async function main() {
-//   const sb = fullAccessServiceClient();
-//   const companiesGet = await sb.from("company_profile").select("*, cmp_li_profile(*)")
-//     .gte("id", 1863)
-//     .limit(100)
-//     .not("web_summary", "is", null)
+async function main() {
+  console.log("Testing Company Acquisition Article Scraper");
 
-//   if (companiesGet.error || companiesGet.data.length < 1) {
-//     console.log("failed to get companies", companiesGet.error);
-//     throw companiesGet.error;
-//   }
+  const sb = fullAccessServiceClient();
 
-//   // const company = companiesGet.data;
+  // get the company (testing with AWP Safety)
+  const cmpGet = await sb
+    .from("company_profile")
+    .select()
+    .eq("id", 66)
+    .single();
+  if (cmpGet.error) {
+    throw cmpGet.error;
+  } else if (!cmpGet.data.web_summary) {
+    throw new Error("Model Company summary not found");
+  }
 
-//   const linkedin = new RapidApiLinkdeInScraper()
+  const company = cmpGet.data;
+  console.log("Company Name: ", company.name);
 
-//   for (const company of companiesGet.data) {
+  // set up the exa api
+  const exa = new Exa(process.env.EXA_API_KEY);
 
-//     if (company.cmp_li_profile.length > 0) {
-//       continue
-//     }
-//     try {
+  // search for acquisition articles from exa
+  const searchResults = await exa.search(`${company.name} acquisition`, {
+    type: "auto",
+    useAutoprompt: true,
+    numResults: 2,
+    category: "news",
+    startPublishedDate: "2019-01-01",
+  });
 
-//       const candidatesSearchResults = await searchForLinkedInCompanySlug(company.name!);
+  console.log("Search Results", searchResults.results);
 
-//       const candidateProfileProms = candidatesSearchResults.map(async (candidate) => {
+  // checking the origin of the articles
+  searchResults.results.map((result) => {
+    console.log("Title: ", result.title);
+    console.log("URL: ", result.url);
+  });
 
-//         const linkedinProfile = await linkedin.getCompany(candidate);
+  // use gpt to qualify the articles to make sure they are about our company and also about acquisitions
 
-//         return linkedinProfile
+  // use gpt to create summaries of the articles
 
-//       })
+  // insert the qualified articles into the database
 
-//       const candidateProfiles = (await Promise.all(candidateProfileProms)).filter(isNotNull)
+  // use gpt to extract from the articles the buyer, seller, backer, amount, date, and reason
 
-//       let profile
-//       if (candidateProfiles.length > 1) {
-//         profile = await llmChooseProfile(candidateProfiles, company.web_summary!)
-//       } else if (candidateProfiles.length === 1) {
-//         profile = candidateProfiles[0]
-//       }
+  // use gpt to create a description  of the transaction (company x buys company y on date for amount)
 
-//       if (!profile) {
-//         console.warn(`no profile found for ${company.name} [${company.id}]`);
-//         continue
-//       }
+  // generate an embedding for the transaction description
 
-//       const insertData = linkedin.sbFormat(profile);
+  // compare the embedding with other transactions in the database to see if it is a duplicate transaction
 
-//       const insertProfile = await sb.from("cmp_li_profile").insert(insertData);
-//       if (insertProfile.error) {
-//         console.log("failed to insert profile", insertProfile.error);
-//         throw insertProfile.error;
-//       }
+  console.log("End of Test");
+  return;
+}
 
-//       console.log("finished: ", company.name);
-//     } catch (error) {
-//       console.error("Failed: ", company.id, error);
-//     }
-
-//   }
-//   return;
-// }
-
-// main();
+main();

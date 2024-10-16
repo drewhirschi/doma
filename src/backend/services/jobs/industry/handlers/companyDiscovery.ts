@@ -36,13 +36,13 @@ export async function findSimilarCompanies(modelCmpId: number) {
 
   const queriesRes = await getStructuredCompletion({
     model: "gpt-4o-2024-08-06",
-    system: `List 3 search queries based of the summary of the company that will be provided.
-        use short descriptions of what the company does based on their products and services.
-        If the business operates on a local scale, include the locaiton in the query.
+    system: `List 3 search queries based on the summary of the company that will be provided.
+        Use short descriptions of what the company does based on their products and services.
+        If the business operates on a local scale, include the location in the query.
         Examples:
-        - an hvac company in scotsdale, arizona
-        - an electric company in seattle, washington
-        - cloud communications, Unified Communications as a Service (UCaaS) sector, and Contact Center as a Service (CCaaS) company
+        - An hvac company in Scotsdale, Arizona
+        - An electric company in Seattle, Washington
+        - Cloud communications, Unified Communications as a Service (UCaaS) sector, and Contact Center as a Service (CCaaS) company
         `,
     user: cmp.web_summary!,
     schema: SearchQuerySchema,

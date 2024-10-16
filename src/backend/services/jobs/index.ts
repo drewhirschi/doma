@@ -15,6 +15,7 @@ import { pathToFileURL } from "url";
 
 async function main() {
   await initIndustryWorker();
+  await initLinkedInWorker();
 }
 
 const jobStartHandler = (job: Job) => {

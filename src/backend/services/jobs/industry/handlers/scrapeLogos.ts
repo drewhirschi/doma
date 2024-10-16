@@ -11,6 +11,14 @@ import { getStructuredCompletion } from "../../llmHelpers";
 import { randomUUID } from "crypto";
 import svg2img from "svg2img";
 import { z } from "zod";
+import https from "https";
+
+const axiosInstance = axios.create({
+  headers: {
+    "User-Agent": "google-bot",
+  },
+  httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+});
 
 export async function scrapeCompanyLogos(
   job: SandboxedJob<z.infer<typeof companyIdSchema>>,
@@ -27,7 +35,9 @@ export async function scrapeCompanyLogos(
 
   const imgLogosFound = await scrapeImgLogos(sb, cmpGet.data);
   if (imgLogosFound) {
-    return;
+    if (imgLogosFound.length > 0) {
+      return;
+    }
   }
 
   await scrapeSvgLogos(sb, cmpGet.data);
@@ -146,7 +156,7 @@ async function scrapeImgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
     completion?.possibleLogos.map(async (logo) => {
       const logoUrl = new URL(logo.src, company.origin!).href;
       try {
-        const response = await axios.get(logoUrl, {
+        const response = await axiosInstance.get(logoUrl, {
           responseType: "arraybuffer",
         });
         const buffer = Buffer.from(response.data, "binary");
