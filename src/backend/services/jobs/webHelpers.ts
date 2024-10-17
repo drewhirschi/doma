@@ -349,3 +349,89 @@ export async function getCompanyName(url: string) {
 
   return companyName;
 }
+
+//---------ARTICLE CRAWLING FUNCTIONS---------//
+
+export async function getArticleContents(url: string) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    console.warn(`Timed out crawling: ${url}`);
+    controller.abort();
+  }, 7000);
+
+  try {
+    const response = await axiosInstance.get(url, {
+      signal: controller.signal,
+    });
+
+    const $ = load(response.data);
+
+    // Try common article tags
+    let articleText =
+      $("article").text() ||
+      $("main").text() ||
+      $('[class*="article"]').text() ||
+      $('[id*="article"]').text() ||
+      $('[class*="content"]').text() ||
+      $('[id*="content"]').text();
+
+    // If no article-like elements are found, fallback to getting the largest block of text
+    if (!articleText) {
+      const largestTextBlock = getLargestTextBlock($);
+      articleText = largestTextBlock;
+    }
+
+    return articleText.trim();
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      const error = e as AxiosError;
+      console.error(`Error crawling ${url}: ${error}`);
+      console.log(error.code, error.message, error.response?.data);
+    } else {
+      console.error(`Unknown error crawling ${url}: ${e}`);
+    }
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  return null;
+}
+
+// Helper function to get the largest block of text from the page
+function getLargestTextBlock($: any): string {
+  let maxLength = 0;
+  let largestText = "";
+
+  $("body *").each(function (this: HTMLElement) {
+    const elementText = $(this).text().trim();
+
+    // Skip non-visible elements (similar to tagVisible)
+    if (!articleTagVisible($(this))) {
+      return;
+    }
+
+    if (elementText.length > maxLength) {
+      maxLength = elementText.length;
+      largestText = elementText;
+    }
+  });
+
+  return largestText;
+}
+
+// Function to check if a tag is visible
+function articleTagVisible(element: any): boolean {
+  return (
+    element.css("display") !== "none" && element.css("visibility") !== "hidden"
+  );
+}
+
+// Function to create a summary of an article using GPT
+export async function summarizeArticle(title: string, pageText: string) {
+  const gptResponse = await getCompletion({
+    system: `You will be provided with content from an article. Summarize the article in 2-3 sentences in a concise and clear manner.`,
+    user: `Title: ${title}\n\nContent: ${pageText}`,
+  });
+
+  return gptResponse;
+}
