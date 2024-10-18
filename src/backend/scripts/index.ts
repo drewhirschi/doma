@@ -56,7 +56,7 @@ async function main() {
   const cmpGet = await sb
     .from("company_profile")
     .select()
-    .eq("id", 1250)
+    .eq("id", 66)
     .single();
   if (cmpGet.error) {
     throw cmpGet.error;
@@ -172,12 +172,60 @@ async function main() {
   console.log("Transaction Embeddings:", transactionEmbeddings);
 
   // compare the embedding with other transactions in the database to see if it is the same as a transaction already in the database (> 0.9)
+  const allExistingEmbeddings = await sb
+    .from("ma_transaction")
+    .select("id, emb");
+
+  const processedTransactions = await Promise.all(
+    transactionEmbeddings.map(async (newEmbedding, idx) => {
+      let isMatch = false;
+      let matchingTransactionId = null;
+
+      if (allExistingEmbeddings.error) {
+        throw allExistingEmbeddings.error;
+      }
+
+      // Loop through all existing embeddings to compare similarity
+      for (const existingTransaction of allExistingEmbeddings.data) {
+        const existingEmbedding = existingTransaction.emb;
+        //const similarity = computeSimilarity(newEmbedding, existingEmbedding);
+        const similarity = 0.95;
+
+        if (similarity > 0.9) {
+          isMatch = true;
+          matchingTransactionId = existingTransaction.id;
+          break;
+        }
+      }
+
+      if (isMatch) {
+        // If match found, skip adding new transaction, but store the existing transaction ID
+        console.log(
+          `Transaction ${idx + 1} matches existing transaction with ID: ${matchingTransactionId}`,
+        );
+
+        return null; // Indicate no new transaction was added
+      } else {
+        // If no match, add the new transaction to the database
+        console.log(`Added new transaction for Transaction ${idx + 1}`);
+
+        return null;
+      }
+    }),
+  );
+
+  // Filter out null values from processedTransactions (i.e., those that were matched and skipped)
+  const newTransactions = processedTransactions.filter(
+    (tx: null) => tx !== null,
+  );
+
+  console.log("New Transactions Added:", newTransactions);
 
   // if it is the same, just mark the transaction id, don't add to the database, if not, add to the database and mark the new id - ma_transaction
 
   // insert into the database the transaction linked to each company and their role - ma_partcpnt
 
-  // insert into the datbase the transaction linked to the article - ma_trans_support
+  // insert into the database the transaction linked to the article - ma_trans_support
 
   console.log("End of Test");
   return;
