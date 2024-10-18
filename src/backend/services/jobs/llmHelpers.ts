@@ -1,23 +1,39 @@
+import OpenAI, { AzureOpenAI } from "openai";
+
 import { ChatCompletionContentPart } from "openai/resources/chat/completions";
-import OpenAI from "openai";
 import path from "path";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 
-const openai = new OpenAI();
+const apiKey = process.env.OPENAI_API_KEY;
+
+export enum CompletionModels {
+  gpt4o = "gpt-4o",
+  gpt4oMini = "gpt-4o-mini",
+}
 
 interface CompletionOptions {
   system: string;
   user: string;
-  model?: string;
+  model?: CompletionModels;
   imageUrl?: string;
 }
 
 export async function getCompletion({
-  model = "gpt-4o-mini-2024-07-18",
+  model = CompletionModels.gpt4oMini,
   system,
   user,
 }: CompletionOptions): Promise<string | null> {
+  const deployment = model;
+  const apiVersion = "2024-08-01-preview";
+
+  const openai = new AzureOpenAI({
+    apiKey,
+    deployment,
+    apiVersion
+  });
+
+
   const completion = await openai.chat.completions.create({
     model,
     messages: [
@@ -37,7 +53,7 @@ interface StructuredCompletionOptions<Z extends z.ZodTypeAny>
 export async function getStructuredCompletion<
   Z extends z.ZodTypeAny = z.ZodNever,
 >({
-  model = "gpt-4o-mini-2024-07-18",
+  model = CompletionModels.gpt4oMini,
   system,
   user,
   schema,
@@ -51,6 +67,15 @@ export async function getStructuredCompletion<
       " seconds",
     );
   }, TIMEOUT_SECONDS * 1000);
+
+  const deployment = model;
+  const apiVersion = "2024-08-01-preview";
+
+  const openai = new AzureOpenAI({
+    apiKey,
+    deployment,
+    apiVersion
+  });
 
   try {
     const userMessageContent: Array<ChatCompletionContentPart> = [
@@ -83,9 +108,17 @@ export async function getStructuredCompletion<
 }
 
 export async function getEmbedding(text: string): Promise<number[]> {
+  const deployment = "text-embedding-3-large";
+  const apiVersion = "2023-05-15";
+
+  const openai = new AzureOpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    deployment,
+    apiVersion
+  });
+
   const embedding = await openai.embeddings.create({
     model: "text-embedding-3-large",
-    // model: "text-embedding-3-small",
     input: text,
   });
   return embedding.data[0].embedding;
