@@ -14,19 +14,21 @@ import {
   TableThead,
   TableTr,
 } from "@mantine/core";
-import { IconExternalLink } from "@tabler/icons-react";
-import { useState } from "react";
+import {
+  GoogleMap,
+  InfoWindow,
+  Marker,
+  useJsApiLoader,
+} from "@react-google-maps/api";
+
 import { AddToDealModal } from "./AddToDealModal";
+import { DistanceFilter } from "./DistanceFilter";
+import { IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
 import { SearchAndPage } from "../../SearchAndPage";
-import { DistanceFilter } from "./DistanceFilter";
-import {
-  useJsApiLoader,
-  GoogleMap,
-  Marker,
-  InfoWindow,
-} from "@react-google-maps/api";
+import { SimilarityBadge } from "./SimilarityBadge";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 
 interface CompanyWithSimilarity extends CompanyProfile_SB {
   similarity: number;
@@ -89,23 +91,19 @@ export default function CompanyList({
           </Anchor>
         </Group>
       </TableTd>
-      <TableTd>{element.similarity}</TableTd>
-      <TableTd>{element.origin}</TableTd>
       <TableTd>
-        <Group>
-          {element.origin && (
-            <ActionIcon
-              p={"xs"}
-              variant="subtle"
-              component={Link}
-              href={element.origin}
-              size="xl"
-              aria-label="Open in a new tab"
-            >
-              <IconExternalLink size={20} />
-            </ActionIcon>
-          )}
-        </Group>
+        <SimilarityBadge similarity={element.similarity} />
+      </TableTd>
+      <TableTd>{element.description}</TableTd>
+      <TableTd>
+        {element.origin && (
+          <Group>
+            <Anchor href={element.origin} c={"dark"} target="_blank">
+              {new URL(element.origin ?? "").hostname}
+            </Anchor>
+            <IconExternalLink size={16} />
+          </Group>
+        )}
       </TableTd>
     </TableTr>
   ));
@@ -272,7 +270,8 @@ export default function CompanyList({
                 />
               </TableTd>
               <TableTh>Name</TableTh>
-              <TableTh>Relevance score</TableTh>
+              <TableTh>Relevance</TableTh>
+              <TableTh>Description</TableTh>
               <TableTh>Website</TableTh>
             </TableTr>
           </TableThead>
