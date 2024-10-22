@@ -1,4 +1,3 @@
-import { RedirectType, redirect } from "next/navigation";
 import {
   Table,
   TableTbody,
@@ -8,7 +7,6 @@ import {
   TableTr,
 } from "@mantine/core";
 
-import Link from "next/link";
 import { isDefined } from "@/shared/types/typeHelpers";
 import { serverClient } from "@/shared/supabase-client/server";
 import { PAGE_SIZE } from "../shared";
@@ -43,13 +41,17 @@ export default async function Page({
           return undefined;
         }
 
+        const displayAmount =
+          element.amount === null || element.amount === 0
+            ? undefined
+            : element.amount;
+
         return (
           <TableTr key={element.id}>
             <TableTd>{element.date}</TableTd>
             <TableTd>{element.reason}</TableTd>
-            <TableTd>{element.amount}</TableTd>
             <TableTd>{element.description}</TableTd>
-            <TableTd>{element.emb}</TableTd>
+            <TableTd>{displayAmount ?? "Undisclosed"}</TableTd>
           </TableTr>
         );
       })
@@ -61,9 +63,8 @@ export default async function Page({
         <TableTr>
           <TableTh>Date</TableTh>
           <TableTh>Reason</TableTh>
-          <TableTh>Amount</TableTh>
           <TableTh>Description</TableTh>
-          <TableTh>Embedding</TableTh>
+          <TableTh>Amount</TableTh>
         </TableTr>
       </TableThead>
       <TableTbody>{rows}</TableTbody>

@@ -1,5 +1,9 @@
 import axios, { AxiosError } from "axios";
-import { getCompletion, getEmbedding } from "./llmHelpers.js";
+import {
+  getCompletion,
+  getEmbedding,
+  getStructuredCompletion,
+} from "./llmHelpers.js";
 
 import axiosRetry from "axios-retry";
 import { companyInfoScraping } from "./prompts.js";
@@ -350,14 +354,15 @@ export async function getCompanyName(url: string) {
   return companyName;
 }
 
-//---------ARTICLE CRAWLING FUNCTIONS---------//
+//-----------------ARTICLE CRAWLING FUNCTIONS-----------------//
 
+// Function to get the contents of an article from a URL
 export async function getArticleContents(url: string) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
     console.warn(`Timed out crawling: ${url}`);
     controller.abort();
-  }, 7000);
+  }, 15000);
 
   try {
     const response = await axiosInstance.get(url, {
@@ -366,7 +371,7 @@ export async function getArticleContents(url: string) {
 
     const $ = load(response.data);
 
-    // Try common article tags
+    // Try common article tags with expanded selectors for robustness
     let articleText =
       $("article").text() ||
       $("main").text() ||
@@ -376,9 +381,8 @@ export async function getArticleContents(url: string) {
       $('[id*="content"]').text();
 
     // If no article-like elements are found, fallback to getting the largest block of text
-    if (!articleText) {
-      const largestTextBlock = getLargestTextBlock($);
-      articleText = largestTextBlock;
+    if (!articleText || articleText.trim().length < 100) {
+      articleText = getLargestTextBlock($);
     }
 
     return articleText.trim();
@@ -402,19 +406,22 @@ function getLargestTextBlock($: any): string {
   let maxLength = 0;
   let largestText = "";
 
-  $("body *").each(function (this: HTMLElement) {
-    const elementText = $(this).text().trim();
+  // Iterate over elements and exclude common non-content tags
+  $("body *:not(nav):not(footer):not(header):not([class*='sidebar'])").each(
+    function (this: HTMLElement) {
+      const elementText = $(this).text().trim();
 
-    // Skip non-visible elements (similar to tagVisible)
-    if (!articleTagVisible($(this))) {
-      return;
-    }
+      // Skip non-visible elements
+      if (!articleTagVisible($(this))) {
+        return;
+      }
 
-    if (elementText.length > maxLength) {
-      maxLength = elementText.length;
-      largestText = elementText;
-    }
-  });
+      if (elementText.length > maxLength) {
+        maxLength = elementText.length;
+        largestText = elementText;
+      }
+    },
+  );
 
   return largestText;
 }
@@ -426,6 +433,36 @@ function articleTagVisible(element: any): boolean {
   );
 }
 
+// function to check if the article is relevant
+export async function isArticleRelevant(
+  articleUrl: string | null,
+  articleTitle: string | null,
+  companyName: string | null,
+  pageText: string | null,
+) {
+  try {
+    const { data } = await axiosInstance.get(articleUrl || "");
+    const $ = load(data);
+    const metaDescription = $('meta[name="description"]').attr("content");
+
+    if (!pageText) {
+      return false;
+    }
+
+    const gptResponse = await getCompletion({
+      system: `You will be provided with content scraped from an article. 
+      Your job is to decide if the article is both about the company - '${companyName}' - and about an acquisition involving this company.
+       Respond simply with true or false.`,
+      user: `Title: ${articleTitle}\n\nMeta Description: ${metaDescription}\n\nContent: ${pageText}`,
+    });
+
+    return gptResponse?.toLowerCase().includes("true");
+  } catch (error) {
+    console.error("Error scraping article:", error);
+    return false;
+  }
+}
+
 // Function to create a summary of an article using GPT
 export async function summarizeArticle(title: string, pageText: string) {
   const gptResponse = await getCompletion({
@@ -435,3 +472,43 @@ export async function summarizeArticle(title: string, pageText: string) {
 
   return gptResponse;
 }
+
+// Transaction schema
+const transactionSchema = z.object({
+  buyer: z.string(),
+  seller: z.string(),
+  backer: z.string(),
+  amount: z.string(),
+  date: z.string(),
+  reason: z.string(),
+  description: z.string(),
+});
+
+// Function to extract transaction details from an article using GPT
+export async function extractTransactionDetails(
+  title: string,
+  pageText: string,
+) {
+  const transaction = await getStructuredCompletion({
+    system: `Extract, if found, the buyer, seller, backer, amount, transaction date, and acquisition reason from the article and create a transaction report.
+    Then, create a brief description of the transaction with the non null values in this format: "Company A acquired Company B for $X million on DATE, backed by Company C for REASON."`,
+    user: `Title: ${title}\n\nContent: ${pageText}`,
+    schema: transactionSchema,
+  });
+
+  return transaction;
+}
+
+// RPC function to compare new transaction with existing transactions
+export async function compareTransactions(
+  newEmbedding: number[],
+  pageText: string,
+) {
+  // call the rpc to compare the new transaction with existing transactions and return the 10 most similar transactions
+
+  // then get the article text for the 10 transactions and use gpt to see if they are really the same transaction
+
+  return false;
+}
+
+// TODO: Function to check if a each company associated with the transaction is in the database

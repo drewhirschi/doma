@@ -7,7 +7,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
 import { companyIdSchema } from "@shared/queues/industry-queue.types";
 import { fullAccessServiceClient } from "@shared/supabase-client/server";
-import { getStructuredCompletion } from "../../llmHelpers";
+import { CompletionModels, getStructuredCompletion } from "../../llmHelpers";
 import { randomUUID } from "crypto";
 import svg2img from "svg2img";
 import { z } from "zod";
@@ -124,7 +124,7 @@ export async function scrapeSvgLogos(
         system: `You will be provided with an image and company name, your job is to respond with true if the image is a logo of the company.`,
         user: `Company name: ${company.name}`,
         imageUrl: dbLogo?.url,
-        model: "gpt-4o-2024-08-06",
+        model: CompletionModels.gpt4o,
       });
 
       if (!isLogoCheck?.isCompanyLogo) {

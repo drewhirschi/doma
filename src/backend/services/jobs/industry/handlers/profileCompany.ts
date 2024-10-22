@@ -1,4 +1,5 @@
 import {
+  CompletionModels,
   getCompletion,
   getEmbedding,
   getStructuredCompletion,
@@ -145,7 +146,7 @@ export async function extractCompanyName(cmpSummary: string) {
 
 export async function geocodeCompany(cmpSummary: string) {
   const queriesRes = await getStructuredCompletion({
-    // model: "gpt-4o-2024-08-06",
+    model: CompletionModels.gpt4o,
     system: `Extract addresses or general locations that we can use to geocode the company.
         `,
     user: cmpSummary,

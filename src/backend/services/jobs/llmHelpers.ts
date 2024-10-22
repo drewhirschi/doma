@@ -30,9 +30,8 @@ export async function getCompletion({
   const openai = new AzureOpenAI({
     apiKey,
     deployment,
-    apiVersion
+    apiVersion,
   });
-
 
   const completion = await openai.chat.completions.create({
     model,
@@ -53,7 +52,7 @@ interface StructuredCompletionOptions<Z extends z.ZodTypeAny>
 export async function getStructuredCompletion<
   Z extends z.ZodTypeAny = z.ZodNever,
 >({
-  model = CompletionModels.gpt4oMini,
+  model = CompletionModels.gpt4o,
   system,
   user,
   schema,
@@ -63,8 +62,8 @@ export async function getStructuredCompletion<
   const timeout = setTimeout(() => {
     console.warn(
       "getStructuredCompletion has not finished in " +
-      TIMEOUT_SECONDS +
-      " seconds",
+        TIMEOUT_SECONDS +
+        " seconds",
     );
   }, TIMEOUT_SECONDS * 1000);
 
@@ -74,7 +73,7 @@ export async function getStructuredCompletion<
   const openai = new AzureOpenAI({
     apiKey,
     deployment,
-    apiVersion
+    apiVersion,
   });
 
   try {
@@ -100,7 +99,6 @@ export async function getStructuredCompletion<
       return null;
     }
 
-
     return responseParsed as z.infer<Z>;
   } finally {
     clearTimeout(timeout);
@@ -114,7 +112,7 @@ export async function getEmbedding(text: string): Promise<number[]> {
   const openai = new AzureOpenAI({
     apiKey: process.env.OPENAI_API_KEY,
     deployment,
-    apiVersion
+    apiVersion,
   });
 
   const embedding = await openai.embeddings.create({
@@ -123,7 +121,6 @@ export async function getEmbedding(text: string): Promise<number[]> {
   });
   return embedding.data[0].embedding;
 }
-
 
 function splitArrayIntoGroups(arr: any[], numGroups = 4) {
   const result = [];

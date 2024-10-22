@@ -3,7 +3,7 @@ import { Job, SandboxedJob } from "bullmq";
 import Exa from "exa-js";
 import { IndustryQueueClient } from "../../../../../shared/queues/industry-queue";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
-import { getStructuredCompletion } from "../../llmHelpers";
+import { CompletionModels, getStructuredCompletion } from "../../llmHelpers";
 import { z } from "zod";
 
 export async function companyDiscovery(job: SandboxedJob) {
@@ -35,7 +35,7 @@ export async function findSimilarCompanies(modelCmpId: number) {
   });
 
   const queriesRes = await getStructuredCompletion({
-    model: "gpt-4o-2024-08-06",
+    model: CompletionModels.gpt4o,
     system: `List 3 search queries based on the summary of the company that will be provided.
         Use short descriptions of what the company does based on their products and services.
         If the business operates on a local scale, include the location in the query.
