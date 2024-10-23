@@ -3,6 +3,7 @@ import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import Exa from "exa-js";
 import {
   compareTransactions,
+  determineCompanyRole,
   extractTransactionDetails,
   getArticleContents,
   isArticleRelevant,
@@ -36,7 +37,7 @@ async function main() {
   const searchResults = await exa.search(`${company.name} acquisition`, {
     type: "keyword",
     useAutoprompt: true,
-    numResults: 5,
+    numResults: 30,
     category: "news",
     startPublishedDate: "2018-01-01",
   });
@@ -149,11 +150,45 @@ async function main() {
       // Perform the comparison (if needed) to find matching transactions
       const isMatch = await compareTransactions(
         transaction.embedding,
-        transaction.pageText || "",
+        transaction.description || "",
       );
 
-      if (isMatch) {
+      console.log(isMatch);
+
+      if (isMatch && isMatch > 0) {
         // You could associate the new transaction with the existing one here if needed
+        const { error: supportError } = await sb
+          .from("ma_trans_support")
+          .insert({
+            trans_id: isMatch,
+            article_id: transaction.article_id,
+          });
+
+        if (supportError) {
+          console.error(
+            `Error linking transaction ${isMatch} with article:`,
+            supportError.message,
+          );
+        }
+
+        // Finally, link the transaction with the company in "ma_partcpnt"
+        const companyRole = await determineCompanyRole(
+          company.name || "",
+          transaction.description || "",
+        );
+
+        const { error: partcpntError } = await sb.from("ma_partcpnt").insert({
+          trans_id: isMatch,
+          cmp_id: company.id,
+          role: companyRole?.toString(),
+        });
+
+        if (partcpntError) {
+          console.error(
+            `Error linking transaction ${isMatch} with company:`,
+            partcpntError.message,
+          );
+        }
       } else {
         // Insert the new transaction into the "ma_transaction" table
         const { data, error } = await sb
@@ -189,6 +224,25 @@ async function main() {
               supportError.message,
             );
           }
+
+          // Finally, link the transaction with the company in "ma_partcpnt"
+          const companyRole = await determineCompanyRole(
+            company.name || "",
+            transaction.description || "",
+          );
+
+          const { error: partcpntError } = await sb.from("ma_partcpnt").insert({
+            trans_id: data[0].id,
+            cmp_id: company.id,
+            role: companyRole?.toString(),
+          });
+
+          if (partcpntError) {
+            console.error(
+              `Error linking transaction ${data[0].id} with company:`,
+              partcpntError.message,
+            );
+          }
         }
       }
     }),
@@ -196,7 +250,7 @@ async function main() {
 
   // We need to check the database to see if we have the companies in the database and if not add them to the job queue to be added
 
-  // insert into the database the transaction linked to each company and their role based on the transactions - ma_partcpnt (trans_id (primary key), cmp_id (primary key), role)
+  // insert into the database the transaction linked to each remaining company
 
   console.log("End of Test");
   return;

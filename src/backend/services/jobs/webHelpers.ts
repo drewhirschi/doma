@@ -10,6 +10,7 @@ import { companyInfoScraping } from "./prompts.js";
 import { load } from "cheerio";
 import { z } from "zod";
 import https from "https";
+import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 
 const axiosInstance = axios.create({
   headers: {
@@ -362,7 +363,7 @@ export async function getArticleContents(url: string) {
   const timeoutId = setTimeout(() => {
     console.warn(`Timed out crawling: ${url}`);
     controller.abort();
-  }, 15000);
+  }, 25000);
 
   try {
     const response = await axiosInstance.get(url, {
@@ -502,13 +503,81 @@ export async function extractTransactionDetails(
 // RPC function to compare new transaction with existing transactions
 export async function compareTransactions(
   newEmbedding: number[],
-  pageText: string,
-) {
-  // call the rpc to compare the new transaction with existing transactions and return the 10 most similar transactions
+  description: string, // Description of the new transaction
+): Promise<number | null> {
+  const sb = fullAccessServiceClient();
 
-  // then get the article text for the 10 transactions and use gpt to see if they are really the same transaction
+  // Call the RPC function to get existing transactions
+  const { data, error } = await sb.rpc("match_transaction_embeddings", {
+    new_embedding: JSON.stringify(newEmbedding),
+    threshold: 0.99,
+  });
 
-  return false;
+  if (error) {
+    console.error("Error finding similar transactions:", error.message);
+    return null;
+  }
+
+  // Create a Map of existing transactions where key is the ID and value is the description
+  const existingTransactions = new Map<number, string>();
+  data.forEach((transaction: { id: number; description: string }) => {
+    existingTransactions.set(transaction.id, transaction.description);
+  });
+
+  data.forEach(
+    (transaction: {
+      id: number;
+      description: string;
+      similarity: number;
+      emb: string;
+    }) => {
+      console.log(transaction.similarity);
+    },
+  );
+
+  // Call checkSimilarTransactions with the new transaction description and existing transactions
+  const matchedId = await checkSimilarTransactions(
+    description,
+    existingTransactions,
+  );
+
+  return matchedId ?? 0;
 }
 
-// TODO: Function to check if a each company associated with the transaction is in the database
+// Function to use GPT to check if the new transaction is the same as any existing transactions based on similarity and description
+export async function checkSimilarTransactions(
+  newTransaction: string,
+  existingTransactions: Map<number, string>,
+): Promise<number | null> {
+  // Create a list of transaction descriptions with their IDs
+  const transactionList = Array.from(existingTransactions.entries())
+    .map(([id, desc]) => `ID: ${id}, Description: ${desc}`)
+    .join("\n");
+
+  // Use GPT to check if any existing transaction matches the new transaction
+  const gptResponse = await getCompletion({
+    system: `You will be provided with a new M&A transaction description and a list of existing transactions that matched above 0.9 with embedding comparisons.
+    Your job is to check if the new transaction is talking about the same transaction as any of the existing transactions.
+    Respond with the ID of the matching transaction if it is the same as any of the existing transactions. If none match, respond with "No Match".`,
+    user: `New Transaction: ${newTransaction}\n\nExisting Transactions:\n${transactionList}`,
+  });
+
+  const match = gptResponse?.match(/ID:\s*(\d+)/);
+
+  return match ? parseInt(match[1], 10) : null;
+}
+
+// Function using gpt to determine what role a company played in a transaction based on company name and transaction description
+export async function determineCompanyRole(
+  companyName: string,
+  transactionDescription: string,
+) {
+  const gptResponse = await getCompletion({
+    system: `You will be provided with the name of a company and a description of a transaction. Determine the role of the company in the transaction. Respond with either "buyer", "seller", or "backer". Only the word and nothing else.`,
+    user: `Company Name: ${companyName}\n\nTransaction Description: ${transactionDescription}`,
+  });
+
+  return gptResponse;
+}
+
+// Function to check if a each company associated with the transaction is in the database

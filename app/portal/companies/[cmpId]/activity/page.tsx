@@ -5,9 +5,13 @@ import {
   TableTh,
   TableThead,
   TableTr,
+  Accordion,
+  AccordionItem,
+  AccordionControl,
+  AccordionPanel,
+  Text,
 } from "@mantine/core";
 
-import { isDefined } from "@/shared/types/typeHelpers";
 import { serverClient } from "@/shared/supabase-client/server";
 import { PAGE_SIZE } from "../shared";
 
@@ -15,47 +19,108 @@ export default async function Page({
   params,
   searchParams,
 }: {
-  params: { projectId: string };
+  params: { cmpId: string };
   searchParams: { query: string; page: number };
 }) {
   const query = searchParams?.query || "";
   const page = Number(searchParams?.page) - 1 || 0;
+  const cmpId = Number(params.cmpId);
 
   const supabase = serverClient();
 
   const transactionsGet = await supabase
-    .from("ma_transaction")
-    .select("*")
-    .order("id", { ascending: false })
-    .limit(30)
+    .rpc("get_company_transactions_and_articles", { companyid: cmpId })
+    .order("transaction_id", { ascending: false })
     .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
 
   if (transactionsGet.error) {
     throw new Error(transactionsGet.error.message);
   }
 
-  const rows =
-    transactionsGet.data
-      ?.map((element) => {
-        if (!element) {
-          return undefined;
-        }
+  const groupedTransactions = transactionsGet.data.reduce(
+    (acc: { [key: number]: any }, element) => {
+      if (!element) return acc;
 
-        const displayAmount =
-          element.amount === null || element.amount === 0
-            ? undefined
-            : element.amount;
+      const {
+        transaction_id,
+        transaction_date,
+        reason,
+        description,
+        amount,
+        article_id,
+        article_title,
+        article_url,
+      } = element;
 
-        return (
-          <TableTr key={element.id}>
-            <TableTd>{element.date}</TableTd>
-            <TableTd>{element.reason}</TableTd>
-            <TableTd>{element.description}</TableTd>
-            <TableTd>{displayAmount ?? "Undisclosed"}</TableTd>
-          </TableTr>
-        );
-      })
-      .filter(isDefined) ?? [];
+      if (!acc[transaction_id]) {
+        acc[transaction_id] = {
+          transaction_date,
+          reason,
+          description,
+          amount,
+          articles: [],
+        };
+      }
+
+      if (article_id) {
+        acc[transaction_id].articles.push({ article_title, article_url });
+      }
+
+      return acc;
+    },
+    {},
+  );
+
+  const rows = Object.entries(groupedTransactions).map(
+    ([transaction_id, transaction]) => {
+      const displayAmount =
+        transaction.amount === null || transaction.amount === 0
+          ? undefined
+          : transaction.amount;
+
+      return (
+        <TableTr key={transaction_id}>
+          <TableTd>{transaction.transaction_date}</TableTd>
+          <TableTd>{transaction.reason}</TableTd>
+          <TableTd>{transaction.description}</TableTd>
+          <TableTd>{displayAmount ?? "Undisclosed"}</TableTd>
+          <TableTd>
+            <Accordion>
+              <AccordionItem value={transaction_id}>
+                <AccordionControl>Articles</AccordionControl>
+                <AccordionPanel>
+                  <ul>
+                    {transaction.articles.map(
+                      (
+                        article: {
+                          article_title: string;
+                          article_url: string;
+                        },
+                        index: number,
+                      ) => (
+                        <li key={index}>
+                          <strong>Title:</strong> {article.article_title}
+                          <br />
+                          <strong>URL:</strong>{" "}
+                          <a
+                            href={article.article_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {article.article_url}
+                          </a>
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
+          </TableTd>
+        </TableTr>
+      );
+    },
+  );
 
   return (
     <Table>
@@ -65,6 +130,7 @@ export default async function Page({
           <TableTh>Reason</TableTh>
           <TableTh>Description</TableTh>
           <TableTh>Amount</TableTh>
+          <TableTh>Articles</TableTh>
         </TableTr>
       </TableThead>
       <TableTbody>{rows}</TableTbody>

@@ -685,6 +685,73 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      compare_article_transaction: {
+        Args: {
+          new_embedding: number[]
+          threshold?: number
+        }
+        Returns: {
+          id: number
+          description: string
+          similarity: number
+          emb: number[]
+        }[]
+      }
+      cube:
+        | {
+            Args: {
+              "": number[]
+            }
+            Returns: unknown
+          }
+        | {
+            Args: {
+              "": number
+            }
+            Returns: unknown
+          }
+      cube_dim: {
+        Args: {
+          "": unknown
+        }
+        Returns: number
+      }
+      cube_in: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      cube_is_point: {
+        Args: {
+          "": unknown
+        }
+        Returns: boolean
+      }
+      cube_out: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      cube_recv: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      cube_send: {
+        Args: {
+          "": unknown
+        }
+        Returns: string
+      }
+      cube_size: {
+        Args: {
+          "": unknown
+        }
+        Returns: number
+      }
       current_profile_project_ids: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -707,6 +774,21 @@ export type Database = {
           key_length: number
         }
         Returns: string
+      }
+      get_company_transactions_and_articles: {
+        Args: {
+          companyid: number
+        }
+        Returns: {
+          transaction_id: number
+          transaction_date: string
+          reason: string
+          description: string
+          amount: number
+          article_id: string
+          article_title: string
+          article_url: string
+        }[]
       }
       get_user_tenant_id: {
         Args: {
@@ -817,6 +899,18 @@ export type Database = {
           id: string
           content: string
           similarity: number
+        }[]
+      }
+      match_transaction_embeddings: {
+        Args: {
+          new_embedding: string
+          threshold?: number
+        }
+        Returns: {
+          id: number
+          description: string
+          similarity: number
+          emb: string
         }[]
       }
       match_transactions_seller: {
