@@ -24,6 +24,12 @@ export async function queueCompanyProfiling(url: string) {
   queue.close();
 }
 
+export async function queueArticleScraping(cmpId: number) {
+  const queue = new IndustryQueueClient();
+  await queue.scrapeArticles(cmpId);
+  queue.close();
+}
+
 export async function deleteLogo(logo: CompanyLogo_SB) {
   const sb = serverActionClient();
   const deleteRow = await sb.from("cmp_logos").delete().eq("url", logo.url);
@@ -42,9 +48,7 @@ export async function updateCompanyLinkedinProfile(
   company: CompanyProfile_SB,
   newLiUrl: string,
 ) {
-
-
-  const linkedinApi = new RapidApiLinkdeInScraper()
+  const linkedinApi = new RapidApiLinkdeInScraper();
   const companySlug = parseCompanySlug(newLiUrl);
 
   if (!companySlug) {
@@ -59,7 +63,10 @@ export async function updateCompanyLinkedinProfile(
 
   const sb = serverActionClient();
 
-  const insertProfile = await sb.from("li_profile").insert(sbFormatProfile).select();
+  const insertProfile = await sb
+    .from("li_profile")
+    .insert(sbFormatProfile)
+    .select();
   if (insertProfile.error) {
     throw new Error("Failed to insert linkedin profile", {
       cause: insertProfile.error,
@@ -76,11 +83,5 @@ export async function updateCompanyLinkedinProfile(
     });
   }
 
-
-
-
   revalidatePath(`/portal/companies/${company.id}/overview`);
-
-
-
 }

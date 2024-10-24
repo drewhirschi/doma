@@ -10,17 +10,17 @@ import {
   summarizeArticle,
 } from "~/services/jobs/webHelpers";
 import { getEmbedding } from "~/services/jobs/llmHelpers";
+import { SandboxedJob } from "bullmq";
 
-async function main() {
-  console.log("Testing Company Acquisition Article Scraper");
-
+export async function scrapeArticles(job: SandboxedJob) {
+  const { cmpId } = job.data;
   const sb = fullAccessServiceClient();
 
   // get the company
   const cmpGet = await sb
     .from("company_profile")
     .select()
-    .eq("id", 66)
+    .eq("id", cmpId)
     .single();
   if (cmpGet.error) {
     throw cmpGet.error;
@@ -28,7 +28,6 @@ async function main() {
 
   // set up the company
   const company = cmpGet.data;
-  console.log("Finding Articles For: ", company.name);
 
   // set up the exa api
   const exa = new Exa(process.env.EXA_API_KEY);
@@ -50,8 +49,6 @@ async function main() {
     console.log("No articles found for the company.");
     return;
   }
-
-  console.log("Search Results:", searchResults.results);
 
   // Get article contents once and store them
   const articleContentsMap = new Map<string, string | null>();
@@ -83,8 +80,6 @@ async function main() {
     (article) => article !== null,
   );
 
-  console.log("Filtered Articles:", qualifiedArticles);
-
   // use gpt to create summaries of the articles
   const summarizedArticles = await Promise.all(
     qualifiedArticles.map(async (article) => {
@@ -98,8 +93,6 @@ async function main() {
       };
     }),
   );
-
-  console.log("Summarized Articles:", summarizedArticles);
 
   // insert the qualified articles into the database - ma_articles (url (primary key), publish_date, title, summary, text, author)
   await Promise.all(
@@ -132,8 +125,6 @@ async function main() {
     }),
   );
 
-  console.log("Transactions:", transactions);
-
   // generate an embedding for the transaction description
   const transactionEmbeddings = await Promise.all(
     transactions.map(async (transaction) => {
@@ -141,8 +132,6 @@ async function main() {
       return { ...transaction, embedding };
     }),
   );
-
-  console.log("Transaction Embeddings:", transactionEmbeddings);
 
   // compare the transaction embeddings to see if they match any existing transactions
   await Promise.all(
@@ -248,12 +237,8 @@ async function main() {
     }),
   );
 
-  // We need to check the database to see if we have the companies in the database and if not add them to the job queue to be added
+  // TODO: Check the database to see if we have the other involved companies in the database and if not add them to the job queue to be added
+  // then insert into the database the transaction linked to each remaining company
 
-  // insert into the database the transaction linked to each remaining company
-
-  console.log("End of Test");
   return;
 }
-
-main();

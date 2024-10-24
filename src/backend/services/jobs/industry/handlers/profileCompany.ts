@@ -92,9 +92,9 @@ export async function reduceCompanyPagesToProfile(job: SandboxedJob) {
   await linkedinQueue.getCompanyLinkedInProfile(companyGet.data.id);
   await linkedinQueue.close();
 
-  //const industryQueue = new IndustryQueueClient();
-  //await industryQueue.transactionDiscovery(companyGet.data.id);
-  //await industryQueue.close();
+  const industryQueue = new IndustryQueueClient();
+  await industryQueue.scrapeArticles(companyGet.data.id);
+  await industryQueue.close();
 }
 
 export function weightedAverage(

@@ -2,15 +2,12 @@ import { SandboxedJob } from "bullmq";
 import { companyDiscovery } from "./handlers/companyDiscovery";
 import { reduceCompanyPagesToProfile } from "./handlers/profileCompany";
 import { scrapeCompanyLogos } from "./handlers/scrapeLogos";
-import {
-  scrapeCompanyWebsite,
-} from "./handlers/scrapeCompanyWebsite";
+import { scrapeCompanyWebsite } from "./handlers/scrapeCompanyWebsite";
 import { transactionCompanyLinking } from "./handlers/transactionLinking";
 import { transactionDiscovery } from "./handlers/transactionDiscovery";
+import { scrapeArticles } from "./handlers/scrapeTransactions";
 
 export default async function (job: SandboxedJob) {
-
-
   switch (job.name) {
     case "company_discovery":
       return await companyDiscovery(job);
@@ -24,6 +21,8 @@ export default async function (job: SandboxedJob) {
       return await transactionCompanyLinking(job);
     case "scrape_logo":
       return await scrapeCompanyLogos(job);
+    case "scrape_ma_articles":
+      return await scrapeArticles(job);
     default:
       throw new Error("unknown_job_name");
   }

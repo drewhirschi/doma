@@ -11,8 +11,6 @@ export const scrapeWebsiteSchema = z.object({
   scrapeComps: z.boolean().optional(),
 });
 
-
-
 export const transactionLinkingSchema = z.object({
   trans_news_id: z.number(),
 });
@@ -26,6 +24,7 @@ export const jobSchemas = {
   transaction_discovery: companyIdSchema,
   transaction_linking: transactionLinkingSchema,
   scrape_logo: companyIdSchema,
+  scrape_ma_articles: companyIdSchema,
 };
 
 export type JobType = keyof typeof jobSchemas;
