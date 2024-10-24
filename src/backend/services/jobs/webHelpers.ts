@@ -3,6 +3,7 @@ import { getCompletion, getEmbedding } from "./llmHelpers.js";
 
 import axiosRetry from "axios-retry";
 import { companyInfoScraping } from "./prompts.js";
+import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import https from "https";
 import { load } from "cheerio";
 import { z } from "zod";
@@ -218,7 +219,7 @@ export async function getPageLinks(
 export async function indexPage(url: string) {
   const client = axios.create(baseAxiosOptions);
 
-  axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+  axiosRetry(client, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
   try {
     const response = await client.get(url);
