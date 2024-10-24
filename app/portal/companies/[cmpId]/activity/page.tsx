@@ -28,14 +28,16 @@ export default async function Page({
 
   const supabase = serverClient();
 
-  const transactionsGet = await supabase
-    .rpc("get_company_transactions_and_articles", { companyid: cmpId })
-    .order("transaction_id", { ascending: false })
-    .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
+  const transactionsGet = await supabase.rpc(
+    "get_company_transactions_and_articles",
+    { companyid: cmpId },
+  );
 
   if (transactionsGet.error) {
-    throw new Error(transactionsGet.error.message);
+    throw new Error(transactionsGet?.error.message);
   }
+
+  console.log(transactionsGet.data);
 
   const groupedTransactions = transactionsGet.data.reduce(
     (acc: { [key: number]: any }, element) => {
