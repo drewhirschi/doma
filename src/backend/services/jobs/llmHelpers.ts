@@ -53,7 +53,7 @@ interface StructuredCompletionOptions<Z extends z.ZodTypeAny>
 export async function getStructuredCompletion<
   Z extends z.ZodTypeAny = z.ZodNever,
 >({
-  model = CompletionModels.gpt4oMini,
+  model = CompletionModels.gpt4o,
   system,
   user,
   schema,

@@ -114,7 +114,6 @@ export async function scrapeSvgLogos(
         system: `You will be provided with an image and company name, your job is to respond with true if the image is a logo of the company.`,
         user: `Company name: ${company.name}`,
         imageUrl: dbLogo?.url,
-        model: "gpt-4o-2024-08-06",
       });
 
       if (!isLogoCheck?.isCompanyLogo) {
