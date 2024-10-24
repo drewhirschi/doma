@@ -1,19 +1,20 @@
 import {
+  Accordion,
+  AccordionControl,
+  AccordionItem,
+  AccordionPanel,
+  Anchor,
   Table,
   TableTbody,
   TableTd,
   TableTh,
   TableThead,
   TableTr,
-  Accordion,
-  AccordionItem,
-  AccordionControl,
-  AccordionPanel,
   Text,
 } from "@mantine/core";
 
-import { serverClient } from "@/shared/supabase-client/server";
 import { PAGE_SIZE } from "../shared";
+import { serverClient } from "@/shared/supabase-client/server";
 
 export default async function Page({
   params,
@@ -28,101 +29,51 @@ export default async function Page({
 
   const supabase = serverClient();
 
-  const transactionsGet = await supabase.rpc(
-    "get_company_transactions_and_articles",
-    { companyid: cmpId },
-  );
+  const cmpWithTransactionsGet = await supabase
+    .from("company_profile")
+    .select("*, ma_transaction(*, ma_articles(url, title))")
+    .eq("id", cmpId)
+    .single();
 
-  if (transactionsGet.error) {
-    throw new Error(transactionsGet?.error.message);
+  if (cmpWithTransactionsGet.error) {
+    throw new Error(cmpWithTransactionsGet?.error.message);
   }
 
-  console.log(transactionsGet.data);
+  const transactions = cmpWithTransactionsGet.data.ma_transaction;
 
-  const groupedTransactions = transactionsGet.data.reduce(
-    (acc: { [key: number]: any }, element) => {
-      if (!element) return acc;
-
-      const {
-        transaction_id,
-        transaction_date,
-        reason,
-        description,
-        amount,
-        article_id,
-        article_title,
-        article_url,
-      } = element;
-
-      if (!acc[transaction_id]) {
-        acc[transaction_id] = {
-          transaction_date,
-          reason,
-          description,
-          amount,
-          articles: [],
-        };
-      }
-
-      if (article_id) {
-        acc[transaction_id].articles.push({ article_title, article_url });
-      }
-
-      return acc;
-    },
-    {},
-  );
-
-  const rows = Object.entries(groupedTransactions).map(
-    ([transaction_id, transaction]) => {
-      const displayAmount =
-        transaction.amount === null || transaction.amount === 0
-          ? undefined
-          : transaction.amount;
-
-      return (
-        <TableTr key={transaction_id}>
-          <TableTd>{transaction.transaction_date}</TableTd>
-          <TableTd>{transaction.reason}</TableTd>
-          <TableTd>{transaction.description}</TableTd>
-          <TableTd>{displayAmount ?? "Undisclosed"}</TableTd>
-          <TableTd>
-            <Accordion>
-              <AccordionItem value={transaction_id}>
-                <AccordionControl>Articles</AccordionControl>
-                <AccordionPanel>
-                  <ul>
-                    {transaction.articles.map(
-                      (
-                        article: {
-                          article_title: string;
-                          article_url: string;
-                        },
-                        index: number,
-                      ) => (
-                        <li key={index}>
-                          <strong>Title:</strong> {article.article_title}
-                          <br />
-                          <strong>URL:</strong>{" "}
-                          <a
-                            href={article.article_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {article.article_url}
-                          </a>
-                        </li>
-                      ),
-                    )}
-                  </ul>
-                </AccordionPanel>
-              </AccordionItem>
-            </Accordion>
-          </TableTd>
-        </TableTr>
-      );
-    },
-  );
+  const rows = transactions.map((transaction) => {
+    console.log(transaction.id, transaction.ma_articles);
+    return (
+      <TableTr key={transaction.id}>
+        <TableTd>{transaction.date}</TableTd>
+        <TableTd>{transaction.reason}</TableTd>
+        <TableTd>{transaction.description}</TableTd>
+        <TableTd>{transaction.amount || "Undisclosed"}</TableTd>
+        <TableTd>
+          <Accordion>
+            <AccordionItem value={String(transaction.id)}>
+              <AccordionControl>Articles</AccordionControl>
+              <AccordionPanel>
+                <ul>
+                  {transaction.ma_articles.map((article, index: number) => (
+                    <li key={index}>
+                      <Anchor
+                        href={article.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {article.title}
+                      </Anchor>
+                    </li>
+                  ))}
+                </ul>
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
+        </TableTd>
+      </TableTr>
+    );
+  });
 
   return (
     <Table>
