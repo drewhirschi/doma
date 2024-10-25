@@ -135,3 +135,5 @@ dist
 tmp/
 dumps/
 .dist/
+
+src\backend\scripts\index.ts
