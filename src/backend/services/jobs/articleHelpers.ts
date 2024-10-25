@@ -88,6 +88,8 @@ export async function compareTransactions(
 ): Promise<number | null> {
   const sb = fullAccessServiceClient();
 
+  // TODO: Fix these to not run in parallel so the database is properly queried
+
   // Call the RPC function to get existing transactions
   const { data: existingTransactions, error } = await sb.rpc(
     "match_transaction_embeddings",
