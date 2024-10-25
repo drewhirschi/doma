@@ -1,5 +1,5 @@
+import { CompletionModels, getEmbedding, getStructuredCompletion } from "../../llmHelpers.js";
 import { Job, Queue, SandboxedJob } from "bullmq";
-import { getEmbedding, getStructuredCompletion } from "../../llmHelpers.js";
 
 import { IndustryQueueClient } from "@shared/queues/industry-queue.js";
 import { Redis } from "ioredis";
@@ -32,7 +32,6 @@ export async function transactionDiscovery(
     queries: z.array(z.string()),
   });
   const queriesRes = await getStructuredCompletion({
-    model: "gpt-4o-2024-08-06",
     system:
       "List 3 few-word-descriptions of what the company does based on their products and services",
     user: cmpGet.data.web_summary,

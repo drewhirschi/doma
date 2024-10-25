@@ -54,7 +54,9 @@ export default async function Page({
   const rows =
     similarityGet.data
       ?.map((sim) => {
-        const element = transactions?.find((x) => x.id === sim.transaction_id);
+        const element = transactions?.find(
+          (x: any) => x.id === sim.transaction_id,
+        );
 
         if (!element) {
           return undefined;
@@ -73,7 +75,8 @@ export default async function Page({
             <TableTd>{element.date}</TableTd>
             <TableTd>{element.reason}</TableTd>
             <TableTd>
-              {element.company_profile?.map((x) => x.name).join(", ") ?? ""}
+              {element.company_profile?.map((x: any) => x.name).join(", ") ??
+                ""}
             </TableTd>
           </TableTr>
         );
