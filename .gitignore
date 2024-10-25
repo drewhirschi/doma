@@ -136,4 +136,4 @@ tmp/
 dumps/
 .dist/
 
-src\backend\scripts\index.ts
+src/backend/scripts/index.ts
