@@ -1,5 +1,5 @@
+import { CompletionModels, getEmbedding, getStructuredCompletion } from "../../llmHelpers.js";
 import { Job, Queue, SandboxedJob } from "bullmq";
-import { getEmbedding, getStructuredCompletion } from "../../llmHelpers.js";
 
 import { IndustryQueueClient } from "@shared/queues/industry-queue.js";
 import { Redis } from "ioredis";

@@ -1,29 +1,22 @@
-import axios from "axios";
-import https from 'https';
+import { getEmbedding } from "../services/jobs/llmHelpers";
 
-const agent = new https.Agent({
-    rejectUnauthorized: false
-});
 async function main() {
 
-    try {
 
-        const res = await axios.get("https://rosenwellpetro.com", {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.142.86 Safari/537.36'
-            },
-            // httpsAgent: agent
-        })
+    const emb1 = await getEmbedding("hello world")
+    const emb2 = await getEmbedding("world, hello")
 
-        console.log('res', res.data)
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.log("axioserror", error.cause, error.message, error.status)
-        } else {
+    const sim = cosinesim(emb1, emb2)
 
-            console.log(error)
-        }
-    }
+    console.log(sim)
 }
 
 main()
+
+function cosinesim(emb1: number[], emb2: number[]) {
+
+    const dot = emb1.reduce((a, b, i) => a + b * emb2[i], 0);
+    const norm1 = Math.sqrt(emb1.reduce((a, b) => a + b * b, 0));
+    const norm2 = Math.sqrt(emb2.reduce((a, b) => a + b * b, 0));
+    return dot / (norm1 * norm2);
+}

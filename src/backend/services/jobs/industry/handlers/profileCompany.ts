@@ -1,4 +1,4 @@
-import { getCompletion, getEmbedding, getStructuredCompletion, recursiveDocumentReduction } from "../../llmHelpers.js";
+import { CompletionModels, getCompletion, getEmbedding, getStructuredCompletion, recursiveDocumentReduction } from "../../llmHelpers.js";
 
 import { Client } from "@googlemaps/google-maps-services-js";
 import { LinkedInQueueClient } from "@shared/queues/linkedin-queue.js";
@@ -149,9 +149,7 @@ export async function geocodeCompany(cmpSummary: string) {
     try {
 
         const queriesRes = await getStructuredCompletion({
-            // model: "gpt-4o-2024-08-06",
-            system: `Extract addresses or general locations that we can use to geocode the company.
-        `,
+            system: `Extract addresses or general locations that we can use to geocode the company.`,
             user: cmpSummary,
             schema: z.object({
                 headquaters: z.string(),

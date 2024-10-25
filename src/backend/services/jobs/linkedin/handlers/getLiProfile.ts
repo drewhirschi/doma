@@ -4,10 +4,6 @@ import { SandboxedJob } from "bullmq";
 import { fullAccessServiceClient } from "@shared/supabase-client/server";
 import { isNotNull } from "@shared/types/typeHelpers";
 
-
-
-
-
 export default async function handler(job: SandboxedJob) {
     return await getProfile(job.data.cmpId);
 
@@ -17,7 +13,7 @@ export async function getProfile(cmpId: number) {
 
 
     const sb = fullAccessServiceClient();
-    const companieGet = await sb.from("company_profile").select("*, cmp_li_profile(*)")
+    const companieGet = await sb.from("company_profile").select("*, li_profile(*)")
         .eq("id", cmpId).single();
 
 
@@ -29,7 +25,7 @@ export async function getProfile(cmpId: number) {
     const company = companieGet.data;
 
 
-    if (company.cmp_li_profile.length > 0) {
+    if (company.li_profile != null) {
         return "already indexed"
     }
 
@@ -71,18 +67,29 @@ export async function getProfile(cmpId: number) {
         const insertData = linkedin.sbFormat(profile);
 
 
-        const insertProfile = await sb.from("cmp_li_profile").insert(insertData);
+        const insertProfile = await sb.from("li_profile").upsert(insertData);
         if (insertProfile.error) {
             console.log("failed to insert profile", insertProfile.error);
             throw insertProfile.error;
         }
 
-        console.log("finished: ", company.name);
+        const linkProfiles = await sb
+            .from("company_profile")
+            .update({ liprofile_slug: profile.universalName })
+            .eq("id", company.id);
+        if (linkProfiles.error) {
+            console.log("failed to link profiles", linkProfiles.error);
+            throw linkProfiles.error;
+        }
+
+
+        return profile.universalName
+
     } catch (error) {
         console.error("Failed: ", company.id, error);
+        return "none_found"
     }
 
 
-    return;
 }
 
