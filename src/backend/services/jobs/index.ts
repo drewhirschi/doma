@@ -71,10 +71,10 @@ async function initLinkedInWorker() {
     removeOnComplete: { count: 200 },
     removeOnFail: { count: 1000 },
     limiter: {
-      max: 40,
-      duration: 1000,
-    }
-    // concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
+      max: 20,
+      duration: 60_000,
+    },
+    concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
   });
 
   linkedinWorker.on("active", jobStartHandler);

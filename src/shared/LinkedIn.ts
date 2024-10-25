@@ -1,9 +1,11 @@
+import { getCompletion, getStructuredCompletion } from "../backend/services/jobs/llmHelpers";
+
 import Bottleneck from "bottleneck";
 import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
-import { getCompletion } from "../backend/services/jobs/llmHelpers";
 import { googleSearch } from "../backend/services/jobs/googlesearch";
 import { isNotNull } from "./types/typeHelpers";
+import { z } from "zod";
 
 type ILinkedInCompany = {
     id: string;
@@ -266,17 +268,20 @@ export async function llmChooseProfile(
     profiles: ILinkedInCompany[],
     webSummary: string,
 ): Promise<ILinkedInCompany | null> {
-    const universalName = await getCompletion({
+    const res = await getStructuredCompletion({
         system: `Return the universalName and nothing else of the LinkedIn profile JSON that matchings the given summary more closely.`,
         user: `## Summary:\n${webSummary}\n\n## Profiles:\n${JSON.stringify(profiles)}`, // webSummary
+        schema: z.object({
+            universalName: z.string(),
+        }),
     });
 
-    if (!universalName) {
+    if (!res?.universalName) {
         console.warn("Failed to get universalName");
         return null;
     }
 
     return (
-        profiles.find((profile) => profile.universalName === universalName) || null
+        profiles.find((profile) => profile.universalName === res.universalName) || null
     );
 }
