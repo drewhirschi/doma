@@ -1,6 +1,6 @@
 import { serverClient } from "@/shared/supabase-client/server";
-import TransactionsTable from "../../../../../src/ux/components/TransactionsTable";
-import AddTransactions from "../../../../../src/ux/components/AddTransactions";
+import TransactionsTable from "./TransactionsTable";
+import AddTransactions from "./AddTransactions";
 
 export default async function Page({ params }: { params: { cmpId: string } }) {
   const cmpId = Number(params.cmpId);

@@ -2,7 +2,7 @@
 
 import { actionWithNotification } from "@/ux/clientComp";
 import { Button, Center, Stack, Title } from "@mantine/core";
-import { queueArticleScraping } from "../../../app/portal/companies/[cmpId]/overview/actions";
+import { queueArticleScraping } from "../overview/actions";
 
 export default function AddTransactions({ cmpId }: { cmpId: number }) {
   const handleScraping = async () => {

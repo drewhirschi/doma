@@ -5,10 +5,9 @@ import {
   compareTransactions,
   determineCompanyRole,
   extractTransactionDetails,
-  getArticleContents,
   isArticleRelevant,
   summarizeArticle,
-} from "~/services/jobs/webHelpers";
+} from "~/services/jobs/articleHelpers";
 import { getEmbedding } from "~/services/jobs/llmHelpers";
 import { SandboxedJob } from "bullmq";
 
@@ -33,13 +32,17 @@ export async function scrapeArticles(job: SandboxedJob) {
   const exa = new Exa(process.env.EXA_API_KEY);
 
   // search for company related acquisition articles from exa
-  const searchResults = await exa.search(`${company.name} acquisition`, {
-    type: "keyword",
-    useAutoprompt: true,
-    numResults: 25,
-    category: "news",
-    startPublishedDate: "2018-01-01",
-  });
+  const searchResults = await exa.searchAndContents(
+    `${company.name} acquisition`,
+    {
+      type: "keyword",
+      useAutoprompt: true,
+      numResults: 25,
+      category: "news",
+      startPublishedDate: "2018-01-01",
+      text: true,
+    },
+  );
 
   if (
     !searchResults ||
@@ -56,7 +59,7 @@ export async function scrapeArticles(job: SandboxedJob) {
   // First, get all article contents
   await Promise.all(
     searchResults.results.map(async (result) => {
-      const pageText = await getArticleContents(result.url);
+      const pageText = result.text;
       articleContentsMap.set(result.url, pageText);
     }),
   );

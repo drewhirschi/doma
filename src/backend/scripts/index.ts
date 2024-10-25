@@ -1,14 +1,14 @@
 require("dotenv").config({ path: "./.env.local" });
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
+import { isNotNull } from "@shared/types/typeHelpers";
 import Exa from "exa-js";
 import {
   compareTransactions,
   determineCompanyRole,
   extractTransactionDetails,
-  getArticleContents,
   isArticleRelevant,
   summarizeArticle,
-} from "~/services/jobs/webHelpers";
+} from "~/services/jobs/articleHelpers";
 import { getEmbedding } from "~/services/jobs/llmHelpers";
 
 async function main() {
@@ -34,85 +34,102 @@ async function main() {
   const exa = new Exa(process.env.EXA_API_KEY);
 
   // search for company related acquisition articles from exa
-  const searchResults = await exa.search(`${company.name} acquisition`, {
-    type: "keyword",
-    useAutoprompt: true,
-    numResults: 25,
-    category: "news",
-    startPublishedDate: "2018-01-01",
-  });
+  const searchAndContentResults = await exa.searchAndContents(
+    `${company.name} acquisition`,
+    {
+      type: "keyword",
+      useAutoprompt: true,
+      numResults: 5,
+      category: "news",
+      startPublishedDate: "2018-01-01",
+      text: true,
+    },
+  );
 
   if (
-    !searchResults ||
-    !searchResults.results ||
-    searchResults.results.length === 0
+    !searchAndContentResults ||
+    !searchAndContentResults.results ||
+    searchAndContentResults.results.length === 0
   ) {
-    console.log("No articles found for the company.");
-    return;
+    const noArticlesMessage = "No articles found for the company.";
+    console.log(noArticlesMessage);
+    return noArticlesMessage;
   }
 
-  console.log("Search Results:", searchResults.results);
+  console.log("Search Results:", searchAndContentResults.results);
+
+  // TODO: Insert into database now and get back only new articles
+
+  // TODO: Remove mapping of content to article URL and just use result object
 
   // Get article contents once and store them
   const articleContentsMap = new Map<string, string | null>();
 
   // First, get all article contents
   await Promise.all(
-    searchResults.results.map(async (result) => {
-      const pageText = await getArticleContents(result.url);
+    searchAndContentResults.results.map(async (result) => {
+      const pageText = result.text;
       articleContentsMap.set(result.url, pageText);
     }),
   );
 
   // Filter the articles based on GPT qualification
-  const filteredArticles = await Promise.all(
-    searchResults.results.map(async (result) => {
-      const pageText = articleContentsMap.get(result.url);
-      const isRelevant = await isArticleRelevant(
-        result.url,
-        result.title,
-        company.name,
-        pageText ?? null,
-      );
-      return isRelevant ? result : null;
-    }),
-  );
-
-  // Remove null values from filteredArticles
-  const qualifiedArticles = filteredArticles.filter(
-    (article) => article !== null,
-  );
+  const qualifiedArticles = (
+    await Promise.all(
+      searchAndContentResults.results.map(async (result) => {
+        const pageText = articleContentsMap.get(result.url);
+        const isRelevant = await isArticleRelevant(
+          result.url,
+          result.title,
+          company.name,
+          pageText ?? null,
+        );
+        return isRelevant ? result : null;
+      }),
+    )
+  ).filter(isNotNull);
 
   console.log("Filtered Articles:", qualifiedArticles);
 
-  // use gpt to create summaries of the articles
-  const summarizedArticles = await Promise.all(
+  // First, insert qualified articles without summaries into the database
+  const insertResult = await sb
+    .from("ma_articles")
+    .insert(
+      qualifiedArticles.map((article) => ({
+        url: article?.url || "",
+        publish_date: article?.publishedDate,
+        title: article?.title,
+        text: articleContentsMap.get(article?.url || ""),
+        author: article?.author,
+      })),
+    )
+    .select("url");
+
+  if (insertResult.error) {
+    console.error("Error inserting articles:", insertResult.error.message);
+  }
+
+  // Summarize each article, then update it with the new summary
+  await Promise.all(
     qualifiedArticles.map(async (article) => {
       const pageText = articleContentsMap.get(article?.url || "");
       const summary = await summarizeArticle(
         article?.title || "No Title",
         pageText || "No Content",
       );
-      return {
-        summary,
-      };
-    }),
-  );
 
-  console.log("Summarized Articles:", summarizedArticles);
+      // Update article with the summary
+      const updateResult = await sb
+        .from("ma_articles")
+        .update({ summary })
+        .eq("url", article?.url || "");
 
-  // insert the qualified articles into the database - ma_articles (url (primary key), publish_date, title, summary, text, author)
-  await Promise.all(
-    qualifiedArticles.map(async (article, idx) => {
-      const summary = summarizedArticles[idx].summary;
-      await sb.from("ma_articles").insert({
-        url: article?.url || "",
-        publish_date: article?.publishedDate,
-        title: article?.title,
-        summary: summary,
-        text: articleContentsMap.get(article?.url || ""),
-        author: article?.author,
-      });
+      if (updateResult.error) {
+        console.error(
+          `Error updating article summary for URL ${article?.url || ""}:`,
+          updateResult.error.message,
+        );
+      }
     }),
   );
 
@@ -144,18 +161,26 @@ async function main() {
 
   console.log("Transaction Embeddings:", transactionEmbeddings);
 
-  // compare the transaction embeddings to see if they match any existing transactions
+  // Compare the transaction embeddings to see if they match any existing transactions
   await Promise.all(
     transactionEmbeddings.map(async (transaction, idx) => {
-      // Perform the comparison (if needed) to find matching transactions
-      const isMatch = await compareTransactions(
-        transaction.embedding,
-        transaction.description || "",
-      );
+      let isMatch;
+      try {
+        // Perform the comparison (if needed) to find matching transactions
+        isMatch = await compareTransactions(
+          transaction.embedding,
+          transaction.description || "",
+        );
+      } catch (error) {
+        console.error(
+          `Error comparing transaction embeddings: ${(error as Error).message}`,
+        );
+        return;
+      }
 
       console.log(isMatch);
 
-      if (isMatch && isMatch > 0) {
+      if (isMatch && isMatch > -1) {
         // You could associate the new transaction with the existing one here if needed
         const { error: supportError } = await sb
           .from("ma_trans_support")
@@ -172,10 +197,18 @@ async function main() {
         }
 
         // Finally, link the transaction with the company in "ma_partcpnt"
-        const companyRole = await determineCompanyRole(
-          company.name || "",
-          transaction.description || "",
-        );
+        let companyRole;
+        try {
+          companyRole = await determineCompanyRole(
+            company.name || "",
+            transaction.description || "",
+          );
+        } catch (error) {
+          console.error(
+            `Error determining company role: ${(error as Error).message}`,
+          );
+          return;
+        }
 
         const { error: partcpntError } = await sb.from("ma_partcpnt").insert({
           trans_id: isMatch,
@@ -226,20 +259,28 @@ async function main() {
           }
 
           // Finally, link the transaction with the company in "ma_partcpnt"
-          const companyRole = await determineCompanyRole(
-            company.name || "",
-            transaction.description || "",
-          );
+          let companyRole;
+          try {
+            companyRole = await determineCompanyRole(
+              company.name || "",
+              transaction.description || "",
+            );
+          } catch (error) {
+            console.error(
+              `Error determining company role: ${(error as Error).message}`,
+            );
+            return;
+          }
 
           const { error: partcpntError } = await sb.from("ma_partcpnt").insert({
-            trans_id: data[0].id,
+            trans_id: insertedId,
             cmp_id: company.id,
             role: companyRole?.toString(),
           });
 
           if (partcpntError) {
             console.error(
-              `Error linking transaction ${data[0].id} with company:`,
+              `Error linking transaction ${insertedId} with company:`,
               partcpntError.message,
             );
           }
@@ -248,9 +289,9 @@ async function main() {
     }),
   );
 
-  // We need to check the database to see if we have the companies in the database and if not add them to the job queue to be added
+  // TODO: We need to check the database to see if we have the companies in the database and if not add them to the job queue to be added
 
-  // insert into the database the transaction linked to each remaining company
+  // TODO: Insert into the database the transaction linked to each remaining company
 
   console.log("End of Test");
   return;
