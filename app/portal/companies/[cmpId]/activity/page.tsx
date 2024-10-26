@@ -9,7 +9,9 @@ export default async function Page({ params }: { params: { cmpId: string } }) {
 
   const cmpWithTransactionsGet = await supabase
     .from("company_profile")
-    .select("*, ma_transaction(*, ma_articles(url, title))")
+    .select(
+      "*, ma_transaction(*, ma_articles(url, title, publish_date), participants:ma_partcpnt(role, company_profile(id, name)))",
+    )
     .eq("id", cmpId)
     .single();
 
@@ -17,16 +19,14 @@ export default async function Page({ params }: { params: { cmpId: string } }) {
     throw new Error(cmpWithTransactionsGet?.error.message);
   }
 
-  const transactions = cmpWithTransactionsGet.data.ma_transaction.map(
-    (transaction: any) => ({
-      ...transaction,
-      id: transaction.id.toString(),
-    }),
-  );
+  const transactions = cmpWithTransactionsGet.data.ma_transaction.map((transaction: any) => ({
+    ...transaction,
+    id: transaction.id.toString(),
+  }));
 
   if (!transactions || transactions.length === 0) {
     return <AddTransactions cmpId={cmpId} />;
   }
 
-  return <TransactionsTable transactions={transactions} />;
+  return <TransactionsTable transactions={transactions} cmpId={cmpId} />;
 }

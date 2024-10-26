@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { getCompletion, getStructuredCompletion } from "./llmHelpers.js";
 import { load } from "cheerio";
-import { z } from "zod";
+import { Schema, z } from "zod";
 import https from "https";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 
@@ -28,14 +28,17 @@ export async function isArticleRelevant(
       return false;
     }
 
-    const gptResponse = await getCompletion({
-      system: `You will be provided with content scraped from an article. 
-      Your job is to decide if the article is both about the company - '${companyName}' - and about an acquisition or merger involving this company.
-       Respond simply with true or false.`,
+    const gptResponse = await getStructuredCompletion({
+      schema: z.object({
+        relevant: z.boolean(),
+      }),
+      system: `You will be provided with content scraped from a webpage. 
+      If the page is a blog or news home of a company, it is not relevant.
+      If the page is both about the company - '${companyName}' - and about an acquisition or merger involving this company, it is relevant.`,
       user: `Title: ${articleTitle}\n\nMeta Description: ${metaDescription}\n\nContent: ${pageText}`,
     });
 
-    return gptResponse?.toLowerCase().includes("true");
+    return gptResponse?.relevant ?? false
   } catch (error) {
     console.error("Error scraping article:", error);
     return false;
@@ -58,10 +61,11 @@ const transactionSchema = z.object({
     z.object({
       name: z.string(),
       role: z.enum(["buyer", "seller", "backer", "advisor", "other"]),
+      context: z.string(),
     }),
   ),
   amount: z.string(),
-  date: z.string(),
+  date: z.string().nullable(),
   reason: z.string(),
   description: z.string(),
 });
@@ -72,7 +76,7 @@ export async function extractTransactionDetails(
   pageText: string,
 ) {
   const transaction = await getStructuredCompletion({
-    system: `Extract, if found, the participants (with roles of buyer, seller, backer, advisor, or other), amount, transaction date, and acquisition/merger reason from the article. Create a transaction report with this structure.
+    system: `Extract, if found, the participants (with roles of buyer, seller, backer, advisor, or other; and any context about who the company is and what they do.), amount, transaction date, and acquisition/merger reason from the article. Create a transaction report with this structure.
     Then, create a brief description of the transaction with the non-null values in this format: "Company A acquired Company B for $X million on DATE, backed by Company C for REASON."`,
     user: `Title: ${title}\n\nContent: ${pageText}`,
     schema: transactionSchema,
@@ -81,16 +85,21 @@ export async function extractTransactionDetails(
   return transaction;
 }
 
+export type SimialarTransaction = {
+  id: number;
+  description: string;
+  similarity: number;
+  emb: string;
+}
+
 // RPC function to compare new transaction with existing transactions
-export async function compareTransactions(
+export async function findExistingTransaction(
   newEmbedding: number[],
   description: string,
-): Promise<number | null> {
+): Promise<SimialarTransaction | null> {
   const sb = fullAccessServiceClient();
 
-  // TODO: Fix these to not run in parallel so the database is properly queried
 
-  // Call the RPC function to get existing transactions
   const { data: existingTransactions, error } = await sb.rpc(
     "match_transaction_embeddings",
     {
@@ -101,11 +110,11 @@ export async function compareTransactions(
 
   if (error) {
     console.error("Error finding similar transactions:", error.message);
-    return null;
+    throw new Error(error.message);
   }
 
-  if (!existingTransactions) {
-    return 0;
+  if (!existingTransactions || existingTransactions.length === 0) {
+    return null;
   }
 
   console.log("Existing Transactions:", existingTransactions);
@@ -116,7 +125,7 @@ export async function compareTransactions(
     existingTransactions,
   );
 
-  return matched?.id ?? null;
+  return matched;
 }
 
 // The schema for the transaction match response
@@ -127,8 +136,8 @@ const transactionMatchSchema = z.object({
 // Function to use GPT to check if the new transaction is the same as any existing transactions based on similarity and description
 export async function checkSimilarTransactions(
   newTransaction: string,
-  existingTransactions: { id: number; description: string }[],
-): Promise<{ id: number; description: string } | null> {
+  existingTransactions: SimialarTransaction[],
+): Promise<SimialarTransaction | null> {
   const transactionListXml = existingTransactions
     .map(
       ({ id, description }) => `
@@ -152,13 +161,12 @@ export async function checkSimilarTransactions(
   // Use GPT structured completion to check for matching transaction
   const gptResponse = await getStructuredCompletion({
     system: `You will be provided with a new M&A transaction description and a list of existing transactions.
-    Your job is to check if the new transaction is talking about the same transaction as any of the existing transactions.
-    Respond with the ID of the existing transaction that matches the new transaction, or return null if none match.`,
+    Your job is to check if the new transaction is referencing an existing transactions.
+    Respond with the id of the existing transaction that matches the new transaction, or return null if none match.`,
     user: xmlPayload,
     schema: transactionMatchSchema,
   });
 
-  // TODO: make sure the ID is a valid ID in the database
 
   return existingTransactions.find((x) => x.id == gptResponse?.id) ?? null;
 }

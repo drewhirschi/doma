@@ -62,8 +62,8 @@ export async function getStructuredCompletion<
   const timeout = setTimeout(() => {
     console.warn(
       "getStructuredCompletion has not finished in " +
-        TIMEOUT_SECONDS +
-        " seconds",
+      TIMEOUT_SECONDS +
+      " seconds",
     );
   }, TIMEOUT_SECONDS * 1000);
 
@@ -167,4 +167,33 @@ export async function recursiveDocumentReduction({
     );
     return await mergeDocs(reductions);
   }
+}
+
+export async function llmChooseItem<T extends { id: number }>(
+  options: T[],
+  lookingFor: string,
+  addtionalInstructions?: string
+): Promise<T | null> {
+
+  let system = `Return the id and nothing else of the item JSON that matchings the given description most closely. If none match respond with null.`
+  if (addtionalInstructions) {
+    system += `\n\n${addtionalInstructions}`
+  }
+
+  const res = await getStructuredCompletion({
+    schema: z.object({
+      id: z.number().nullable(),
+      confidence: z.enum(["low", "medium", "high"]).nullable(),
+    }),
+    system,
+    user: `# Description:\n${lookingFor}\n\n# Options:\n${JSON.stringify(options)}`,
+  });
+
+  if (!res?.id) {
+    return null;
+  }
+
+  return (
+    options.find((option) => option.id === res.id) || null
+  );
 }

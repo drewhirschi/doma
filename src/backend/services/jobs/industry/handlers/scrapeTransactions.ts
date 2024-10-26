@@ -1,18 +1,23 @@
-require("dotenv").config({ path: "./.env.local" });
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import Exa from "exa-js";
 import {
-  compareTransactions,
+  findExistingTransaction,
   determineCompanyRole,
   extractTransactionDetails,
   isArticleRelevant,
   summarizeArticle,
+  SimialarTransaction,
 } from "~/services/jobs/articleHelpers";
-import { getEmbedding } from "~/services/jobs/llmHelpers";
+import { getEmbedding, llmChooseItem } from "~/services/jobs/llmHelpers";
 import { SandboxedJob } from "bullmq";
+import { IndustryQueueClient } from "@shared/queues/industry-queue";
 
-export async function scrapeArticles(job: SandboxedJob) {
-  const { cmpId } = job.data;
+
+export default async function handler(job: SandboxedJob) {
+  return await scrapeArticles(job.data.cmpId);
+}
+export async function scrapeArticles(cmpId: number) {
+
   const sb = fullAccessServiceClient();
 
   // get the company
@@ -27,17 +32,18 @@ export async function scrapeArticles(job: SandboxedJob) {
 
   // set up the company
   const company = cmpGet.data;
+  console.log("Finding Articles For: ", company.name);
 
   // set up the exa api
   const exa = new Exa(process.env.EXA_API_KEY);
 
   // search for company related acquisition articles from exa
-  const searchResults = await exa.searchAndContents(
+  const searchAndContentResults = await exa.searchAndContents(
     `${company.name} acquisition`,
     {
       type: "keyword",
       useAutoprompt: true,
-      numResults: 25,
+      numResults: 5,
       category: "news",
       startPublishedDate: "2018-01-01",
       text: true,
@@ -45,203 +51,218 @@ export async function scrapeArticles(job: SandboxedJob) {
   );
 
   if (
-    !searchResults ||
-    !searchResults.results ||
-    searchResults.results.length === 0
+    !searchAndContentResults ||
+    !searchAndContentResults.results ||
+    searchAndContentResults.results.length === 0
   ) {
-    console.log("No articles found for the company.");
-    return;
+    const noArticlesMessage = "No articles found for the company.";
+    console.log(noArticlesMessage);
+    return noArticlesMessage;
   }
 
-  // Get article contents once and store them
-  const articleContentsMap = new Map<string, string | null>();
+  // const searchAndContentResults = {
+  //   results: exaRes
+  // }
 
-  // First, get all article contents
-  await Promise.all(
-    searchResults.results.map(async (result) => {
-      const pageText = result.text;
-      articleContentsMap.set(result.url, pageText);
-    }),
-  );
+
+  // First, insert qualified articles without summaries into the database
+  const insertResult = await sb
+    .from("ma_articles")
+    .upsert(
+      searchAndContentResults.results.map((article) => ({
+        url: article.url || "",
+        publish_date: article.publishedDate,
+        title: article.title,
+        text: article.text,
+        author: article?.author,
+      })), { ignoreDuplicates: true }
+    )
+    .select();
+
+  if (insertResult.error) {
+    console.error("Error inserting articles:", insertResult.error.message);
+    throw insertResult.error;
+  }
+
+  const articles = insertResult.data;
+
 
   // Filter the articles based on GPT qualification
-  const filteredArticles = await Promise.all(
-    searchResults.results.map(async (result) => {
-      const pageText = articleContentsMap.get(result.url);
+  const qualifiedResults = (await Promise.all(
+    articles.map(async (article) => {
       const isRelevant = await isArticleRelevant(
-        result.url,
-        result.title,
+        article.url,
+        article.title,
         company.name,
-        pageText ?? null,
+        article.text,
       );
-      return isRelevant ? result : null;
+      return isRelevant ?? false
     }),
-  );
+  ))
 
-  // Remove null values from filteredArticles
-  const qualifiedArticles = filteredArticles.filter(
-    (article) => article !== null,
-  );
+  const qualifiedArticles = articles.filter((_article, index) => qualifiedResults[index])
 
-  // use gpt to create summaries of the articles
-  const summarizedArticles = await Promise.all(
-    qualifiedArticles.map(async (article) => {
-      const pageText = articleContentsMap.get(article?.url || "");
-      const summary = await summarizeArticle(
-        article?.title || "No Title",
-        pageText || "No Content",
-      );
-      return {
-        summary,
-      };
-    }),
-  );
+  console.log("Filtered Articles:", qualifiedArticles);
 
-  // insert the qualified articles into the database - ma_articles (url (primary key), publish_date, title, summary, text, author)
-  await Promise.all(
-    qualifiedArticles.map(async (article, idx) => {
-      const summary = summarizedArticles[idx].summary;
-      await sb.from("ma_articles").insert({
-        url: article?.url || "",
-        publish_date: article?.publishedDate,
-        title: article?.title,
-        summary: summary,
-        text: articleContentsMap.get(article?.url || ""),
-        author: article?.author,
-      });
-    }),
-  );
+
+
+
 
   // use gpt to extract from the articles the buyer, seller, backer, amount, date, and reason and create a transaction description
-  const transactions = await Promise.all(
+  const articleTransactionDetails = await Promise.all(
     qualifiedArticles.map(async (article) => {
-      const pageText = articleContentsMap.get(article?.url || "");
       const transaction = await extractTransactionDetails(
-        article?.title || "",
-        pageText || "",
+        article?.title || "No title",
+        article.text || "No content",
       );
+      const embedding = await getEmbedding(transaction?.description || "");
+
       return {
-        ...transaction,
-        pageText,
-        article_id: article?.url || "",
+        transaction,
+        embedding,
+        ...article
       };
     }),
   );
 
-  // generate an embedding for the transaction description
-  const transactionEmbeddings = await Promise.all(
-    transactions.map(async (transaction) => {
-      const embedding = await getEmbedding(transaction?.description || "");
-      return { ...transaction, embedding };
-    }),
-  );
 
-  // compare the transaction embeddings to see if they match any existing transactions
-  await Promise.all(
-    transactionEmbeddings.map(async (transaction, idx) => {
+
+  // Compare the transaction embeddings to see if they match any existing transactions
+  for (const article of articleTransactionDetails) {
+    let existingTransaction: SimialarTransaction | null = null;
+    try {
       // Perform the comparison (if needed) to find matching transactions
-      const isMatch = await compareTransactions(
-        transaction.embedding,
-        transaction.description || "",
+      existingTransaction = await findExistingTransaction(
+        article.embedding,
+        article.transaction?.description || "",
       );
+    } catch (error) {
+      console.error(
+        `Error comparing transaction embeddings: ${(error as Error).message}`,
+      );
+      continue;
+    }
 
-      console.log(isMatch);
 
-      if (isMatch && isMatch > 0) {
-        // You could associate the new transaction with the existing one here if needed
-        const { error: supportError } = await sb
-          .from("ma_trans_support")
-          .insert({
-            trans_id: isMatch,
-            article_id: transaction.article_id,
-          });
+    if (existingTransaction) {
+      const { error: supportError } = await sb
+        .from("ma_trans_support")
+        .insert({
+          trans_id: existingTransaction.id,
+          article_id: article.url,
+        });
 
-        if (supportError) {
-          console.error(
-            `Error linking transaction ${isMatch} with article:`,
-            supportError.message,
-          );
+      if (supportError) {
+        console.error(
+          `Error linking transaction ${existingTransaction} with article:`,
+          supportError.message,
+        );
+      }
+
+    } else {
+      // Insert the new transaction into the "ma_transaction" table
+
+
+
+      const transactionInsert = await sb
+        .from("ma_transaction")
+        .insert({
+          reason: article.transaction?.reason,
+          emb: JSON.stringify(article.embedding),
+          description: article.transaction?.description,
+          amount: Number(article.transaction?.amount),
+          date: article.transaction?.date,
+        })
+        .select("id").single();
+
+      if (transactionInsert.error) {
+        console.error(
+          `Error inserting transaction for article ${article.url}:`,
+          transactionInsert.error.message,
+        );
+        continue;
+      }
+
+      // Now associate the new transaction with the article in "ma_trans_support"
+      const { error: supportError } = await sb
+        .from("ma_trans_support")
+        .insert({
+          trans_id: transactionInsert.data.id,
+          article_id: article.url,
+        });
+
+      if (supportError) {
+        console.error(
+          `Error linking transaction ${transactionInsert.data.id} with article:`,
+          supportError.message,
+        );
+      }
+
+      const insertPartcpntProms = article.transaction?.participants.map(async (participant) => {
+        let resolvedCmpId = await resolveParticipantCmpId(participant);
+
+        if (!resolvedCmpId) {
+          const cmpInsert = await sb.from("company_profile").insert({}).select().single()
+
+          if (cmpInsert.error) {
+            console.error(
+              `Error inserting transaction for article ${article.url}:`,
+              cmpInsert.error.message,
+            );
+            return
+            //TODO: better error handling
+          }
+
+          resolvedCmpId = cmpInsert.data.id
+
+          const industryQueue = new IndustryQueueClient();
+          industryQueue.findCompany(cmpInsert.data.id, participant)
+          await industryQueue.close()
         }
 
-        // Finally, link the transaction with the company in "ma_partcpnt"
-        const companyRole = await determineCompanyRole(
-          company.name || "",
-          transaction.description || "",
-        );
+        const particntToInsert = {
+          trans_id: transactionInsert.data.id,
+          cmp_id: resolvedCmpId,
+          role: participant.role,
+        };
 
-        const { error: partcpntError } = await sb.from("ma_partcpnt").insert({
-          trans_id: isMatch,
-          cmp_id: company.id,
-          role: companyRole?.toString(),
-        });
+        const { error: partcpntError } = await sb.from("ma_partcpnt").insert(particntToInsert);
 
         if (partcpntError) {
           console.error(
-            `Error linking transaction ${isMatch} with company:`,
+            `Error linking transaction ${existingTransaction} with company:`,
             partcpntError.message,
           );
         }
-      } else {
-        // Insert the new transaction into the "ma_transaction" table
-        const { data, error } = await sb
-          .from("ma_transaction")
-          .insert({
-            reason: transaction.reason,
-            emb: JSON.stringify(transaction.embedding),
-            description: transaction.description,
-            amount: Number(transaction.amount),
-            date: transaction.date,
-          })
-          .select("id");
+      })
 
-        if (error) {
-          console.error(
-            `Error inserting transaction ${idx + 1}:`,
-            error.message,
-          );
-        } else if (data && data.length > 0) {
-          const insertedId = data[0].id;
 
-          // Now associate the new transaction with the article in "ma_trans_support"
-          const { error: supportError } = await sb
-            .from("ma_trans_support")
-            .insert({
-              trans_id: insertedId,
-              article_id: transaction.article_id,
-            });
+    }
+  }
+}
 
-          if (supportError) {
-            console.error(
-              `Error linking transaction ${insertedId} with article:`,
-              supportError.message,
-            );
-          }
 
-          // Finally, link the transaction with the company in "ma_partcpnt"
-          const companyRole = await determineCompanyRole(
-            company.name || "",
-            transaction.description || "",
-          );
 
-          const { error: partcpntError } = await sb.from("ma_partcpnt").insert({
-            trans_id: data[0].id,
-            cmp_id: company.id,
-            role: companyRole?.toString(),
-          });
+export async function resolveParticipantCmpId(participant: { name: string, role: string, context: string }) {
+  const sb = fullAccessServiceClient();
 
-          if (partcpntError) {
-            console.error(
-              `Error linking transaction ${data[0].id} with company:`,
-              partcpntError.message,
-            );
-          }
-        }
-      }
-    }),
-  );
+  const participantDescription = `## ${participant.name}\n### Role: ${participant.role}\n${participant.context}`
+  const emb = await getEmbedding(participantDescription)
 
-  // TODO: Check the database to see if we have the other involved companies in the database and if not add them to the job queue to be added
-  // then insert into the database the transaction linked to each remaining company
+  const companiesGet = await sb.rpc("match_cmp_adaptive", {
+    match_count: 10,
+    query_embedding: emb as unknown as string,
+  })
 
-  return;
+  if (companiesGet.error) {
+    throw companiesGet.error
+  }
+
+  const companies = companiesGet.data.map(cmp => ({ id: cmp.id, name: cmp.name, summary: cmp.description ?? cmp.web_summary }))
+
+
+  const cmp = await llmChooseItem(companies, participantDescription, "We are determaining if a company in a news article is already in our database. We have pulled some possible mathces from our database. We want the names to plausibly be the same company.")
+
+
+  return cmp?.id;
 }

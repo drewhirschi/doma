@@ -38,6 +38,9 @@ export class IndustryQueueClient {
   async companyDiscovery(cmpId: number) {
     return await this.queue.add("company_discovery", { cmpId });
   }
+  async findCompany(cmpId: number, context: object) {
+    return await this.queue.add("find_company", { cmpId, context });
+  }
   async transactionDiscovery(cmpId: number) {
     return await this.queue.add("transaction_discovery", { cmpId });
   }
