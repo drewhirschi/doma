@@ -1,7 +1,7 @@
 import { Box, Button, Drawer, Group, Paper, TextInput } from "@mantine/core";
 
 import { actionWithNotification } from "../clientComp";
-import { queueCompanyProfiling } from "../../../app/portal/companies/[cmpId]/overview/actions";
+import { createCompany } from "../../../app/portal/companies/[cmpId]/overview/actions";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 
@@ -55,7 +55,7 @@ export function AddCompanyDrawer() {
                   }
 
                   await actionWithNotification(async () => {
-                    await queueCompanyProfiling(form.values.url);
+                    await createCompany(form.values.url);
                   });
                   form.reset();
                 }}

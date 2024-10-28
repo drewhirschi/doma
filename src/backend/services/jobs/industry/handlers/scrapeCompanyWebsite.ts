@@ -17,10 +17,7 @@ const addProtocolIfNeeded = (url: string) => {
     return hasProtocol ? url : `https://${url}`;
 };
 export async function scrapeCompanyWebsite(job: SandboxedJob<z.infer<typeof scrapeWebsiteSchema>>) {
-    const companyWebsite = new URL(addProtocolIfNeeded(job.data.url)).origin; // startUrl
-    if (!companyWebsite) {
-        throw new Error("Property 'url' is required in data payload");
-    }
+
 
     const supabase = fullAccessServiceClient();
 
@@ -28,37 +25,27 @@ export async function scrapeCompanyWebsite(job: SandboxedJob<z.infer<typeof scra
     const companyGet = await supabase
         .from("company_profile")
         .select()
-        .eq("origin", companyWebsite);
+        .eq("id", job.data.cmpId)
+        .single();
     if (companyGet.error) {
         throw companyGet.error;
-    } else if (companyGet.data.length > 0) {
-        // console.log("company already exists", companyGet.data[0].id)
-
-        company = companyGet.data[0];
-
-        if (company.web_summary && !job.data.force) {
-            console.log("web summary already exists", company.origin);
-            return "already indexed";
-        }
-    } else {
-        const createCompany = await supabase
-            .from("company_profile")
-            .insert({
-                origin: companyWebsite,
-            })
-            .select()
-            .single();
-
-        if (createCompany.error) {
-            throw createCompany.error;
-        }
-
-        company = createCompany.data;
     }
 
+    company = companyGet.data;
+
+    if (company.web_summary && !job.data.force) {
+        console.log("web summary already exists", company.origin);
+        return "already indexed";
+    }
+
+    if (!company.origin) {
+        throw new Error("company origin is required");
+    }
+
+
     const [companyName, favicon] = await Promise.all([
-        getCompanyName(companyWebsite),
-        getFaviconUrl(companyWebsite).catch(() => null),
+        getCompanyName(company.origin),
+        getFaviconUrl(company.origin).catch(() => null),
     ]);
 
     if (favicon || companyName) {
@@ -69,7 +56,7 @@ export async function scrapeCompanyWebsite(job: SandboxedJob<z.infer<typeof scra
     }
 
     const pagesUrls = Array.from(
-        await getPageLinks(companyWebsite, { limit: 50 }),
+        await getPageLinks(company.origin, { limit: 50 }),
     );
 
     const pagesGet = await supabase

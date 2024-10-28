@@ -5,8 +5,7 @@ export const companyIdSchema = z.object({
   cmpId: z.number(),
 });
 
-export const scrapeWebsiteSchema = z.object({
-  url: z.string(),
+export const scrapeWebsiteSchema = companyIdSchema.extend({
   force: z.boolean().optional(),
   scrapeComps: z.boolean().optional(),
 });

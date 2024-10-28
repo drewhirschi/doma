@@ -3,6 +3,7 @@
 import { RapidApiLinkdeInScraper, parseCompanySlug } from "@/shared/LinkedIn";
 
 import { IndustryQueueClient } from "@/shared/queues/industry-queue";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { serverActionClient } from "@/shared/supabase-client/server";
 
@@ -18,10 +19,42 @@ export async function queueFindIndustyActivity(cmpId: number) {
   queue.close();
 }
 
-export async function queueCompanyProfiling(url: string) {
+export async function createCompany(url: string) {
+  const sb = serverActionClient();
+
+  const addProtocolIfNeeded = (url: string) => {
+    const hasProtocol = /^https?:\/\//i.test(url);
+    return hasProtocol ? url : `https://${url}`;
+  };
+
+
+  const cmpGet = await sb.from("company_profile").select().ilike("origin", `%${new URL(url).hostname}%`).maybeSingle();
+
+
+  if (cmpGet.error) {
+    throw cmpGet.error;
+  }
+
+  let company = cmpGet.data;
+  if (!company) {
+    url = addProtocolIfNeeded(url);
+    const cmpInsert = await sb.from("company_profile").insert({ origin: new URL(url).origin }).select().single();
+    if (cmpInsert.error) {
+      throw cmpInsert.error;
+    }
+
+    company = cmpInsert.data;
+
+  }
+
+
+
   const queue = new IndustryQueueClient();
-  await queue.scrapeCompanyWebsite(url, { force: true });
+  await queue.scrapeCompanyWebsite(company.id, { force: false });
   queue.close();
+
+
+  redirect(`/portal/companies/${company.id}/overview`);
 }
 
 export async function deleteLogo(logo: CompanyLogo_SB) {
