@@ -39,9 +39,9 @@ export class IndustryQueueClient {
   async transactionDiscovery(cmpId: number) {
     return await this.queue.add("transaction_discovery", { cmpId });
   }
-  async scrapeCompanyWebsite(url: string, opts?: { force?: boolean, scrapeComps?: boolean }) {
+  async scrapeCompanyWebsite(cmpId: number, opts?: { force?: boolean, scrapeComps?: boolean }) {
     const params = {
-      url,
+      cmpId,
       force: opts?.force,
       scrapeComps: opts?.scrapeComps
     } as z.infer<typeof scrapeWebsiteSchema>;
