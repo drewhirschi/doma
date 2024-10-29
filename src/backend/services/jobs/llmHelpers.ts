@@ -45,13 +45,10 @@ export async function getCompletion({
   return completion.choices[0].message.content;
 }
 
-interface StructuredCompletionOptions<Z extends z.ZodTypeAny>
-  extends CompletionOptions {
+interface StructuredCompletionOptions<Z extends z.ZodTypeAny> extends CompletionOptions {
   schema: Z;
 }
-export async function getStructuredCompletion<
-  Z extends z.ZodTypeAny = z.ZodNever,
->({
+export async function getStructuredCompletion<Z extends z.ZodTypeAny = z.ZodNever>({
   model = CompletionModels.gpt4o,
   system,
   user,
@@ -60,11 +57,7 @@ export async function getStructuredCompletion<
 }: StructuredCompletionOptions<Z>): Promise<z.infer<Z> | null> {
   const TIMEOUT_SECONDS = 20;
   const timeout = setTimeout(() => {
-    console.warn(
-      "getStructuredCompletion has not finished in " +
-      TIMEOUT_SECONDS +
-      " seconds",
-    );
+    console.warn("getStructuredCompletion has not finished in " + TIMEOUT_SECONDS + " seconds");
   }, TIMEOUT_SECONDS * 1000);
 
   const deployment = model;
@@ -77,9 +70,7 @@ export async function getStructuredCompletion<
   });
 
   try {
-    const userMessageContent: Array<ChatCompletionContentPart> = [
-      { type: "text", text: user },
-    ];
+    const userMessageContent: Array<ChatCompletionContentPart> = [{ type: "text", text: user }];
     if (imageUrl) {
       userMessageContent.push({
         type: "image_url",
@@ -143,9 +134,7 @@ export async function recursiveDocumentReduction({
     const doc = await getCompletion({
       system: `You will receive a list of documents. Merge their information into one document. No need to mention in the final output that it is multiple documents merged.
       Additional information:\n ${instruction}`,
-      user: docs
-        .map((doc, idx) => `<doc${idx + 1}>\n${doc}\n</doc${idx + 1}>`)
-        .join("\n"),
+      user: docs.map((doc, idx) => `<doc${idx + 1}>\n${doc}\n</doc${idx + 1}>`).join("\n"),
     });
     if (!doc) {
       console.warn("Could not get completion");
@@ -161,9 +150,7 @@ export async function recursiveDocumentReduction({
   } else {
     const documentGroups = splitArrayIntoGroups(documents, 4);
     const reductions = await Promise.all(
-      documentGroups.map((docGroup) =>
-        recursiveDocumentReduction({ documents: docGroup, instruction }),
-      ),
+      documentGroups.map((docGroup) => recursiveDocumentReduction({ documents: docGroup, instruction })),
     );
     return await mergeDocs(reductions);
   }
@@ -172,12 +159,11 @@ export async function recursiveDocumentReduction({
 export async function llmChooseItem<T extends { id: number }>(
   options: T[],
   lookingFor: string,
-  addtionalInstructions?: string
+  addtionalInstructions?: string,
 ): Promise<T | null> {
-
-  let system = `Return the id and nothing else of the item JSON that matchings the given description most closely. If none match respond with null.`
+  let system = `Return the id and nothing else of the item JSON that matches the given description most closely. If none match respond with null.`;
   if (addtionalInstructions) {
-    system += `\n\n${addtionalInstructions}`
+    system += `\n\n${addtionalInstructions}`;
   }
 
   const res = await getStructuredCompletion({
@@ -193,7 +179,5 @@ export async function llmChooseItem<T extends { id: number }>(
     return null;
   }
 
-  return (
-    options.find((option) => option.id === res.id) || null
-  );
+  return options.find((option) => option.id === res.id) || null;
 }

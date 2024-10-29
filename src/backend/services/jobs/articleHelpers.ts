@@ -38,7 +38,7 @@ export async function isArticleRelevant(
       user: `Title: ${articleTitle}\n\nMeta Description: ${metaDescription}\n\nContent: ${pageText}`,
     });
 
-    return gptResponse?.relevant ?? false
+    return gptResponse?.relevant ?? false;
   } catch (error) {
     console.error("Error scraping article:", error);
     return false;
@@ -71,10 +71,7 @@ const transactionSchema = z.object({
 });
 
 // Function to extract transaction details from an article using GPT
-export async function extractTransactionDetails(
-  title: string,
-  pageText: string,
-) {
+export async function extractTransactionDetails(title: string, pageText: string) {
   const transaction = await getStructuredCompletion({
     system: `Extract, if found, the participants (with roles of buyer, seller, backer, advisor, or other; and any context about who the company is and what they do.), amount, transaction date, and acquisition/merger reason from the article. Create a transaction report with this structure.
     Then, create a brief description of the transaction with the non-null values in this format: "Company A acquired Company B for $X million on DATE, backed by Company C for REASON."`,
@@ -90,7 +87,7 @@ export type SimialarTransaction = {
   description: string;
   similarity: number;
   emb: string;
-}
+};
 
 // RPC function to compare new transaction with existing transactions
 export async function findExistingTransaction(
@@ -99,14 +96,10 @@ export async function findExistingTransaction(
 ): Promise<SimialarTransaction | null> {
   const sb = fullAccessServiceClient();
 
-
-  const { data: existingTransactions, error } = await sb.rpc(
-    "match_transaction_embeddings",
-    {
-      new_embedding: JSON.stringify(newEmbedding),
-      threshold: 0.9,
-    },
-  );
+  const { data: existingTransactions, error } = await sb.rpc("match_transaction_embeddings", {
+    new_embedding: JSON.stringify(newEmbedding),
+    threshold: 0.9,
+  });
 
   if (error) {
     console.error("Error finding similar transactions:", error.message);
@@ -120,10 +113,7 @@ export async function findExistingTransaction(
   console.log("Existing Transactions:", existingTransactions);
 
   // Call checkSimilarTransactions with the new transaction description and existing transactions
-  const matched = await checkSimilarTransactions(
-    description,
-    existingTransactions,
-  );
+  const matched = await checkSimilarTransactions(description, existingTransactions);
 
   return matched;
 }
@@ -161,21 +151,17 @@ export async function checkSimilarTransactions(
   // Use GPT structured completion to check for matching transaction
   const gptResponse = await getStructuredCompletion({
     system: `You will be provided with a new M&A transaction description and a list of existing transactions.
-    Your job is to check if the new transaction is referencing an existing transactions.
+    Your job is to check if the new transaction is referencing an existing transaction.
     Respond with the id of the existing transaction that matches the new transaction, or return null if none match.`,
     user: xmlPayload,
     schema: transactionMatchSchema,
   });
 
-
   return existingTransactions.find((x) => x.id == gptResponse?.id) ?? null;
 }
 
 // Function using gpt to determine what role a company played in a transaction based on company name and transaction description
-export async function determineCompanyRole(
-  companyName: string,
-  transactionDescription: string,
-) {
+export async function determineCompanyRole(companyName: string, transactionDescription: string) {
   const gptResponse = await getCompletion({
     system: `You will be provided with the name of a company and a description of a transaction. Determine the role of the company in the transaction. Respond with either "buyer", "seller", or "backer". Only the word and nothing else.`,
     user: `Company Name: ${companyName}\n\nTransaction Description: ${transactionDescription}`,
