@@ -1,7 +1,7 @@
-import axios, { AxiosError } from "axios";
-import { getCompletion, getStructuredCompletion } from "./llmHelpers.js";
+import axios from "axios";
+import { getCompletion, getEmbedding, getStructuredCompletion, llmChooseItem } from "./llmHelpers.js";
 import { load } from "cheerio";
-import { Schema, z } from "zod";
+import { z } from "zod";
 import https from "https";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 
@@ -11,6 +11,8 @@ const axiosInstance = axios.create({
   },
   httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 });
+
+// TODO 1: Fix relevancy filter to reject non single article links
 
 // function to check if the article is relevant
 export async function isArticleRelevant(
@@ -70,6 +72,8 @@ const transactionSchema = z.object({
   description: z.string(),
 });
 
+// TODO 2: Improve transaction extraction prompt to get correct participants if they are there; make date consistent
+
 // Function to extract transaction details from an article using GPT
 export async function extractTransactionDetails(title: string, pageText: string) {
   const transaction = await getStructuredCompletion({
@@ -123,6 +127,8 @@ const transactionMatchSchema = z.object({
   id: z.number().nullable(),
 });
 
+// TODO 3: Improve transaction matching prompt to make it more clear
+
 // Function to use GPT to check if the new transaction is the same as any existing transactions based on similarity and description
 export async function checkSimilarTransactions(
   newTransaction: string,
@@ -170,4 +176,34 @@ export async function determineCompanyRole(companyName: string, transactionDescr
   return gptResponse;
 }
 
-// Function to check if a each company associated with the transaction is in the database
+// TODO 4: Work on participant resolution so it better matches companies
+
+export async function resolveParticipantCmpId(participant: { name: string; role: string; context: string }) {
+  const sb = fullAccessServiceClient();
+
+  const participantDescription = `## ${participant.name}\n### Role: ${participant.role}\n${participant.context}`;
+  const emb = await getEmbedding(participantDescription);
+
+  const companiesGet = await sb.rpc("match_cmp_adaptive", {
+    match_count: 10,
+    query_embedding: emb as unknown as string,
+  });
+
+  if (companiesGet.error) {
+    throw companiesGet.error;
+  }
+
+  const companies = companiesGet.data.map((cmp) => ({
+    id: cmp.id,
+    name: cmp.name,
+    summary: cmp.description ?? cmp.web_summary,
+  }));
+
+  const cmp = await llmChooseItem(
+    companies,
+    participantDescription,
+    "We are determining if a company in a news article is already in our database. We have pulled some possible mathces from our database. We want the names to plausibly be the same company.",
+  );
+
+  return cmp?.id;
+}

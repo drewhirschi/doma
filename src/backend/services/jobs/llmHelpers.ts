@@ -1,7 +1,5 @@
-import OpenAI, { AzureOpenAI } from "openai";
-
+import { AzureOpenAI } from "openai";
 import { ChatCompletionContentPart } from "openai/resources/chat/completions";
-import path from "path";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 
@@ -156,12 +154,14 @@ export async function recursiveDocumentReduction({
   }
 }
 
+// TODO 4: Improve the llmChooseItem prompt to make it more clear and return null if no item is chosen
+
 export async function llmChooseItem<T extends { id: number }>(
   options: T[],
   lookingFor: string,
   addtionalInstructions?: string,
 ): Promise<T | null> {
-  let system = `Return the id and nothing else of the item JSON that matches the given description most closely. If none match respond with null.`;
+  let system = `Return the id and nothing else of the item JSON that matches the given description most closely. If none match, respond with null.`;
   if (addtionalInstructions) {
     system += `\n\n${addtionalInstructions}`;
   }

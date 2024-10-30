@@ -2,15 +2,15 @@ import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 import Exa from "exa-js";
 import {
   findExistingTransaction,
-  determineCompanyRole,
   extractTransactionDetails,
   isArticleRelevant,
-  summarizeArticle,
   SimialarTransaction,
+  resolveParticipantCmpId,
 } from "~/services/jobs/articleHelpers";
 import { getEmbedding, llmChooseItem } from "~/services/jobs/llmHelpers";
 import { SandboxedJob } from "bullmq";
 import { IndustryQueueClient } from "@shared/queues/industry-queue";
+import { exaRes } from "~/scripts/data";
 
 export default async function handler(job: SandboxedJob) {
   return await scrapeArticles(job.data.cmpId);
@@ -26,30 +26,34 @@ export async function scrapeArticles(cmpId: number) {
 
   // set up the company
   const company = cmpGet.data;
+
   console.log("Finding Articles For: ", company.name);
 
   // set up the exa api
   const exa = new Exa(process.env.EXA_API_KEY);
 
+  // TODO: Test different search queries to find the best way to get articles
+
   // search for company related acquisition articles from exa
-  const searchAndContentResults = await exa.searchAndContents(`${company.name} acquisition`, {
-    type: "keyword",
-    useAutoprompt: true,
-    numResults: 5,
-    category: "news",
-    startPublishedDate: "2018-01-01",
-    text: true,
-  });
+  //   const searchAndContentResults = await exa.searchAndContents(`${company.name} acquisition`, {
+  //     type: "keyword",
+  //     useAutoprompt: true,
+  //     numResults: 5,
+  //     category: "news",
+  //     startPublishedDate: "2018-01-01",
+  //     text: true,
+  //   });
 
-  if (!searchAndContentResults || !searchAndContentResults.results || searchAndContentResults.results.length === 0) {
-    const noArticlesMessage = "No articles found for the company.";
-    console.log(noArticlesMessage);
-    return noArticlesMessage;
-  }
+  //   if (!searchAndContentResults || !searchAndContentResults.results || searchAndContentResults.results.length === 0) {
+  //     const noArticlesMessage = "No articles found for the company.";
+  //     console.log(noArticlesMessage);
+  //     return noArticlesMessage;
+  //   }
 
-  // const searchAndContentResults = {
-  //   results: exaRes
-  // }
+  // Use for testing
+  const searchAndContentResults = {
+    results: exaRes,
+  };
 
   // First, insert qualified articles without summaries into the database
   const insertResult = await sb
@@ -73,6 +77,8 @@ export async function scrapeArticles(cmpId: number) {
 
   const articles = insertResult.data;
 
+  // TODO 1: Work on relevancy filtering
+
   // Filter the articles based on GPT qualification
   const qualifiedResults = await Promise.all(
     articles.map(async (article) => {
@@ -83,7 +89,9 @@ export async function scrapeArticles(cmpId: number) {
 
   const qualifiedArticles = articles.filter((_article, index) => qualifiedResults[index]);
 
-  console.log("Filtered Articles:", qualifiedArticles);
+  console.log("Qualified Articles:", qualifiedArticles);
+
+  // TODO 2: Work on transaction extraction
 
   // use gpt to extract from the articles the buyer, seller, backer, amount, date, and reason and create a transaction description
   const articleTransactionDetails = await Promise.all(
@@ -98,6 +106,8 @@ export async function scrapeArticles(cmpId: number) {
       };
     }),
   );
+
+  // TODO 3: Work on transaction matching
 
   // Compare the transaction embeddings to see if they match any existing transactions
   for (const article of articleTransactionDetails) {
@@ -149,6 +159,8 @@ export async function scrapeArticles(cmpId: number) {
         console.error(`Error linking transaction ${transactionInsert.data.id} with article:`, supportError.message);
       }
 
+      // TODO 4: Work on participant resolution
+
       const insertPartcpntProms = article.transaction?.participants.map(async (participant) => {
         let resolvedCmpId = await resolveParticipantCmpId(participant);
 
@@ -182,34 +194,6 @@ export async function scrapeArticles(cmpId: number) {
       });
     }
   }
-}
 
-export async function resolveParticipantCmpId(participant: { name: string; role: string; context: string }) {
-  const sb = fullAccessServiceClient();
-
-  const participantDescription = `## ${participant.name}\n### Role: ${participant.role}\n${participant.context}`;
-  const emb = await getEmbedding(participantDescription);
-
-  const companiesGet = await sb.rpc("match_cmp_adaptive", {
-    match_count: 10,
-    query_embedding: emb as unknown as string,
-  });
-
-  if (companiesGet.error) {
-    throw companiesGet.error;
-  }
-
-  const companies = companiesGet.data.map((cmp) => ({
-    id: cmp.id,
-    name: cmp.name,
-    summary: cmp.description ?? cmp.web_summary,
-  }));
-
-  const cmp = await llmChooseItem(
-    companies,
-    participantDescription,
-    "We are determaining if a company in a news article is already in our database. We have pulled some possible mathces from our database. We want the names to plausibly be the same company.",
-  );
-
-  return cmp?.id;
+  console.log("End of Scraping");
 }

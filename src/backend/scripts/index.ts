@@ -4,8 +4,7 @@ import { scrapeArticles } from "~/services/jobs/industry/handlers/scrapeTransact
 
 async function main() {
   console.log("Testing Company Acquisition Article Scraper");
-  scrapeArticles(123);
-  console.log("End of Test");
+  scrapeArticles(66);
   return;
 }
 
