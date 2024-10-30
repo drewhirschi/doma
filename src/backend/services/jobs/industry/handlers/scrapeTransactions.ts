@@ -53,39 +53,44 @@ export async function scrapeArticles(cmpId: number) {
     results: exaRes,
   };
 
-  // First, insert qualified articles without summaries into the database
-  const insertResult = await sb
-    .from("ma_articles")
-    .upsert(
-      searchAndContentResults.results.map((article) => ({
-        url: article.url || "",
-        publish_date: article.publishedDate,
-        title: article.title,
-        text: article.text,
-        author: article?.author,
-      })),
-      { ignoreDuplicates: true },
-    )
-    .select();
+  console.log("Articles:", searchAndContentResults.results);
 
-  if (insertResult.error) {
-    console.error("Error inserting articles:", insertResult.error.message);
-    throw insertResult.error;
-  }
-
-  const articles = insertResult.data;
-
-  console.log("Articles:", articles);
-
-  // Filter the articles based on GPT qualification
-  const qualifiedResults = await Promise.all(
-    articles.map(async (article) => {
+  // First, filter the articles based on GPT qualification
+  const filteredArticles = await Promise.all(
+    searchAndContentResults.results.map(async (article) => {
       const isRelevant = await isArticleRelevant(article.url, article.title, company.name, article.text);
-      return isRelevant ?? false;
+      return isRelevant
+        ? {
+            url: article.url || "",
+            publish_date: article.publishedDate,
+            title: article.title,
+            text: article.text,
+            author: article?.author,
+          }
+        : null;
     }),
   );
 
-  const qualifiedArticles = articles.filter((_article, index) => qualifiedResults[index]);
+  // Remove any null values from filteredArticles
+  const articlesToInsert = filteredArticles.filter(
+    (article): article is NonNullable<typeof article> => article !== null,
+  );
+
+  let qualifiedArticles: any[] = [];
+
+  // Only proceed with insertion if there are qualified articles
+  if (articlesToInsert.length > 0) {
+    const insertResult = await sb.from("ma_articles").upsert(articlesToInsert, { ignoreDuplicates: true }).select();
+
+    if (insertResult.error) {
+      console.error("Error inserting articles:", insertResult.error.message);
+      throw insertResult.error;
+    }
+
+    qualifiedArticles = insertResult.data.filter((article) => article !== null);
+  } else {
+    console.log("No qualified articles to insert.");
+  }
 
   console.log("Qualified Articles:", qualifiedArticles);
 
@@ -107,7 +112,6 @@ export async function scrapeArticles(cmpId: number) {
   for (const article of articleTransactionDetails) {
     let existingTransaction: SimialarTransaction | null = null;
     try {
-      // Perform the comparison (if needed) to find matching transactions
       existingTransaction = await findExistingTransaction(article.embedding, article.transaction?.description || "");
     } catch (error) {
       console.error(`Error comparing transaction embeddings: ${(error as Error).message}`);
@@ -124,7 +128,6 @@ export async function scrapeArticles(cmpId: number) {
         console.error(`Error linking transaction ${existingTransaction} with article:`, supportError.message);
       }
     } else {
-      // Insert the new transaction into the "ma_transaction" table
       const transactionInsert = await sb
         .from("ma_transaction")
         .insert({
@@ -142,7 +145,6 @@ export async function scrapeArticles(cmpId: number) {
         continue;
       }
 
-      // Now associate the new transaction with the article in "ma_trans_support"
       const { error: supportError } = await sb.from("ma_trans_support").insert({
         trans_id: transactionInsert.data.id,
         article_id: article.url,
@@ -154,34 +156,44 @@ export async function scrapeArticles(cmpId: number) {
 
       // TODO: Work on participant resolution
 
-      const insertPartcpntProms = article.transaction?.participants.map(async (participant) => {
-        let resolvedCmpId = await resolveParticipantCmpId(participant);
-
-        if (!resolvedCmpId) {
-          //   const cmpInsert = await sb.from("company_profile").insert({}).select().single();
-          //   if (cmpInsert.error) {
-          //     console.error(`Error inserting transaction for article ${article.url}:`, cmpInsert.error.message);
-          //     return;
-          //   }
-          //   resolvedCmpId = cmpInsert.data.id;
-          //   const industryQueue = new IndustryQueueClient();
-          //   industryQueue.findCompany(cmpInsert.data.id, participant);
-          //   await industryQueue.close();
-          console.log("Participant not found in database:", participant);
-        } else {
-          const particntToInsert = {
-            trans_id: transactionInsert.data.id,
-            cmp_id: resolvedCmpId,
-            role: participant.role,
-          };
-
-          const { error: partcpntError } = await sb.from("ma_partcpnt").insert(particntToInsert);
-
-          if (partcpntError) {
-            console.error(`Error linking transaction ${existingTransaction} with company:`, partcpntError.message);
+      const insertPartcpntProms = article.transaction?.participants.map(
+        async (participant: { role: any; name?: string; context?: string }) => {
+          if (!participant.name || !participant.role || !participant.context) {
+            console.error("Participant information is incomplete:", participant);
+            return;
           }
-        }
-      });
+          let resolvedCmpId = await resolveParticipantCmpId({
+            name: participant.name,
+            role: participant.role,
+            context: participant.context,
+          });
+
+          if (!resolvedCmpId) {
+            //   const cmpInsert = await sb.from("company_profile").insert({}).select().single();
+            //   if (cmpInsert.error) {
+            //     console.error(`Error inserting transaction for article ${article.url}:`, cmpInsert.error.message);
+            //     return;
+            //   }
+            //   resolvedCmpId = cmpInsert.data.id;
+            //   const industryQueue = new IndustryQueueClient();
+            //   industryQueue.findCompany(cmpInsert.data.id, participant);
+            //   await industryQueue.close();
+            console.log("Participant not found in database:", participant);
+          } else {
+            const particntToInsert = {
+              trans_id: transactionInsert.data.id,
+              cmp_id: resolvedCmpId,
+              role: participant.role,
+            };
+
+            const { error: partcpntError } = await sb.from("ma_partcpnt").insert(particntToInsert);
+
+            if (partcpntError) {
+              console.error(`Error linking transaction ${existingTransaction} with company:`, partcpntError.message);
+            }
+          }
+        },
+      );
     }
   }
 

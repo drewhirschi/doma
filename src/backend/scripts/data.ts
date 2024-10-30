@@ -1,7 +1,4 @@
 export const exaRes = [
-  // Notes: This test data include 5 articles. One of them should be rejected,
-  // 2 of them are about the same transaction, and the other 2 are about different transactions.
-
   // This article should be rejected from qualifying
   {
     id: "https://www.awpsafety.com/news/category/press-releases/",
@@ -81,3 +78,39 @@ export const particpnts = [
     context: "Financial advisor to AWP Safety.",
   },
 ];
+
+// First, insert qualified articles without summaries into the database
+//   const insertResult = await sb
+//     .from("ma_articles")
+//     .upsert(
+//       searchAndContentResults.results.map((article) => ({
+//         url: article.url || "",
+//         publish_date: article.publishedDate,
+//         title: article.title,
+//         text: article.text,
+//         author: article?.author,
+//       })),
+//       { ignoreDuplicates: true },
+//     )
+//     .select();
+
+//   if (insertResult.error) {
+//     console.error("Error inserting articles:", insertResult.error.message);
+//     throw insertResult.error;
+//   }
+
+//   const articles = insertResult.data;
+
+//   console.log("Articles:", articles);
+
+//   // Filter the articles based on GPT qualification
+//   const qualifiedResults = await Promise.all(
+//     articles.map(async (article) => {
+//       const isRelevant = await isArticleRelevant(article.url, article.title, company.name, article.text);
+//       return isRelevant ?? false;
+//     }),
+//   );
+
+//   const qualifiedArticles = articles.filter((_article, index) => qualifiedResults[index]);
+
+//   console.log("Qualified Articles:", qualifiedArticles);
