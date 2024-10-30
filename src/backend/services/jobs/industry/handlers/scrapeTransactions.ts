@@ -32,8 +32,6 @@ export async function scrapeArticles(cmpId: number) {
   // set up the exa api
   const exa = new Exa(process.env.EXA_API_KEY);
 
-  // TODO: Test different search queries to find the best way to get articles
-
   // search for company related acquisition articles from exa
   //   const searchAndContentResults = await exa.searchAndContents(`${company.name} acquisition`, {
   //     type: "keyword",
@@ -79,8 +77,6 @@ export async function scrapeArticles(cmpId: number) {
 
   console.log("Articles:", articles);
 
-  // TODO 1: Work on relevancy filtering
-
   // Filter the articles based on GPT qualification
   const qualifiedResults = await Promise.all(
     articles.map(async (article) => {
@@ -92,8 +88,6 @@ export async function scrapeArticles(cmpId: number) {
   const qualifiedArticles = articles.filter((_article, index) => qualifiedResults[index]);
 
   console.log("Qualified Articles:", qualifiedArticles);
-
-  // TODO 2: Work on transaction extraction
 
   // use gpt to extract from the articles the buyer, seller, backer, amount, date, and reason and create a transaction description
   const articleTransactionDetails = await Promise.all(
@@ -108,8 +102,6 @@ export async function scrapeArticles(cmpId: number) {
       };
     }),
   );
-
-  // TODO 3: Work on transaction matching
 
   // Compare the transaction embeddings to see if they match any existing transactions
   for (const article of articleTransactionDetails) {
@@ -133,7 +125,6 @@ export async function scrapeArticles(cmpId: number) {
       }
     } else {
       // Insert the new transaction into the "ma_transaction" table
-
       const transactionInsert = await sb
         .from("ma_transaction")
         .insert({
@@ -161,7 +152,7 @@ export async function scrapeArticles(cmpId: number) {
         console.error(`Error linking transaction ${transactionInsert.data.id} with article:`, supportError.message);
       }
 
-      // TODO 4: Work on participant resolution
+      // TODO: Work on participant resolution
 
       const insertPartcpntProms = article.transaction?.participants.map(async (participant) => {
         let resolvedCmpId = await resolveParticipantCmpId(participant);

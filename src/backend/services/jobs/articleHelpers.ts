@@ -12,8 +12,6 @@ const axiosInstance = axios.create({
   httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 });
 
-// TODO 1: Fix relevancy filter to reject non single article links
-
 // function to check if the article is relevant
 export async function isArticleRelevant(
   articleUrl: string | null,
@@ -30,12 +28,45 @@ export async function isArticleRelevant(
       return false;
     }
 
+    let system = `Assess whether a single article matches the criteria of being about an M&A (Merger and Acquisition) event related to the specified company.
+
+Evaluate based on these criteria:
+1. **M&A Topic**: The article's content (title and page text) should indicate it covers M&A activity, such as mergers, acquisitions, joint ventures, divestitures, or takeovers.
+2. **Company Mention**: Ensure the specified company, '${companyName}', is mentioned prominently and in connection with the M&A event.
+3. **Single Article Check**: Confirm the content represents a single article about the event (not a homepage, list, or collection of articles).
+
+# Output
+Return true if all criteria are met; otherwise, return false.
+
+# Examples
+
+**Input**:
+1. **URL**: "https://example.com/company-announcement"
+   - **Title**: "TechCorp announces acquisition of InnovateX"
+   - **Company Name**: "TechCorp"
+   - **Page Text**: "TechCorp recently announced its acquisition of InnovateX, marking a major expansion in its market."
+
+2. **URL**: "https://example.com/business-news"
+   - **Title**: "Daily Business News Roundup"
+   - **Company Name**: "TechCorp"
+   - **Page Text**: "The latest news from various industries, including acquisitions, mergers, and other updates."
+
+**Output**:
+1. **Result**: true
+
+2. **Result**: false
+   
+   # Notes
+
+- The company's name should be either prominently mentioned in the title or several times throughout the article text.
+- The text should contain specific language related to mergers, acquisitions, deals, or other synonymous phrases.
+- Ignore URLs pointing to non-specific collections or unrelated company news.`;
+
     const gptResponse = await getStructuredCompletion({
       schema: z.object({
         relevant: z.boolean(),
       }),
-      system: `You will receive content from a webpage. If the page is a company blog or news homepage, it is not relevant. Only return true if it's a company-specific M&A news article.
-      If the page is both about the company - '${companyName}' - and about an acquisition or merger involving this company, it is relevant.`,
+      system: system,
       user: `Title: ${articleTitle}\n\nMeta Description: ${metaDescription}\n\nContent: ${pageText}`,
     });
 
@@ -47,14 +78,14 @@ export async function isArticleRelevant(
 }
 
 // Function to create a summary of an article using GPT
-export async function summarizeArticle(title: string, pageText: string) {
-  const gptResponse = await getCompletion({
-    system: `You will be provided with content from an article. Summarize the article in 2-3 sentences in a concise and clear manner.`,
-    user: `Title: ${title}\n\nContent: ${pageText}`,
-  });
+// export async function summarizeArticle(title: string, pageText: string) {
+//   const gptResponse = await getCompletion({
+//     system: `You will be provided with content from an article. Summarize the article in 2-3 sentences in a concise and clear manner.`,
+//     user: `Title: ${title}\n\nContent: ${pageText}`,
+//   });
 
-  return gptResponse;
-}
+//   return gptResponse;
+// }
 
 // Transaction schema
 const transactionSchema = z.object({
@@ -70,8 +101,6 @@ const transactionSchema = z.object({
   reason: z.string(),
   description: z.string(),
 });
-
-// TODO 2: Improve transaction extraction prompt to get correct participants if they are there; make date consistent
 
 // Function to extract transaction details from an article using GPT
 export async function extractTransactionDetails(title: string, pageText: string) {
@@ -114,7 +143,6 @@ export async function findExistingTransaction(
     return null;
   }
 
-  // Call checkSimilarTransactions with the new transaction description and existing transactions
   const matched = await checkSimilarTransactions(description, existingTransactions);
 
   return matched;
@@ -124,8 +152,6 @@ export async function findExistingTransaction(
 const transactionMatchSchema = z.object({
   id: z.number().nullable(),
 });
-
-// TODO 3: Improve transaction matching prompt to make it more clear
 
 // Function to use GPT to check if the new transaction is the same as any existing transactions based on similarity and description
 export async function checkSimilarTransactions(
@@ -152,7 +178,6 @@ export async function checkSimilarTransactions(
     </transactionCheck>
   `;
 
-  // Use GPT structured completion to check for matching transaction
   const gptResponse = await getStructuredCompletion({
     system: `You will be provided with a new M&A transaction description and a list of existing transactions.
     Your job is to determine if the new transaction is referencing an existing transaction.
@@ -165,17 +190,45 @@ export async function checkSimilarTransactions(
 }
 
 // Function using gpt to determine what role a company played in a transaction based on company name and transaction description
-export async function determineCompanyRole(companyName: string, transactionDescription: string) {
-  const gptResponse = await getCompletion({
-    system: `You will be provided with the name of a company and a description of a transaction. Determine the role of the company in the transaction. Respond with either "buyer", "seller", or "backer". Only the word and nothing else.`,
-    user: `Company Name: ${companyName}\n\nTransaction Description: ${transactionDescription}`,
-  });
+// export async function determineCompanyRole(companyName: string, transactionDescription: string) {
+//   const gptResponse = await getCompletion({
+//     system: `You will be provided with the name of a company and a description of a transaction. Determine the role of the company in the transaction. Respond with either "buyer", "seller", or "backer". Only the word and nothing else.`,
+//     user: `Company Name: ${companyName}\n\nTransaction Description: ${transactionDescription}`,
+//   });
 
-  return gptResponse;
-}
+//   return gptResponse;
+// }
 
-// TODO 4: Work on participant resolution so it better matches companies
-// TODO 5: Fix timeout issue with the rpc
+const fakeCompanies = [
+  {
+    id: 1,
+    name: "TechCorp",
+    summary: "TechCorp specializes in innovative technology solutions and recently acquired NextGen Systems.",
+  },
+  {
+    id: 2,
+    name: "GreenEarth Industries",
+    summary:
+      "GreenEarth is a leader in renewable energy and eco-friendly initiatives, focused on sustainable practices.",
+  },
+  {
+    id: 3,
+    name: "HealthSolutions Inc.",
+    summary: "A healthcare company providing medical software and services, partnered with WellnessCorp.",
+  },
+  {
+    id: 4,
+    name: "FinanceHub",
+    summary: "FinanceHub provides investment and banking solutions, with recent expansion into wealth management.",
+  },
+  {
+    id: 5,
+    name: "BuildSmart Construction",
+    summary:
+      "BuildSmart specializes in sustainable construction materials and recently merged with EcoBuild Solutions.",
+  },
+];
+// TODO: Fix timeout issue with the rpc
 
 export async function resolveParticipantCmpId(participant: { name: string; role: string; context: string }) {
   try {
@@ -189,31 +242,26 @@ export async function resolveParticipantCmpId(participant: { name: string; role:
       .ilike("name", `%${participant.name}%`)
       .limit(1);
 
-    // If you get a simple match, use it, else proceed with the RPC
     if (quickResolve.data?.length) {
       return quickResolve.data[0].id;
     }
 
-    const companiesGet = await sb.rpc("match_cmp_adaptive", {
-      match_count: 10,
-      query_embedding: emb as unknown as string,
-    });
+    // const companiesGet = await sb.rpc("match_cmp_adaptive", {
+    //   match_count: 10,
+    //   query_embedding: emb as unknown as string,
+    // });
 
-    if (companiesGet.error) {
-      throw companiesGet.error;
-    }
+    // if (companiesGet.error) {
+    //   throw companiesGet.error;
+    // }
 
-    const companies = companiesGet.data.map((cmp) => ({
-      id: cmp.id,
-      name: cmp.name,
-      summary: cmp.description ?? cmp.web_summary,
-    }));
+    // const companies = companiesGet.data.map((cmp) => ({
+    //   id: cmp.id,
+    //   name: cmp.name,
+    //   summary: cmp.description ?? cmp.web_summary,
+    // }));
 
-    const cmp = await determineParticipant(companies, participantDescription);
-
-    if (!cmp) {
-      console.log("No confident match found for participant:", participant.name);
-    }
+    const cmp = await determineParticipant(fakeCompanies, participantDescription);
 
     return cmp?.id || null;
   } catch (error) {
@@ -242,9 +290,7 @@ async function determineParticipant<T extends { id: number }>(options: T[], look
       user: `# Participant Description:\n${lookingFor}\n\n# Options:\n${JSON.stringify(options)}`,
     });
 
-    // Only accept high-confidence matches; otherwise, return null
     if (!res || res.confidence !== "high" || !res.id) {
-      console.log("Low or medium confidence, or no match:", res);
       return null;
     }
 
