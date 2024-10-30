@@ -7,7 +7,7 @@ import {
   SimialarTransaction,
   resolveParticipantCmpId,
 } from "~/services/jobs/articleHelpers";
-import { getEmbedding, llmChooseItem } from "~/services/jobs/llmHelpers";
+import { getEmbedding } from "~/services/jobs/llmHelpers";
 import { SandboxedJob } from "bullmq";
 import { IndustryQueueClient } from "@shared/queues/industry-queue";
 import { exaRes } from "~/scripts/data";
@@ -76,6 +76,8 @@ export async function scrapeArticles(cmpId: number) {
   }
 
   const articles = insertResult.data;
+
+  console.log("Articles:", articles);
 
   // TODO 1: Work on relevancy filtering
 
@@ -165,31 +167,28 @@ export async function scrapeArticles(cmpId: number) {
         let resolvedCmpId = await resolveParticipantCmpId(participant);
 
         if (!resolvedCmpId) {
-          const cmpInsert = await sb.from("company_profile").insert({}).select().single();
+          //   const cmpInsert = await sb.from("company_profile").insert({}).select().single();
+          //   if (cmpInsert.error) {
+          //     console.error(`Error inserting transaction for article ${article.url}:`, cmpInsert.error.message);
+          //     return;
+          //   }
+          //   resolvedCmpId = cmpInsert.data.id;
+          //   const industryQueue = new IndustryQueueClient();
+          //   industryQueue.findCompany(cmpInsert.data.id, participant);
+          //   await industryQueue.close();
+          console.log("Participant not found in database:", participant);
+        } else {
+          const particntToInsert = {
+            trans_id: transactionInsert.data.id,
+            cmp_id: resolvedCmpId,
+            role: participant.role,
+          };
 
-          if (cmpInsert.error) {
-            console.error(`Error inserting transaction for article ${article.url}:`, cmpInsert.error.message);
-            return;
-            //TODO: better error handling
+          const { error: partcpntError } = await sb.from("ma_partcpnt").insert(particntToInsert);
+
+          if (partcpntError) {
+            console.error(`Error linking transaction ${existingTransaction} with company:`, partcpntError.message);
           }
-
-          resolvedCmpId = cmpInsert.data.id;
-
-          const industryQueue = new IndustryQueueClient();
-          industryQueue.findCompany(cmpInsert.data.id, participant);
-          await industryQueue.close();
-        }
-
-        const particntToInsert = {
-          trans_id: transactionInsert.data.id,
-          cmp_id: resolvedCmpId,
-          role: participant.role,
-        };
-
-        const { error: partcpntError } = await sb.from("ma_partcpnt").insert(particntToInsert);
-
-        if (partcpntError) {
-          console.error(`Error linking transaction ${existingTransaction} with company:`, partcpntError.message);
         }
       });
     }

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getCompletion, getEmbedding, getStructuredCompletion, llmChooseItem } from "./llmHelpers.js";
+import { getCompletion, getEmbedding, getStructuredCompletion } from "./llmHelpers.js";
 import { load } from "cheerio";
 import { z } from "zod";
 import https from "https";
@@ -26,7 +26,7 @@ export async function isArticleRelevant(
     const $ = load(data);
     const metaDescription = $('meta[name="description"]').attr("content");
 
-    if (!pageText) {
+    if (!pageText || pageText.length < 200 || metaDescription?.includes("homepage")) {
       return false;
     }
 
@@ -34,8 +34,7 @@ export async function isArticleRelevant(
       schema: z.object({
         relevant: z.boolean(),
       }),
-      system: `You will be provided with content scraped from a webpage. 
-      If the page is a blog or news home of a company, it is not relevant.
+      system: `You will receive content from a webpage. If the page is a company blog or news homepage, it is not relevant. Only return true if it's a company-specific M&A news article.
       If the page is both about the company - '${companyName}' - and about an acquisition or merger involving this company, it is relevant.`,
       user: `Title: ${articleTitle}\n\nMeta Description: ${metaDescription}\n\nContent: ${pageText}`,
     });
@@ -77,8 +76,9 @@ const transactionSchema = z.object({
 // Function to extract transaction details from an article using GPT
 export async function extractTransactionDetails(title: string, pageText: string) {
   const transaction = await getStructuredCompletion({
-    system: `Extract, if found, the participants (with roles of buyer, seller, backer, advisor, or other; and any context about who the company is and what they do.), amount, transaction date, and acquisition/merger reason from the article. Create a transaction report with this structure.
-    Then, create a brief description of the transaction with the non-null values in this format: "Company A acquired Company B for $X million on DATE, backed by Company C for REASON."`,
+    system: `You will receive content from a news article related to M&A. Extract from the article, if found, the transaction details such as the participants 
+    (buyer, seller, backer, advisor, or other, as well as any context you can provide about their participation.), transaction amount, date, and reason for the merger/acquisition.
+    Also, make a brief summary of non-null values in the format "Company A acquired Company B for $X million on DATE, with backing from Company C for REASON." Only use provided information.`,
     user: `Title: ${title}\n\nContent: ${pageText}`,
     schema: transactionSchema,
   });
@@ -102,7 +102,7 @@ export async function findExistingTransaction(
 
   const { data: existingTransactions, error } = await sb.rpc("match_transaction_embeddings", {
     new_embedding: JSON.stringify(newEmbedding),
-    threshold: 0.9,
+    threshold: 0.95,
   });
 
   if (error) {
@@ -113,8 +113,6 @@ export async function findExistingTransaction(
   if (!existingTransactions || existingTransactions.length === 0) {
     return null;
   }
-
-  console.log("Existing Transactions:", existingTransactions);
 
   // Call checkSimilarTransactions with the new transaction description and existing transactions
   const matched = await checkSimilarTransactions(description, existingTransactions);
@@ -157,7 +155,7 @@ export async function checkSimilarTransactions(
   // Use GPT structured completion to check for matching transaction
   const gptResponse = await getStructuredCompletion({
     system: `You will be provided with a new M&A transaction description and a list of existing transactions.
-    Your job is to check if the new transaction is referencing an existing transaction.
+    Your job is to determine if the new transaction is referencing an existing transaction.
     Respond with the id of the existing transaction that matches the new transaction, or return null if none match.`,
     user: xmlPayload,
     schema: transactionMatchSchema,
@@ -177,33 +175,82 @@ export async function determineCompanyRole(companyName: string, transactionDescr
 }
 
 // TODO 4: Work on participant resolution so it better matches companies
+// TODO 5: Fix timeout issue with the rpc
 
 export async function resolveParticipantCmpId(participant: { name: string; role: string; context: string }) {
-  const sb = fullAccessServiceClient();
+  try {
+    const sb = fullAccessServiceClient();
+    const participantDescription = `## ${participant.name}\n### Role: ${participant.role}\n${participant.context}`;
+    const emb = await getEmbedding(participantDescription);
 
-  const participantDescription = `## ${participant.name}\n### Role: ${participant.role}\n${participant.context}`;
-  const emb = await getEmbedding(participantDescription);
+    const quickResolve = await sb
+      .from("company_profile")
+      .select("id, name")
+      .ilike("name", `%${participant.name}%`)
+      .limit(1);
 
-  const companiesGet = await sb.rpc("match_cmp_adaptive", {
-    match_count: 10,
-    query_embedding: emb as unknown as string,
-  });
+    // If you get a simple match, use it, else proceed with the RPC
+    if (quickResolve.data?.length) {
+      return quickResolve.data[0].id;
+    }
 
-  if (companiesGet.error) {
-    throw companiesGet.error;
+    const companiesGet = await sb.rpc("match_cmp_adaptive", {
+      match_count: 10,
+      query_embedding: emb as unknown as string,
+    });
+
+    if (companiesGet.error) {
+      throw companiesGet.error;
+    }
+
+    const companies = companiesGet.data.map((cmp) => ({
+      id: cmp.id,
+      name: cmp.name,
+      summary: cmp.description ?? cmp.web_summary,
+    }));
+
+    const cmp = await determineParticipant(companies, participantDescription);
+
+    if (!cmp) {
+      console.log("No confident match found for participant:", participant.name);
+    }
+
+    return cmp?.id || null;
+  } catch (error) {
+    console.error("Error in resolveParticipantCmpId:", error);
+    return null;
   }
+}
 
-  const companies = companiesGet.data.map((cmp) => ({
-    id: cmp.id,
-    name: cmp.name,
-    summary: cmp.description ?? cmp.web_summary,
-  }));
+async function determineParticipant<T extends { id: number }>(options: T[], lookingFor: string): Promise<T | null> {
+  try {
+    const system = `
+      You are determining if a participant from a news article matches any company in our database. 
+      You are given a description of the participant and possible company options from our database. 
+      Only return the id if you are confident it is the correct company, based on clear matching details.
 
-  const cmp = await llmChooseItem(
-    companies,
-    participantDescription,
-    "We are determining if a company in a news article is already in our database. We have pulled some possible mathces from our database. We want the names to plausibly be the same company.",
-  );
+      If none of the options represent the same company with high certainty, return null instead.
+      Do not guess or provide a match unless you are certain.
+    `;
 
-  return cmp?.id;
+    const res = await getStructuredCompletion({
+      schema: z.object({
+        id: z.number().nullable(),
+        confidence: z.enum(["low", "medium", "high"]).nullable(),
+      }),
+      system,
+      user: `# Participant Description:\n${lookingFor}\n\n# Options:\n${JSON.stringify(options)}`,
+    });
+
+    // Only accept high-confidence matches; otherwise, return null
+    if (!res || res.confidence !== "high" || !res.id) {
+      console.log("Low or medium confidence, or no match:", res);
+      return null;
+    }
+
+    return options.find((option) => option.id === res.id) || null;
+  } catch (error) {
+    console.error("Error in determineParticipant:", error);
+    return null;
+  }
 }

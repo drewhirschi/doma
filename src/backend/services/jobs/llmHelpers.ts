@@ -153,31 +153,3 @@ export async function recursiveDocumentReduction({
     return await mergeDocs(reductions);
   }
 }
-
-// TODO 4: Improve the llmChooseItem prompt to make it more clear and return null if no item is chosen
-
-export async function llmChooseItem<T extends { id: number }>(
-  options: T[],
-  lookingFor: string,
-  addtionalInstructions?: string,
-): Promise<T | null> {
-  let system = `Return the id and nothing else of the item JSON that matches the given description most closely. If none match, respond with null.`;
-  if (addtionalInstructions) {
-    system += `\n\n${addtionalInstructions}`;
-  }
-
-  const res = await getStructuredCompletion({
-    schema: z.object({
-      id: z.number().nullable(),
-      confidence: z.enum(["low", "medium", "high"]).nullable(),
-    }),
-    system,
-    user: `# Description:\n${lookingFor}\n\n# Options:\n${JSON.stringify(options)}`,
-  });
-
-  if (!res?.id) {
-    return null;
-  }
-
-  return options.find((option) => option.id === res.id) || null;
-}
