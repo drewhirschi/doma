@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getCompletion, getEmbedding, getStructuredCompletion } from "./llmHelpers.js";
+import { getEmbedding, getStructuredCompletion } from "./llmHelpers.js";
 import { load } from "cheerio";
 import { z } from "zod";
 import https from "https";
@@ -12,7 +12,7 @@ const axiosInstance = axios.create({
   httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 });
 
-// function to check if the article is relevant
+// Function to check if the article is relevant to the company and M&A
 export async function isArticleRelevant(
   articleUrl: string | null,
   articleTitle: string | null,
@@ -77,16 +77,6 @@ Return true if all criteria are met; otherwise, return false.
   }
 }
 
-// Function to create a summary of an article using GPT
-// export async function summarizeArticle(title: string, pageText: string) {
-//   const gptResponse = await getCompletion({
-//     system: `You will be provided with content from an article. Summarize the article in 2-3 sentences in a concise and clear manner.`,
-//     user: `Title: ${title}\n\nContent: ${pageText}`,
-//   });
-
-//   return gptResponse;
-// }
-
 // Transaction schema
 const transactionSchema = z.object({
   participants: z.array(
@@ -115,6 +105,7 @@ export async function extractTransactionDetails(title: string, pageText: string)
   return transaction;
 }
 
+// Schema for the company match response
 export type SimialarTransaction = {
   id: number;
   description: string;
@@ -148,7 +139,7 @@ export async function findExistingTransaction(
   return matched;
 }
 
-// The schema for the transaction match response
+// Transaction match schema
 const transactionMatchSchema = z.object({
   id: z.number().nullable(),
 });
@@ -189,47 +180,7 @@ export async function checkSimilarTransactions(
   return existingTransactions.find((x) => x.id == gptResponse?.id) ?? null;
 }
 
-// Function using gpt to determine what role a company played in a transaction based on company name and transaction description
-// export async function determineCompanyRole(companyName: string, transactionDescription: string) {
-//   const gptResponse = await getCompletion({
-//     system: `You will be provided with the name of a company and a description of a transaction. Determine the role of the company in the transaction. Respond with either "buyer", "seller", or "backer". Only the word and nothing else.`,
-//     user: `Company Name: ${companyName}\n\nTransaction Description: ${transactionDescription}`,
-//   });
-
-//   return gptResponse;
-// }
-
-const fakeCompanies = [
-  {
-    id: 1,
-    name: "TechCorp",
-    summary: "TechCorp specializes in innovative technology solutions and recently acquired NextGen Systems.",
-  },
-  {
-    id: 2,
-    name: "GreenEarth Industries",
-    summary:
-      "GreenEarth is a leader in renewable energy and eco-friendly initiatives, focused on sustainable practices.",
-  },
-  {
-    id: 3,
-    name: "HealthSolutions Inc.",
-    summary: "A healthcare company providing medical software and services, partnered with WellnessCorp.",
-  },
-  {
-    id: 4,
-    name: "FinanceHub",
-    summary: "FinanceHub provides investment and banking solutions, with recent expansion into wealth management.",
-  },
-  {
-    id: 5,
-    name: "BuildSmart Construction",
-    summary:
-      "BuildSmart specializes in sustainable construction materials and recently merged with EcoBuild Solutions.",
-  },
-];
-// TODO: Fix timeout issue with the rpc
-
+// Function to resolve the participant's company ID
 export async function resolveParticipantCmpId(participant: { name: string; role: string; context: string }) {
   try {
     const sb = fullAccessServiceClient();
@@ -246,22 +197,22 @@ export async function resolveParticipantCmpId(participant: { name: string; role:
       return quickResolve.data[0].id;
     }
 
-    // const companiesGet = await sb.rpc("match_cmp_adaptive", {
-    //   match_count: 10,
-    //   query_embedding: emb as unknown as string,
-    // });
+    const companiesGet = await sb.rpc("match_cmp_adaptive", {
+      match_count: 10,
+      query_embedding: emb as unknown as string,
+    });
 
-    // if (companiesGet.error) {
-    //   throw companiesGet.error;
-    // }
+    if (companiesGet.error) {
+      throw companiesGet.error;
+    }
 
-    // const companies = companiesGet.data.map((cmp) => ({
-    //   id: cmp.id,
-    //   name: cmp.name,
-    //   summary: cmp.description ?? cmp.web_summary,
-    // }));
+    const companies = companiesGet.data.map((cmp) => ({
+      id: cmp.id,
+      name: cmp.name,
+      summary: cmp.description ?? cmp.web_summary,
+    }));
 
-    const cmp = await determineParticipant(fakeCompanies, participantDescription);
+    const cmp = await determineParticipant(companies, participantDescription);
 
     return cmp?.id || null;
   } catch (error) {
@@ -270,33 +221,59 @@ export async function resolveParticipantCmpId(participant: { name: string; role:
   }
 }
 
-async function determineParticipant<T extends { id: number }>(options: T[], lookingFor: string): Promise<T | null> {
+// Function to determine if a participant matches a company in the database
+async function determineParticipant<T extends { id: number }>(
+  options: T[],
+  lookingFor: string,
+): Promise<{ id: number | null; confidence: number }> {
   try {
     const system = `
-      You are determining if a participant from a news article matches any company in our database. 
-      You are given a description of the participant and possible company options from our database. 
-      Only return the id if you are confident it is the correct company, based on clear matching details.
+      Compare the description of a participant to a list of potential companies to determine if one of the candidate companies is an exact match.
+      The comparison should mostly be made based on the name of the company.
+      Analyze the provided details about the participant alongside each potential company, using the name and summary. 
+      Return a structured response with the predicted company ID and a confidence score (from 0 to 1) indicating the certainty of the match.
+      The company names should be near-exact matches.
 
-      If none of the options represent the same company with high certainty, return null instead.
-      Do not guess or provide a match unless you are certain.
+      # Output Format
+
+      - The output should be a JSON containing two fields:
+        - \`id\`: The ID of the matched company or \`null\` if no suitable match is found.
+        - \`confidence\`: A score between 0 and 1 indicating the confidence level of this match.
+
+      Example:
+      \`\`\`
+      This is an example of a matched company with a high confidence score.
+      {
+        "id": "[company_id]",
+        "confidence": 0.95
+      }
+      \`\`\`
+
+      # Notes
+
+      - If no match appears to be highly likely, set the \`id\` field to \`null\` and provide a low confidence score.
+      - In cases of multiple similarly valid matches, choose the one with the highest similarity score.
+      - If the names alone are not nearly identical, do not return a high confidence score.
     `;
 
     const res = await getStructuredCompletion({
       schema: z.object({
         id: z.number().nullable(),
-        confidence: z.enum(["low", "medium", "high"]).nullable(),
+        confidence: z.number(),
       }),
       system,
       user: `# Participant Description:\n${lookingFor}\n\n# Options:\n${JSON.stringify(options)}`,
     });
 
-    if (!res || res.confidence !== "high" || !res.id) {
-      return null;
+    if (!res || res.confidence < 0.95 || !res.id) {
+      return { id: null, confidence: 0 };
     }
 
-    return options.find((option) => option.id === res.id) || null;
+    const matchedCompany = options.find((option) => option.id === res.id);
+    console.log("Matched Company:", matchedCompany, "Participant:", lookingFor, "Confidence:", res.confidence);
+    return matchedCompany ? { id: matchedCompany.id, confidence: res.confidence } : { id: null, confidence: 0 };
   } catch (error) {
     console.error("Error in determineParticipant:", error);
-    return null;
+    return { id: null, confidence: 0 };
   }
 }

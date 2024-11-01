@@ -78,39 +78,3 @@ export const particpnts = [
     context: "Financial advisor to AWP Safety.",
   },
 ];
-
-// First, insert qualified articles without summaries into the database
-//   const insertResult = await sb
-//     .from("ma_articles")
-//     .upsert(
-//       searchAndContentResults.results.map((article) => ({
-//         url: article.url || "",
-//         publish_date: article.publishedDate,
-//         title: article.title,
-//         text: article.text,
-//         author: article?.author,
-//       })),
-//       { ignoreDuplicates: true },
-//     )
-//     .select();
-
-//   if (insertResult.error) {
-//     console.error("Error inserting articles:", insertResult.error.message);
-//     throw insertResult.error;
-//   }
-
-//   const articles = insertResult.data;
-
-//   console.log("Articles:", articles);
-
-//   // Filter the articles based on GPT qualification
-//   const qualifiedResults = await Promise.all(
-//     articles.map(async (article) => {
-//       const isRelevant = await isArticleRelevant(article.url, article.title, company.name, article.text);
-//       return isRelevant ?? false;
-//     }),
-//   );
-
-//   const qualifiedArticles = articles.filter((_article, index) => qualifiedResults[index]);
-
-//   console.log("Qualified Articles:", qualifiedArticles);
