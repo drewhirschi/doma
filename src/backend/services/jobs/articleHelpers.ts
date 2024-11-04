@@ -1,10 +1,11 @@
 import axios from "axios";
-import { CompletionModels, getEmbedding, getStructuredCompletion } from "./llmHelpers.js";
+import { CompletionModels, getCompletion, getEmbedding, getStructuredCompletion } from "./llmHelpers.js";
 import { load } from "cheerio";
 import { z } from "zod";
 import https from "https";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
 
+// Axios instance with custom headers
 const axiosInstance = axios.create({
   headers: {
     "User-Agent": "google-bot",
@@ -12,7 +13,7 @@ const axiosInstance = axios.create({
   httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 });
 
-// Function to check if the article is relevant to the company and M&A
+// Function to check if the article is relevant to the company and M&A related
 export async function isArticleRelevant(
   articleUrl: string | null,
   articleTitle: string | null,
@@ -95,8 +96,8 @@ const transactionSchema = z.object({
 // Function to extract transaction details from an article using GPT
 export async function extractTransactionDetails(title: string, pageText: string) {
   const transaction = await getStructuredCompletion({
-    system: `You will receive content from a news article related to M&A. Extract from the article, if found, the transaction details such as the participants 
-    (buyer, seller, backer, advisor, or other, as well as any context you can provide about their participation.), transaction amount, date, and reason for the merger/acquisition.
+    system: `You will receive content from a news article related to M&A. Extract from the article, if found, the transaction details such as the transaction participants 
+    (buyer, seller, backer, advisor, or other, as well as any context you can provide about their participation.), transaction amount, transaction date, and reason for the merger/acquisition.
     Also, make a brief summary of non-null values in the format "Company A acquired Company B for $X million on DATE, with backing from Company C for REASON." Only use provided information.`,
     user: `Title: ${title}\n\nContent: ${pageText}`,
     schema: transactionSchema,
@@ -180,7 +181,7 @@ export async function checkSimilarTransactions(
   return existingTransactions.find((x) => x.id == gptResponse?.id) ?? null;
 }
 
-// // Function to resolve the participant's company ID
+// Function to resolve the participant's company ID
 export async function resolveParticipantCmpId(participant: { name: string; role: string; context: string }) {
   try {
     const sb = fullAccessServiceClient();
@@ -212,7 +213,8 @@ export async function resolveParticipantCmpId(participant: { name: string; role:
       summary: cmp.description ?? cmp.web_summary,
     }));
 
-    const cmp = await determineParticipant(companies, participantDescription);
+    console.log(participant.name, "Companies:", companies);
+    const cmp = await determineParticipant(companies, participant.name);
 
     return cmp?.id || null;
   } catch (error) {
@@ -225,53 +227,26 @@ export async function resolveParticipantCmpId(participant: { name: string; role:
 async function determineParticipant<T extends { id: number }>(
   options: T[],
   lookingFor: string,
-): Promise<{ id: number | null; confidence: number }> {
+): Promise<{ id: number | null }> {
   try {
     const system = `
-      Compare the participant's name to each company's name to determine an exact match.
-      Only consider two conditions as valid matches:
-      1. If the participant's name and the company name are nearly identical.
-      2. If the participant's name is an acronym or abbreviation that matches the company name.
-      
-      # Matching Criteria
-      - Return a match only if the names are either nearly identical or there is a clear acronym match.
-      - Confidence should be high (0.95 or above) for matches that meet these criteria.
-      
-      # Output Format
-      - Provide a JSON with:
-        - \`id\`: the company ID or \`null\` if no suitable match is found.
-        - \`confidence\`: a confidence score from 0 to 1.
+      You will be provided with a participant name that we are looking for, and a list of companies from our database that may match the participant.
+      Your job is to determine if the participant matches any of the companies in the list. You should be confident that the participant is a match before providing an ID.
+      The name of the participant should be nearly the same as the company name or an acronym of the company name. There will sometimes be clear matches, and other times there will be
+      matches that are less certain, but still likely, so use your best judgment. If you are confident you have a match, return the company ID, and nothing but the ID.
+      If you are not confident, return null, and nothing but null.`;
 
-      Example:
-      \`\`\`
-      {
-        "id": [company_id],
-        "confidence": 0.97
-      }
-      \`\`\`
-
-      - If no close or acronym match exists, set \`id\` to \`null\` and confidence to a low value.
-    `;
-
-    const res = await getStructuredCompletion({
+    const res = await getCompletion({
       model: CompletionModels.gpt4turbo,
-      schema: z.object({
-        id: z.number().nullable(),
-        confidence: z.number(),
-      }),
       system,
       user: `# Participant Name:\n${lookingFor}\n\n# Options:\n${JSON.stringify(options)}`,
     });
 
-    if (!res || res.confidence < 0.95 || !res.id) {
-      return { id: null, confidence: 0 };
-    }
-
-    const matchedCompany = options.find((option) => option.id === res.id);
-    console.log("Matched Company:", matchedCompany, "Participant:", lookingFor, "Confidence:", res.confidence);
-    return matchedCompany ? { id: matchedCompany.id, confidence: res.confidence } : { id: null, confidence: 0 };
+    const cmpId = Number(res) || null;
+    console.log("Matched Company ID:", cmpId);
+    return { id: cmpId };
   } catch (error) {
     console.error("Error in determineParticipant:", error);
-    return { id: null, confidence: 0 };
+    return { id: null };
   }
 }

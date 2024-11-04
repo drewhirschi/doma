@@ -12,10 +12,13 @@ import { SandboxedJob } from "bullmq";
 import { IndustryQueueClient } from "@shared/queues/industry-queue";
 import { exaRes } from "~/scripts/data";
 
+// Handler for the scrapeArticles job
 export default async function handler(job: SandboxedJob) {
   return await scrapeArticles(job.data.cmpId);
 }
+// Function to scrape articles for a given company
 export async function scrapeArticles(cmpId: number) {
+  // Set up the supabase client
   const sb = fullAccessServiceClient();
 
   // Get the selected company
@@ -33,26 +36,26 @@ export async function scrapeArticles(cmpId: number) {
   const exa = new Exa(process.env.EXA_API_KEY);
 
   // // Search for company related acquisition articles from exa
-  // const searchAndContentResults = await exa.searchAndContents(`${company.name} acquisition`, {
-  //   type: "keyword",
-  //   useAutoprompt: true,
-  //   numResults: 20,
-  //   category: "news",
-  //   startPublishedDate: "2018-01-01",
-  //   text: true,
-  // });
+  const searchAndContentResults = await exa.searchAndContents(`${company.name} acquisition`, {
+    type: "keyword",
+    useAutoprompt: true,
+    numResults: 20,
+    category: "news",
+    startPublishedDate: "2018-01-01",
+    text: true,
+  });
 
-  // // If no articles are found, return
-  // if (!searchAndContentResults || !searchAndContentResults.results || searchAndContentResults.results.length === 0) {
-  //   const noArticlesMessage = "No articles found for the company.";
-  //   console.log(noArticlesMessage);
-  //   return noArticlesMessage;
-  // }
+  // If no articles are found, return
+  if (!searchAndContentResults || !searchAndContentResults.results || searchAndContentResults.results.length === 0) {
+    const noArticlesMessage = "No articles found for the company.";
+    console.log(noArticlesMessage);
+    return noArticlesMessage;
+  }
 
   // Use for testing
-  const searchAndContentResults = {
-    results: exaRes,
-  };
+  // const searchAndContentResults = {
+  //   results: exaRes,
+  // };
 
   console.log("Articles:", searchAndContentResults.results);
 
@@ -77,6 +80,7 @@ export async function scrapeArticles(cmpId: number) {
     (article): article is NonNullable<typeof article> => article !== null,
   );
 
+  //  Array to store qualified articles
   let qualifiedArticles: any[] = [];
 
   // Only proceed with db insertion if there are qualified articles
@@ -95,13 +99,6 @@ export async function scrapeArticles(cmpId: number) {
   }
 
   console.log("Qualified Articles:", qualifiedArticles);
-
-  // Get the list of disqualified articles (those in searchAndContentResults but not in qualifiedArticles)
-  // const disqualifiedArticles = searchAndContentResults.results.filter(
-  //   (article) => !qualifiedArticles.some((qualified) => qualified.url === article.url),
-  // );
-
-  // console.log("Disqualified Articles:", disqualifiedArticles);
 
   // Use gpt to extract from the articles the buyer, seller, backer, amount, date, and reason and create a transaction description
   const articleTransactionDetails = await Promise.all(
@@ -185,17 +182,18 @@ export async function scrapeArticles(cmpId: number) {
           // If the participant is not found in the database, add them to the industry queue
           if (!resolvedCmpId) {
             console.log("Participant not found in database, adding to industry queue:", participant);
-            // const cmpInsert = await sb.from("company_profile").insert({}).select().single();
-            // if (cmpInsert.error) {
-            //   console.error(`Error inserting transaction for article ${article.url}:`, cmpInsert.error.message);
-            //   continue;
-            // }
-            // resolvedCmpId = cmpInsert.data.id;
-            // const industryQueue = new IndustryQueueClient();
-            // industryQueue.findCompany(cmpInsert.data.id, participant);
-            // await industryQueue.close();
+            const cmpInsert = await sb.from("company_profile").insert({}).select().single();
+            if (cmpInsert.error) {
+              console.error(`Error inserting transaction for article ${article.url}:`, cmpInsert.error.message);
+              continue;
+            }
+            resolvedCmpId = cmpInsert.data.id;
+            const industryQueue = new IndustryQueueClient();
+            industryQueue.findCompany(cmpInsert.data.id, participant);
+            await industryQueue.close();
           } else {
             // If the participant is found in the database, link them to the transaction
+            console.log("Participant found in database:", participant);
             const particntToInsert = {
               trans_id: transactionInsert.data.id,
               cmp_id: resolvedCmpId,
