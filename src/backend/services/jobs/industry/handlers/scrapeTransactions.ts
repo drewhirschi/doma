@@ -32,27 +32,27 @@ export async function scrapeArticles(cmpId: number) {
   // Set up the exa api
   const exa = new Exa(process.env.EXA_API_KEY);
 
-  // Search for company related acquisition articles from exa
-  const searchAndContentResults = await exa.searchAndContents(`${company.name} acquisition`, {
-    type: "keyword",
-    useAutoprompt: true,
-    numResults: 25,
-    category: "news",
-    startPublishedDate: "2018-01-01",
-    text: true,
-  });
+  // // Search for company related acquisition articles from exa
+  // const searchAndContentResults = await exa.searchAndContents(`${company.name} acquisition`, {
+  //   type: "keyword",
+  //   useAutoprompt: true,
+  //   numResults: 20,
+  //   category: "news",
+  //   startPublishedDate: "2018-01-01",
+  //   text: true,
+  // });
 
-  // If no articles are found, return
-  if (!searchAndContentResults || !searchAndContentResults.results || searchAndContentResults.results.length === 0) {
-    const noArticlesMessage = "No articles found for the company.";
-    console.log(noArticlesMessage);
-    return noArticlesMessage;
-  }
+  // // If no articles are found, return
+  // if (!searchAndContentResults || !searchAndContentResults.results || searchAndContentResults.results.length === 0) {
+  //   const noArticlesMessage = "No articles found for the company.";
+  //   console.log(noArticlesMessage);
+  //   return noArticlesMessage;
+  // }
 
   // Use for testing
-  // const searchAndContentResults = {
-  //   results: exaRes,
-  // };
+  const searchAndContentResults = {
+    results: exaRes,
+  };
 
   console.log("Articles:", searchAndContentResults.results);
 
@@ -95,6 +95,13 @@ export async function scrapeArticles(cmpId: number) {
   }
 
   console.log("Qualified Articles:", qualifiedArticles);
+
+  // Get the list of disqualified articles (those in searchAndContentResults but not in qualifiedArticles)
+  // const disqualifiedArticles = searchAndContentResults.results.filter(
+  //   (article) => !qualifiedArticles.some((qualified) => qualified.url === article.url),
+  // );
+
+  // console.log("Disqualified Articles:", disqualifiedArticles);
 
   // Use gpt to extract from the articles the buyer, seller, backer, amount, date, and reason and create a transaction description
   const articleTransactionDetails = await Promise.all(
@@ -159,6 +166,8 @@ export async function scrapeArticles(cmpId: number) {
         console.error(`Error linking transaction ${transactionInsert.data.id} with article:`, supportError.message);
       }
 
+      console.log("Transaction Participants:", article.transaction?.participants);
+
       // Insert the participants of the transaction into the database
       for (const participant of article.transaction?.participants || []) {
         if (!participant.name || !participant.role || !participant.context) {
@@ -169,8 +178,8 @@ export async function scrapeArticles(cmpId: number) {
         try {
           let resolvedCmpId = await resolveParticipantCmpId({
             name: participant.name,
-            role: participant.role,
-            context: participant.context,
+            //role: participant.role,
+            //context: participant.context,
           });
 
           // If the participant is not found in the database, add them to the industry queue
