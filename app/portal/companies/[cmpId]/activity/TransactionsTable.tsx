@@ -15,6 +15,7 @@ import {
   Box,
 } from "@mantine/core";
 import { isNotNull } from "@/shared/types/typeHelpers";
+import AddTransactions from "./AddTransactions";
 
 interface Transaction {
   id: string;
@@ -61,6 +62,7 @@ export default function TransactionsTable({ transactions, cmpId }: TransactionsT
         </TableThead>
         <TableTbody>{rows}</TableTbody>
       </Table>
+      <AddTransactions cmpId={cmpId} />
 
       {openedTransaction && <TransactionModal cmpId={cmpId} transaction={openedTransaction} closeModal={closeModal} />}
     </>
