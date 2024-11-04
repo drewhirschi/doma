@@ -178,8 +178,8 @@ export async function scrapeArticles(cmpId: number) {
         try {
           let resolvedCmpId = await resolveParticipantCmpId({
             name: participant.name,
-            //role: participant.role,
-            //context: participant.context,
+            role: participant.role,
+            context: participant.context,
           });
 
           // If the participant is not found in the database, add them to the industry queue

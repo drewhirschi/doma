@@ -8,6 +8,7 @@ const apiKey = process.env.OPENAI_API_KEY;
 export enum CompletionModels {
   gpt4o = "gpt-4o",
   gpt4oMini = "gpt-4o-mini",
+  gpt4turbo = "gpt-4-turbo",
 }
 
 interface CompletionOptions {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getEmbedding, getStructuredCompletion } from "./llmHelpers.js";
+import { CompletionModels, getEmbedding, getStructuredCompletion } from "./llmHelpers.js";
 import { load } from "cheerio";
 import { z } from "zod";
 import https from "https";
@@ -181,111 +181,12 @@ export async function checkSimilarTransactions(
 }
 
 // // Function to resolve the participant's company ID
-// export async function resolveParticipantCmpId(participant: { name: string; role: string; context: string }) {
-//   try {
-//     const sb = fullAccessServiceClient();
-//     const participantDescription = `## ${participant.name}\n### Role: ${participant.role}\n${participant.context}`;
-//     const emb = await getEmbedding(participantDescription);
-
-//     const quickResolve = await sb
-//       .from("company_profile")
-//       .select("id, name")
-//       .ilike("name", `%${participant.name}%`)
-//       .limit(1);
-
-//     if (quickResolve.data?.length) {
-//       return quickResolve.data[0].id;
-//     }
-
-//     const companiesGet = await sb.rpc("match_cmp_adaptive", {
-//       match_count: 10,
-//       query_embedding: emb as unknown as string,
-//     });
-
-//     if (companiesGet.error) {
-//       throw companiesGet.error;
-//     }
-
-//     const companies = companiesGet.data.map((cmp) => ({
-//       id: cmp.id,
-//       name: cmp.name,
-//       summary: cmp.description ?? cmp.web_summary,
-//     }));
-
-//     const cmp = await determineParticipant(companies, participantDescription);
-
-//     return cmp?.id || null;
-//   } catch (error) {
-//     console.error("Error in resolveParticipantCmpId:", error);
-//     return null;
-//   }
-// }
-
-// // Function to determine if a participant matches a company in the database
-// async function determineParticipant<T extends { id: number }>(
-//   options: T[],
-//   lookingFor: string,
-// ): Promise<{ id: number | null; confidence: number }> {
-//   try {
-//     const system = `
-//       Compare the description of a participant to a list of potential companies to determine if one of the candidate companies is an exact match.
-//       The comparison should mostly be made based on the name of the company.
-//       Analyze the provided details about the participant alongside each potential company, using the name and summary.
-//       Return a structured response with the predicted company ID and a confidence score (from 0 to 1) indicating the certainty of the match.
-//       The company names should be near-exact matches.
-
-//       # Output Format
-
-//       - The output should be a JSON containing two fields:
-//         - \`id\`: The ID of the matched company or \`null\` if no suitable match is found.
-//         - \`confidence\`: A score between 0 and 1 indicating the confidence level of this match.
-
-//       Example:
-//       \`\`\`
-//       This is an example of a matched company with a high confidence score.
-//       {
-//         "id": "[company_id]",
-//         "confidence": 0.95
-//       }
-//       \`\`\`
-
-//       # Notes
-
-//       - If no match appears to be highly likely, set the \`id\` field to \`null\` and provide a low confidence score.
-//       - In cases of multiple similarly valid matches, choose the one with the highest similarity score.
-//       - If the names alone are not nearly identical, do not return a high confidence score.
-//     `;
-
-//     const res = await getStructuredCompletion({
-//       schema: z.object({
-//         id: z.number().nullable(),
-//         confidence: z.number(),
-//       }),
-//       system,
-//       user: `# Participant Description:\n${lookingFor}\n\n# Options:\n${JSON.stringify(options)}`,
-//     });
-
-//     if (!res || res.confidence < 0.95 || !res.id) {
-//       return { id: null, confidence: 0 };
-//     }
-
-//     const matchedCompany = options.find((option) => option.id === res.id);
-//     console.log("Matched Company:", matchedCompany, "Participant:", lookingFor, "Confidence:", res.confidence);
-//     return matchedCompany ? { id: matchedCompany.id, confidence: res.confidence } : { id: null, confidence: 0 };
-//   } catch (error) {
-//     console.error("Error in determineParticipant:", error);
-//     return { id: null, confidence: 0 };
-//   }
-// }
-
-// Function to resolve the participant's company ID
-export async function resolveParticipantCmpId(participant: { name: string }) {
+export async function resolveParticipantCmpId(participant: { name: string; role: string; context: string }) {
   try {
     const sb = fullAccessServiceClient();
-    const participantName = participant.name;
-    const emb = await getEmbedding(participantName);
+    const participantDescription = `## ${participant.name}\n### Role: ${participant.role}\n${participant.context}`;
+    const emb = await getEmbedding(participantDescription);
 
-    // Step 1: Direct match based on name
     const quickResolve = await sb
       .from("company_profile")
       .select("id, name")
@@ -296,7 +197,6 @@ export async function resolveParticipantCmpId(participant: { name: string }) {
       return quickResolve.data[0].id;
     }
 
-    // Step 2: Fallback to adaptive match if no direct match is found
     const companiesGet = await sb.rpc("match_cmp_adaptive", {
       match_count: 10,
       query_embedding: emb as unknown as string,
@@ -309,9 +209,10 @@ export async function resolveParticipantCmpId(participant: { name: string }) {
     const companies = companiesGet.data.map((cmp) => ({
       id: cmp.id,
       name: cmp.name,
+      summary: cmp.description ?? cmp.web_summary,
     }));
 
-    const cmp = await determineParticipant(companies, participantName);
+    const cmp = await determineParticipant(companies, participantDescription);
 
     return cmp?.id || null;
   } catch (error) {
@@ -353,6 +254,7 @@ async function determineParticipant<T extends { id: number }>(
     `;
 
     const res = await getStructuredCompletion({
+      model: CompletionModels.gpt4turbo,
       schema: z.object({
         id: z.number().nullable(),
         confidence: z.number(),
