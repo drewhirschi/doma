@@ -103,6 +103,7 @@ export async function extractTransactionDetails(title: string, pageText: string)
     schema: transactionSchema,
   });
 
+  console.log("Extracted Transaction:", transaction);
   return transaction;
 }
 
@@ -123,7 +124,7 @@ export async function findExistingTransaction(
 
   const { data: existingTransactions, error } = await sb.rpc("match_transaction_embeddings", {
     new_embedding: JSON.stringify(newEmbedding),
-    threshold: 0.95,
+    threshold: 0.9,
   });
 
   if (error) {

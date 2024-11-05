@@ -39,7 +39,7 @@ export async function scrapeArticles(cmpId: number) {
   const searchAndContentResults = await exa.searchAndContents(`${company.name} acquisition`, {
     type: "keyword",
     useAutoprompt: true,
-    numResults: 20,
+    numResults: 25,
     category: "news",
     startPublishedDate: "2018-01-01",
     text: true,
@@ -142,7 +142,7 @@ export async function scrapeArticles(cmpId: number) {
           reason: article.transaction?.reason,
           emb: JSON.stringify(article.embedding),
           description: article.transaction?.description,
-          amount: Number(article.transaction?.amount),
+          amount: article.transaction?.amount,
           date: article.transaction?.date,
         })
         .select("id")
