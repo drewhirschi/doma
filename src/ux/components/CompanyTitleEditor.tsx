@@ -46,7 +46,7 @@ export function CompanyTitleEditor({
       {isEditing ? (
         <>
           <TextInput
-            value={companyName || origin}
+            value={companyName}
             onChange={(event) => handleNameChange(event.currentTarget.value)}
             size="lg"
             styles={{ input: { fontSize: "1.5rem", fontWeight: "bold" } }}
