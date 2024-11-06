@@ -24,7 +24,7 @@ export const jobSchemas = {
   transaction_linking: transactionLinkingSchema,
   scrape_logo: companyIdSchema,
   scrape_ma_articles: companyIdSchema,
-  find_company: findCompanySchema,
+  find_company: companyIdSchema,
 };
 
 export type JobType = keyof typeof jobSchemas;

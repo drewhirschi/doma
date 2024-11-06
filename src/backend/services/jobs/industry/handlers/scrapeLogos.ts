@@ -8,7 +8,6 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
 import { companyIdSchema } from "@shared/queues/industry-queue.types";
 import { fullAccessServiceClient } from "@shared/supabase-client/server";
-import { CompletionModels, getStructuredCompletion } from "../../llmHelpers";
 import { randomUUID } from "crypto";
 import svg2img from "svg2img";
 import { z } from "zod";

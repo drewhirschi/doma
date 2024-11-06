@@ -1,18 +1,4 @@
-import {
-  CompletionModels,
-  getCompletion,
-  getEmbedding,
-  getStructuredCompletion,
-  recursiveDocumentReduction,
-} from "../../llmHelpers.js";
-import {
-  CompletionModels,
-  getCompletion,
-  getEmbedding,
-  getStructuredCompletion,
-  recursiveDocumentReduction,
-} from "../../llmHelpers.js";
-
+import { getCompletion, getEmbedding, getStructuredCompletion, recursiveDocumentReduction } from "../../llmHelpers.js";
 import { Client } from "@googlemaps/google-maps-services-js";
 import { LinkedInQueueClient } from "@shared/queues/linkedin-queue.js";
 import { IndustryQueueClient } from "@shared/queues/industry-queue.js";
@@ -80,19 +66,6 @@ export async function reduceCompanyPagesToProfile(job: SandboxedJob) {
     .update({
       name: cmpName ?? undefined,
       description: cmpDescription,
-      hq_geo: cmpLocation.hq_geo,
-      hq_lon: cmpLocation.hq_lon,
-      hq_lat: cmpLocation.hq_lat,
-    })
-    .eq("id", cmpId);
-  if (cmpUpdate.error) {
-    throw cmpUpdate.error;
-  }
-  const cmpUpdate = await supabase
-    .from("company_profile")
-    .update({
-      name: cmpName ?? undefined,
-      description: cmpDescription,
       hq_geo: cmpLocation?.hq_geo,
       hq_lon: cmpLocation?.hq_lon,
       hq_lat: cmpLocation?.hq_lat,
@@ -154,17 +127,6 @@ export async function extractCompanyName(cmpSummary: string) {
 }
 
 export async function geocodeCompany(cmpSummary: string) {
-  const queriesRes = await getStructuredCompletion({
-    model: CompletionModels.gpt4o,
-    system: `Extract addresses or general locations that we can use to geocode the company.
-        `,
-    user: cmpSummary,
-    schema: z.object({
-      headquaters: z.string(),
-      locations: z.array(z.string()),
-    }),
-  });
-
   try {
     const queriesRes = await getStructuredCompletion({
       system: `Extract addresses or general locations that we can use to geocode the company.`,
@@ -186,29 +148,13 @@ export async function geocodeCompany(cmpSummary: string) {
         key: process.env.GEOCODE_API_KEY!,
       },
     });
-    const googleMaps = new Client({});
-    const geocodeRes = await googleMaps.geocode({
-      params: {
-        address: queriesRes.headquaters,
-        key: process.env.GEOCODE_API_KEY!,
-      },
-    });
 
-    if (!geocodeRes.data) {
-      throw new Error("Failed to geocode headquaters");
-    }
     if (!geocodeRes.data) {
       throw new Error("Failed to geocode headquaters");
     }
 
     const { location } = geocodeRes.data.results[0].geometry;
-    const { location } = geocodeRes.data.results[0].geometry;
 
-    return {
-      hq_geo: geoPointString(location.lng, location.lat),
-      hq_lon: location.lng,
-      hq_lat: location.lat,
-    };
     return {
       hq_geo: geoPointString(location.lng, location.lat),
       hq_lon: location.lng,
