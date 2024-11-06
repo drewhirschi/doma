@@ -9,10 +9,7 @@ export class IndustryQueueClient {
   connection: Redis;
 
   constructor(opts?: QueueOptions) {
-    const CONNECTION_URL =
-      process.env.LOCAL_REDIS === "true"
-        ? "127.0.0.1"
-        : process.env.UPSTASH_REDIS_URL;
+    const CONNECTION_URL = process.env.LOCAL_REDIS === "true" ? "127.0.0.1" : process.env.UPSTASH_REDIS_URL;
 
     if (CONNECTION_URL === undefined) {
       throw new Error("Set UPSTASH_REDIS_URL or LOCAL_REDIS");
@@ -44,12 +41,9 @@ export class IndustryQueueClient {
   async transactionDiscovery(cmpId: number) {
     return await this.queue.add("transaction_discovery", { cmpId });
   }
-  async scrapeCompanyWebsite(
-    url: string,
-    opts?: { force?: boolean; scrapeComps?: boolean },
-  ) {
+  async scrapeCompanyWebsite(cmpId: number, opts?: { force?: boolean; scrapeComps?: boolean }) {
     const params = {
-      url,
+      cmpId,
       force: opts?.force,
       scrapeComps: opts?.scrapeComps,
     } as z.infer<typeof scrapeWebsiteSchema>;
@@ -68,13 +62,7 @@ export class IndustryQueueClient {
       },
     );
   }
-  async scrapeArticles(cmpId: number) {
-    return await this.queue.add(
-      "scrape_ma_articles",
-      { cmpId },
-      { attempts: 2 },
-    );
-  }
+
   async getCompanyLinkedInProfile(cmpId: number, url: string) {
     return await this.queue.add(
       "get_li_profile",

@@ -78,6 +78,8 @@ export default function Login() {
     origin = window.location.origin;
   }
 
+  const authCallbackUrl = `${origin}/auth/callback${nextUrl ? `?next=${nextUrl}` : ""}`;
+
   return (
     <Center h={"100vh"}>
       <Paper shadow="sm" p="lg" bg={"gray.0"}>
@@ -90,12 +92,8 @@ export default function Login() {
           </Group>
 
           <Stack>
-            <MicrosoftButton
-              authCallbackUrl={`${origin}/auth/callback?next=${nextUrl}`}
-            />
-            <GoogleButton
-              authCallbackUrl={`${origin}/auth/callback?next=${nextUrl}`}
-            />
+            <MicrosoftButton authCallbackUrl={authCallbackUrl} />
+            <GoogleButton authCallbackUrl={authCallbackUrl} />
           </Stack>
         </Stack>
       </Paper>

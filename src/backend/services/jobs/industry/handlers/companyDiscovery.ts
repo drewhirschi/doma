@@ -1,9 +1,9 @@
+import { CompletionModels, getStructuredCompletion } from "../../llmHelpers";
 import { Job, SandboxedJob } from "bullmq";
 
 import Exa from "exa-js";
-import { IndustryQueueClient } from "../../../../../shared/queues/industry-queue";
+import { IndustryQueueClient } from "@shared/queues/industry-queue";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
-import { CompletionModels, getStructuredCompletion } from "../../llmHelpers";
 import { z } from "zod";
 
 export async function companyDiscovery(job: SandboxedJob) {
@@ -17,11 +17,7 @@ export async function companyDiscovery(job: SandboxedJob) {
 
 export async function findSimilarCompanies(modelCmpId: number) {
   const sb = fullAccessServiceClient();
-  const cmpGet = await sb
-    .from("company_profile")
-    .select()
-    .eq("id", modelCmpId)
-    .single();
+  const cmpGet = await sb.from("company_profile").select().eq("id", modelCmpId).single();
   if (cmpGet.error) {
     throw cmpGet.error;
   } else if (!cmpGet.data.web_summary) {
@@ -80,9 +76,7 @@ export async function findSimilarCompanies(modelCmpId: number) {
       });
     });
 
-  const searchRes = (await Promise.all(searchProms)).flatMap(
-    (res) => res.results,
-  );
+  const searchRes = (await Promise.all(searchProms)).flatMap((res) => res.results);
 
   const insert = await sb
     .from("company_profile")
@@ -97,12 +91,10 @@ export async function findSimilarCompanies(modelCmpId: number) {
     throw insert.error;
   }
 
-  console.log(insert.data);
-
   const industryQueue = new IndustryQueueClient();
 
   for (const item of insert.data) {
-    if (item.origin) await industryQueue.scrapeCompanyWebsite(item.origin);
+    if (item.origin) await industryQueue.scrapeCompanyWebsite(item.id);
   }
   await industryQueue.close();
 

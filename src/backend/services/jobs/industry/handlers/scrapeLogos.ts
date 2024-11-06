@@ -1,3 +1,4 @@
+import { CompletionModels, getStructuredCompletion } from "../../llmHelpers";
 import { Job, SandboxedJob } from "bullmq";
 import { getImgs, getSVGs } from "../../webHelpers";
 import { isDefined, isNotNull } from "@shared/types/typeHelpers";
@@ -20,15 +21,9 @@ const axiosInstance = axios.create({
   httpsAgent: new https.Agent({ rejectUnauthorized: false }),
 });
 
-export async function scrapeCompanyLogos(
-  job: SandboxedJob<z.infer<typeof companyIdSchema>>,
-) {
+export async function scrapeCompanyLogos(job: SandboxedJob<z.infer<typeof companyIdSchema>>) {
   const sb = fullAccessServiceClient();
-  const cmpGet = await sb
-    .from("company_profile")
-    .select()
-    .eq("id", job.data.cmpId)
-    .single();
+  const cmpGet = await sb.from("company_profile").select().eq("id", job.data.cmpId).single();
   if (cmpGet.error) {
     throw cmpGet.error;
   }
@@ -43,10 +38,7 @@ export async function scrapeCompanyLogos(
   await scrapeSvgLogos(sb, cmpGet.data);
 }
 
-export async function scrapeSvgLogos(
-  sb: SupabaseClient,
-  company: CompanyProfile_SB,
-) {
+export async function scrapeSvgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
   if (!company.origin) {
     throw new Error("company origin is required");
   }
@@ -64,9 +56,7 @@ export async function scrapeSvgLogos(
 
   const cmpSvgLogos: { html: string; title: string }[] = [];
   try {
-    likelySvgLogoCompletion?.possibleLogos.forEach((i) =>
-      cmpSvgLogos.push(svgWithTitles[i]),
-    );
+    likelySvgLogoCompletion?.possibleLogos.forEach((i) => cmpSvgLogos.push(svgWithTitles[i]));
   } catch (error) {
     console.error("Bad svg index", error);
   }
@@ -75,26 +65,14 @@ export async function scrapeSvgLogos(
     try {
       const pngBuffer = await svgToPngAsync(svg.html);
       const fileName = logoFilename(company.id, svg.title);
-      const dbLogo = await uploadLogo(
-        sb,
-        fileName,
-        company.id,
-        pngBuffer,
-        svg.title,
-        "image/png",
-      );
+      const dbLogo = await uploadLogo(sb, fileName, company.id, pngBuffer, svg.title, "image/png");
       return dbLogo;
     } catch (error) {
-      console.error(
-        `Error downloading or processing svg logo from ${company.origin}: ${svg.title}`,
-        error,
-      );
+      console.error(`Error downloading or processing svg logo from ${company.origin}: ${svg.title}`, error);
     }
   });
 
-  const savedLogos = (await Promise.all(savedLogosProms))
-    .filter(isNotNull)
-    .filter(isDefined);
+  const savedLogos = (await Promise.all(savedLogosProms)).filter(isNotNull).filter(isDefined);
 
   if (savedLogos.length > 0) {
     return;
@@ -106,14 +84,7 @@ export async function scrapeSvgLogos(
     try {
       const pngBuffer = await svgToPngAsync(svg.html);
       const fileName = logoFilename(company.id, randomUUID().split("-")[0]);
-      const dbLogo = await uploadLogo(
-        sb,
-        fileName,
-        company.id,
-        pngBuffer,
-        `${company.name} logo ${i}`,
-        "image/png",
-      );
+      const dbLogo = await uploadLogo(sb, fileName, company.id, pngBuffer, `${company.name} logo ${i}`, "image/png");
 
       if (!dbLogo) {
         return null;
@@ -160,10 +131,7 @@ async function scrapeImgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
           responseType: "arraybuffer",
         });
         const buffer = Buffer.from(response.data, "binary");
-        const fileName = logoFilename(
-          company.id,
-          logoUrl.split("/").pop() ?? randomUUID().split("-")[0],
-        );
+        const fileName = logoFilename(company.id, logoUrl.split("/").pop() ?? randomUUID().split("-")[0]);
         return await uploadLogo(
           sb,
           fileName,
@@ -174,24 +142,15 @@ async function scrapeImgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
         );
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          console.error(
-            `Failed to download logo from ${logoUrl}:`,
-            error.response?.status,
-            error.response?.statusText,
-          );
+          console.error(`Failed to download logo from ${logoUrl}:`, error.response?.status, error.response?.statusText);
         } else {
-          console.error(
-            `Error downloading or processing logo from ${logoUrl}:`,
-            error,
-          );
+          console.error(`Error downloading or processing logo from ${logoUrl}:`, error);
         }
         return null;
       }
     }) ?? [];
 
-  const dbLogos = (await Promise.all(dbLogosProms))
-    .filter(isNotNull)
-    .filter(isDefined);
+  const dbLogos = (await Promise.all(dbLogosProms)).filter(isNotNull).filter(isDefined);
   return dbLogos;
 }
 
@@ -203,12 +162,10 @@ async function uploadLogo(
   alt: string,
   type: string,
 ) {
-  const { data, error } = await sb.storage
-    .from("cmp_assets")
-    .upload(fileName, buffer, {
-      contentType: type,
-      upsert: true,
-    });
+  const { data, error } = await sb.storage.from("cmp_assets").upload(fileName, buffer, {
+    contentType: type,
+    upsert: true,
+  });
 
   if (error) {
     console.error(`Failed to upload logo for company ${cmpId}:`, error);
@@ -225,21 +182,14 @@ async function uploadLogo(
       .single();
 
     if (updateError) {
-      console.error(
-        `Failed to update company profile with new logo:`,
-        updateError,
-      );
+      console.error(`Failed to update company profile with new logo:`, updateError);
     }
 
     return uploadedLogo;
   }
 }
 
-async function deleteLogo(
-  sb: SupabaseClient<Database>,
-  url: string,
-  filename: string,
-) {
+async function deleteLogo(sb: SupabaseClient<Database>, url: string, filename: string) {
   //remove stored file
   const deleteNonLogo = await sb.storage.from("cmp_assets").remove([filename]);
   if (deleteNonLogo.error) {
@@ -256,11 +206,7 @@ async function deleteLogo(
 }
 
 function logoFilename(cmpId: number, name: string) {
-  return (
-    `logo/${cmpId}/${name.replaceAll(" ", "_")}`
-      .replaceAll(".png", "")
-      .replaceAll("~", "_") + ".png"
-  );
+  return `logo/${cmpId}/${name.replaceAll(" ", "_")}`.replaceAll(".png", "").replaceAll("~", "_") + ".png";
 }
 
 async function svgToPngAsync(svgXml: string) {

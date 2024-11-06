@@ -1,5 +1,5 @@
+import { CompletionModels, getEmbedding, getStructuredCompletion } from "../../llmHelpers.js";
 import { Job, Queue, SandboxedJob } from "bullmq";
-import { getEmbedding, getStructuredCompletion } from "../../llmHelpers.js";
 
 import { IndustryQueueClient } from "@shared/queues/industry-queue.js";
 import { Redis } from "ioredis";
@@ -12,16 +12,10 @@ import { isNotNull } from "@shared/types/typeHelpers";
 import { title } from "process";
 import { z } from "zod";
 
-export async function transactionDiscovery(
-  job: SandboxedJob<z.infer<typeof companyIdSchema>>,
-) {
+export async function transactionDiscovery(job: SandboxedJob<z.infer<typeof companyIdSchema>>) {
   const sb = fullAccessServiceClient();
 
-  const cmpGet = await sb
-    .from("company_profile")
-    .select()
-    .eq("id", job.data.cmpId)
-    .single();
+  const cmpGet = await sb.from("company_profile").select().eq("id", job.data.cmpId).single();
   if (cmpGet.error) {
     throw cmpGet.error;
   } else if (!cmpGet.data.web_summary) {
@@ -33,8 +27,7 @@ export async function transactionDiscovery(
   });
   const queriesRes = await getStructuredCompletion({
     //model: "gpt-4o-2024-08-06",
-    system:
-      "List 3 few-word-descriptions of what the company does based on their products and services",
+    system: "List 3 few-word-descriptions of what the company does based on their products and services",
     user: cmpGet.data.web_summary,
     schema: SearchQuerySchema,
   });
@@ -150,10 +143,7 @@ export async function transactionDiscovery(
     .filter(isNotNull);
   // transactions.map(transaction => console.log({...transaction, emb: undefined}))
 
-  const insert = await sb
-    .from("transaction_search_res")
-    .insert(transactions)
-    .select();
+  const insert = await sb.from("transaction_search_res").insert(transactions).select();
 
   if (insert.error) {
     console.log("Failed to insert", insert.error);

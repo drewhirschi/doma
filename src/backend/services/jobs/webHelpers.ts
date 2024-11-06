@@ -3,29 +3,25 @@ import { getCompletion, getEmbedding } from "./llmHelpers.js";
 
 import axiosRetry from "axios-retry";
 import { companyInfoScraping } from "./prompts.js";
+import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
+import https from "https";
 import { load } from "cheerio";
 import { z } from "zod";
-import https from "https";
 
-const axiosInstance = axios.create({
+const baseAxiosOptions = {
   headers: {
-    "User-Agent": "google-bot",
+    "User-Agent": "doma-bot",
+    // "User-Agent": "google-bot",
     // 'Accept-Language': 'en-US,en;q=0.9',
     // Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
   },
   httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-});
+};
+const axiosInstance = axios.create(baseAxiosOptions);
 
 function tagVisible(element: any) {
   const parentName = element.parent().prop("tagName").toLowerCase();
-  const invisibleTags = [
-    "style",
-    "script",
-    "head",
-    "title",
-    "meta",
-    "[document]",
-  ];
+  const invisibleTags = ["style", "script", "head", "title", "meta", "[document]"];
 
   if (invisibleTags.includes(parentName)) {
     return false;
@@ -112,9 +108,7 @@ function isValidUrl(url: string, baseUrl: URL): boolean {
 }
 
 // Function to crawl a website starting from the given URL
-export async function crawlWebsite(
-  startUrl: string,
-): Promise<Map<string, string>> {
+export async function crawlWebsite(startUrl: string): Promise<Map<string, string>> {
   const visitedUrls: Map<string, string> = new Map();
   const queue: string[] = [startUrl];
 
@@ -143,9 +137,7 @@ export async function crawlWebsite(
         .contents()
         .filter(function () {
           return (
-            this.type === "text" &&
-            $(this).closest("script, style").length === 0 &&
-            $(this).text().trim().length > 0
+            this.type === "text" && $(this).closest("script, style").length === 0 && $(this).text().trim().length > 0
           );
         })
         .map(function () {
@@ -177,10 +169,7 @@ export async function crawlWebsite(
   return visitedUrls;
 }
 
-export async function getPageLinks(
-  url: string,
-  options?: { limit?: number },
-): Promise<Set<string>> {
+export async function getPageLinks(url: string, options?: { limit?: number }): Promise<Set<string>> {
   const linksSet: Set<string> = new Set();
   const limit = options?.limit || 50; // Set default limit to 50
   const normalizedUrl = new URL(url).href.replace(/\/$/, "");
@@ -214,15 +203,9 @@ export async function getPageLinks(
 }
 
 export async function indexPage(url: string) {
-  // const client = axios.create({
-  //   headers: {
-  //     "User-Agent": "google-bot",
-  //   },
-  // });
+  const client = axios.create(baseAxiosOptions);
 
-  const client = axiosInstance;
-
-  axiosRetry(axios, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
+  axiosRetry(client, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
 
   try {
     const response = await client.get(url);
@@ -236,9 +219,7 @@ export async function indexPage(url: string) {
       .contents()
       .filter(function () {
         return (
-          this.type === "text" &&
-          $(this).closest("script, style").length === 0 &&
-          $(this).text().trim().length > 0
+          this.type === "text" && $(this).closest("script, style").length === 0 && $(this).text().trim().length > 0
         );
       })
       .map(function () {
@@ -252,9 +233,7 @@ export async function indexPage(url: string) {
       user: visibleText,
     });
 
-    const emb = await getEmbedding(
-      `Title: ${title}\nPath: ${new URL(url).pathname}`,
-    );
+    const emb = await getEmbedding(`Title: ${title}\nPath: ${new URL(url).pathname}`);
 
     return {
       title,

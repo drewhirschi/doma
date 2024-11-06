@@ -5,12 +5,7 @@ export const companyIdSchema = z.object({
   cmpId: z.number(),
 });
 
-export const findCompanySchema = companyIdSchema.extend({
-  context: z.object({}),
-})
-
-export const scrapeWebsiteSchema = z.object({
-  url: z.string(),
+export const scrapeWebsiteSchema = companyIdSchema.extend({
   force: z.boolean().optional(),
   scrapeComps: z.boolean().optional(),
 });
@@ -29,7 +24,7 @@ export const jobSchemas = {
   transaction_linking: transactionLinkingSchema,
   scrape_logo: companyIdSchema,
   scrape_ma_articles: companyIdSchema,
-  find_company: findCompanySchema
+  find_company: findCompanySchema,
 };
 
 export type JobType = keyof typeof jobSchemas;
