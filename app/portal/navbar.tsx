@@ -13,6 +13,7 @@ import {
   Space,
   Stack,
   Text,
+  Tooltip,
   UnstyledButton,
 } from "@mantine/core";
 import {
@@ -31,6 +32,30 @@ import classnames from "./layout.module.css";
 import { useHover } from "@mantine/hooks";
 import { usePathname } from "next/navigation";
 
+const navbarConfig = [
+  {
+    label: "Projects",
+    path: "projects",
+    icon: <IconSubtask />,
+  },
+  {
+    label: "Companies",
+    path: "companies",
+    icon: <IconSearch />,
+  },
+  {
+    label: "Search",
+    path: "search",
+    icon: <IconSearch />,
+  },
+  {
+    label: "Team",
+    path: "team",
+    icon: <IconUsersGroup size={26} />,
+  },
+  {},
+];
+
 export function NavBar() {
   const pathname = usePathname();
   // const { hovered: navbarHovered, ref: navbarRef } = useHover();
@@ -41,30 +66,19 @@ export function NavBar() {
       className={classnames.navbar}
     >
       <div className={classnames["nav-item"]}>
-        <NavLink
-          href={`/portal/projects`}
-          label={<IconSubtask />}
-          component={Link}
-          active={pathname.split("/")[2] === "projects"}
-        />
-        <NavLink
-          href={`/portal/companies`}
-          label={<IconSearch />}
-          component={Link}
-          active={pathname.split("/")[2] === "companies"}
-        />
-        {/* <NavLink
-          href={`/portal/datasets`}
-          label={<IconDatabase />}
-          component={Link}
-          active={pathname.split("/")[2] === "datasets"}
-        /> */}
-        <NavLink
-          href={`/portal/team`}
-          label={<IconUsersGroup />}
-          component={Link}
-          active={pathname.split("/")[2] === "team"}
-        />
+        {navbarConfig.map((item) => (
+          <NavLink
+            key={item.label}
+            href={`/portal/${item.path}`}
+            label={
+              <Tooltip position="right" label={item.label}>
+                <Box>{item.icon}</Box>
+              </Tooltip>
+            }
+            component={Link}
+            active={pathname.split("/")[2] === item.path}
+          />
+        ))}
       </div>
 
       <div className={classnames["nav-item"]}>

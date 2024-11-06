@@ -30,7 +30,7 @@ export default async function Layout({
         <BreadcrumbsComponent />
         <CompanyTitleEditor
           companyId={companyGet.data.id.toString() || ""}
-          initialName={companyGet.data.name || ""}
+          initialName={companyGet.data.name || companyGet.data.origin || ""}
           origin={companyGet.data.origin || ""}
         />
         {origin && (

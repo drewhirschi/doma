@@ -661,6 +661,41 @@ export type Database = {
           },
         ]
       }
+      searches: {
+        Row: {
+          created_at: string
+          emb: string
+          id: number
+          query: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          emb: string
+          id?: number
+          query?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          emb?: string
+          id?: number
+          query?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "searchs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenant: {
         Row: {
           created_at: string

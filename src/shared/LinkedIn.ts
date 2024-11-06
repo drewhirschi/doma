@@ -186,7 +186,7 @@ export class RapidApiLinkdeInScraper implements LinkedInDataProvider {
             type: liCompany.type,
             url: liCompany.linkedinUrl,
             description: liCompany.description,
-            headcountRange: liCompany.staffCountRange,
+            headcount_range: liCompany.staffCountRange,
             website: liCompany.website,
             industries: liCompany.industries,
             specialities: liCompany.specialities,

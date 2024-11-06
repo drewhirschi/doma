@@ -1,0 +1,61 @@
+import AiSearch from "./AiSearch";
+import {
+  Anchor,
+  Box,
+  Stack,
+  Table,
+  TableTbody,
+  TableTd,
+  TableTh,
+  TableThead,
+  TableTr,
+  Title,
+} from "@mantine/core";
+
+import { serverClient } from "@/shared/supabase-client/server";
+import Link from "next/link";
+
+interface IpageProps {}
+
+export default async function page() {
+  const supabase = serverClient();
+
+  const searchesGet = await supabase
+    .from("searches")
+    .select("id,query")
+    .order("updated_at", { ascending: false });
+  if (searchesGet.error) {
+    throw searchesGet.error;
+  }
+
+  const elements = searchesGet.data;
+  const rows = elements.map((element) => (
+    <TableTr key={element.id}>
+      <TableTd>
+        <Anchor
+          component={Link}
+          href={`/portal/search/${element.id}`}
+          c={"inherit"}
+        >
+          {element.query}
+        </Anchor>
+      </TableTd>
+    </TableTr>
+  ));
+
+  return (
+    <Stack m="sm">
+      <AiSearch />
+      {/* <CompaniesTable companies={companies} /> */}
+      {/* <Title order={3}>Other searches</Title> */}
+      <Table>
+        <TableThead>
+          <TableTr>
+            <TableTh>History</TableTh>
+          </TableTr>
+        </TableThead>
+        <TableTbody>{rows}</TableTbody>
+      </Table>
+    </Stack>
+  );
+}
