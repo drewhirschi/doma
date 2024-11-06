@@ -1,22 +1,7 @@
 "use client";
 
-import {
-  Anchor,
-  Box,
-  Button,
-  Divider,
-  Group,
-  NavLink,
-  TabsList,
-  TabsTab,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
-import {
-  IconMessageCircle,
-  IconPhoto,
-  IconSettings,
-} from "@tabler/icons-react";
+import { Anchor, Box, Button, Divider, Group, NavLink, TabsList, TabsTab, Text, UnstyledButton } from "@mantine/core";
+import { IconMessageCircle, IconPhoto, IconSettings } from "@tabler/icons-react";
 import { Tabs, rem } from "@mantine/core";
 
 import Link from "next/link";
@@ -49,17 +34,11 @@ export default function TopNav() {
           variant="gradient"
           gradient={{ from: "dark.8", to: "dark.3", deg: -45 }}
         >
-          Parsl
+          Doma
         </Text>
 
         <Group gap={48} justify="space-between" h={"100%"}>
-          <Box
-            mod={{ active: pathname === "/" }}
-            className={classes.root}
-            key={"home"}
-            href="/"
-            component={Link}
-          >
+          <Box mod={{ active: pathname === "/" }} className={classes.root} key={"home"} href="/" component={Link}>
             Home
           </Box>
 

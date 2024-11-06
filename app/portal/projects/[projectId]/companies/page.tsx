@@ -57,22 +57,14 @@ export default function Page({ params }: { params: { projectId: string } }) {
   }
 
   const toggleRow = (id: number) => {
-    setSelectedRows((current) =>
-      current.includes(id)
-        ? current.filter((rowId) => rowId !== id)
-        : [...current, id],
-    );
+    setSelectedRows((current) => (current.includes(id) ? current.filter((rowId) => rowId !== id) : [...current, id]));
   };
 
   const rows = project!.company_profile?.map((element) => (
     <TableTr
       key={element.id}
       onClick={() => toggleRow(element.id)}
-      bg={
-        selectedRows.includes(element.id)
-          ? "var(--mantine-color-blue-light)"
-          : undefined
-      }
+      bg={selectedRows.includes(element.id) ? "var(--mantine-color-blue-light)" : undefined}
     >
       <TableTd>
         <Checkbox
@@ -94,15 +86,8 @@ export default function Page({ params }: { params: { projectId: string } }) {
       </TableTd>
       <TableTd>
         <Group>
-          {element.favicon != null && (
-            <Image src={element.favicon} width={16} height={16} />
-          )}
-          <Anchor
-            c={"dark"}
-            fw={500}
-            component={Link}
-            href={`/portal/companies/${element.id}/overview`}
-          >
+          {element.favicon != null && <Image src={element.favicon} width={16} height={16} />}
+          <Anchor c={"dark"} fw={500} component={Link} href={`/portal/companies/${element.id}/overview`}>
             {element.name || element.origin}
           </Anchor>
         </Group>
@@ -143,15 +128,12 @@ export default function Page({ params }: { params: { projectId: string } }) {
           onRemoveSuccess={() => setSelectedRows([])}
         />
       </Group>
-      <Table
-        highlightOnHover
-        highlightOnHoverColor="var(--mantine-color-blue-light)"
-      >
+      <Table highlightOnHover highlightOnHoverColor="var(--mantine-color-blue-light)">
         <TableThead>
           <TableTr>
-            <TableTh></TableTh>
-            <TableTh>Name</TableTh>
-            <TableTh>Website</TableTh>
+            <TableTh style={{ width: "5%" }}></TableTh>
+            <TableTh style={{ width: "35%" }}>Name</TableTh>
+            <TableTh style={{ width: "60%" }}>Website</TableTh>
           </TableTr>
         </TableThead>
         <TableTbody>{rows}</TableTbody>

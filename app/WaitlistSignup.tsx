@@ -1,24 +1,7 @@
 "use client";
 
-import {
-  Anchor,
-  Box,
-  Button,
-  Checkbox,
-  Container,
-  Divider,
-  Grid,
-  Group,
-  Modal,
-  SimpleGrid,
-  Stack,
-  Text,
-  TextInput,
-  Textarea,
-  Title,
-} from "@mantine/core";
+import { Box, Button, Divider, Group, Modal, SimpleGrid, Text, TextInput } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-
 import axios from "axios";
 import { fbPixel } from "@/ux/helper";
 import { notifications } from "@mantine/notifications";
@@ -31,9 +14,7 @@ interface Props {
 }
 export function WaitlistSignup({ callToAction, secondaryDesription }: Props) {
   const [opened, { open, close: closeModal }] = useDisclosure(false);
-  const largeScreen = useMediaQuery(
-    `(min-width: ${theme.breakpoints?.sm || 48}em)`,
-  ); // Ensure proper units
+  const largeScreen = useMediaQuery(`(min-width: ${theme.breakpoints?.sm || 48}em)`);
 
   let pathname = "";
   if (typeof window !== "undefined") {
@@ -60,15 +41,12 @@ export function WaitlistSignup({ callToAction, secondaryDesription }: Props) {
       <Modal
         opened={opened}
         onClose={closeModal}
-        title={callToAction ?? "Join the Waitlist"}
+        title={<Text fw={700}>{callToAction ?? "Join the Waitlist"}</Text>}
         size={largeScreen ? "lg" : "md"}
       >
-        {/* Modal content */}
-
         <form
           onSubmit={form.onSubmit(async (values) => {
             try {
-              // await axios.post("https://submit-form.com/echo", {
               await axios.post("https://submit-form.com/IkZtiKU2d", {
                 method: "POST",
                 body: values,
@@ -99,32 +77,12 @@ export function WaitlistSignup({ callToAction, secondaryDesription }: Props) {
 
           <Box>
             <SimpleGrid cols={{ base: 1, sm: 2 }}>
-              <TextInput
-                {...form.getInputProps("first")}
-                label="First Name"
-                placeholder="First Name"
-              />
-              <TextInput
-                {...form.getInputProps("last")}
-                label="Last Name"
-                placeholder="Last Name"
-              />
-              <TextInput
-                {...form.getInputProps("email")}
-                required
-                label="Email"
-                placeholder="Email"
-              />
-              <TextInput
-                {...form.getInputProps("title")}
-                label="Title"
-                placeholder="Title"
-              />
-              <TextInput
-                {...form.getInputProps("company")}
-                label="Company"
-                placeholder="Company"
-              />
+              <TextInput {...form.getInputProps("first")} label="First Name" placeholder="First Name" />
+              <TextInput {...form.getInputProps("last")} label="Last Name" placeholder="Last Name" />
+              <TextInput {...form.getInputProps("email")} required label="Email" placeholder="Email" />
+              <TextInput {...form.getInputProps("title")} label="Title" placeholder="Title" />
+              <TextInput {...form.getInputProps("company")} label="Company" placeholder="Company" />
+              <TextInput {...form.getInputProps("url")} label="Website" placeholder="URL" />
             </SimpleGrid>
 
             <Group justify="flex-end">
@@ -136,14 +94,7 @@ export function WaitlistSignup({ callToAction, secondaryDesription }: Props) {
         </form>
       </Modal>
 
-      <Button
-        onClick={open}
-        //  styles={{label: {fontSize: 24}}}
-        size="lg"
-        variant="gradient"
-        gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
-        fw={500}
-      >
+      <Button onClick={open} size="lg" variant="gradient" gradient={{ deg: 30, from: "blue.8", to: "blue.6" }} fw={500}>
         {callToAction ?? "Join the Waitlist"}
       </Button>
     </>

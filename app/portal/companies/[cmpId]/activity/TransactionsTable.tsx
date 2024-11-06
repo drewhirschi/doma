@@ -56,8 +56,8 @@ export default function TransactionsTable({ transactions, cmpId }: TransactionsT
       <Table highlightOnHover>
         <TableThead>
           <TableTr>
-            <TableTh>Date</TableTh>
-            <TableTh>Description</TableTh>
+            <TableTh style={{ width: "12%" }}>Date</TableTh>
+            <TableTh style={{ width: "88%" }}>Description</TableTh>
           </TableTr>
         </TableThead>
         <TableTbody>{rows}</TableTbody>

@@ -1,15 +1,4 @@
-import {
-  Anchor,
-  Box,
-  Group,
-  Table,
-  TableTbody,
-  TableTd,
-  TableTh,
-  TableThead,
-  TableTr,
-} from "@mantine/core";
-
+import { Anchor, Box, Group, Table, TableTbody, TableTd, TableTh, TableThead, TableTr } from "@mantine/core";
 import { AddProjectModal } from "./AddProject";
 import Link from "next/link";
 import { serverClient } from "@/shared/supabase-client/server";
@@ -27,23 +16,17 @@ export default async function Page({
   const supabase = serverClient();
 
   const projectsGet = await supabase.from("ib_projects").select("*");
-  // .eq('project_id', params.projectId)
-  // .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 
   if (projectsGet.error) {
     throw new Error(projectsGet.error.message);
   }
 
   const transactions = projectsGet.data;
-  // console.log(transactions)
 
   const rows = transactions.map((element) => (
     <TableTr key={element.id}>
       <TableTd>
-        <Anchor
-          component={Link}
-          href={`/portal/projects/${element.id}/overview`}
-        >
+        <Anchor component={Link} href={`/portal/projects/${element.id}/overview`}>
           {element.title}
         </Anchor>
       </TableTd>
@@ -58,7 +41,7 @@ export default async function Page({
       <Table>
         <TableThead>
           <TableTr>
-            <TableTh>Name</TableTh>
+            <TableTh>Project Name</TableTh>
           </TableTr>
         </TableThead>
         <TableTbody>{rows}</TableTbody>

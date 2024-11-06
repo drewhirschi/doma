@@ -1,22 +1,7 @@
 "use client";
 
-import {
-  ActionIcon,
-  Box,
-  Button,
-  Container,
-  Group,
-  Paper,
-  Stack,
-  TextInput,
-} from "@mantine/core";
-import {
-  BubbleMenu,
-  EditorContent,
-  FloatingMenu,
-  useEditor,
-} from "@tiptap/react";
-
+import { Button, Paper } from "@mantine/core";
+import { BubbleMenu, EditorContent, FloatingMenu, useEditor } from "@tiptap/react";
 import { Markdown } from "tiptap-markdown";
 import Placeholder from "@tiptap/extension-placeholder";
 import React from "react";
@@ -33,15 +18,12 @@ const extensions = [
   Markdown,
 ];
 
-export default function CompanySummaryEditor({
-  companyProfile,
-}: {
-  companyProfile: CompanyProfile_SB | null;
-}) {
+export default function CompanySummaryEditor({ companyProfile }: { companyProfile: CompanyProfile_SB | null }) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions,
     content: companyProfile?.web_summary || "",
+    editable: false, // Set to true to enable editing
     onUpdate: ({ editor }) => {
       debouncedSaveContent(editor.getHTML());
     },
@@ -63,7 +45,6 @@ export default function CompanySummaryEditor({
   }, 300);
 
   return (
-    //<Group align="flex-start" m={"sm"}>
     <Paper flex={1} radius={8} withBorder p={"xs"} maw={900}>
       <EditorContent editor={editor} />
 
@@ -85,9 +66,7 @@ export default function CompanySummaryEditor({
             miw={40}
             variant="default"
             size="compact-sm"
-            onClick={() =>
-              editor?.chain().focus().toggleHeading({ level: 1 }).run()
-            }
+            onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
           >
             H1
           </Button>
@@ -111,6 +90,5 @@ export default function CompanySummaryEditor({
         </Button.Group>
       </BubbleMenu>
     </Paper>
-    //</Group>
   );
 }

@@ -12,15 +12,9 @@ interface RemoveCompaniesDialogProps {
   onRemoveSuccess: () => void;
 }
 
-export function RemoveCompaniesDialog({
-  selectedCompanies,
-  projectId,
-  onRemoveSuccess,
-}: RemoveCompaniesDialogProps) {
+export function RemoveCompaniesDialog({ selectedCompanies, projectId, onRemoveSuccess }: RemoveCompaniesDialogProps) {
   const [opened, { open, close }] = useDisclosure(false);
-  const [removeLoading, setRemoveLoading] = useState<LoadingState>(
-    LoadingState.IDLE,
-  );
+  const [removeLoading, setRemoveLoading] = useState<LoadingState>(LoadingState.IDLE);
 
   const handleRemove = async () => {
     setRemoveLoading(LoadingState.LOADING);
@@ -50,28 +44,23 @@ export function RemoveCompaniesDialog({
 
   return (
     <>
-      <Button
-        onClick={open}
-        color="red"
-        disabled={selectedCompanies.length === 0}
-        variant="subtle"
-      >
+      <Button onClick={open} color="red" disabled={selectedCompanies.length === 0} variant="subtle" mr="md" mt="md">
         Remove Selected
       </Button>
 
       <Modal opened={opened} onClose={close} title="Remove Companies">
-        <Text>
-          Are you sure you want to remove {selectedCompanies.length} companies
-          from this project?
-        </Text>
+        <Text>Are you sure you want to remove {selectedCompanies.length} companies from this project?</Text>
         <Group justify="flex-end" mt="md">
-          <Button variant="outline" onClick={close}>
+          <Button variant="outline" onClick={close} radius="sm" gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}>
             Cancel
           </Button>
           <Button
             color="red"
             onClick={handleRemove}
             loading={removeLoading === LoadingState.LOADING}
+            radius="sm"
+            variant="gradient"
+            gradient={{ deg: 30, from: "red.8", to: "red.6" }}
           >
             Remove
           </Button>

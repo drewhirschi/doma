@@ -1,15 +1,4 @@
-import {
-  Button,
-  Card,
-  CardSection,
-  Container,
-  Divider,
-  Group,
-  Image,
-  SimpleGrid,
-  Text,
-} from "@mantine/core";
-
+import { Card, CardSection, Container, Divider, Group, Image, SimpleGrid, Text } from "@mantine/core";
 import Link from "next/link";
 import React from "react";
 import { serverClient } from "@/shared/supabase-client/server";
@@ -29,15 +18,14 @@ export default async function Page() {
   return (
     <div>
       <Container>
-        <h1>Welcome to the Parsl Blog</h1>
+        <h1>Welcome to the Doma Blog!</h1>
 
-        <h3>Recent Articles</h3>
         <Divider pb={"md"} />
+
+        {articles.length === 0 && <Text>Check back later for new articles!</Text>}
 
         <SimpleGrid cols={2}>
           {articles.map((article) => {
-            const date = new Date(article.created_at);
-
             return (
               <Card
                 key={article.id}
@@ -55,7 +43,6 @@ export default async function Page() {
                 <Group justify="space-between" mt="md" mb="xs">
                   <Text fw={500}>{article.title}</Text>
                 </Group>
-                {/* {date.toLocaleDateString()} */}
 
                 <Text size="sm" c="dimmed">
                   {article.md?.split("\n")[0]}

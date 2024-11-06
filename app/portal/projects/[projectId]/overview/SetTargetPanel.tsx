@@ -1,11 +1,4 @@
-import {
-  Button,
-  Checkbox,
-  Drawer,
-  Group,
-  Table,
-  TextInput,
-} from "@mantine/core";
+import { Button, Checkbox, Drawer, Group, Table, TextInput } from "@mantine/core";
 import { useEffect, useState } from "react";
 
 import { EmptyCompanyListState } from "@/ux/components/CompanyList.EmptyState";
@@ -16,15 +9,14 @@ import { useDisclosure } from "@mantine/hooks";
 interface Props {
   setCmpId: (id: number) => Promise<void>;
 }
+
 export function SetTargetPanel(props: Props) {
   const [opened, { open, close }] = useDisclosure(false);
-  const [companies, setCompanies] = useState<
-    { id: number; name: string | null; origin: string | null }[]
-  >([]);
+  const [companies, setCompanies] = useState<{ id: number; name: string | null; origin: string | null }[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const debouncedSetSearchTerm = useDebouncedCallback(setSearchTerm, 500);
 
   const sb = browserClient();
@@ -32,10 +24,14 @@ export function SetTargetPanel(props: Props) {
   useEffect(() => {
     const fetchCompanies = async () => {
       setLoading(true);
+
+      const searchIsNumber = !isNaN(Number(searchTerm)) && searchTerm;
+      const orClause = `name.ilike.%${searchTerm}%,origin.ilike.%${searchTerm}%${searchIsNumber ? ",id.eq." + searchTerm : ""}`;
+
       const { data, error } = await sb
         .from("company_profile")
         .select("id, name, origin")
-        .ilike("name", `%${searchTerm}%`)
+        .or(orClause)
         .limit(20)
         .order("name", { ascending: true });
 
@@ -55,25 +51,12 @@ export function SetTargetPanel(props: Props) {
   }, [opened, sb, searchTerm]);
 
   const rows = companies.map((cmp) => (
-    <Table.Tr
-      key={cmp.name}
-      bg={
-        selectedRows.includes(cmp.id)
-          ? "var(--mantine-color-blue-light)"
-          : undefined
-      }
-    >
+    <Table.Tr key={cmp.name} bg={selectedRow === cmp.id ? "var(--mantine-color-blue-light)" : undefined}>
       <Table.Td>
         <Checkbox
           aria-label="Select row"
-          checked={selectedRows.includes(cmp.id)}
-          onChange={(event) =>
-            setSelectedRows(
-              event.currentTarget.checked
-                ? [...selectedRows, cmp.id]
-                : selectedRows.filter((position) => position !== cmp.id),
-            )
-          }
+          checked={selectedRow === cmp.id}
+          onChange={(event) => setSelectedRow(event.currentTarget.checked ? cmp.id : null)}
         />
       </Table.Td>
       <Table.Td>{cmp.id}</Table.Td>
@@ -84,20 +67,11 @@ export function SetTargetPanel(props: Props) {
 
   return (
     <>
-      <Drawer
-        opened={opened}
-        onClose={close}
-        title="Set Target"
-        position="right"
-        size={"lg"}
-      >
+      <Drawer opened={opened} onClose={close} title="Set Target" position="right" size={"lg"}>
         {error && <p>Error</p>}
         {loading && <p>Loading...</p>}
 
-        <TextInput
-          placeholder="Search by name"
-          onChange={(e) => debouncedSetSearchTerm(e.currentTarget.value)}
-        />
+        <TextInput placeholder="Search by name or ID" onChange={(e) => debouncedSetSearchTerm(e.currentTarget.value)} />
 
         <Table>
           <Table.Thead>
@@ -110,24 +84,34 @@ export function SetTargetPanel(props: Props) {
           </Table.Thead>
           <Table.Tbody>{rows}</Table.Tbody>
         </Table>
-        {companies.length === 0 && loading === false && (
-          <EmptyCompanyListState />
-        )}
+        {companies.length === 0 && loading === false && <EmptyCompanyListState />}
         <Group justify="flex-end">
           <Button
-            disabled={selectedRows.length !== 1}
+            disabled={selectedRow === null}
             onClick={async () => {
-              await props.setCmpId(selectedRows[0]);
-              close();
-              setSearchTerm("");
+              if (selectedRow !== null) {
+                await props.setCmpId(selectedRow);
+                close();
+                setSearchTerm("");
+                setSelectedRow(null);
+              }
             }}
+            radius="sm"
+            variant="gradient"
+            gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
           >
             Save
           </Button>
         </Group>
       </Drawer>
 
-      <Button size="compact-sm" variant="default" onClick={open}>
+      <Button
+        size="sm"
+        onClick={open}
+        radius="sm"
+        variant="gradient"
+        gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
+      >
         Change
       </Button>
     </>

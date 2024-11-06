@@ -36,22 +36,13 @@ export function ProjectTabs({ children }: Props) {
     >
       <Stack gap={0} h={"100%"}>
         <TabsList miw={860}>
-          <TabsTab
-            value="overview"
-            leftSection={<IconHome style={iconStyle} />}
-          >
+          <TabsTab value="overview" leftSection={<IconHome style={iconStyle} />}>
             Overview
           </TabsTab>
-          <TabsTab
-            value="companies"
-            leftSection={<IconBuildingSkyscraper style={iconStyle} />}
-          >
+          <TabsTab value="companies" leftSection={<IconBuildingSkyscraper style={iconStyle} />}>
             Companies
           </TabsTab>
-          <TabsTab
-            value="activity"
-            leftSection={<IconFlag style={iconStyle} />}
-          >
+          <TabsTab value="activity" leftSection={<IconFlag style={iconStyle} />}>
             M&A Activity
           </TabsTab>
         </TabsList>
