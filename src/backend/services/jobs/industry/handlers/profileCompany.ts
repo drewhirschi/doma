@@ -1,4 +1,4 @@
-import { CompletionModels, getCompletion, getEmbedding, getStructuredCompletion, recursiveDocumentReduction } from "../../llmHelpers.js";
+import { CompletionModels, getCompletion, getEmbedding, getStructuredCompletion, recursiveDocumentReduction } from "@shared/llmHelpers";
 
 import { Client } from "@googlemaps/google-maps-services-js";
 import { LinkedInQueueClient } from "@shared/queues/linkedin-queue.js";

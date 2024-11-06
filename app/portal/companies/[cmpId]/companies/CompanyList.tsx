@@ -32,8 +32,16 @@ import { SimilarityBadge } from "./SimilarityBadge";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
-interface CompanyWithSimilarity extends CompanyProfile_SB {
+interface CompanyWithSimilarity {
+  id: number;
+  name: string;
+  origin: string;
   similarity: number;
+  description: string;
+  headcount_range: string;
+  hq_lat: number;
+  hq_lon: number;
+  favicon: string;
 }
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -97,6 +105,7 @@ export default function CompanyList({
         <SimilarityBadge similarity={element.similarity} />
       </TableTd>
       <TableTd>{element.description}</TableTd>
+      <TableTd>{element.headcount_range}</TableTd>
       <TableTd>
         {element.origin && (
           <Group>
@@ -268,6 +277,7 @@ export default function CompanyList({
               <TableTh>Name</TableTh>
               <TableTh>Relevance</TableTh>
               <TableTh>Description</TableTh>
+              <TableTh>Headcount</TableTh>
               <TableTh>Website</TableTh>
             </TableTr>
           </TableThead>

@@ -165,7 +165,7 @@ export default function OverviewTab({
                 />
                 <MetadataItem
                   header="Head count"
-                  text={linkedInProfile.headcountRange ?? ""}
+                  text={linkedInProfile.headcount_range ?? ""}
                 />
 
                 <Box>

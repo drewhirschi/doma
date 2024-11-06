@@ -239,7 +239,7 @@ export type Database = {
           description: string | null
           follower_count: number | null
           founded_year: number | null
-          headcountRange: string | null
+          headcount_range: string | null
           hq_area: string | null
           hq_country: string | null
           hq_postal_code: string | null
@@ -256,7 +256,7 @@ export type Database = {
           description?: string | null
           follower_count?: number | null
           founded_year?: number | null
-          headcountRange?: string | null
+          headcount_range?: string | null
           hq_area?: string | null
           hq_country?: string | null
           hq_postal_code?: string | null
@@ -273,7 +273,7 @@ export type Database = {
           description?: string | null
           follower_count?: number | null
           founded_year?: number | null
-          headcountRange?: string | null
+          headcount_range?: string | null
           hq_area?: string | null
           hq_country?: string | null
           hq_postal_code?: string | null
@@ -380,7 +380,7 @@ export type Database = {
       }
       ma_transaction: {
         Row: {
-          amount: number | null
+          amount: string | null
           created_at: string
           date: string | null
           description: string | null
@@ -389,7 +389,7 @@ export type Database = {
           reason: string | null
         }
         Insert: {
-          amount?: number | null
+          amount?: string | null
           created_at?: string
           date?: string | null
           description?: string | null
@@ -398,7 +398,7 @@ export type Database = {
           reason?: string | null
         }
         Update: {
-          amount?: number | null
+          amount?: string | null
           created_at?: string
           date?: string | null
           description?: string | null
@@ -817,6 +817,7 @@ export type Database = {
           distance: number
           match_count: number
           apply_distance_filter: boolean
+          headcount_range_filter?: string[]
         }
         Returns: {
           id: number
@@ -824,6 +825,11 @@ export type Database = {
           origin: string
           similarity: number
           geo_distance: number
+          description: string
+          headcount_range: string
+          hq_lat: number
+          hq_lon: number
+          favicon: string
         }[]
       }
       match_cmp_adaptive: {

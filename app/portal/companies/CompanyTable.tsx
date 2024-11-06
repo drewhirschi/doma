@@ -31,7 +31,8 @@ export function CompaniesTable({ companies }: CompanyTableProps) {
       <TableTd>
         <Anchor
           component={Link}
-          href={`/portal/companies/${company.id}/overview#page=${searchParams.get("page")}&search=${encodeURIComponent(searchParams.get("query") ?? "")}`}
+          // i may have broken this??
+          href={`/portal/companies/${company.id}/overview#page=${searchParams.get("page") || 1}&search=${encodeURIComponent(searchParams.get("query") ?? "")}`}
         >
           {company.name ?? company.origin}
         </Anchor>

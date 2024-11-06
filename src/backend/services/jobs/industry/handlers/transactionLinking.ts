@@ -4,7 +4,7 @@ import { Job, Queue, SandboxedJob } from "bullmq";
 
 import { InvolvedParty } from "../../googlesearch.types";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
-import { getStructuredCompletion } from "../../llmHelpers";
+import { getStructuredCompletion } from "@shared/llmHelpers";
 import { googleSearch } from "../../googlesearch";
 import { transactionLinkingSchema } from "@shared/queues/industry-queue.types.js";
 import { z } from "zod";
