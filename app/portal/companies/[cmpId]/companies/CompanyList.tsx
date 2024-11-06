@@ -7,6 +7,7 @@ import {
   Group,
   Image,
   Paper,
+  SegmentedControl,
   Table,
   TableTbody,
   TableTd,
@@ -23,6 +24,7 @@ import {
 
 import { AddToDealModal } from "./AddToDealModal";
 import { DistanceFilter } from "./DistanceFilter";
+import { EmployeeCountFilter } from "./EmployeeCountFilter";
 import { IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
 import { SearchAndPage } from "../../SearchAndPage";
@@ -34,7 +36,7 @@ interface CompanyWithSimilarity extends CompanyProfile_SB {
   similarity: number;
 }
 
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 export default function CompanyList({
   sortedCompanies,
@@ -44,12 +46,12 @@ export default function CompanyList({
   count: number;
 }) {
   const [selectedCompanies, setSelectedCompanies] = useState<number[]>([]);
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState("List");
   const [selectedCompany, setSelectedCompany] =
     useState<CompanyWithSimilarity | null>(null);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: API_KEY || "",
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY || "",
   });
 
   const handleCheckboxChange = (companyId: number) => {
@@ -111,30 +113,24 @@ export default function CompanyList({
   return (
     <>
       <Paper shadow="xs" p="md" mb="md">
-        <Group>
-          <SearchAndPage totalCount={count} />
-          <DistanceFilter />
-          <Checkbox
-            label="Show map"
-            checked={showMap}
-            onChange={(event) => setShowMap(event.currentTarget.checked)}
-            styles={{
-              root: { cursor: "pointer" },
-              input: { cursor: "pointer" },
-              label: { cursor: "pointer" },
-            }}
-          />
+        <Group justify="space-between">
+          <Group>
+            <SearchAndPage totalCount={count} />
+            <DistanceFilter />
+            <EmployeeCountFilter />
+            <SegmentedControl data={["List", "Map"]} onChange={setShowMap} />
+          </Group>
           <AddToDealModal selectedCompanies={selectedCompanies} />
         </Group>
       </Paper>
 
-      {showMap && isLoaded ? (
+      {showMap == "Map" && isLoaded ? (
         <Paper shadow="xs" p="md" mb="md">
           <GoogleMap
             mapContainerStyle={{ width: "100%", height: "500px" }}
             center={{
-              lat: sortedCompanies[0]?.hq_lat || 0,
-              lng: sortedCompanies[0]?.hq_lon || 0,
+              lat: sortedCompanies[0]?.hq_lat || -101.3726549,
+              lng: sortedCompanies[0]?.hq_lon || 39.782531,
             }}
             zoom={10}
             options={{

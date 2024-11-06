@@ -2,6 +2,7 @@ import {
   Anchor,
   Box,
   Paper,
+  Stack,
   Table,
   TableTbody,
   TableTd,
@@ -10,11 +11,12 @@ import {
   TableTr,
 } from "@mantine/core";
 
+import { CompaniesTable } from "./CompanyTable";
 import { EmptyCompanyListState } from "@/ux/components/CompanyList.EmptyState";
 import Link from "next/link";
+import { PAGE_SIZE } from "./[cmpId]/shared";
 import { SearchAndPage } from "./SearchAndPage";
 import { serverClient } from "@/shared/supabase-client/server";
-import { PAGE_SIZE } from "./[cmpId]/shared";
 
 export default async function CompaniesPage({
   searchParams,
@@ -37,6 +39,7 @@ export default async function CompaniesPage({
     .from("company_profile")
     .select("*", { count: "estimated" })
     .or(orClause)
+    .not("origin", "is", null)
     .not("web_summary", "eq", null)
     .range(offset, offset + PAGE_SIZE - 1);
 
@@ -45,57 +48,15 @@ export default async function CompaniesPage({
     return <div>Error loading companies</div>;
   }
 
-  const rows = companies.map((company) => (
-    <TableTr key={company.id}>
-      <TableTd>
-        <Anchor
-          component={Link}
-          href={`/portal/companies/${company.id}/overview#page=${page}&search=${encodeURIComponent(searchTerm)}`}
-        >
-          {company.name ?? company.origin}
-        </Anchor>
-      </TableTd>
-      <TableTd
-        maw={"600px"}
-        style={{
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-        c={"dimmed"}
-        fz={"sm"}
-      >
-        {company.description}
-      </TableTd>
-    </TableTr>
-  ));
-
-  // async function handleSearch(formData: FormData) {
-  //   "use server";
-  //   const search = formData.get("search") as string;
-  //   redirect(
-  //     `/portal/companies?search=${encodeURIComponent(search)}`,
-  //     RedirectType.replace,
-  //   );
-  // }
-
   return (
     <Box maw={"100vw"}>
       <Paper shadow="xs" p="md" mb="md">
-        <SearchAndPage totalCount={count ?? 0} />
+        <Stack>
+          <SearchAndPage totalCount={count ?? 0} />
+        </Stack>
       </Paper>
 
-      <Table highlightOnHover>
-        <TableThead>
-          <TableTr>
-            <TableTh>Company Name</TableTh>
-            <TableTh>Description</TableTh>
-          </TableTr>
-        </TableThead>
-
-        <TableTbody>{rows}</TableTbody>
-      </Table>
-      {companies?.length === 0 && <EmptyCompanyListState />}
+      <CompaniesTable companies={companies ?? []} />
     </Box>
   );
 }

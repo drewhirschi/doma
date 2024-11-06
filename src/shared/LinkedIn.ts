@@ -1,4 +1,4 @@
-import { getCompletion, getStructuredCompletion } from "../backend/services/jobs/llmHelpers";
+import { getCompletion, getStructuredCompletion } from "./llmHelpers";
 
 import Bottleneck from "bottleneck";
 import { SupabaseClient } from "@supabase/supabase-js";

@@ -12,6 +12,7 @@ import {
   TabsList,
   TabsPanel,
   TabsTab,
+  Title,
   rem,
 } from "@mantine/core";
 import {
@@ -41,8 +42,6 @@ export default async function Page() {
     throw new Error("Failed to fetch user data");
   }
 
-  const iconStyle = { width: rem(12), height: rem(12) };
-
   const rows = userFetch.data
     // .filter((profile) => profile.email_confirmed_at)
     .map((profile) => (
@@ -67,76 +66,39 @@ export default async function Page() {
           </Group>
         </TableTd>
 
-        <TableTd></TableTd>
-      </TableTr>
-    ));
-
-  const inviteRows = userFetch.data
-    .filter((profile) => !profile.email_confirmed_at)
-    .map((item) => (
-      <TableTr key={item.email}>
-        <TableTd>{item.email}</TableTd>
-        <TableTd>{item.invited_at}</TableTd>
         <TableTd>
-          <Badge color="gray" fullWidth variant="light">
-            Pending
-          </Badge>
+          {profile.email_confirmed_at ? (
+            <Badge variant="light" color="green">
+              Active
+            </Badge>
+          ) : (
+            <Badge variant="light" color="yellow">
+              Invited
+            </Badge>
+          )}
         </TableTd>
       </TableTr>
     ));
 
   return (
     <>
-      <Tabs defaultValue="team">
-        <TabsList mb={"sm"}>
-          <TabsTab value="team" leftSection={<IconUsers style={iconStyle} />}>
-            Team
-          </TabsTab>
-          <TabsTab
-            value="invites"
-            leftSection={<IconUserPlus style={iconStyle} />}
-          >
-            Invites
-          </TabsTab>
-        </TabsList>
-
-        <TabsPanel value="team">
-          <Container>
-            <TableScrollContainer minWidth={800}>
-              <Table verticalSpacing="sm">
-                <TableThead>
-                  <TableTr>
-                    <TableTh>Employee</TableTh>
-                    <TableTh>Assigned Contracts</TableTh>
-                  </TableTr>
-                </TableThead>
-                <TableTbody>{rows}</TableTbody>
-              </Table>
-            </TableScrollContainer>
-          </Container>
-        </TabsPanel>
-
-        <TabsPanel value="invites">
-          <InviteMemberModal />
-        </TabsPanel>
-
-        <TabsPanel value="invites">
-          <Container>
-            <TableScrollContainer minWidth={800}>
-              <Table verticalSpacing="sm">
-                <TableThead>
-                  <TableTr>
-                    <TableTh>Email</TableTh>
-                    <TableTh>Invite Sent</TableTh>
-                    <TableTh>Status</TableTh>
-                  </TableTr>
-                </TableThead>
-                <TableTbody>{inviteRows}</TableTbody>
-              </Table>
-            </TableScrollContainer>
-          </Container>
-        </TabsPanel>
-      </Tabs>
+      <Title ml={"1rem"}>Team</Title>
+      {/* <Container> */}
+      <Group justify="flex-end">
+        <InviteMemberModal />
+      </Group>
+      <TableScrollContainer minWidth={800}>
+        <Table verticalSpacing="sm">
+          <TableThead>
+            <TableTr>
+              <TableTh>Name</TableTh>
+              <TableTh>Status</TableTh>
+            </TableTr>
+          </TableThead>
+          <TableTbody>{rows}</TableTbody>
+        </Table>
+      </TableScrollContainer>
+      {/* </Container> */}
     </>
   );
 }

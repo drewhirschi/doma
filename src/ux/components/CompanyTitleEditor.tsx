@@ -79,17 +79,6 @@ export function CompanyTitleEditor({
           >
             <IconEdit />
           </ActionIcon>
-          {origin && (
-            <ActionIcon
-              component="a"
-              href={origin}
-              target="_blank"
-              variant="transparent"
-              aria-label="Visit company website"
-            >
-              <IconExternalLink />
-            </ActionIcon>
-          )}
         </>
       )}
     </div>

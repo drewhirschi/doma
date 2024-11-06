@@ -12,8 +12,8 @@ import { Notifications } from "@mantine/notifications";
 import { theme } from "../theme";
 
 export const metadata = {
-  title: "Parsl",
-  description: "Contract intelligence",
+  title: "Doma",
+  description: "Intelligent Data",
 };
 
 export default function RootLayout({ children }: { children: any }) {

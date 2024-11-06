@@ -18,6 +18,7 @@ import {
 import {
   Icon24Hours,
   IconBook,
+  IconDatabase,
   IconFolderOpen,
   IconSearch,
   IconSubtask,
@@ -53,17 +54,17 @@ export function NavBar() {
           active={pathname.split("/")[2] === "companies"}
         />
         {/* <NavLink
+          href={`/portal/datasets`}
+          label={<IconDatabase />}
+          component={Link}
+          active={pathname.split("/")[2] === "datasets"}
+        /> */}
+        <NavLink
           href={`/portal/team`}
           label={<IconUsersGroup />}
           component={Link}
           active={pathname.split("/")[2] === "team"}
-        /> */}
-        {/* <NavLink
-          href={`/portal/reports`}
-          label={<IconBook />}
-          component={Link}
-          active={pathname.split("/")[2] === "reports"}
-        /> */}
+        />
       </div>
 
       <div className={classnames["nav-item"]}>

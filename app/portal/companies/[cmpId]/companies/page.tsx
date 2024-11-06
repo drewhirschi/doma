@@ -19,8 +19,7 @@ export default async function Page({
     distanceFilter?: boolean;
   };
 }) {
-  const distanceFilter = searchParams.distanceFilter ?? false;
-  const distance = parseInt(searchParams.distance ?? "15000", 10);
+  const distance = parseInt(searchParams.distance ?? "0");
   const searchTerm = searchParams.query || "";
   const page = parseInt(searchParams.page ?? "1", 10);
   const offset = (page - 1) * PAGE_SIZE;
@@ -50,7 +49,7 @@ export default async function Page({
     long: modelCmp.hq_lon ?? 0,
     distance: Number(distance) * 1609.34,
     match_count: 100,
-    apply_distance_filter: distanceFilter,
+    apply_distance_filter: distance > 0,
   });
 
   if (similarCompaniesGet.error || !similarCompaniesGet.data) {

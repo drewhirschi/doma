@@ -7,6 +7,7 @@ import {
 
 import { CreateProfileValues } from "./InviteMemberModal";
 import { getUserTenant } from "@/shared/getUserTenant";
+import { revalidatePath } from "next/cache";
 
 function getRandomColor(): string {
   const saturation = 100; // Adjust for vibrancy
@@ -32,4 +33,8 @@ export async function createProfile(profileData: CreateProfileValues) {
     console.log(error);
     throw new Error("failed to send email/add new profile");
   }
+
+  const profileUpdate = await supabase.from("profile").update({ "display_name": profileData.name }).eq("id", data.user.id).single();
+
+  revalidatePath("/portal/team");
 }

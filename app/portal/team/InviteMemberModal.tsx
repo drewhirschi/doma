@@ -10,6 +10,7 @@ import { useForm } from "@mantine/form";
 export interface CreateProfileValues {
   email: string;
   role: string;
+  name: string;
 }
 
 export function InviteMemberModal() {
@@ -18,6 +19,7 @@ export function InviteMemberModal() {
   const form = useForm({
     initialValues: {
       email: "",
+      name: "",
       role: "associate",
     },
 
@@ -28,7 +30,7 @@ export function InviteMemberModal() {
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Authentication">
+      <Modal opened={opened} onClose={close} title="Invite a team member">
         <form
           onSubmit={form.onSubmit((values) => {
             console.log("creating profile");
@@ -39,7 +41,8 @@ export function InviteMemberModal() {
           })}
         >
           <TextInput label="Email" required {...form.getInputProps("email")} />
-          <TeamRoleSelect defaultValue={form.values.role} withLabel />
+          <TextInput label="Name" required {...form.getInputProps("name")} />
+          {/* <TeamRoleSelect defaultValue={form.values.role} withLabel /> */}
           <Button mt="sm" type="submit">
             Invite
           </Button>

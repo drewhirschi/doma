@@ -1,32 +1,23 @@
-import {
-  Anchor,
-  Box,
-  Center,
-  Container,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Box, Center, Container, Stack, Text, Title } from "@mantine/core";
 
 import GridBackground from "@/ux/components/GridBackground";
-import LoginButton from "./LoginButton";
 import { Metadata } from "next";
 import { Meteors } from "@/ux/components/Meteors";
-import TopNav from "@/ux/components/TopNav";
+import TopNav from "./TopNav";
 import { WaitlistSignup } from "./WaitlistSignup";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "Parsl AI",
-  description: "Accurate AI Legal Due Diligence for M&A",
-  keywords: "Parsl, AI Due Diligence, AI M&A",
-  authors: { name: "Atlas Technology", url: "https://parslai.com" },
+  title: "Doma",
+  description: "",
+  keywords: "Doma, Company data, AI company data, AI insights",
+  authors: { name: "Doma Data", url: "https://domadata.com" },
   openGraph: {
     type: "website",
-    title: "Parsl AI",
+    title: "Doma",
     description: "Automated Market Reports",
-    images: "https://parslai.com/images/product/landing_preview.png",
-    url: "https://parslai.com",
+    images: "https://domadata.com/images/product/landing_preview.png",
+    url: "https://domadata.com",
   },
 };
 
