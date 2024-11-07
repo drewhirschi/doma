@@ -1,31 +1,51 @@
 "use client";
 
 import { Box, Button, Textarea } from "@mantine/core";
-import React, { useState } from "react";
-
-import { IconSearch } from "@tabler/icons-react";
-import Link from "next/link";
-import { getEmbedding } from "@/shared/llmHelpers";
+import { useParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { createSearch } from "./actions";
+import { browserClient } from "@/ux/supabase-client/BrowserClient";
 
 interface IAiSearchProps {}
 
 export default function AiSearch({}: IAiSearchProps) {
   const [q, setQ] = useState("");
+  const params = useParams();
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (!params.searchId) return;
+    const sb = browserClient();
+    sb.from("searches")
+      .select()
+      .eq("id", params.searchId)
+      .single()
+      .then((res) => {
+        if (res.data) {
+          setQ(res.data.query);
+        }
+      });
+  }, [params.searchId]);
+
+  async function runSearch() {
+    setLoading(true);
+    await createSearch(q, params.searchId as string);
+    setLoading(false);
+  }
+
   return (
-    <Box component="form" pos={"relative"} action={createSearch}>
+    <Box pos={"relative"}>
       <Textarea
-        name="query"
+        value={q}
         autosize
         minRows={2}
         placeholder="Describe the company you are looking for"
+        onChange={(e) => {
+          setQ(e.target.value);
+        }}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-            e.currentTarget.dispatchEvent(
-              new Event("submit", { bubbles: true, cancelable: true }),
-            );
+            runSearch();
           }
         }}
       />
@@ -33,15 +53,8 @@ export default function AiSearch({}: IAiSearchProps) {
         pos={"absolute"}
         right={10}
         bottom={10}
-        type="submit"
-        // component={Link} href={"/portal/datasets"}
-        // onClick={async () => {
-        //   setLoading(true);
-        //   console.log(q);
-        //   const emb = await getEmbedding(q);
-        //   setEmb(emb);
-        //   setLoading(false);
-        // }}
+        onClick={runSearch}
+        loading={loading}
       >
         Search
       </Button>

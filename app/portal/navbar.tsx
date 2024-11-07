@@ -51,9 +51,8 @@ const navbarConfig = [
   {
     label: "Team",
     path: "team",
-    icon: <IconUsersGroup size={26} />,
+    icon: <IconUsersGroup />,
   },
-  {},
 ];
 
 export function NavBar() {
@@ -66,7 +65,7 @@ export function NavBar() {
       className={classnames.navbar}
     >
       <div className={classnames["nav-item"]}>
-        {navbarConfig.map((item) => (
+        {navbarConfig.map((item, idx) => (
           <NavLink
             key={item.label}
             href={`/portal/${item.path}`}

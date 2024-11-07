@@ -3,6 +3,7 @@
 import {
   Anchor,
   Box,
+  Skeleton,
   Table,
   TableTbody,
   TableTd,
@@ -22,9 +23,21 @@ type CompanyTableProps = {
     origin: string | null;
     description: string | null;
   }[];
+  loading?: boolean;
 };
-export function CompaniesTable({ companies }: CompanyTableProps) {
+export function CompaniesTable({ companies, loading }: CompanyTableProps) {
   const searchParams = useSearchParams();
+
+  const loadingRows = Array.from({ length: 15 }).map((_, i) => (
+    <TableTr key={i}>
+      <TableTd width="25%">
+        <Skeleton height={26} />
+      </TableTd>
+      <TableTd>
+        <Skeleton height={26} />
+      </TableTd>
+    </TableTr>
+  ));
 
   const rows = companies.map((company) => (
     <TableTr key={company.id}>
@@ -61,9 +74,9 @@ export function CompaniesTable({ companies }: CompanyTableProps) {
           </TableTr>
         </TableThead>
 
-        <TableTbody>{rows}</TableTbody>
+        <TableTbody>{loading ? loadingRows : rows}</TableTbody>
       </Table>
-      {companies?.length === 0 && <EmptyCompanyListState />}
+      {!loading && companies?.length === 0 && <EmptyCompanyListState />}
     </Box>
   );
 }

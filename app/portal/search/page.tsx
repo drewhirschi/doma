@@ -44,18 +44,13 @@ export default async function page() {
   ));
 
   return (
-    <Stack m="sm">
-      <AiSearch />
-      {/* <CompaniesTable companies={companies} /> */}
-      {/* <Title order={3}>Other searches</Title> */}
-      <Table>
-        <TableThead>
-          <TableTr>
-            <TableTh>History</TableTh>
-          </TableTr>
-        </TableThead>
-        <TableTbody>{rows}</TableTbody>
-      </Table>
-    </Stack>
+    <Table>
+      <TableThead>
+        <TableTr>
+          <TableTh>History</TableTh>
+        </TableTr>
+      </TableThead>
+      <TableTbody>{rows}</TableTbody>
+    </Table>
   );
 }

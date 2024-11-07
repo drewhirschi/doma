@@ -23,20 +23,14 @@ export default async function Page({
   }
   // const emb = JSON.parse(searchGet.data.emb);
 
-  const companiesGet = supabase.rpc("match_cmp_adaptive", {
+  const companiesGet = await supabase.rpc("match_cmp_adaptive", {
     query_embedding: searchGet.data.emb,
     match_count: 100,
   });
 
   return (
     <Stack>
-      <Box>
-        <Text fw={600} size="sm" c={"dimmed"}>
-          Query
-        </Text>
-        <Text>{searchGet.data.query}</Text>
-      </Box>
-      <CompaniesTable companiesGet={companiesGet} />
+      <CompaniesTable companies={companiesGet.data ?? []} />
     </Stack>
   );
 }
