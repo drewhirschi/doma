@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Paper } from "@mantine/core";
+import { Button, Paper, Center, Text } from "@mantine/core";
 import { BubbleMenu, EditorContent, FloatingMenu, useEditor } from "@tiptap/react";
 import { Markdown } from "tiptap-markdown";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -46,7 +46,28 @@ export default function CompanySummaryEditor({ companyProfile }: { companyProfil
 
   return (
     <Paper flex={1} radius={8} withBorder p={"xs"} maw={900}>
-      <EditorContent editor={editor} />
+      {companyProfile && companyProfile.web_summary ? (
+        <EditorContent editor={editor} />
+      ) : (
+        <Center style={{ height: "100%" }}>
+          <Paper
+            radius="lg"
+            style={{
+              backgroundColor: "#fff",
+              padding: "20px",
+              maxWidth: "400px",
+              textAlign: "center",
+            }}
+          >
+            <Text size="lg" fw={600}>
+              No Company Profile Available
+            </Text>
+            <Text size="md" mt="sm">
+              Scraping in Progress. Check back in several minutes for company information!
+            </Text>
+          </Paper>
+        </Center>
+      )}
 
       <FloatingMenu
         editor={editor}
@@ -60,6 +81,7 @@ export default function CompanySummaryEditor({ companyProfile }: { companyProfil
       >
         <Paper w={200} shadow="md" radius={"md"} withBorder py={"xs"}></Paper>
       </FloatingMenu>
+
       <BubbleMenu editor={editor}>
         <Button.Group>
           <Button

@@ -1,10 +1,9 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
-
 import { LoadingState } from "@/shared/types/loadingstate";
 import { actionWithNotification } from "@/ux/clientComp";
-import { browserClient } from "@/ux/supabase-client/BrowserClient";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
+import { removeCompaniesFromProject } from "./actions";
 
 interface RemoveCompaniesDialogProps {
   selectedCompanies: number[];
@@ -16,32 +15,6 @@ export function RemoveCompaniesDialog({ selectedCompanies, projectId, onRemoveSu
   const [opened, { open, close }] = useDisclosure(false);
   const [removeLoading, setRemoveLoading] = useState<LoadingState>(LoadingState.IDLE);
 
-  const handleRemove = async () => {
-    setRemoveLoading(LoadingState.LOADING);
-    const supabase = browserClient();
-
-    await actionWithNotification(
-      async () => {
-        const { error } = await supabase
-          .from("deal_comps")
-          .delete()
-          .eq("project_id", projectId)
-          .in("company_id", selectedCompanies);
-
-        if (error) throw error;
-      },
-      {
-        successMessage: "Companies removed from project",
-        errorMessage: "Error removing companies",
-        loadingMessage: "Removing companies",
-      },
-    );
-
-    setRemoveLoading(LoadingState.IDLE);
-    close();
-    onRemoveSuccess();
-  };
-
   return (
     <>
       <Button onClick={open} color="red" disabled={selectedCompanies.length === 0} variant="subtle" mr="md" mt="md">
@@ -49,14 +22,17 @@ export function RemoveCompaniesDialog({ selectedCompanies, projectId, onRemoveSu
       </Button>
 
       <Modal opened={opened} onClose={close} title="Remove Companies">
-        <Text>Are you sure you want to remove {selectedCompanies.length} companies from this project?</Text>
+        <Text>Are you sure you want to remove these companies from this project?</Text>
         <Group justify="flex-end" mt="md">
           <Button variant="outline" onClick={close} radius="sm" gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}>
             Cancel
           </Button>
           <Button
             color="red"
-            onClick={handleRemove}
+            onClick={async () => {
+              actionWithNotification(() => removeCompaniesFromProject(Number(projectId), selectedCompanies));
+              close();
+            }}
             loading={removeLoading === LoadingState.LOADING}
             radius="sm"
             variant="gradient"

@@ -2,7 +2,6 @@
 
 import { Button, Checkbox, Drawer, Group, Table, TextInput } from "@mantine/core";
 import { useEffect, useState } from "react";
-
 import { IconPlus } from "@tabler/icons-react";
 import { actionWithNotification } from "@/ux/clientComp";
 import { addCompaniesToProject } from "./actions";
@@ -100,6 +99,9 @@ export function AddCompaniesPanel(props: Props) {
               close();
               setSearchTerm("");
             }}
+            radius="sm"
+            variant="gradient"
+            gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
           >
             Save
           </Button>
@@ -111,7 +113,7 @@ export function AddCompaniesPanel(props: Props) {
         onClick={open}
         mt="md"
         radius="sm"
-        gradient={{ deg: 30, from: "red.8", to: "red.6" }}
+        gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
       >
         Add Companies
       </Button>

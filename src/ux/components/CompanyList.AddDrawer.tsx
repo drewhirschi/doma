@@ -29,13 +29,7 @@ export function AddCompanyDrawer() {
   });
   return (
     <>
-      <Drawer
-        opened={opened}
-        onClose={close}
-        size="lg"
-        position="right"
-        title="Profile new company"
-      >
+      <Drawer opened={opened} onClose={close} size="lg" position="right" title="Profile new company">
         <Paper radius={8} withBorder p={"xs"}>
           <Box maw={600}>
             <Group align="flex-end" justify="space-between">
@@ -47,6 +41,9 @@ export function AddCompanyDrawer() {
                 {...form.getInputProps("url")}
               />
               <Button
+                radius="sm"
+                variant="gradient"
+                gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
                 onClick={async () => {
                   const validationRes = form.validate();
 

@@ -13,22 +13,11 @@ import {
   TableThead,
   TableTr,
 } from "@mantine/core";
-import {
-  IconAlertCircle,
-  IconChevronLeft,
-  IconExternalLink,
-  IconFileArrowLeft,
-  IconHome,
-  IconMessageCircle,
-  IconPhoto,
-  IconSettings,
-} from "@tabler/icons-react";
-
+import { IconExternalLink } from "@tabler/icons-react";
 import { AddCompaniesPanel } from "./AddCompaniesPanel";
 import Link from "next/link";
 import { RemoveCompaniesDialog } from "./RemoveCompaniesDialog";
 import { browserClient } from "@/ux/supabase-client/BrowserClient";
-import { serverClient } from "@/shared/supabase-client/server";
 import { useSBFetch } from "@/ux/hooks";
 import { useState } from "react";
 import Loading from "@/ux/components/Loading";
@@ -106,7 +95,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
               size="xl"
               aria-label="Open in a new tab"
             >
-              <IconExternalLink size={20} />
+              <IconExternalLink size={20} color="black" />
             </ActionIcon>
           )}
         </Group>
@@ -138,7 +127,6 @@ export default function Page({ params }: { params: { projectId: string } }) {
         </TableThead>
         <TableTbody>{rows}</TableTbody>
       </Table>
-      {/* <CompanyProfile companyId={cmpId} /> */}
     </>
   );
 }

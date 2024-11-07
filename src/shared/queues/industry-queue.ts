@@ -41,6 +41,9 @@ export class IndustryQueueClient {
   async transactionDiscovery(cmpId: number) {
     return await this.queue.add("transaction_discovery", { cmpId });
   }
+  async scrapeArticles(cmpId: number) {
+    return await this.queue.add("scrape_ma_articles", { cmpId });
+  }
   async scrapeCompanyWebsite(cmpId: number, opts?: { force?: boolean; scrapeComps?: boolean }) {
     const params = {
       cmpId,

@@ -94,7 +94,7 @@ export async function findSimilarCompanies(modelCmpId: number) {
   const industryQueue = new IndustryQueueClient();
 
   for (const item of insert.data) {
-    if (item.origin) await industryQueue.scrapeCompanyWebsite(item.origin);
+    if (item.origin) await industryQueue.scrapeCompanyWebsite(item.id);
   }
   await industryQueue.close();
 

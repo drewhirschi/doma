@@ -27,9 +27,11 @@ export async function createCompany(url: string) {
     return hasProtocol ? url : `https://${url}`;
   };
 
-
-  const cmpGet = await sb.from("company_profile").select().ilike("origin", `%${new URL(url).hostname}%`).maybeSingle();
-
+  const cmpGet = await sb
+    .from("company_profile")
+    .select()
+    .ilike("origin", `%${new URL(url).hostname}%`)
+    .maybeSingle();
 
   if (cmpGet.error) {
     throw cmpGet.error;
@@ -38,21 +40,21 @@ export async function createCompany(url: string) {
   let company = cmpGet.data;
   if (!company) {
     url = addProtocolIfNeeded(url);
-    const cmpInsert = await sb.from("company_profile").insert({ origin: new URL(url).origin }).select().single();
+    const cmpInsert = await sb
+      .from("company_profile")
+      .insert({ origin: new URL(url).origin })
+      .select()
+      .single();
     if (cmpInsert.error) {
       throw cmpInsert.error;
     }
 
     company = cmpInsert.data;
-
   }
-
-
 
   const queue = new IndustryQueueClient();
   await queue.scrapeCompanyWebsite(company.id, { force: false });
   queue.close();
-
 
   redirect(`/portal/companies/${company.id}/overview`);
 }
@@ -77,10 +79,7 @@ export async function deleteLogo(logo: CompanyLogo_SB) {
   revalidatePath(`/portal/companies/${logo.cmp_id}/overview`);
 }
 
-export async function updateCompanyLinkedinProfile(
-  company: CompanyProfile_SB,
-  newLiUrl: string,
-) {
+export async function updateCompanyLinkedinProfile(company: CompanyProfile_SB, newLiUrl: string) {
   const linkedinApi = new RapidApiLinkdeInScraper();
   const companySlug = parseCompanySlug(newLiUrl);
 
@@ -96,10 +95,7 @@ export async function updateCompanyLinkedinProfile(
 
   const sb = serverActionClient();
 
-  const insertProfile = await sb
-    .from("li_profile")
-    .insert(sbFormatProfile)
-    .select();
+  const insertProfile = await sb.from("li_profile").insert(sbFormatProfile).select();
   if (insertProfile.error) {
     throw new Error("Failed to insert linkedin profile", {
       cause: insertProfile.error,

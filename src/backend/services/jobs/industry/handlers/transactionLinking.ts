@@ -11,16 +11,10 @@ import { z } from "zod";
 
 const supabase = fullAccessServiceClient();
 
-export async function transactionCompanyLinking(
-  job: SandboxedJob<z.infer<typeof transactionLinkingSchema>>,
-) {
+export async function transactionCompanyLinking(job: SandboxedJob<z.infer<typeof transactionLinkingSchema>>) {
   const id = job.data.trans_news_id;
 
-  const transactionsGet = await supabase
-    .from("transaction_search_res")
-    .select()
-    .eq("id", id)
-    .single();
+  const transactionsGet = await supabase.from("transaction_search_res").select().eq("id", id).single();
 
   if (transactionsGet.error) {
     throw transactionsGet.error;
@@ -31,19 +25,15 @@ export async function transactionCompanyLinking(
   const transParticipantProms = [
     { trans_id: id, name: transaction.buyer_name, role: "buyer" },
     { trans_id: id, name: transaction.seller_name, role: "seller" },
-    ...(transaction.others as [])?.map(
-      (other: z.infer<typeof InvolvedParty>) => ({
-        trans_id: id,
-        name: other.name,
-        role: other.role,
-      }),
-    ),
+    ...(transaction.others as [])?.map((other: z.infer<typeof InvolvedParty>) => ({
+      trans_id: id,
+      name: other.name,
+      role: other.role,
+    })),
   ]
     .filter((x) => !!x.name)
     .map(async (involvedParty) => {
-      const potentialSites = (
-        await googleSearch(`${involvedParty.name} website`)
-      ).items.slice(0, 3);
+      const potentialSites = (await googleSearch(`${involvedParty.name} website`)).items.slice(0, 3);
 
       const bestCandidateWebsite = await getStructuredCompletion({
         schema: z.object({
@@ -64,9 +54,7 @@ export async function transactionCompanyLinking(
 
       return {
         ...involvedParty,
-        websiteOrigin: new URL(
-          potentialSites[bestCandidateWebsite?.id ?? 0].link,
-        ).origin,
+        websiteOrigin: new URL(potentialSites[bestCandidateWebsite?.id ?? 0].link).origin,
       };
     });
 
@@ -119,16 +107,10 @@ export async function transactionCompanyLinking(
     });
   });
 
-  const updateTransaction = await supabase
-    .from("transaction_search_res")
-    .update({ linked: true })
-    .eq("id", id);
+  const updateTransaction = await supabase.from("transaction_search_res").update({ linked: true }).eq("id", id);
 
   if (updateTransaction.error) {
-    console.error(
-      "Failed to set transaction as linked",
-      updateTransaction.error,
-    );
+    console.error("Failed to set transaction as linked", updateTransaction.error);
     throw updateTransaction.error;
   }
   // await industryQueue.close()
