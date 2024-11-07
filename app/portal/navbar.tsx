@@ -1,26 +1,8 @@
 "use client";
 
+import { Box, NavLink, Stack, Tooltip } from "@mantine/core";
 import {
-  Anchor,
-  AppShell,
-  Box,
-  Breadcrumbs,
-  Code,
-  Flex,
-  Group,
-  NavLink,
-  ScrollArea,
-  Space,
-  Stack,
-  Text,
-  Tooltip,
-  UnstyledButton,
-} from "@mantine/core";
-import {
-  Icon24Hours,
-  IconBook,
-  IconDatabase,
-  IconFolderOpen,
+  IconBuildingSkyscraper,
   IconSearch,
   IconSubtask,
   IconUsersGroup,
@@ -29,7 +11,6 @@ import {
 import Link from "next/link";
 import { UserButton } from "@/ux/components/UserButton";
 import classnames from "./layout.module.css";
-import { useHover } from "@mantine/hooks";
 import { usePathname } from "next/navigation";
 
 const navbarConfig = [
@@ -39,9 +20,9 @@ const navbarConfig = [
     icon: <IconSubtask />,
   },
   {
-    label: "Companies",
+    label: "Company Directory",
     path: "companies",
-    icon: <IconSearch />,
+    icon: <IconBuildingSkyscraper />,
   },
   {
     label: "Search",
@@ -57,13 +38,9 @@ const navbarConfig = [
 
 export function NavBar() {
   const pathname = usePathname();
-  // const { hovered: navbarHovered, ref: navbarRef } = useHover();
 
   return (
-    <Stack
-      // ref={navbarRef}
-      className={classnames.navbar}
-    >
+    <Stack className={classnames.navbar}>
       <div className={classnames["nav-item"]}>
         {navbarConfig.map((item, idx) => (
           <NavLink

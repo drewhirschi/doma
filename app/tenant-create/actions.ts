@@ -16,6 +16,11 @@ export async function createTenantAndAssignUser(tenantName: string) {
     throw userError;
   }
 
+
+  if (user.user.app_metadata.tenant_id) {
+    redirect("/portal/projects");
+  }
+
   const createTenant = await dangerousClient
     .from("tenant")
     .insert({ name: tenantName })
