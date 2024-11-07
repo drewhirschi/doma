@@ -52,18 +52,22 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
     router.push("/login");
   };
 
+  const userAvatar = (
+    <Avatar
+      //src={session?.user?.user_metadata?.avatar_url} // implement for images
+      color={profile?.color ?? "black"} // need to add color to the user_metadata or retrieve profile
+      radius="xl"
+    >
+      {getInitials(profile?.display_name ?? "")}
+    </Avatar>
+  );
+
   return (
     <Menu shadow="md" width={200} withinPortal={true}>
       <Menu.Target>
         <UnstyledButton className={classes.user} mx={4}>
           <Flex wrap={"nowrap"} direction={"row"} align={"center"}>
-            <Avatar
-              //src={session?.user?.user_metadata?.avatar_url} // implement for images
-              color={profile?.color ?? "black"} // need to add color to the user_metadata or retrieve profile
-              radius="xl"
-            >
-              {getInitials(profile?.display_name ?? "")}
-            </Avatar>
+            {userAvatar}
 
             {!collapsed && (
               <>
@@ -104,10 +108,14 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
       </Menu.Target>
 
       <Menu.Dropdown>
-        {/* <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}>
-          Settings
+        <Menu.Item
+          component={Link}
+          href={"/portal/settings"}
+          leftSection={userAvatar}
+        >
+          {profile?.email}
         </Menu.Item>
-        <Menu.Divider /> */}
+        <Menu.Divider />
         <Menu.Item
           component={Link}
           href={"/portal/settings"}

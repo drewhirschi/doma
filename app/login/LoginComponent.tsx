@@ -88,7 +88,7 @@ export default function Login() {
             <ThemeIcon variant="light">
               <IconLogin2 style={{ width: "70%", height: "70%" }} />
             </ThemeIcon>
-            <Title order={2}>Login to Parsl</Title>
+            <Title order={2}>Login to Doma</Title>
           </Group>
 
           <Stack>

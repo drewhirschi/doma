@@ -6,6 +6,7 @@ import { TeamRoleSelect } from "@/ux/components/TeamRoleSelect";
 import { createProfile } from "./InviteMemberModal.action";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
+import { useState } from "react";
 
 export interface CreateProfileValues {
   email: string;
@@ -15,6 +16,7 @@ export interface CreateProfileValues {
 
 export function InviteMemberModal() {
   const [opened, { open, close }] = useDisclosure(false);
+  const [loading, setLoading] = useState(false);
 
   const form = useForm({
     initialValues: {
@@ -31,22 +33,24 @@ export function InviteMemberModal() {
   return (
     <>
       <Modal opened={opened} onClose={close} title="Invite a team member">
-        <form
-          onSubmit={form.onSubmit((values) => {
-            console.log("creating profile");
-            createProfile(values).then(() => {
-              close();
-              form.reset();
-            });
-          })}
+        <TextInput label="Email" required {...form.getInputProps("email")} />
+        <TextInput label="Name" required {...form.getInputProps("name")} />
+        {/* <TeamRoleSelect defaultValue={form.values.role} withLabel /> */}
+        <Button
+          loading={loading}
+          mt="sm"
+          onClick={async () => {
+            setLoading(true);
+
+            await createProfile(form.values);
+
+            setLoading(false);
+            form.reset();
+            close();
+          }}
         >
-          <TextInput label="Email" required {...form.getInputProps("email")} />
-          <TextInput label="Name" required {...form.getInputProps("name")} />
-          {/* <TeamRoleSelect defaultValue={form.values.role} withLabel /> */}
-          <Button mt="sm" type="submit">
-            Invite
-          </Button>
-        </form>
+          Invite
+        </Button>
       </Modal>
 
       <Button onClick={open}>Invite a team member</Button>
