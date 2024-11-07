@@ -22,20 +22,16 @@ export default async function Layout({
     return <Title>Not found</Title>;
   }
 
-  const breadcrumbsItems = [
-    { label: "< Companies", href: "/portal/companies" },
-  ];
-
   return (
     <Stack h={"100vh"} gap={0} w="calc(100vw - 60px)">
-      <Group p="sm" mb={"sm"} miw={860}>
-        <BreadcrumbsComponent items={breadcrumbsItems} />
+      <Stack p="sm" mb={"sm"} miw={860}>
+        <BreadcrumbsComponent />
         <CompanyTitleEditor
           companyId={companyGet.data.id.toString() || ""}
           initialName={companyGet.data.name || ""}
           origin={companyGet.data.origin || ""}
         />
-      </Group>
+      </Stack>
       <ProjectTabs>{children}</ProjectTabs>
     </Stack>
   );

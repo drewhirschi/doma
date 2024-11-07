@@ -85,6 +85,11 @@ export default function Page({ params }: { params: { projectId: string } }) {
                 : selectedRows.filter((position) => position !== element.id),
             )
           }
+          styles={{
+            root: { cursor: "pointer" },
+            input: { cursor: "pointer" },
+            label: { cursor: "pointer" },
+          }}
         />
       </TableTd>
       <TableTd>

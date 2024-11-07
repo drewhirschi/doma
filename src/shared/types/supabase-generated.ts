@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -114,6 +113,7 @@ export type Database = {
           hq_lat: number | null
           hq_lon: number | null
           id: number
+          liprofile_slug: string | null
           name: string | null
           origin: string | null
           updated_at: string
@@ -129,6 +129,7 @@ export type Database = {
           hq_lat?: number | null
           hq_lon?: number | null
           id?: number
+          liprofile_slug?: string | null
           name?: string | null
           origin?: string | null
           updated_at?: string
@@ -144,13 +145,22 @@ export type Database = {
           hq_lat?: number | null
           hq_lon?: number | null
           id?: number
+          liprofile_slug?: string | null
           name?: string | null
           origin?: string | null
           updated_at?: string
           web_summary?: string | null
           web_summary_emb?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_profile_liprofile_slug_fkey"
+            columns: ["liprofile_slug"]
+            isOneToOne: false
+            referencedRelation: "li_profile"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       deal_comps: {
         Row: {
@@ -223,6 +233,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      li_profile: {
+        Row: {
+          description: string | null
+          follower_count: number | null
+          founded_year: number | null
+          headcountRange: string | null
+          hq_area: string | null
+          hq_country: string | null
+          hq_postal_code: string | null
+          industries: string[] | null
+          slug: string
+          specialities: string[] | null
+          updated_at: string
+          url: string
+          website: string | null
+        }
+        Insert: {
+          description?: string | null
+          follower_count?: number | null
+          founded_year?: number | null
+          headcountRange?: string | null
+          hq_area?: string | null
+          hq_country?: string | null
+          hq_postal_code?: string | null
+          industries?: string[] | null
+          slug: string
+          specialities?: string[] | null
+          updated_at?: string
+          url: string
+          website?: string | null
+        }
+        Update: {
+          description?: string | null
+          follower_count?: number | null
+          founded_year?: number | null
+          headcountRange?: string | null
+          hq_area?: string | null
+          hq_country?: string | null
+          hq_postal_code?: string | null
+          industries?: string[] | null
+          slug?: string
+          specialities?: string[] | null
+          updated_at?: string
+          url?: string
+          website?: string | null
+        }
+        Relationships: []
       }
       profile: {
         Row: {
@@ -717,6 +775,7 @@ export type Database = {
           hq_lat: number | null
           hq_lon: number | null
           id: number
+          liprofile_slug: string | null
           name: string | null
           origin: string | null
           updated_at: string
@@ -737,33 +796,33 @@ export type Database = {
         }[]
       }
       match_cmp_summaries:
-      | {
-        Args: {
-          query_embedding: string
-          match_threshold: number
-          match_count: number
-        }
-        Returns: {
-          id: number
-          name: string
-          website: string
-          similarity: number
-        }[]
-      }
-      | {
-        Args: {
-          query_embedding: string
-          match_threshold: number
-          match_count: number
-          company_id: number
-        }
-        Returns: {
-          id: number
-          name: string
-          website: string
-          similarity: number
-        }[]
-      }
+        | {
+            Args: {
+              query_embedding: string
+              match_threshold: number
+              match_count: number
+            }
+            Returns: {
+              id: number
+              name: string
+              website: string
+              similarity: number
+            }[]
+          }
+        | {
+            Args: {
+              query_embedding: string
+              match_threshold: number
+              match_count: number
+              company_id: number
+            }
+            Returns: {
+              id: number
+              name: string
+              website: string
+              similarity: number
+            }[]
+          }
       match_documents: {
         Args: {
           query_embedding: string
@@ -790,48 +849,47 @@ export type Database = {
         }[]
       }
       nearby_relevant_cmp:
-      | {
-        Args: {
-          lat: number
-          long: number
-        }
-        Returns: {
-          id: number
-          name: string
-          lat: number
-          long: number
-          dist_meters: number
-        }[]
-      }
-      | {
-        Args: {
-          lat: number
-          long: number
-          distance: number
-          relevant_company_ids: number[]
-        }
-        Returns: {
-          id: number
-          name: string
-          lat: number
-          long: number
-          dist_meters: number
-        }[]
-      }
-      | {
-        Args: {
-          lat: number
-          long: number
-          relevant_company_ids: number[]
-        }
-        Returns: {
-          id: number
-          name: string
-          lat: number
-          long: number
-          dist_meters: number
-        }[]
-      }
+        | {
+            Args: {
+              lat: number
+              long: number
+            }
+            Returns: {
+              id: number
+              name: string
+              lat: number
+              long: number
+              dist_meters: number
+            }[]
+          }
+        | {
+            Args: {
+              lat: number
+              long: number
+              distance: number
+              relevant_company_ids: number[]
+            }
+            Returns: {
+              id: number
+              name: string
+              origin: string
+              similarity: number
+            }[]
+          }
+        | {
+            Args: {
+              lat: number
+              long: number
+              relevant_company_ids: number[]
+            }
+            Returns: {
+              id: number
+              name: string
+              lat: number
+              long: number
+              dist_meters: number
+            }[]
+          }
       random_color: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -876,80 +934,80 @@ type PublicSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
   PublicTableNameOrOptions extends
-  | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-  | { schema: keyof Database },
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-  ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-    Database[PublicTableNameOrOptions["schema"]]["Views"])
-  : never = never,
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-    Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-  ? R
-  : never
+    ? R
+    : never
   : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-    PublicSchema["Views"])
-  ? (PublicSchema["Tables"] &
-    PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-  | keyof PublicSchema["Tables"]
-  | { schema: keyof Database },
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-  ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
+      Insert: infer I
+    }
+    ? I
+    : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-  | keyof PublicSchema["Tables"]
-  | { schema: keyof Database },
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-  ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
+      Update: infer U
+    }
+    ? U
+    : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
-  | keyof PublicSchema["Enums"]
-  | { schema: keyof Database },
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-  : never
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never

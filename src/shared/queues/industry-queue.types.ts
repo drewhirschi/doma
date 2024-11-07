@@ -8,7 +8,12 @@ export const companyIdSchema = z.object({
 export const scrapeWebsiteSchema = z.object({
   url: z.string(),
   force: z.boolean().optional(),
+  scrapeComps: z.boolean().optional(),
 });
+
+export const getLinkedInProfileSchema = companyIdSchema.extend({
+  liProfileUrl: z.string()
+})
 
 export const transactionLinkingSchema = z.object({
   trans_news_id: z.number(),
@@ -16,6 +21,7 @@ export const transactionLinkingSchema = z.object({
 
 // Create a schema map
 export const jobSchemas = {
+  get_li_profile: getLinkedInProfileSchema,
   company_discovery: companyIdSchema,
   scrape_company_website: scrapeWebsiteSchema,
   reduce_company_pages: companyIdSchema,

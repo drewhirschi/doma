@@ -1,9 +1,6 @@
 import {
   Anchor,
   Box,
-  Button,
-  Container,
-  Group,
   Paper,
   Table,
   TableTbody,
@@ -11,16 +8,11 @@ import {
   TableTh,
   TableThead,
   TableTr,
-  Text,
-  TextInput,
 } from "@mantine/core";
 
 import { EmptyCompanyListState } from "@/ux/components/CompanyList.EmptyState";
-import { IconSearch } from "@tabler/icons-react";
 import Link from "next/link";
-import { RedirectType } from "next/navigation";
 import { SearchAndPage } from "./SearchAndPage";
-import { redirect } from "next/navigation";
 import { serverClient } from "@/shared/supabase-client/server";
 import { PAGE_SIZE } from "./[cmpId]/shared";
 
@@ -58,7 +50,7 @@ export default async function CompaniesPage({
       <TableTd>
         <Anchor
           component={Link}
-          href={`/portal/companies/${company.id}/overview`}
+          href={`/portal/companies/${company.id}/overview#page=${page}&search=${encodeURIComponent(searchTerm)}`}
         >
           {company.name ?? company.origin}
         </Anchor>
@@ -78,14 +70,14 @@ export default async function CompaniesPage({
     </TableTr>
   ));
 
-  async function handleSearch(formData: FormData) {
-    "use server";
-    const search = formData.get("search") as string;
-    redirect(
-      `/portal/companies?search=${encodeURIComponent(search)}`,
-      RedirectType.replace,
-    );
-  }
+  // async function handleSearch(formData: FormData) {
+  //   "use server";
+  //   const search = formData.get("search") as string;
+  //   redirect(
+  //     `/portal/companies?search=${encodeURIComponent(search)}`,
+  //     RedirectType.replace,
+  //   );
+  // }
 
   return (
     <Box maw={"100vw"}>

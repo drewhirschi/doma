@@ -1,8 +1,7 @@
 "use client";
 
 import { ActionIcon, TextInput } from "@mantine/core";
-import { IconExternalLink } from "@tabler/icons-react";
-import Link from "next/link";
+import { IconEdit, IconX, IconExternalLink } from "@tabler/icons-react";
 import { useDebouncedCallback } from "use-debounce";
 import { browserClient } from "@/ux/supabase-client/BrowserClient";
 import { useState } from "react";
@@ -19,6 +18,7 @@ export function CompanyTitleEditor({
   origin,
 }: CompanyTitleEditorProps) {
   const [companyName, setCompanyName] = useState<string>(initialName);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const sb = browserClient();
 
   const debouncedSaveCompanyName = useDebouncedCallback(
@@ -42,24 +42,56 @@ export function CompanyTitleEditor({
   };
 
   return (
-    <>
-      <TextInput
-        value={companyName}
-        onChange={(event) => handleNameChange(event.currentTarget.value)}
-        size="lg"
-        styles={{ input: { fontSize: "1.5rem", fontWeight: "bold" } }}
-        placeholder="Company Name"
-      />
-      {origin && (
-        <ActionIcon
-          variant="transparent"
-          component={Link}
-          href={origin}
-          target="_blank"
-        >
-          <IconExternalLink />
-        </ActionIcon>
+    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      {isEditing ? (
+        <>
+          <TextInput
+            value={companyName || origin}
+            onChange={(event) => handleNameChange(event.currentTarget.value)}
+            size="lg"
+            styles={{ input: { fontSize: "1.5rem", fontWeight: "bold" } }}
+            placeholder="Company Name"
+            onBlur={() => setIsEditing(false)}
+          />
+          <ActionIcon
+            onClick={() => setIsEditing(false)}
+            variant="transparent"
+            aria-label="Close editor"
+          >
+            <IconX />
+          </ActionIcon>
+        </>
+      ) : (
+        <>
+          <span
+            style={{
+              fontSize: "2rem",
+              fontWeight: "bold",
+              cursor: "default",
+            }}
+          >
+            {companyName || origin}
+          </span>
+          <ActionIcon
+            onClick={() => setIsEditing(true)}
+            variant="transparent"
+            aria-label="Edit company name"
+          >
+            <IconEdit />
+          </ActionIcon>
+          {origin && (
+            <ActionIcon
+              component="a"
+              href={origin}
+              target="_blank"
+              variant="transparent"
+              aria-label="Visit company website"
+            >
+              <IconExternalLink />
+            </ActionIcon>
+          )}
+        </>
       )}
-    </>
+    </div>
   );
 }
