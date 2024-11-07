@@ -7,11 +7,7 @@ import { serverClient } from "@/shared/supabase-client/server";
 export default async function Page({ params }: { params: { blogId: string } }) {
   const sb = serverClient();
 
-  const article = await sb
-    .from("blog_article")
-    .select("*")
-    .eq("id", Number(params.blogId))
-    .single();
+  const article = await sb.from("blog_article").select("*").eq("id", Number(params.blogId)).single();
 
   if (article.error) {
     console.error(article.error);
@@ -23,7 +19,7 @@ export default async function Page({ params }: { params: { blogId: string } }) {
   return (
     <div>
       <Container mb={"xl"}>
-        <Image src={article.data.cover_img} />
+        <Image src={article.data.cover_img} alt="" />
         <h1>{article.data.title}</h1>
         <Text c="dimmed" fw={600}>
           {article.data.author} | {date.toLocaleDateString()}

@@ -75,7 +75,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
       </TableTd>
       <TableTd>
         <Group>
-          {element.favicon != null && <Image src={element.favicon} width={16} height={16} />}
+          {element.favicon != null && <Image src={element.favicon} width={16} height={16} alt="" />}
           <Anchor c={"dark"} fw={500} component={Link} href={`/portal/companies/${element.id}/overview`}>
             {element.name || element.origin}
           </Anchor>

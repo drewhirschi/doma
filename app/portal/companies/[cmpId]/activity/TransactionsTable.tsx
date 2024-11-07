@@ -101,7 +101,9 @@ function TransactionModal({ transaction, closeModal, cmpId }: TransactionModalPr
             {transaction.participants
               .filter((p) => p.company_profile.id != cmpId)
               .map((p) => (
-                <Anchor href={`/portal/companies/${p.company_profile.id}`}>{p.company_profile.name}</Anchor>
+                <Anchor key={p.company_profile.id} href={`/portal/companies/${p.company_profile.id}`}>
+                  {p.company_profile.name}
+                </Anchor>
               ))}
           </Stack>
         </Box>
@@ -111,7 +113,7 @@ function TransactionModal({ transaction, closeModal, cmpId }: TransactionModalPr
             <Text fw={700}>Articles</Text>
             <Stack gap={4}>
               {transaction.ma_articles.map((article, index) => (
-                <li key={index}>
+                <li key={article.url || index}>
                   <Anchor href={article.url} target="_blank" rel="noopener noreferrer">
                     {article.title}
                   </Anchor>

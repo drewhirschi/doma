@@ -70,7 +70,7 @@ export default function CompanyList({
       </TableTd>
       <TableTd>
         <Group>
-          {element.favicon != null && <Image src={element.favicon} width={16} height={16} />}
+          {element.favicon != null && <Image src={element.favicon} width={16} height={16} alt="" />}
           <Anchor c={"dark"} fw={500} component={Link} href={`/portal/companies/${element.id}/overview#cmp=${cmpId}`}>
             {element.name || element.origin}
           </Anchor>
@@ -175,7 +175,7 @@ export default function CompanyList({
                   </ActionIcon>
                   {selectedCompany.favicon ? (
                     <div style={{ textAlign: "center", marginBottom: "10px" }}>
-                      <img
+                      <Image
                         src={selectedCompany.favicon}
                         alt={`${selectedCompany.name} favicon`}
                         style={{
