@@ -19,13 +19,10 @@ export default function ProjectSettingsPage() {
 
   const handleDeleteProject = async () => {
     try {
-      await actionWithNotification(
-        async () => deleteProject(parseInt(projectId as string)),
-        {
-          loadingMessage: "Deleting project...",
-          successMessage: "Project deleted successfully",
-        },
-      );
+      await actionWithNotification(async () => deleteProject(parseInt(projectId as string)), {
+        loadingMessage: "Deleting project...",
+        successMessage: "Project deleted successfully",
+      });
       setIsModalOpen(false);
       router.push("/portal/projects");
     } catch (error) {
@@ -52,18 +49,31 @@ export default function ProjectSettingsPage() {
 
   return (
     <div>
-      <Button onClick={() => setIsRenameModalOpen(true)} mb="md">
+      <Button
+        onClick={() => setIsRenameModalOpen(true)}
+        mb="md"
+        radius="sm"
+        variant="gradient"
+        gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
+        mt="md"
+        ml="md"
+        mr="md"
+      >
         Rename Project
       </Button>
-      <Button color="red" onClick={() => setIsModalOpen(true)} mb="md">
+      <Button
+        color="red"
+        onClick={() => setIsModalOpen(true)}
+        mb="md"
+        radius="sm"
+        variant="gradient"
+        gradient={{ deg: 30, from: "red.8", to: "red.6" }}
+        mt="md"
+      >
         Delete Project
       </Button>
 
-      <Modal
-        opened={isRenameModalOpen}
-        onClose={() => setIsRenameModalOpen(false)}
-        title="Rename Project"
-      >
+      <Modal opened={isRenameModalOpen} onClose={() => setIsRenameModalOpen(false)} title="Rename Project">
         <TextInput
           value={projectName}
           onChange={(event) => setProjectName(event.currentTarget.value)}
@@ -75,19 +85,25 @@ export default function ProjectSettingsPage() {
             }
           }}
         />
-        <Button onClick={handleRenameProject}>Confirm Rename</Button>
+        <Button
+          onClick={handleRenameProject}
+          radius="sm"
+          variant="gradient"
+          gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
+        >
+          Confirm Rename
+        </Button>
       </Modal>
 
-      <Modal
-        opened={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Confirm Project Deletion"
-      >
-        <Text mb="md">
-          Are you sure you want to delete this project? This action cannot be
-          undone.
-        </Text>
-        <Button color="red" onClick={handleDeleteProject}>
+      <Modal opened={isModalOpen} onClose={() => setIsModalOpen(false)} title="Confirm Project Deletion">
+        <Text mb="md">Are you sure you want to delete this project? This action cannot be undone.</Text>
+        <Button
+          color="red"
+          onClick={handleDeleteProject}
+          radius="sm"
+          variant="gradient"
+          gradient={{ deg: 30, from: "red.8", to: "red.6" }}
+        >
           Confirm Delete
         </Button>
       </Modal>

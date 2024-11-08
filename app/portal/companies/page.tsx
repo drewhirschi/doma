@@ -1,14 +1,4 @@
-import {
-  Anchor,
-  Box,
-  Paper,
-  Table,
-  TableTbody,
-  TableTd,
-  TableTh,
-  TableThead,
-  TableTr,
-} from "@mantine/core";
+import { Anchor, Box, Paper, Table, TableTbody, TableTd, TableTh, TableThead, TableTr } from "@mantine/core";
 
 import { EmptyCompanyListState } from "@/ux/components/CompanyList.EmptyState";
 import Link from "next/link";
@@ -16,11 +6,7 @@ import { SearchAndPage } from "./SearchAndPage";
 import { serverClient } from "@/shared/supabase-client/server";
 import { PAGE_SIZE } from "./[cmpId]/shared";
 
-export default async function CompaniesPage({
-  searchParams,
-}: {
-  searchParams: { query?: string; page?: string };
-}) {
+export default async function CompaniesPage({ searchParams }: { searchParams: { query?: string; page?: string } }) {
   const searchTerm = searchParams.query || "";
   const page = parseInt(searchParams.page ?? "1", 10);
   const offset = (page - 1) * PAGE_SIZE;
@@ -70,15 +56,6 @@ export default async function CompaniesPage({
     </TableTr>
   ));
 
-  // async function handleSearch(formData: FormData) {
-  //   "use server";
-  //   const search = formData.get("search") as string;
-  //   redirect(
-  //     `/portal/companies?search=${encodeURIComponent(search)}`,
-  //     RedirectType.replace,
-  //   );
-  // }
-
   return (
     <Box maw={"100vw"}>
       <Paper shadow="xs" p="md" mb="md">
@@ -88,8 +65,8 @@ export default async function CompaniesPage({
       <Table highlightOnHover>
         <TableThead>
           <TableTr>
-            <TableTh>Company Name</TableTh>
-            <TableTh>Description</TableTh>
+            <TableTh style={{ width: "25%" }}>Company Name</TableTh>
+            <TableTh style={{ width: "75%" }}>Description</TableTh>
           </TableTr>
         </TableThead>
 

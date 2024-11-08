@@ -1,101 +1,32 @@
-import { RedirectType, redirect } from "next/navigation";
-import {
-  Table,
-  TableTbody,
-  TableTd,
-  TableTh,
-  TableThead,
-  TableTr,
-} from "@mantine/core";
-
-import Link from "next/link";
-import { isDefined } from "@/shared/types/typeHelpers";
 import { serverClient } from "@/shared/supabase-client/server";
+import TransactionsTable from "./TransactionsTable";
+import AddTransactions from "./AddTransactions";
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { projectId: string };
-  searchParams: { query: string; page: number };
-}) {
-  const query = searchParams?.query || "";
-  const page = Number(searchParams?.page) - 1 || 0;
+export default async function Page({ params }: { params: { cmpId: string } }) {
+  const cmpId = Number(params.cmpId);
 
   const supabase = serverClient();
 
-  const projectGet = await supabase
-    .from("ib_projects")
-    .select("*, company_profile(*)")
-    .eq("id", params.projectId)
+  const cmpWithTransactionsGet = await supabase
+    .from("company_profile")
+    .select(
+      "*, ma_transaction(*, ma_articles(url, title, publish_date), participants:ma_partcpnt(role, company_profile(id, name)))",
+    )
+    .eq("id", cmpId)
     .single();
 
-  const transactionsGet = await supabase
-    .from("transaction_search_res")
-    .select("*, company_profile(*)")
-    .order("id", { ascending: false });
-  // .limit(30)
-  // .eq('project_id', params.projectId)
-  // .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
-
-  if (transactionsGet.error) {
-    throw new Error(transactionsGet.error.message);
+  if (cmpWithTransactionsGet.error) {
+    throw new Error(cmpWithTransactionsGet?.error.message);
   }
 
-  const transactions = transactionsGet.data;
-  // console.log(transactions)
+  const transactions = cmpWithTransactionsGet.data.ma_transaction.map((transaction: any) => ({
+    ...transaction,
+    id: transaction.id.toString(),
+  }));
 
-  const similarityGet = await supabase.rpc("match_transactions_seller", {
-    match_count: 30,
-    match_threshold: 0.05,
-    query_embedding: projectGet.data?.company_profile?.web_summary_emb!,
-  });
+  if (!transactions || transactions.length === 0) {
+    return <AddTransactions cmpId={cmpId} />;
+  }
 
-  const rows =
-    similarityGet.data
-      ?.map((sim) => {
-        const element = transactions?.find(
-          (x: any) => x.id === sim.transaction_id,
-        );
-
-        if (!element) {
-          return undefined;
-        }
-
-        return (
-          <TableTr key={element.id}>
-            <TableTd>
-              <Link href={element.url} target="_blank">
-                {element.id}
-              </Link>
-            </TableTd>
-            {/* <TableTd><Link href={element.url} target='_blank'>{element.url}</Link></TableTd> */}
-            <TableTd>{element.seller_name}</TableTd>
-            <TableTd>{element.buyer_name}</TableTd>
-            <TableTd>{element.date}</TableTd>
-            <TableTd>{element.reason}</TableTd>
-            <TableTd>
-              {element.company_profile?.map((x: any) => x.name).join(", ") ??
-                ""}
-            </TableTd>
-          </TableTr>
-        );
-      })
-      .filter(isDefined) ?? [];
-
-  return (
-    <Table>
-      <TableThead>
-        <TableTr>
-          <TableTh>ID</TableTh>
-          <TableTh>Seller</TableTh>
-          <TableTh>Buyer</TableTh>
-          <TableTh>Date</TableTh>
-          <TableTh>Reason</TableTh>
-          <TableTh>Participants</TableTh>
-        </TableTr>
-      </TableThead>
-      <TableTbody>{rows}</TableTbody>
-    </Table>
-  );
+  return <TransactionsTable transactions={transactions} cmpId={cmpId} />;
 }

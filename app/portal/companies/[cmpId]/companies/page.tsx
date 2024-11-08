@@ -29,11 +29,7 @@ export default async function Page({
 
   const supabase = serverClient();
 
-  const companyGet = await supabase
-    .from("company_profile")
-    .select("*")
-    .eq("id", params.cmpId)
-    .single();
+  const companyGet = await supabase.from("company_profile").select("*").eq("id", params.cmpId).single();
 
   if (companyGet.error) {
     throw new Error(companyGet.error.message);
@@ -54,10 +50,7 @@ export default async function Page({
   });
 
   if (similarCompaniesGet.error || !similarCompaniesGet.data) {
-    throw new Error(
-      similarCompaniesGet.error?.message ||
-        "No data found for match_and_nearby_cmp",
-    );
+    throw new Error(similarCompaniesGet.error?.message || "No data found for match_and_nearby_cmp");
   }
 
   // TODO: Change this if we want to preserve search on the backend - this was just easier to get the paging working
@@ -72,16 +65,10 @@ export default async function Page({
 
   const count = filteredCompanies.length;
 
-  const paginatedCompanies = filteredCompanies.slice(
-    offset,
-    offset + PAGE_SIZE,
-  );
+  const paginatedCompanies = filteredCompanies.slice(offset, offset + PAGE_SIZE);
 
   const paginatedIds = paginatedCompanies.map((company) => company.id);
-  const companiesGet = await supabase
-    .from("company_profile")
-    .select("*")
-    .in("id", paginatedIds);
+  const companiesGet = await supabase.from("company_profile").select("*").in("id", paginatedIds);
 
   if (companiesGet.error) {
     throw new Error(companiesGet.error.message);
@@ -89,11 +76,8 @@ export default async function Page({
 
   const sortedCompanies = paginatedCompanies
     .map((company) => {
-      const companyProfile =
-        companiesGet.data.find((cmp) => cmp.id === company.id) ?? null;
-      return companyProfile
-        ? { ...companyProfile, similarity: company.similarity }
-        : null;
+      const companyProfile = companiesGet.data.find((cmp) => cmp.id === company.id) ?? null;
+      return companyProfile ? { ...companyProfile, similarity: company.similarity } : null;
     })
     .filter((company): company is CompanyWithSimilarity => company !== null);
 

@@ -18,12 +18,7 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
-import {
-  IconBrandLinkedin,
-  IconDownload,
-  IconExternalLink,
-  IconMapPinFilled,
-} from "@tabler/icons-react";
+import { IconBrandLinkedin, IconDownload, IconExternalLink, IconMapPinFilled } from "@tabler/icons-react";
 
 import { AddToDealModal } from "../companies/AddToDealModal";
 import { ChangeLinkedInProfileModal } from "./ChangeLinkedInProfileModal";
@@ -39,9 +34,7 @@ import SelectLogoOption from "@/ux/components/SelectLogoOption";
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-const markerIcon = `data:image/svg+xml;utf8,${encodeURIComponent(
-  renderToStaticMarkup(<IconMapPinFilled />),
-)}`;
+const markerIcon = `data:image/svg+xml;utf8,${encodeURIComponent(renderToStaticMarkup(<IconMapPinFilled />))}`;
 
 export default function OverviewTab({
   companyProfile,
@@ -112,14 +105,18 @@ export default function OverviewTab({
 
   return (
     <Group align="flex-start" m={"sm"}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <CompanySummaryEditor companyProfile={companyProfile} />
+      </div>
       <Stack style={{ flex: 1, minWidth: 0 }}>
         <Paper radius={8} withBorder p={"xs"}>
           <Button
+            radius="sm"
+            variant="gradient"
+            gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
             disabled={companyProfile == null}
             onClick={() => {
-              actionWithNotification(() =>
-                queueFindIndustryCompanies(companyProfile!.id),
-              );
+              actionWithNotification(() => queueFindIndustryCompanies(companyProfile!.id));
             }}
           >
             Find companies
@@ -142,10 +139,7 @@ export default function OverviewTab({
                 </ActionIcon>
               )}
             </Title>
-            <ChangeLinkedInProfileModal
-              liProfile={linkedInProfile}
-              company={companyProfile}
-            />
+            <ChangeLinkedInProfileModal liProfile={linkedInProfile} company={companyProfile} />
           </Group>
           {linkedInProfile != null && (
             <>
@@ -155,18 +149,9 @@ export default function OverviewTab({
               </Spoiler>
               <Space h={"sm"} />
               <SimpleGrid cols={2}>
-                <MetadataItem
-                  header="Area"
-                  text={linkedInProfile.hq_area ?? ""}
-                />
-                <MetadataItem
-                  header="Founded"
-                  text={linkedInProfile.founded_year?.toString() ?? ""}
-                />
-                <MetadataItem
-                  header="Head count"
-                  text={linkedInProfile.headcountRange ?? ""}
-                />
+                <MetadataItem header="Area" text={linkedInProfile.hq_area ?? ""} />
+                <MetadataItem header="Founded" text={linkedInProfile.founded_year?.toString() ?? ""} />
+                <MetadataItem header="Head count" text={linkedInProfile.headcountRange ?? ""} />
 
                 <Box>
                   <Text fw={500}>Industries</Text>
@@ -190,11 +175,7 @@ export default function OverviewTab({
             p={"xs"}
           >
             <Box pos="relative">
-              <img
-                alt={logos.find((l) => l.url === selectedLogo)?.alt || ""}
-                src={selectedLogo}
-                height={100}
-              />
+              <img alt={logos.find((l) => l.url === selectedLogo)?.alt || ""} src={selectedLogo} height={100} />
               <Group gap={"xs"} pos="absolute" right={2} bottom={5}>
                 <ActionIcon
                   variant="filled"
@@ -206,10 +187,7 @@ export default function OverviewTab({
                       const url = window.URL.createObjectURL(blob);
                       const link = document.createElement("a");
                       link.href = url;
-                      link.download = `${
-                        logos.find((l) => l.url === selectedLogo)?.alt ||
-                        "download"
-                      }.png`;
+                      link.download = `${logos.find((l) => l.url === selectedLogo)?.alt || "download"}.png`;
                       document.body.appendChild(link);
                       link.click();
                       document.body.removeChild(link);
@@ -219,10 +197,7 @@ export default function OverviewTab({
                     }
                   }}
                 >
-                  <IconDownload
-                    style={{ width: "70%", height: "70%" }}
-                    stroke={1.5}
-                  />
+                  <IconDownload style={{ width: "70%", height: "70%" }} stroke={1.5} />
                 </ActionIcon>
               </Group>
             </Box>
@@ -284,10 +259,6 @@ export default function OverviewTab({
           </Paper>
         )}
       </Stack>
-
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <CompanySummaryEditor companyProfile={companyProfile} />
-      </div>
     </Group>
   );
 }

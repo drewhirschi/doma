@@ -12,29 +12,17 @@ interface CompanyTitleEditorProps {
   origin?: string;
 }
 
-export function CompanyTitleEditor({
-  companyId,
-  initialName,
-  origin,
-}: CompanyTitleEditorProps) {
+export function CompanyTitleEditor({ companyId, initialName, origin }: CompanyTitleEditorProps) {
   const [companyName, setCompanyName] = useState<string>(initialName);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const sb = browserClient();
 
-  const debouncedSaveCompanyName = useDebouncedCallback(
-    async (newName: string) => {
-      const update = await sb
-        .from("company_profile")
-        .update({ name: newName })
-        .eq("id", companyId)
-        .select()
-        .single();
-      if (update.error) {
-        console.log(update.error);
-      }
-    },
-    100,
-  );
+  const debouncedSaveCompanyName = useDebouncedCallback(async (newName: string) => {
+    const update = await sb.from("company_profile").update({ name: newName }).eq("id", companyId).select().single();
+    if (update.error) {
+      console.log(update.error);
+    }
+  }, 100);
 
   const handleNameChange = (newName: string) => {
     setCompanyName(newName);
@@ -53,11 +41,7 @@ export function CompanyTitleEditor({
             placeholder="Company Name"
             onBlur={() => setIsEditing(false)}
           />
-          <ActionIcon
-            onClick={() => setIsEditing(false)}
-            variant="transparent"
-            aria-label="Close editor"
-          >
+          <ActionIcon onClick={() => setIsEditing(false)} variant="transparent" aria-label="Close editor" color="black">
             <IconX />
           </ActionIcon>
         </>
@@ -74,6 +58,7 @@ export function CompanyTitleEditor({
           </span>
           <ActionIcon
             onClick={() => setIsEditing(true)}
+            color="black"
             variant="transparent"
             aria-label="Edit company name"
           >
@@ -82,6 +67,7 @@ export function CompanyTitleEditor({
           {origin && (
             <ActionIcon
               component="a"
+              color="black"
               href={origin}
               target="_blank"
               variant="transparent"

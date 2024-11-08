@@ -15,14 +15,7 @@ import {
   Text,
   UnstyledButton,
 } from "@mantine/core";
-import {
-  Icon24Hours,
-  IconBook,
-  IconFolderOpen,
-  IconSearch,
-  IconSubtask,
-  IconUsersGroup,
-} from "@tabler/icons-react";
+import { Icon24Hours, IconBook, IconFolderOpen, IconSearch, IconSubtask, IconUsersGroup } from "@tabler/icons-react";
 
 import Link from "next/link";
 import { UserButton } from "@/ux/components/UserButton";

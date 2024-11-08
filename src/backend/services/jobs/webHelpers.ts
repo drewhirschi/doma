@@ -16,19 +16,12 @@ const baseAxiosOptions = {
     // Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
   },
   httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-}
+};
 const axiosInstance = axios.create(baseAxiosOptions);
 
 function tagVisible(element: any) {
   const parentName = element.parent().prop("tagName").toLowerCase();
-  const invisibleTags = [
-    "style",
-    "script",
-    "head",
-    "title",
-    "meta",
-    "[document]",
-  ];
+  const invisibleTags = ["style", "script", "head", "title", "meta", "[document]"];
 
   if (invisibleTags.includes(parentName)) {
     return false;
@@ -115,9 +108,7 @@ function isValidUrl(url: string, baseUrl: URL): boolean {
 }
 
 // Function to crawl a website starting from the given URL
-export async function crawlWebsite(
-  startUrl: string,
-): Promise<Map<string, string>> {
+export async function crawlWebsite(startUrl: string): Promise<Map<string, string>> {
   const visitedUrls: Map<string, string> = new Map();
   const queue: string[] = [startUrl];
 
@@ -146,9 +137,7 @@ export async function crawlWebsite(
         .contents()
         .filter(function () {
           return (
-            this.type === "text" &&
-            $(this).closest("script, style").length === 0 &&
-            $(this).text().trim().length > 0
+            this.type === "text" && $(this).closest("script, style").length === 0 && $(this).text().trim().length > 0
           );
         })
         .map(function () {
@@ -180,10 +169,7 @@ export async function crawlWebsite(
   return visitedUrls;
 }
 
-export async function getPageLinks(
-  url: string,
-  options?: { limit?: number },
-): Promise<Set<string>> {
+export async function getPageLinks(url: string, options?: { limit?: number }): Promise<Set<string>> {
   const linksSet: Set<string> = new Set();
   const limit = options?.limit || 50; // Set default limit to 50
   const normalizedUrl = new URL(url).href.replace(/\/$/, "");
@@ -233,9 +219,7 @@ export async function indexPage(url: string) {
       .contents()
       .filter(function () {
         return (
-          this.type === "text" &&
-          $(this).closest("script, style").length === 0 &&
-          $(this).text().trim().length > 0
+          this.type === "text" && $(this).closest("script, style").length === 0 && $(this).text().trim().length > 0
         );
       })
       .map(function () {
@@ -249,9 +233,7 @@ export async function indexPage(url: string) {
       user: visibleText,
     });
 
-    const emb = await getEmbedding(
-      `Title: ${title}\nPath: ${new URL(url).pathname}`,
-    );
+    const emb = await getEmbedding(`Title: ${title}\nPath: ${new URL(url).pathname}`);
 
     return {
       title,
@@ -278,8 +260,8 @@ export async function getFaviconUrl(url: string) {
     return origin + "/favicon.ico";
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) { }
-      else console.log(`Request failed`, error.response?.data);
+      if (error.response?.status === 404) {
+      } else console.log(`Request failed`, error.response?.data);
     } else {
       console.error(`Unknown error getting favicon ${url}:`, error);
     }

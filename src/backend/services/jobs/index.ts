@@ -10,13 +10,9 @@ import { LinkedInQueueClient } from "@shared/queues/linkedin-queue";
 import { pathToFileURL } from "url";
 
 async function main() {
-
   await initIndustryWorker();
   await initLinkedInWorker();
-
-
 }
-
 
 const jobStartHandler = (job: Job) => {
   const schema = jobSchemas[job.name as JobType];
@@ -26,22 +22,19 @@ const jobStartHandler = (job: Job) => {
   const result = schema.safeParse(job.data);
   if (!result.success) {
     console.error("Bad job data", job.id);
-    throw new Error(
-      `Invalid job data for ${job.name}: ${result.error.message}`,
-    );
+    throw new Error(`Invalid job data for ${job.name}: ${result.error.message}`);
   }
 
-
   console.log(`Got ${job.name}, id: ${job.id}`, job.data);
-}
+};
 
 const jobEndHandler = (job: Job) => {
   console.log(`Finished ${job.name}, id: ${job.id}`);
-}
+};
 
 const jobFailedHandler = (job: Job | undefined, err: Error) => {
   console.error(`Failed ${job?.name}, id: ${job?.id}`, job?.data, err);
-}
+};
 
 async function initIndustryWorker() {
   const industryQueue = new IndustryQueueClient();
@@ -53,7 +46,6 @@ async function initIndustryWorker() {
     removeOnComplete: { count: 1000 },
     removeOnFail: { count: 5000 },
     concurrency: parseInt(process.env.BULLMQ_CONCURRENCY ?? "5"),
-
   });
 
   industryWorker.on("active", jobStartHandler);

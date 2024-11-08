@@ -1,15 +1,5 @@
-import {
-  Anchor,
-  Box,
-  Center,
-  Container,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
-
+import { Box, Center, Container, Stack, Text, Title } from "@mantine/core";
 import GridBackground from "@/ux/components/GridBackground";
-import LoginButton from "./LoginButton";
 import { Metadata } from "next";
 import { Meteors } from "@/ux/components/Meteors";
 import TopNav from "@/ux/components/TopNav";
@@ -17,16 +7,16 @@ import { WaitlistSignup } from "./WaitlistSignup";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "Parsl AI",
+  title: "Doma",
   description: "Accurate AI Legal Due Diligence for M&A",
-  keywords: "Parsl, AI Due Diligence, AI M&A",
-  authors: { name: "Atlas Technology", url: "https://parslai.com" },
+  keywords: "Doma, AI Due Diligence, AI M&A",
+  authors: { name: "Atlas Technology", url: "https://domadata.com" },
   openGraph: {
     type: "website",
-    title: "Parsl AI",
+    title: "Doma",
     description: "Automated Market Reports",
-    images: "https://parslai.com/images/product/landing_preview.png",
-    url: "https://parslai.com",
+    images: "https://domadata.com/images/product/landing_preview.png",
+    url: "https://domadata.com",
   },
 };
 
@@ -51,14 +41,13 @@ export default function HomePage() {
               <Title order={1} ta={"center"}>
                 Struggling to keep your leads warm?
               </Title>
-              <Text size={"20px"} ta={"center"} fw={500}>
-                Our AI makes drafting quarterly, seller-specific reports
-                seamless to ensure your valuable leads stay active and
-                interested
+              <Text size={"20px"} ta={"center"} fw={500} lh="1.6">
+                Our AI makes drafting quarterly, seller-specific reports seamless to ensure your valuable leads stay
+                active and interested
               </Text>
               <WaitlistSignup
                 callToAction="Book a Demo"
-                secondaryDesription="We'll contact you to schedule a 20-minute introductory call."
+                secondaryDesription="We will contact you to schedule a 20-minute introductory call."
               />
             </Stack>
           </Center>

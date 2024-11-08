@@ -7,11 +7,7 @@ import React from "react";
 import Tab from "./tab";
 import { serverClient } from "@/shared/supabase-client/server";
 
-export default async function Page({
-  params,
-}: {
-  params: { projectId: string };
-}) {
+export default async function Page({ params }: { params: { projectId: string } }) {
   const sb = serverClient();
 
   const project = await sb

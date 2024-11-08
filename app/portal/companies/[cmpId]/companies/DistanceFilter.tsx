@@ -31,7 +31,7 @@ export function DistanceFilter() {
   return (
     <Group align="baseline">
       <Checkbox
-        label="Filter Companies By Location"
+        label="Filter By Location"
         checked={searchParams.get("distanceFilter") === "true"}
         onChange={(event) => updateDistanceFilter(event.currentTarget.checked)}
         styles={{
