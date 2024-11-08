@@ -3,6 +3,7 @@ import React, { Suspense } from "react";
 import { CompaniesTable } from "../../companies/CompanyTable";
 import { Box, Stack, Text } from "@mantine/core";
 import { getEmbedding } from "@/shared/llmHelpers";
+import AiSearch from "../AiSearch";
 
 export default async function Page({ searchParams }: { searchParams: { q: string } }) {
   const supabase = serverClient();
@@ -24,6 +25,7 @@ export default async function Page({ searchParams }: { searchParams: { q: string
 
   return (
     <Stack>
+      <AiSearch />
       <CompaniesTable companies={companiesGet.data ?? []} />
     </Stack>
   );
