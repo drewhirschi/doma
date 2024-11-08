@@ -108,9 +108,9 @@ export default function CompanyList({
       <Paper shadow="xs" p="md" mb="md">
         <Group justify="space-between">
           <Group>
-            <SearchAndPage totalCount={count} />
-            <DistanceFilter />
+            <SearchAndPage totalCount={count} hidePagination={true} />
             <EmployeeCountFilter />
+            <DistanceFilter />
             <SegmentedControl data={["List", "Map"]} onChange={setShowMap} />
           </Group>
           <AddToDealModal selectedCompanies={selectedCompanies} />

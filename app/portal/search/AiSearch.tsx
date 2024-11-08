@@ -21,7 +21,7 @@ export default function AiSearch({}: IAiSearchProps) {
         value={q}
         autosize
         minRows={2}
-        placeholder="Describe the company you are looking for"
+        placeholder="Describe the company that you are looking for"
         onChange={(e) => {
           setQ(e.target.value);
         }}
@@ -31,7 +31,15 @@ export default function AiSearch({}: IAiSearchProps) {
           }
         }}
       />
-      <Button pos={"absolute"} right={10} bottom={10} onClick={runSearch}>
+      <Button
+        pos={"absolute"}
+        right={10}
+        bottom={10}
+        onClick={runSearch}
+        radius="sm"
+        variant="gradient"
+        gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
+      >
         Search
       </Button>
     </Box>
