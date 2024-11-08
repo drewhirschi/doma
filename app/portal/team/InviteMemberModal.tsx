@@ -1,7 +1,6 @@
 "use client";
 
-import { Button, Modal, TextInput } from "@mantine/core";
-
+import { Button, Modal, Select, TextInput } from "@mantine/core";
 import { createProfile } from "./InviteMemberModal.action";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
@@ -27,8 +26,23 @@ export function InviteMemberModal() {
 
     validate: {
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+      name: (value) => (value.trim() ? null : "Name is required"),
     },
   });
+
+  const handleInvite = async () => {
+    if (!form.isValid()) {
+      form.validate();
+      return;
+    }
+
+    setLoading(true);
+    await createProfile(form.values);
+    setLoading(false);
+
+    form.reset();
+    close();
+  };
 
   return (
     <>
@@ -57,12 +71,22 @@ export function InviteMemberModal() {
             form.reset();
             close();
           }}
+          radius="sm"
+          variant="gradient"
+          gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
         >
           Invite
         </Button>
       </Modal>
 
-      <Button onClick={open} mr={"sm"}>
+      <Button
+        onClick={open}
+        radius="sm"
+        variant="gradient"
+        gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
+        mr="sm"
+      >
+
         Invite a team member
       </Button>
     </>
