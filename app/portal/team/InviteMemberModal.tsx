@@ -1,12 +1,12 @@
 "use client";
 
-import { Button, Modal, Select, TextInput } from "@mantine/core";
+import { Button, Modal, TextInput } from "@mantine/core";
 
-import { TeamRoleSelect } from "@/ux/components/TeamRoleSelect";
 import { createProfile } from "./InviteMemberModal.action";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
+import { actionWithNotification } from "@/ux/clientComp";
 
 export interface CreateProfileValues {
   email: string;
@@ -42,7 +42,16 @@ export function InviteMemberModal() {
           onClick={async () => {
             setLoading(true);
 
-            await createProfile(form.values);
+            await actionWithNotification(
+              async () => {
+                await createProfile(form.values);
+              },
+              {
+                title: "Creating invite",
+                errorMessage: "Failed to invite " + form.values.email,
+                successMessage: "Invited " + form.values.email,
+              },
+            );
 
             setLoading(false);
             form.reset();
@@ -53,7 +62,9 @@ export function InviteMemberModal() {
         </Button>
       </Modal>
 
-      <Button onClick={open}>Invite a team member</Button>
+      <Button onClick={open} mr={"sm"}>
+        Invite a team member
+      </Button>
     </>
   );
 }
