@@ -1,36 +1,18 @@
 "use client";
 
 import { Box, Button, Textarea } from "@mantine/core";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { createSearch } from "./actions";
-import { browserClient } from "@/ux/supabase-client/BrowserClient";
 
 interface IAiSearchProps {}
 
 export default function AiSearch({}: IAiSearchProps) {
-  const [q, setQ] = useState("");
-  const params = useParams();
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!params.searchId) return;
-    const sb = browserClient();
-    sb.from("searches")
-      .select()
-      .eq("id", params.searchId)
-      .single()
-      .then((res) => {
-        if (res.data) {
-          setQ(res.data.query);
-        }
-      });
-  }, [params.searchId]);
+  const searchParams = useSearchParams();
+  const [q, setQ] = useState(searchParams.get("q") || "");
+  const router = useRouter();
 
   async function runSearch() {
-    setLoading(true);
-    await createSearch(q, params.searchId as string);
-    setLoading(false);
+    router.push("/portal/search/query?q=" + encodeURIComponent(q));
   }
 
   return (
@@ -49,13 +31,7 @@ export default function AiSearch({}: IAiSearchProps) {
           }
         }}
       />
-      <Button
-        pos={"absolute"}
-        right={10}
-        bottom={10}
-        onClick={runSearch}
-        loading={loading}
-      >
+      <Button pos={"absolute"} right={10} bottom={10} onClick={runSearch}>
         Search
       </Button>
     </Box>
