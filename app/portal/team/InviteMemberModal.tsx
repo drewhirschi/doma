@@ -5,6 +5,7 @@ import { createProfile } from "./InviteMemberModal.action";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
+import { actionWithNotification } from "@/ux/clientComp";
 
 export interface CreateProfileValues {
   email: string;
@@ -52,7 +53,24 @@ export function InviteMemberModal() {
         <Button
           loading={loading}
           mt="sm"
-          onClick={handleInvite}
+          onClick={async () => {
+            setLoading(true);
+
+            await actionWithNotification(
+              async () => {
+                await createProfile(form.values);
+              },
+              {
+                title: "Creating invite",
+                errorMessage: "Failed to invite " + form.values.email,
+                successMessage: "Invited " + form.values.email,
+              },
+            );
+
+            setLoading(false);
+            form.reset();
+            close();
+          }}
           radius="sm"
           variant="gradient"
           gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
@@ -68,6 +86,7 @@ export function InviteMemberModal() {
         gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
         mr="sm"
       >
+
         Invite a team member
       </Button>
     </>
