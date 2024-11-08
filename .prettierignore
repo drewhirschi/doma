@@ -8,3 +8,4 @@ coverage
 .next/
 dump/
 tmp/
+src/backend/scripts/

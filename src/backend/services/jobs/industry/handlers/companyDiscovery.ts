@@ -1,4 +1,4 @@
-import { CompletionModels, getStructuredCompletion } from "../../llmHelpers";
+import { CompletionModels, getStructuredCompletion } from "@shared/llmHelpers";
 import { Job, SandboxedJob } from "bullmq";
 
 import Exa from "exa-js";

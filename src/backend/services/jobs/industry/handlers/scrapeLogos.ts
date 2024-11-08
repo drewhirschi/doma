@@ -1,4 +1,4 @@
-import { CompletionModels, getStructuredCompletion } from "../../llmHelpers";
+import { CompletionModels, getStructuredCompletion } from "@shared/llmHelpers";
 import { Job, SandboxedJob } from "bullmq";
 import { getImgs, getSVGs } from "../../webHelpers";
 import { isDefined, isNotNull } from "@shared/types/typeHelpers";

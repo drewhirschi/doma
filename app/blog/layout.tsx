@@ -1,5 +1,5 @@
 import { Box } from "@mantine/core";
-import TopNav from "@/ux/components/TopNav";
+import TopNav from "../TopNav";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

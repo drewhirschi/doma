@@ -16,7 +16,7 @@ export function SimilarityBadge({ similarity }: { similarity: number }) {
   } else if (similarity > 0.4) {
     color = "yellow";
     text = "Low";
-  } else if (similarity > 0.3) {
+  } else {
     color = "red";
     text = "Very Low";
   }

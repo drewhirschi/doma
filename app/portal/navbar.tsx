@@ -1,62 +1,55 @@
 "use client";
 
-import {
-  Anchor,
-  AppShell,
-  Box,
-  Breadcrumbs,
-  Code,
-  Flex,
-  Group,
-  NavLink,
-  ScrollArea,
-  Space,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
-import { Icon24Hours, IconBook, IconFolderOpen, IconSearch, IconSubtask, IconUsersGroup } from "@tabler/icons-react";
+import { Box, NavLink, Stack, Tooltip } from "@mantine/core";
+import { IconBuildingSkyscraper, IconSearch, IconSubtask, IconUsersGroup } from "@tabler/icons-react";
 
 import Link from "next/link";
 import { UserButton } from "@/ux/components/UserButton";
 import classnames from "./layout.module.css";
-import { useHover } from "@mantine/hooks";
 import { usePathname } from "next/navigation";
+
+const navbarConfig = [
+  {
+    label: "Projects",
+    path: "projects",
+    icon: <IconSubtask />,
+  },
+  {
+    label: "Company Directory",
+    path: "companies",
+    icon: <IconBuildingSkyscraper />,
+  },
+  {
+    label: "Search",
+    path: "search",
+    icon: <IconSearch />,
+  },
+  {
+    label: "Team",
+    path: "team",
+    icon: <IconUsersGroup />,
+  },
+];
 
 export function NavBar() {
   const pathname = usePathname();
-  // const { hovered: navbarHovered, ref: navbarRef } = useHover();
 
   return (
-    <Stack
-      // ref={navbarRef}
-      className={classnames.navbar}
-    >
+    <Stack className={classnames.navbar}>
       <div className={classnames["nav-item"]}>
-        <NavLink
-          href={`/portal/projects`}
-          label={<IconSubtask />}
-          component={Link}
-          active={pathname.split("/")[2] === "projects"}
-        />
-        <NavLink
-          href={`/portal/companies`}
-          label={<IconSearch />}
-          component={Link}
-          active={pathname.split("/")[2] === "companies"}
-        />
-        {/* <NavLink
-          href={`/portal/team`}
-          label={<IconUsersGroup />}
-          component={Link}
-          active={pathname.split("/")[2] === "team"}
-        /> */}
-        {/* <NavLink
-          href={`/portal/reports`}
-          label={<IconBook />}
-          component={Link}
-          active={pathname.split("/")[2] === "reports"}
-        /> */}
+        {navbarConfig.map((item, idx) => (
+          <NavLink
+            key={item.label}
+            href={`/portal/${item.path}`}
+            label={
+              <Tooltip position="right" label={item.label}>
+                <Box>{item.icon}</Box>
+              </Tooltip>
+            }
+            component={Link}
+            active={pathname.split("/")[2] === item.path}
+          />
+        ))}
       </div>
 
       <div className={classnames["nav-item"]}>

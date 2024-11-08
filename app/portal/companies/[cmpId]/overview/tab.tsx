@@ -151,7 +151,7 @@ export default function OverviewTab({
               <SimpleGrid cols={2}>
                 <MetadataItem header="Area" text={linkedInProfile.hq_area ?? ""} />
                 <MetadataItem header="Founded" text={linkedInProfile.founded_year?.toString() ?? ""} />
-                <MetadataItem header="Head count" text={linkedInProfile.headcountRange ?? ""} />
+                <MetadataItem header="Head count" text={linkedInProfile.headcount_range ?? ""} />
 
                 <Box>
                   <Text fw={500}>Industries</Text>

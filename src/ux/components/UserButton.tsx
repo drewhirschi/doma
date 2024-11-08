@@ -5,6 +5,7 @@ import {
   Box,
   Flex,
   Group,
+  MantineSize,
   Menu,
   Popover,
   Text,
@@ -30,7 +31,9 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
 
   const router = useRouter();
 
-  const [profile, setProfile] = useState<Profile_SB | null | undefined>(null);
+  const [profile, setProfile] = useState<
+    (Profile_SB & { tenant: Tenant_SB | null }) | null | undefined
+  >(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data, error }) => {
@@ -39,7 +42,7 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
       if (data.session) {
         const profileQ = await supabase
           .from("profile")
-          .select("*")
+          .select("*, tenant(*)")
           .eq("id", data.session.user.id)
           .single();
         setProfile(profileQ.data);
@@ -52,18 +55,23 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
     router.push("/login");
   };
 
+  const userAvatar = (size: MantineSize = "md") => (
+    <Avatar
+      size={size}
+      //src={session?.user?.user_metadata?.avatar_url} // implement for images
+      color={profile?.color ?? "black"} // need to add color to the user_metadata or retrieve profile
+      radius="xl"
+    >
+      {getInitials(profile?.display_name ?? "")}
+    </Avatar>
+  );
+
   return (
     <Menu shadow="md" width={200} withinPortal={true}>
       <Menu.Target>
         <UnstyledButton className={classes.user} mx={4}>
           <Flex wrap={"nowrap"} direction={"row"} align={"center"}>
-            <Avatar
-              //src={session?.user?.user_metadata?.avatar_url} // implement for images
-              color={profile?.color ?? "black"} // need to add color to the user_metadata or retrieve profile
-              radius="xl"
-            >
-              {getInitials(profile?.display_name ?? "")}
-            </Avatar>
+            {userAvatar()}
 
             {!collapsed && (
               <>
@@ -104,10 +112,26 @@ export function UserButton({ collapsed }: { collapsed?: boolean }) {
       </Menu.Target>
 
       <Menu.Dropdown>
-        {/* <Menu.Item leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}>
-          Settings
+        <Menu.Item
+          component={Link}
+          href={"/portal/team"}
+          leftSection={
+            <Avatar size={"sm"} color={profile?.color ?? "black"} radius="xs">
+              {getInitials(profile?.tenant?.name ?? "")}
+            </Avatar>
+          }
+        >
+          {profile?.tenant?.name}
         </Menu.Item>
-        <Menu.Divider /> */}
+        <Menu.Divider />
+        <Menu.Item
+          component={Link}
+          href={"/portal/settings"}
+          leftSection={userAvatar("sm")}
+        >
+          {profile?.email}
+        </Menu.Item>
+        <Menu.Divider />
         <Menu.Item
           component={Link}
           href={"/portal/settings"}

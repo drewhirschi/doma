@@ -2,6 +2,8 @@ import type { Database } from "./supabase";
 
 declare global {
   type Profile_SB = Database["public"]["Tables"]["profile"]["Row"];
+  type Tenant_SB = Database["public"]["Tables"]["tenant"]["Row"];
+
   type Report_SB = Database["public"]["Tables"]["reports"]["Row"];
   type ReportSection_SB = Database["public"]["Tables"]["report_sections"]["Row"];
   type ReportView_SB = Database["public"]["Tables"]["report_views"]["Row"];

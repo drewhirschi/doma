@@ -7,6 +7,7 @@ import {
   Group,
   Image,
   Paper,
+  SegmentedControl,
   Table,
   TableTbody,
   TableTd,
@@ -18,6 +19,7 @@ import { GoogleMap, InfoWindow, Marker, useJsApiLoader } from "@react-google-map
 
 import { AddToDealModal } from "./AddToDealModal";
 import { DistanceFilter } from "./DistanceFilter";
+import { EmployeeCountFilter } from "./EmployeeCountFilter";
 import { IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
 import { SearchAndPage } from "../../SearchAndPage";
@@ -25,11 +27,19 @@ import { SimilarityBadge } from "./SimilarityBadge";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
-interface CompanyWithSimilarity extends CompanyProfile_SB {
+interface CompanyWithSimilarity {
+  id: number;
+  name: string;
+  origin: string;
   similarity: number;
+  description: string;
+  headcount_range: string;
+  hq_lat: number;
+  hq_lon: number;
+  favicon: string;
 }
 
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 export default function CompanyList({
   sortedCompanies,
@@ -39,11 +49,11 @@ export default function CompanyList({
   count: number;
 }) {
   const [selectedCompanies, setSelectedCompanies] = useState<number[]>([]);
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState("List");
   const [selectedCompany, setSelectedCompany] = useState<CompanyWithSimilarity | null>(null);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: API_KEY || "",
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY || "",
   });
 
   const handleCheckboxChange = (companyId: number) => {
@@ -80,6 +90,7 @@ export default function CompanyList({
         <SimilarityBadge similarity={element.similarity} />
       </TableTd>
       <TableTd>{element.description}</TableTd>
+      <TableTd>{element.headcount_range}</TableTd>
       <TableTd>
         {element.origin && (
           <Group>
@@ -95,30 +106,24 @@ export default function CompanyList({
   return (
     <>
       <Paper shadow="xs" p="md" mb="md">
-        <Group>
-          <SearchAndPage totalCount={count} />
-          <DistanceFilter />
-          <Checkbox
-            label="Show map"
-            checked={showMap}
-            onChange={(event) => setShowMap(event.currentTarget.checked)}
-            styles={{
-              root: { cursor: "pointer" },
-              input: { cursor: "pointer" },
-              label: { cursor: "pointer" },
-            }}
-          />
+        <Group justify="space-between">
+          <Group>
+            <SearchAndPage totalCount={count} />
+            <DistanceFilter />
+            <EmployeeCountFilter />
+            <SegmentedControl data={["List", "Map"]} onChange={setShowMap} />
+          </Group>
           <AddToDealModal selectedCompanies={selectedCompanies} />
         </Group>
       </Paper>
 
-      {showMap && isLoaded ? (
+      {showMap == "Map" && isLoaded ? (
         <Paper shadow="xs" p="md" mb="md">
           <GoogleMap
             mapContainerStyle={{ width: "100%", height: "500px" }}
             center={{
-              lat: sortedCompanies[0]?.hq_lat || 0,
-              lng: sortedCompanies[0]?.hq_lon || 0,
+              lat: sortedCompanies[0]?.hq_lat || -101.3726549,
+              lng: sortedCompanies[0]?.hq_lon || 39.782531,
             }}
             zoom={10}
             options={{
@@ -248,9 +253,11 @@ export default function CompanyList({
                   }}
                 />
               </TableTd>
+
               <TableTh style={{ width: "20%" }}>Name</TableTh>
               <TableTh style={{ width: "5%" }}>Relevance</TableTh>
-              <TableTh style={{ width: "55%" }}>Description</TableTh>
+              <TableTh style={{ width: "45%" }}>Description</TableTh>
+              <TableTh w={"10%"}>Headcount</TableTh>
               <TableTh style={{ width: "20%" }}>Website</TableTh>
             </TableTr>
           </TableThead>

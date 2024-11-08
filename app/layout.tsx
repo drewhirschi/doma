@@ -13,7 +13,7 @@ import { theme } from "../theme";
 
 export const metadata = {
   title: "Doma",
-  description: "Contract intelligence",
+  description: "Intelligent Data",
 };
 
 export default function RootLayout({ children }: { children: any }) {

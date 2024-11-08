@@ -1,7 +1,8 @@
-import { Group, Stack, Title } from "@mantine/core";
-import { BreadcrumbsComponent } from "./Breadcrumbs";
+import { Anchor, Group, Stack, Title } from "@mantine/core";
+
 import { ProjectTabs } from "./ProjectTabs";
 import { serverClient } from "@/shared/supabase-client/server";
+import { BreadcrumbsComponent } from "./Breadcrumbs";
 import { CompanyTitleEditor } from "./CompanyTitleEditor";
 
 export default async function Layout({ children, params }: { children: React.ReactNode; params: { cmpId: string } }) {
@@ -12,15 +13,23 @@ export default async function Layout({ children, params }: { children: React.Rea
     return <Title>Not found</Title>;
   }
 
+  const { origin } = companyGet.data;
   return (
     <Stack h={"100vh"} gap={0} w="calc(100vw - 60px)">
-      <Stack p="sm" mb={"sm"} miw={860}>
+      <Stack p="sm" mb={"sm"} gap={0}>
         <BreadcrumbsComponent />
         <CompanyTitleEditor
           companyId={companyGet.data.id.toString() || ""}
-          initialName={companyGet.data.name || ""}
+          initialName={companyGet.data.name || companyGet.data.origin || ""}
           origin={companyGet.data.origin || ""}
         />
+        {origin && (
+          <Group>
+            <Anchor href={origin} target="_blank" variant="transparent" aria-label="Visit company website">
+              {new URL(origin).hostname}
+            </Anchor>
+          </Group>
+        )}
       </Stack>
       <ProjectTabs>{children}</ProjectTabs>
     </Stack>

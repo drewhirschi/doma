@@ -2,15 +2,15 @@ import { Box, Center, Container, Stack, Text, Title } from "@mantine/core";
 import GridBackground from "@/ux/components/GridBackground";
 import { Metadata } from "next";
 import { Meteors } from "@/ux/components/Meteors";
-import TopNav from "@/ux/components/TopNav";
+import TopNav from "./TopNav";
 import { WaitlistSignup } from "./WaitlistSignup";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "Doma",
-  description: "Accurate AI Legal Due Diligence for M&A",
-  keywords: "Doma, AI Due Diligence, AI M&A",
-  authors: { name: "Atlas Technology", url: "https://domadata.com" },
+  description: "",
+  keywords: "Doma, Company data, AI company data, AI insights",
+  authors: { name: "Doma Data", url: "https://domadata.com" },
   openGraph: {
     type: "website",
     title: "Doma",

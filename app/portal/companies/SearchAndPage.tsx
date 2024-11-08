@@ -1,11 +1,12 @@
 "use client";
 
-import { Group, Pagination, TextInput, rem, ActionIcon } from "@mantine/core";
+import { ActionIcon, Group, Pagination, TextInput, rem } from "@mantine/core";
 import { IconSearch, IconX } from "@tabler/icons-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useDebouncedCallback } from "use-debounce";
-import { PAGE_SIZE } from "./[cmpId]/shared";
 import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+import { PAGE_SIZE } from "./[cmpId]/shared";
+import { useDebouncedCallback } from "use-debounce";
 
 export function SearchAndPage({ totalCount }: { totalCount: number }) {
   const searchParams = useSearchParams();
@@ -50,7 +51,7 @@ export function SearchAndPage({ totalCount }: { totalCount: number }) {
     <Group align="baseline">
       <TextInput
         miw={300}
-        placeholder="Search"
+        placeholder="Search by name or website"
         leftSection={
           <IconSearch
             style={{ width: rem(16), height: rem(16) }}

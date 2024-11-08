@@ -17,11 +17,15 @@ export default async function Page({
     page?: string;
     distance?: string;
     distanceFilter?: boolean;
+    employeeCount?: string;
   };
 }) {
-  const distanceFilter = searchParams.distanceFilter ?? false;
-  const distance = parseInt(searchParams.distance ?? "15000", 10);
+  const distance = parseInt(searchParams.distance ?? "0");
   const searchTerm = searchParams.query || "";
+  let employeeCountRanges: string[] | undefined = decodeURIComponent(searchParams.employeeCount ?? "").split(",");
+  if (employeeCountRanges.length === 1 && employeeCountRanges[0] === "") {
+    employeeCountRanges = undefined;
+  }
   const page = parseInt(searchParams.page ?? "1", 10);
   const offset = (page - 1) * PAGE_SIZE;
   const searchIsNumber = !isNaN(Number(searchTerm)) && searchTerm;
@@ -29,7 +33,11 @@ export default async function Page({
 
   const supabase = serverClient();
 
-  const companyGet = await supabase.from("company_profile").select("*").eq("id", params.cmpId).single();
+  const companyGet = await supabase
+    .from("company_profile")
+    .select("*, li_profile(headcount_range)")
+    .eq("id", params.cmpId)
+    .single();
 
   if (companyGet.error) {
     throw new Error(companyGet.error.message);
@@ -46,7 +54,8 @@ export default async function Page({
     long: modelCmp.hq_lon ?? 0,
     distance: Number(distance) * 1609.34,
     match_count: 100,
-    apply_distance_filter: distanceFilter,
+    apply_distance_filter: distance > 0,
+    headcount_range_filter: employeeCountRanges,
   });
 
   if (similarCompaniesGet.error || !similarCompaniesGet.data) {
@@ -83,7 +92,7 @@ export default async function Page({
 
   return (
     <Box maw={"100vw"}>
-      <CompanyList sortedCompanies={sortedCompanies} count={count} />
+      <CompanyList sortedCompanies={filteredCompanies} count={count} />
     </Box>
   );
 }

@@ -34,7 +34,7 @@ export function CompanyTitleEditor({ companyId, initialName, origin }: CompanyTi
       {isEditing ? (
         <>
           <TextInput
-            value={companyName || origin}
+            value={companyName}
             onChange={(event) => handleNameChange(event.currentTarget.value)}
             size="lg"
             styles={{ input: { fontSize: "1.5rem", fontWeight: "bold" } }}
@@ -64,18 +64,6 @@ export function CompanyTitleEditor({ companyId, initialName, origin }: CompanyTi
           >
             <IconEdit />
           </ActionIcon>
-          {origin && (
-            <ActionIcon
-              component="a"
-              color="black"
-              href={origin}
-              target="_blank"
-              variant="transparent"
-              aria-label="Visit company website"
-            >
-              <IconExternalLink />
-            </ActionIcon>
-          )}
         </>
       )}
     </div>

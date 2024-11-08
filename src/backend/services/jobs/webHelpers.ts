@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { getCompletion, getEmbedding } from "./llmHelpers.js";
+import { getCompletion, getEmbedding } from "@shared/llmHelpers.js";
 
 import axiosRetry from "axios-retry";
 import { companyInfoScraping } from "./prompts.js";
