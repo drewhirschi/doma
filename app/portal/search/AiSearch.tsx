@@ -26,8 +26,11 @@ export default function AiSearch({}: IAiSearchProps) {
           setQ(e.target.value);
         }}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault(); // Prevents newline
             runSearch();
+          } else if (e.key === "Enter" && e.shiftKey) {
+            // Allow newline on Ctrl+Enter
           }
         }}
       />
