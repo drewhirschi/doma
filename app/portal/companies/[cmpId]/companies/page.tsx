@@ -26,10 +26,7 @@ export default async function Page({
   if (employeeCountRanges.length === 1 && employeeCountRanges[0] === "") {
     employeeCountRanges = undefined;
   }
-  const page = parseInt(searchParams.page ?? "1", 10);
-  const offset = (page - 1) * PAGE_SIZE;
   const searchIsNumber = !isNaN(Number(searchTerm)) && searchTerm;
-  //const orClause = `name.ilike.%${searchTerm}%,origin.ilike.%${searchTerm}%${searchIsNumber ? ",id.eq." + searchTerm : ""}`;
 
   const supabase = serverClient();
 
@@ -62,8 +59,6 @@ export default async function Page({
     throw new Error(similarCompaniesGet.error?.message || "No data found for match_and_nearby_cmp");
   }
 
-  // TODO: Change this if we want to preserve search on the backend - this was just easier to get the paging working
-  // Fine for now with only the first 100 companies, but will need to change if we want to search more similar companies
   const filteredCompanies = similarCompaniesGet.data.filter((company) => {
     return (
       company.name?.toLowerCase().includes(searchTerm?.toLowerCase()) ||
@@ -73,22 +68,6 @@ export default async function Page({
   });
 
   const count = filteredCompanies.length;
-
-  const paginatedCompanies = filteredCompanies.slice(offset, offset + PAGE_SIZE);
-
-  const paginatedIds = paginatedCompanies.map((company) => company.id);
-  const companiesGet = await supabase.from("company_profile").select("*").in("id", paginatedIds);
-
-  if (companiesGet.error) {
-    throw new Error(companiesGet.error.message);
-  }
-
-  const sortedCompanies = paginatedCompanies
-    .map((company) => {
-      const companyProfile = companiesGet.data.find((cmp) => cmp.id === company.id) ?? null;
-      return companyProfile ? { ...companyProfile, similarity: company.similarity } : null;
-    })
-    .filter((company): company is CompanyWithSimilarity => company !== null);
 
   return (
     <Box maw={"100vw"}>

@@ -49,28 +49,10 @@ export function InviteMemberModal() {
       <Modal opened={opened} onClose={close} title="Invite a team member">
         <TextInput label="Email" required {...form.getInputProps("email")} />
         <TextInput label="Name" required {...form.getInputProps("name")} />
-        {/* <TeamRoleSelect defaultValue={form.values.role} withLabel /> */}
         <Button
           loading={loading}
           mt="sm"
-          onClick={async () => {
-            setLoading(true);
-
-            await actionWithNotification(
-              async () => {
-                await createProfile(form.values);
-              },
-              {
-                title: "Creating invite",
-                errorMessage: "Failed to invite " + form.values.email,
-                successMessage: "Invited " + form.values.email,
-              },
-            );
-
-            setLoading(false);
-            form.reset();
-            close();
-          }}
+          onClick={handleInvite}
           radius="sm"
           variant="gradient"
           gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
@@ -86,7 +68,6 @@ export function InviteMemberModal() {
         gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
         mr="sm"
       >
-
         Invite a team member
       </Button>
     </>

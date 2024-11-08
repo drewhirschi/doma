@@ -8,9 +8,7 @@ export function EmployeeCountFilter() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
-  const [numEmployees, setEmployees] = useState<string[]>(
-    searchParams.get("employeeCount")?.split(",") ?? [],
-  );
+  const [numEmployees, setEmployees] = useState<string[]>(searchParams.get("employeeCount")?.split(",") ?? []);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
@@ -26,7 +24,7 @@ export function EmployeeCountFilter() {
     <Group align="baseline">
       <MultiSelect
         maw={500}
-        placeholder="Employee ranges"
+        placeholder="Company Size"
         // value={searchParams.get("employeeCount")?.split(",") ?? []}
         value={numEmployees}
         onChange={setEmployees}
