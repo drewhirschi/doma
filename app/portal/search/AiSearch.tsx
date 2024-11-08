@@ -49,13 +49,7 @@ export default function AiSearch({}: IAiSearchProps) {
           }
         }}
       />
-      <Button
-        pos={"absolute"}
-        right={10}
-        bottom={10}
-        onClick={runSearch}
-        loading={loading}
-      >
+      <Button pos={"absolute"} right={10} bottom={10} onClick={runSearch} loading={loading}>
         Search
       </Button>
     </Box>
