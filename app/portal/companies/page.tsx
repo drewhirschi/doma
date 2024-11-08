@@ -1,28 +1,11 @@
-import {
-  Anchor,
-  Box,
-  Paper,
-  Stack,
-  Table,
-  TableTbody,
-  TableTd,
-  TableTh,
-  TableThead,
-  TableTr,
-} from "@mantine/core";
+import { Box, Paper, Stack } from "@mantine/core";
 
 import { CompaniesTable } from "./CompanyTable";
-import { EmptyCompanyListState } from "@/ux/components/CompanyList.EmptyState";
-import Link from "next/link";
 import { PAGE_SIZE } from "./[cmpId]/shared";
 import { SearchAndPage } from "./SearchAndPage";
 import { serverClient } from "@/shared/supabase-client/server";
 
-export default async function CompaniesPage({
-  searchParams,
-}: {
-  searchParams: { query?: string; page?: string };
-}) {
+export default async function CompaniesPage({ searchParams }: { searchParams: { query?: string; page?: string } }) {
   const searchTerm = searchParams.query || "";
   const page = parseInt(searchParams.page ?? "1", 10);
   const offset = (page - 1) * PAGE_SIZE;

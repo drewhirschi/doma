@@ -23,10 +23,7 @@ export default function RootLayout({ children }: { children: any }) {
         <ColorSchemeScript />
 
         <link rel="shortcut icon" href="/logo.svg" />
-        <meta
-          name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
-        />
+        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no" />
         <meta name="msvalidate.01" content="107AE4ACC58FF672DBC6CF79BCEA3965" />
         <ApolloTracker />
       </head>

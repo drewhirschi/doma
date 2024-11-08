@@ -11,32 +11,33 @@ import { fullAccessServiceClient } from "@shared/supabase-client/server";
 import { randomUUID } from "crypto";
 import svg2img from "svg2img";
 import { z } from "zod";
+import https from "https";
 
-export async function scrapeCompanyLogos(
-  job: SandboxedJob<z.infer<typeof companyIdSchema>>,
-) {
+const axiosInstance = axios.create({
+  headers: {
+    "User-Agent": "google-bot",
+  },
+  httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+});
+
+export async function scrapeCompanyLogos(job: SandboxedJob<z.infer<typeof companyIdSchema>>) {
   const sb = fullAccessServiceClient();
-  const cmpGet = await sb
-    .from("company_profile")
-    .select()
-    .eq("id", job.data.cmpId)
-    .single();
+  const cmpGet = await sb.from("company_profile").select().eq("id", job.data.cmpId).single();
   if (cmpGet.error) {
     throw cmpGet.error;
   }
 
   const imgLogosFound = await scrapeImgLogos(sb, cmpGet.data);
   if (imgLogosFound) {
-    return;
+    if (imgLogosFound.length > 0) {
+      return;
+    }
   }
 
   await scrapeSvgLogos(sb, cmpGet.data);
 }
 
-export async function scrapeSvgLogos(
-  sb: SupabaseClient,
-  company: CompanyProfile_SB,
-) {
+export async function scrapeSvgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
   if (!company.origin) {
     throw new Error("company origin is required");
   }
@@ -54,9 +55,7 @@ export async function scrapeSvgLogos(
 
   const cmpSvgLogos: { html: string; title: string }[] = [];
   try {
-    likelySvgLogoCompletion?.possibleLogos.forEach((i) =>
-      cmpSvgLogos.push(svgWithTitles[i]),
-    );
+    likelySvgLogoCompletion?.possibleLogos.forEach((i) => cmpSvgLogos.push(svgWithTitles[i]));
   } catch (error) {
     console.error("Bad svg index", error);
   }
@@ -65,26 +64,14 @@ export async function scrapeSvgLogos(
     try {
       const pngBuffer = await svgToPngAsync(svg.html);
       const fileName = logoFilename(company.id, svg.title);
-      const dbLogo = await uploadLogo(
-        sb,
-        fileName,
-        company.id,
-        pngBuffer,
-        svg.title,
-        "image/png",
-      );
+      const dbLogo = await uploadLogo(sb, fileName, company.id, pngBuffer, svg.title, "image/png");
       return dbLogo;
     } catch (error) {
-      console.error(
-        `Error downloading or processing svg logo from ${company.origin}: ${svg.title}`,
-        error,
-      );
+      console.error(`Error downloading or processing svg logo from ${company.origin}: ${svg.title}`, error);
     }
   });
 
-  const savedLogos = (await Promise.all(savedLogosProms))
-    .filter(isNotNull)
-    .filter(isDefined);
+  const savedLogos = (await Promise.all(savedLogosProms)).filter(isNotNull).filter(isDefined);
 
   if (savedLogos.length > 0) {
     return;
@@ -96,14 +83,7 @@ export async function scrapeSvgLogos(
     try {
       const pngBuffer = await svgToPngAsync(svg.html);
       const fileName = logoFilename(company.id, randomUUID().split("-")[0]);
-      const dbLogo = await uploadLogo(
-        sb,
-        fileName,
-        company.id,
-        pngBuffer,
-        `${company.name} logo ${i}`,
-        "image/png",
-      );
+      const dbLogo = await uploadLogo(sb, fileName, company.id, pngBuffer, `${company.name} logo ${i}`, "image/png");
 
       if (!dbLogo) {
         return null;
@@ -114,6 +94,7 @@ export async function scrapeSvgLogos(
         system: `You will be provided with an image and company name, your job is to respond with true if the image is a logo of the company.`,
         user: `Company name: ${company.name}`,
         imageUrl: dbLogo?.url,
+        model: CompletionModels.gpt4o,
       });
 
       if (!isLogoCheck?.isCompanyLogo) {
@@ -145,14 +126,11 @@ async function scrapeImgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
     completion?.possibleLogos.map(async (logo) => {
       const logoUrl = new URL(logo.src, company.origin!).href;
       try {
-        const response = await axios.get(logoUrl, {
+        const response = await axiosInstance.get(logoUrl, {
           responseType: "arraybuffer",
         });
         const buffer = Buffer.from(response.data, "binary");
-        const fileName = logoFilename(
-          company.id,
-          logoUrl.split("/").pop() ?? randomUUID().split("-")[0],
-        );
+        const fileName = logoFilename(company.id, logoUrl.split("/").pop() ?? randomUUID().split("-")[0]);
         return await uploadLogo(
           sb,
           fileName,
@@ -163,24 +141,15 @@ async function scrapeImgLogos(sb: SupabaseClient, company: CompanyProfile_SB) {
         );
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          console.error(
-            `Failed to download logo from ${logoUrl}:`,
-            error.response?.status,
-            error.response?.statusText,
-          );
+          console.error(`Failed to download logo from ${logoUrl}:`, error.response?.status, error.response?.statusText);
         } else {
-          console.error(
-            `Error downloading or processing logo from ${logoUrl}:`,
-            error,
-          );
+          console.error(`Error downloading or processing logo from ${logoUrl}:`, error);
         }
         return null;
       }
     }) ?? [];
 
-  const dbLogos = (await Promise.all(dbLogosProms))
-    .filter(isNotNull)
-    .filter(isDefined);
+  const dbLogos = (await Promise.all(dbLogosProms)).filter(isNotNull).filter(isDefined);
   return dbLogos;
 }
 
@@ -192,12 +161,10 @@ async function uploadLogo(
   alt: string,
   type: string,
 ) {
-  const { data, error } = await sb.storage
-    .from("cmp_assets")
-    .upload(fileName, buffer, {
-      contentType: type,
-      upsert: true,
-    });
+  const { data, error } = await sb.storage.from("cmp_assets").upload(fileName, buffer, {
+    contentType: type,
+    upsert: true,
+  });
 
   if (error) {
     console.error(`Failed to upload logo for company ${cmpId}:`, error);
@@ -214,21 +181,14 @@ async function uploadLogo(
       .single();
 
     if (updateError) {
-      console.error(
-        `Failed to update company profile with new logo:`,
-        updateError,
-      );
+      console.error(`Failed to update company profile with new logo:`, updateError);
     }
 
     return uploadedLogo;
   }
 }
 
-async function deleteLogo(
-  sb: SupabaseClient<Database>,
-  url: string,
-  filename: string,
-) {
+async function deleteLogo(sb: SupabaseClient<Database>, url: string, filename: string) {
   //remove stored file
   const deleteNonLogo = await sb.storage.from("cmp_assets").remove([filename]);
   if (deleteNonLogo.error) {
@@ -245,11 +205,7 @@ async function deleteLogo(
 }
 
 function logoFilename(cmpId: number, name: string) {
-  return (
-    `logo/${cmpId}/${name.replaceAll(" ", "_")}`
-      .replaceAll(".png", "")
-      .replaceAll("~", "_") + ".png"
-  );
+  return `logo/${cmpId}/${name.replaceAll(" ", "_")}`.replaceAll(".png", "").replaceAll("~", "_") + ".png";
 }
 
 async function svgToPngAsync(svgXml: string) {

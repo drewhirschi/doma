@@ -15,12 +15,7 @@ import {
   TableThead,
   TableTr,
 } from "@mantine/core";
-import {
-  GoogleMap,
-  InfoWindow,
-  Marker,
-  useJsApiLoader,
-} from "@react-google-maps/api";
+import { GoogleMap, InfoWindow, Marker, useJsApiLoader } from "@react-google-maps/api";
 
 import { AddToDealModal } from "./AddToDealModal";
 import { DistanceFilter } from "./DistanceFilter";
@@ -55,8 +50,7 @@ export default function CompanyList({
 }) {
   const [selectedCompanies, setSelectedCompanies] = useState<number[]>([]);
   const [showMap, setShowMap] = useState("List");
-  const [selectedCompany, setSelectedCompany] =
-    useState<CompanyWithSimilarity | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<CompanyWithSimilarity | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY || "",
@@ -64,9 +58,7 @@ export default function CompanyList({
 
   const handleCheckboxChange = (companyId: number) => {
     setSelectedCompanies((prev) =>
-      prev.includes(companyId)
-        ? prev.filter((id) => id !== companyId)
-        : [...prev, companyId],
+      prev.includes(companyId) ? prev.filter((id) => id !== companyId) : [...prev, companyId],
     );
   };
 
@@ -88,15 +80,8 @@ export default function CompanyList({
       </TableTd>
       <TableTd>
         <Group>
-          {element.favicon != null && (
-            <Image src={element.favicon} width={16} height={16} />
-          )}
-          <Anchor
-            c={"dark"}
-            fw={500}
-            component={Link}
-            href={`/portal/companies/${element.id}/overview#cmp=${cmpId}`}
-          >
+          {element.favicon != null && <Image src={element.favicon} width={16} height={16} alt="" />}
+          <Anchor c={"dark"} fw={500} component={Link} href={`/portal/companies/${element.id}/overview#cmp=${cmpId}`}>
             {element.name || element.origin}
           </Anchor>
         </Group>
@@ -112,7 +97,6 @@ export default function CompanyList({
             <Anchor href={element.origin} c={"dark"} target="_blank">
               {new URL(element.origin ?? "").hostname}
             </Anchor>
-            <IconExternalLink size={16} />
           </Group>
         )}
       </TableTd>
@@ -196,7 +180,7 @@ export default function CompanyList({
                   </ActionIcon>
                   {selectedCompany.favicon ? (
                     <div style={{ textAlign: "center", marginBottom: "10px" }}>
-                      <img
+                      <Image
                         src={selectedCompany.favicon}
                         alt={`${selectedCompany.name} favicon`}
                         style={{
@@ -258,15 +242,10 @@ export default function CompanyList({
                     if (selectedCompanies.length === sortedCompanies.length) {
                       setSelectedCompanies([]);
                     } else {
-                      setSelectedCompanies(
-                        sortedCompanies.map((company) => company.id),
-                      );
+                      setSelectedCompanies(sortedCompanies.map((company) => company.id));
                     }
                   }}
-                  indeterminate={
-                    selectedCompanies.length > 0 &&
-                    selectedCompanies.length < sortedCompanies.length
-                  }
+                  indeterminate={selectedCompanies.length > 0 && selectedCompanies.length < sortedCompanies.length}
                   styles={{
                     root: { cursor: "pointer" },
                     input: { cursor: "pointer" },
@@ -274,11 +253,12 @@ export default function CompanyList({
                   }}
                 />
               </TableTd>
-              <TableTh>Name</TableTh>
-              <TableTh>Relevance</TableTh>
-              <TableTh>Description</TableTh>
-              <TableTh>Headcount</TableTh>
-              <TableTh>Website</TableTh>
+
+              <TableTh style={{ width: "20%" }}>Name</TableTh>
+              <TableTh style={{ width: "5%" }}>Relevance</TableTh>
+              <TableTh style={{ width: "45%" }}>Description</TableTh>
+              <TableTh w={"10%"}>Headcount</TableTh>
+              <TableTh style={{ width: "20%" }}>Website</TableTh>
             </TableTr>
           </TableThead>
           <TableTbody>{rows}</TableTbody>

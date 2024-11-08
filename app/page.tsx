@@ -1,5 +1,4 @@
 import { Box, Center, Container, Stack, Text, Title } from "@mantine/core";
-
 import GridBackground from "@/ux/components/GridBackground";
 import { Metadata } from "next";
 import { Meteors } from "@/ux/components/Meteors";
@@ -42,14 +41,13 @@ export default function HomePage() {
               <Title order={1} ta={"center"}>
                 Struggling to keep your leads warm?
               </Title>
-              <Text size={"20px"} ta={"center"} fw={500}>
-                Our AI makes drafting quarterly, seller-specific reports
-                seamless to ensure your valuable leads stay active and
-                interested
+              <Text size={"20px"} ta={"center"} fw={500} lh="1.6">
+                Our AI makes drafting quarterly, seller-specific reports seamless to ensure your valuable leads stay
+                active and interested
               </Text>
               <WaitlistSignup
                 callToAction="Book a Demo"
-                secondaryDesription="We'll contact you to schedule a 20-minute introductory call."
+                secondaryDesription="We will contact you to schedule a 20-minute introductory call."
               />
             </Stack>
           </Center>

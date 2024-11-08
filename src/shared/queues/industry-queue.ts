@@ -9,8 +9,7 @@ export class IndustryQueueClient {
   connection: Redis;
 
   constructor(opts?: QueueOptions) {
-
-    const CONNECTION_URL = process.env.LOCAL_REDIS === 'true' ? "127.0.0.1" : process.env.UPSTASH_REDIS_URL
+    const CONNECTION_URL = process.env.LOCAL_REDIS === "true" ? "127.0.0.1" : process.env.UPSTASH_REDIS_URL;
 
     if (CONNECTION_URL === undefined) {
       throw new Error("Set UPSTASH_REDIS_URL or LOCAL_REDIS");
@@ -36,14 +35,20 @@ export class IndustryQueueClient {
   async companyDiscovery(cmpId: number) {
     return await this.queue.add("company_discovery", { cmpId });
   }
+  async findCompany(cmpId: number, context: object) {
+    return await this.queue.add("find_company", { cmpId, context });
+  }
   async transactionDiscovery(cmpId: number) {
     return await this.queue.add("transaction_discovery", { cmpId });
   }
-  async scrapeCompanyWebsite(cmpId: number, opts?: { force?: boolean, scrapeComps?: boolean }) {
+  async scrapeArticles(cmpId: number) {
+    return await this.queue.add("scrape_ma_articles", { cmpId });
+  }
+  async scrapeCompanyWebsite(cmpId: number, opts?: { force?: boolean; scrapeComps?: boolean }) {
     const params = {
       cmpId,
       force: opts?.force,
-      scrapeComps: opts?.scrapeComps
+      scrapeComps: opts?.scrapeComps,
     } as z.infer<typeof scrapeWebsiteSchema>;
 
     return await this.queue.add("scrape_company_website", params);
@@ -77,9 +82,6 @@ export class IndustryQueueClient {
   async enqueueBulk(jobs: { name: string; data: JobDataType }[]) {
     return await this.queue.addBulk(jobs);
   }
-
-
-
 
   async close() {
     await this.queue.close();

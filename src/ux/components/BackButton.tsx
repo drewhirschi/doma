@@ -13,23 +13,11 @@ export function BackButton(props: BackButtonProps) {
 
   if ("browser" in props) {
     return (
-      <Button
-        leftSection={<IconChevronLeft size={14} />}
-        variant="subtle"
-        onClick={() => router.back()}
-        {...props}
-      >
+      <Button leftSection={<IconChevronLeft size={14} />} variant="subtle" onClick={() => router.back()} {...props}>
         Back
       </Button>
     );
   }
 
-  return (
-    <Button
-      component={Link}
-      leftSection={<IconChevronLeft size={14} />}
-      variant="subtle"
-      {...props}
-    ></Button>
-  );
+  return <Button component={Link} leftSection={<IconChevronLeft size={14} />} variant="subtle" {...props}></Button>;
 }

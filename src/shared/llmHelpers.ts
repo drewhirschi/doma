@@ -1,7 +1,5 @@
-import OpenAI, { AzureOpenAI } from "openai";
-
+import { AzureOpenAI } from "openai";
 import { ChatCompletionContentPart } from "openai/resources/chat/completions";
-import path from "path";
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 
@@ -31,9 +29,8 @@ export async function getCompletion({
   const openai = new AzureOpenAI({
     apiKey,
     deployment,
-    apiVersion
+    apiVersion,
   });
-
 
   const completion = await openai.chat.completions.create({
     model,
@@ -47,13 +44,10 @@ export async function getCompletion({
   return completion.choices[0].message.content;
 }
 
-interface StructuredCompletionOptions<Z extends z.ZodTypeAny>
-  extends CompletionOptions {
+interface StructuredCompletionOptions<Z extends z.ZodTypeAny> extends CompletionOptions {
   schema: Z;
 }
-export async function getStructuredCompletion<
-  Z extends z.ZodTypeAny = z.ZodNever,
->({
+export async function getStructuredCompletion<Z extends z.ZodTypeAny = z.ZodNever>({
   model = CompletionModels.gpt4o,
   system,
   user,
@@ -62,11 +56,7 @@ export async function getStructuredCompletion<
 }: StructuredCompletionOptions<Z>): Promise<z.infer<Z> | null> {
   const TIMEOUT_SECONDS = 20;
   const timeout = setTimeout(() => {
-    console.warn(
-      "getStructuredCompletion has not finished in " +
-      TIMEOUT_SECONDS +
-      " seconds",
-    );
+    console.warn("getStructuredCompletion has not finished in " + TIMEOUT_SECONDS + " seconds");
   }, TIMEOUT_SECONDS * 1000);
 
   const deployment = model;
@@ -75,13 +65,11 @@ export async function getStructuredCompletion<
   const openai = new AzureOpenAI({
     apiKey,
     deployment,
-    apiVersion
+    apiVersion,
   });
 
   try {
-    const userMessageContent: Array<ChatCompletionContentPart> = [
-      { type: "text", text: user },
-    ];
+    const userMessageContent: Array<ChatCompletionContentPart> = [{ type: "text", text: user }];
     if (imageUrl) {
       userMessageContent.push({
         type: "image_url",
@@ -101,7 +89,6 @@ export async function getStructuredCompletion<
       return null;
     }
 
-
     return responseParsed as z.infer<Z>;
   } finally {
     clearTimeout(timeout);
@@ -115,7 +102,7 @@ export async function getEmbedding(text: string): Promise<number[]> {
   const openai = new AzureOpenAI({
     apiKey: process.env.OPENAI_API_KEY,
     deployment,
-    apiVersion
+    apiVersion,
   });
 
   const embedding = await openai.embeddings.create({
@@ -124,7 +111,6 @@ export async function getEmbedding(text: string): Promise<number[]> {
   });
   return embedding.data[0].embedding;
 }
-
 
 function splitArrayIntoGroups(arr: any[], numGroups = 4) {
   const result = [];
@@ -147,9 +133,7 @@ export async function recursiveDocumentReduction({
     const doc = await getCompletion({
       system: `You will receive a list of documents. Merge their information into one document. No need to mention in the final output that it is multiple documents merged.
       Additional information:\n ${instruction}`,
-      user: docs
-        .map((doc, idx) => `<doc${idx + 1}>\n${doc}\n</doc${idx + 1}>`)
-        .join("\n"),
+      user: docs.map((doc, idx) => `<doc${idx + 1}>\n${doc}\n</doc${idx + 1}>`).join("\n"),
     });
     if (!doc) {
       console.warn("Could not get completion");
@@ -165,9 +149,7 @@ export async function recursiveDocumentReduction({
   } else {
     const documentGroups = splitArrayIntoGroups(documents, 4);
     const reductions = await Promise.all(
-      documentGroups.map((docGroup) =>
-        recursiveDocumentReduction({ documents: docGroup, instruction }),
-      ),
+      documentGroups.map((docGroup) => recursiveDocumentReduction({ documents: docGroup, instruction })),
     );
     return await mergeDocs(reductions);
   }

@@ -1,12 +1,7 @@
 "use client";
 
 import { Box, NavLink, Stack, Tooltip } from "@mantine/core";
-import {
-  IconBuildingSkyscraper,
-  IconSearch,
-  IconSubtask,
-  IconUsersGroup,
-} from "@tabler/icons-react";
+import { IconBuildingSkyscraper, IconSearch, IconSubtask, IconUsersGroup } from "@tabler/icons-react";
 
 import Link from "next/link";
 import { UserButton } from "@/ux/components/UserButton";

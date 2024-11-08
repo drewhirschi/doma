@@ -1,22 +1,12 @@
 import { Anchor, Group, Stack, Title } from "@mantine/core";
 
-import { BreadcrumbsComponent } from "@/ux/components/Breadcrumbs";
-import { CompanyTitleEditor } from "@/ux/components/CompanyTitleEditor";
 import { ProjectTabs } from "./ProjectTabs";
 import { serverClient } from "@/shared/supabase-client/server";
+import { BreadcrumbsComponent } from "./Breadcrumbs";
+import { CompanyTitleEditor } from "./CompanyTitleEditor";
 
-export default async function Layout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: { cmpId: string };
-}) {
-  const companyGet = await serverClient()
-    .from("company_profile")
-    .select("*")
-    .eq("id", params.cmpId)
-    .single();
+export default async function Layout({ children, params }: { children: React.ReactNode; params: { cmpId: string } }) {
+  const companyGet = await serverClient().from("company_profile").select("*").eq("id", params.cmpId).single();
 
   if (companyGet.error) {
     console.log(companyGet.error);
@@ -35,12 +25,7 @@ export default async function Layout({
         />
         {origin && (
           <Group>
-            <Anchor
-              href={origin}
-              target="_blank"
-              variant="transparent"
-              aria-label="Visit company website"
-            >
+            <Anchor href={origin} target="_blank" variant="transparent" aria-label="Visit company website">
               {new URL(origin).hostname}
             </Anchor>
           </Group>

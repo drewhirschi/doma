@@ -1,22 +1,7 @@
 "use client";
 
-import {
-  ActionIcon,
-  Box,
-  Button,
-  Container,
-  Group,
-  Paper,
-  Stack,
-  TextInput,
-} from "@mantine/core";
-import {
-  BubbleMenu,
-  EditorContent,
-  FloatingMenu,
-  useEditor,
-} from "@tiptap/react";
-
+import { Button, Paper, Center, Text } from "@mantine/core";
+import { BubbleMenu, EditorContent, FloatingMenu, useEditor } from "@tiptap/react";
 import { Markdown } from "tiptap-markdown";
 import Placeholder from "@tiptap/extension-placeholder";
 import React from "react";
@@ -33,15 +18,12 @@ const extensions = [
   Markdown,
 ];
 
-export default function CompanySummaryEditor({
-  companyProfile,
-}: {
-  companyProfile: CompanyProfile_SB | null;
-}) {
+export default function CompanySummaryEditor({ companyProfile }: { companyProfile: CompanyProfile_SB | null }) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions,
     content: companyProfile?.web_summary || "",
+    editable: false, // Set to true to enable editing
     onUpdate: ({ editor }) => {
       debouncedSaveContent(editor.getHTML());
     },
@@ -63,9 +45,29 @@ export default function CompanySummaryEditor({
   }, 300);
 
   return (
-    //<Group align="flex-start" m={"sm"}>
     <Paper flex={1} radius={8} withBorder p={"xs"} maw={900}>
-      <EditorContent editor={editor} />
+      {companyProfile && companyProfile.web_summary ? (
+        <EditorContent editor={editor} />
+      ) : (
+        <Center style={{ height: "100%" }}>
+          <Paper
+            radius="lg"
+            style={{
+              backgroundColor: "#fff",
+              padding: "20px",
+              maxWidth: "400px",
+              textAlign: "center",
+            }}
+          >
+            <Text size="lg" fw={600}>
+              No Company Profile Available
+            </Text>
+            <Text size="md" mt="sm">
+              Scraping in Progress. Check back in several minutes for company information!
+            </Text>
+          </Paper>
+        </Center>
+      )}
 
       <FloatingMenu
         editor={editor}
@@ -79,15 +81,14 @@ export default function CompanySummaryEditor({
       >
         <Paper w={200} shadow="md" radius={"md"} withBorder py={"xs"}></Paper>
       </FloatingMenu>
+
       <BubbleMenu editor={editor}>
         <Button.Group>
           <Button
             miw={40}
             variant="default"
             size="compact-sm"
-            onClick={() =>
-              editor?.chain().focus().toggleHeading({ level: 1 }).run()
-            }
+            onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
           >
             H1
           </Button>
@@ -111,6 +112,5 @@ export default function CompanySummaryEditor({
         </Button.Group>
       </BubbleMenu>
     </Paper>
-    //</Group>
   );
 }

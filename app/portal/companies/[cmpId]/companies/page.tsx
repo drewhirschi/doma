@@ -22,9 +22,7 @@ export default async function Page({
 }) {
   const distance = parseInt(searchParams.distance ?? "0");
   const searchTerm = searchParams.query || "";
-  let employeeCountRanges: string[] | undefined = decodeURIComponent(
-    searchParams.employeeCount ?? "",
-  ).split(",");
+  let employeeCountRanges: string[] | undefined = decodeURIComponent(searchParams.employeeCount ?? "").split(",");
   if (employeeCountRanges.length === 1 && employeeCountRanges[0] === "") {
     employeeCountRanges = undefined;
   }
@@ -61,10 +59,7 @@ export default async function Page({
   });
 
   if (similarCompaniesGet.error || !similarCompaniesGet.data) {
-    throw new Error(
-      similarCompaniesGet.error?.message ||
-        "No data found for match_and_nearby_cmp",
-    );
+    throw new Error(similarCompaniesGet.error?.message || "No data found for match_and_nearby_cmp");
   }
 
   // TODO: Change this if we want to preserve search on the backend - this was just easier to get the paging working
@@ -79,16 +74,10 @@ export default async function Page({
 
   const count = filteredCompanies.length;
 
-  const paginatedCompanies = filteredCompanies.slice(
-    offset,
-    offset + PAGE_SIZE,
-  );
+  const paginatedCompanies = filteredCompanies.slice(offset, offset + PAGE_SIZE);
 
   const paginatedIds = paginatedCompanies.map((company) => company.id);
-  const companiesGet = await supabase
-    .from("company_profile")
-    .select("*")
-    .in("id", paginatedIds);
+  const companiesGet = await supabase.from("company_profile").select("*").in("id", paginatedIds);
 
   if (companiesGet.error) {
     throw new Error(companiesGet.error.message);
@@ -96,11 +85,8 @@ export default async function Page({
 
   const sortedCompanies = paginatedCompanies
     .map((company) => {
-      const companyProfile =
-        companiesGet.data.find((cmp) => cmp.id === company.id) ?? null;
-      return companyProfile
-        ? { ...companyProfile, similarity: company.similarity }
-        : null;
+      const companyProfile = companiesGet.data.find((cmp) => cmp.id === company.id) ?? null;
+      return companyProfile ? { ...companyProfile, similarity: company.similarity } : null;
     })
     .filter((company): company is CompanyWithSimilarity => company !== null);
 

@@ -1,17 +1,6 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Center,
-  Container,
-  Group,
-  Paper,
-  Stack,
-  TextInput,
-  ThemeIcon,
-  Title,
-} from "@mantine/core";
+import { Box, Button, Center, Container, Group, Paper, Stack, TextInput, ThemeIcon, Title } from "@mantine/core";
 import { IconLogin2, IconPhoto } from "@tabler/icons-react";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -82,7 +71,7 @@ export default function Login() {
 
   return (
     <Center h={"100vh"}>
-      <Paper shadow="sm" p="lg" bg={"gray.0"}>
+      <Paper shadow="sm" p="xl" bg={"gray.0"}>
         <Stack>
           <Group>
             <ThemeIcon variant="light">
