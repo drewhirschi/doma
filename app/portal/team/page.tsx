@@ -1,13 +1,4 @@
-import {
-  Avatar,
-  TableScrollContainer,
-  TableTbody,
-  TableTd,
-  TableTh,
-  TableThead,
-  TableTr,
-  Title,
-} from "@mantine/core";
+import { Avatar, TableScrollContainer, TableTbody, TableTd, TableTh, TableThead, TableTr, Title } from "@mantine/core";
 import { Badge, Group, Table, Text } from "@mantine/core";
 
 import { InviteMemberModal } from "./InviteMemberModal";
@@ -16,10 +7,7 @@ import { serverClient } from "@/shared/supabase-client/server";
 
 export default async function Page() {
   const supabase = serverClient();
-  const tenantFetch = await supabase
-    .from("tenant")
-    .select("*,profiles:profile(*)")
-    .single();
+  const tenantFetch = await supabase.from("tenant").select("*,profiles:profile(*)").single();
 
   if (!tenantFetch.data) {
     console.error(tenantFetch.error);

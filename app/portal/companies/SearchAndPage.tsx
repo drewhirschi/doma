@@ -8,14 +8,17 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PAGE_SIZE } from "./[cmpId]/shared";
 import { useDebouncedCallback } from "use-debounce";
 
-export function SearchAndPage({ totalCount }: { totalCount: number }) {
+interface SearchAndPageProps {
+  totalCount: number;
+  hidePagination?: boolean;
+}
+
+export function SearchAndPage({ totalCount, hidePagination = false }: SearchAndPageProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
 
-  const [searchQuery, setSearchQuery] = useState<string>(
-    searchParams.get("query") ?? "",
-  );
+  const [searchQuery, setSearchQuery] = useState<string>(searchParams.get("query") ?? "");
 
   const debouncedHandleSearch = useDebouncedCallback((value: string) => {
     const params = new URLSearchParams(searchParams);
@@ -52,19 +55,10 @@ export function SearchAndPage({ totalCount }: { totalCount: number }) {
       <TextInput
         miw={300}
         placeholder="Search by name or website"
-        leftSection={
-          <IconSearch
-            style={{ width: rem(16), height: rem(16) }}
-            stroke={1.5}
-          />
-        }
+        leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
         rightSection={
           searchQuery ? (
-            <ActionIcon
-              onClick={clearSearch}
-              variant="transparent"
-              aria-label="Clear search"
-            >
+            <ActionIcon onClick={clearSearch} variant="transparent" aria-label="Clear search">
               <IconX />
             </ActionIcon>
           ) : null
@@ -76,11 +70,13 @@ export function SearchAndPage({ totalCount }: { totalCount: number }) {
           debouncedHandleSearch(value);
         }}
       />
-      <Pagination
-        total={Math.ceil(totalCount / PAGE_SIZE)}
-        value={Number(searchParams.get("page") ?? 1)}
-        onChange={updatePage}
-      />
+      {!hidePagination && (
+        <Pagination
+          total={Math.ceil(totalCount / PAGE_SIZE)}
+          value={Number(searchParams.get("page") ?? 1)}
+          onChange={updatePage}
+        />
+      )}
     </Group>
   );
 }
