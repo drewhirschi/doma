@@ -4,10 +4,15 @@ import { CompaniesTable } from "../../companies/CompanyTable";
 import { Box, Stack, Text } from "@mantine/core";
 import { getEmbedding } from "@/shared/llmHelpers";
 import AiSearch from "../AiSearch";
+import { redirect } from "next/navigation";
 
 export default async function Page({ searchParams }: { searchParams: { q: string } }) {
-  const supabase = serverClient();
   const query = searchParams.q;
+  if (!query) {
+    return redirect("/portal/search");
+  }
+
+  const supabase = serverClient();
 
   const embProm = getEmbedding(query);
   const insertSearchProm = supabase.from("searches").upsert({ query }).select().single();
