@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/portal") &&
     !user?.app_metadata?.tenant_id
   ) {
-    return NextResponse.redirect(`${process.env.AUTH_URL}/no-tenant`);
+    return NextResponse.redirect(`${process.env.AUTH_URL}/tenant-create`);
   }
 
   return response;
