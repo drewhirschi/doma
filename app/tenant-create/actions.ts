@@ -43,7 +43,9 @@ export async function createTenantAndAssignUser(tenantName: string) {
     throw userUpdateError;
   }
 
-  const { data: profileUpdate, error: profileUpdateError } = await supabase
+  // we have to use the service client here bc RLS checks the tenant_id to know if the user can update the row
+  // but the profile row doesn't have a tenant_id until after this call.
+  const { data: profileUpdate, error: profileUpdateError } = await dangerousClient
     .from("profile")
     .update({ tenant_id: createTenant.data.id })
     .eq("id", user.user.id);

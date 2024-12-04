@@ -18,7 +18,7 @@ function PasswordLoginForm() {
   const router = useRouter();
 
   return (
-    <Box maw={300} mx="auto">
+    <Box>
       <TextInput
         label="Email"
         placeholder="Your email"
@@ -83,6 +83,7 @@ export default function Login() {
           <Stack>
             <MicrosoftButton authCallbackUrl={authCallbackUrl} />
             <GoogleButton authCallbackUrl={authCallbackUrl} />
+            <PasswordLoginForm />
           </Stack>
         </Stack>
       </Paper>

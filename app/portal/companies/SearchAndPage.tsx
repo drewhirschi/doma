@@ -31,10 +31,6 @@ export function SearchAndPage({ totalCount, hidePagination = false }: SearchAndP
     replace(`${pathname}?${params.toString()}`);
   }, 300);
 
-  useEffect(() => {
-    setSearchQuery(searchParams.get("query") ?? "");
-  }, [searchParams]);
-
   function updatePage(value: number) {
     const params = new URLSearchParams(searchParams);
     if (value) {

@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  Anchor,
-  Box,
-  Skeleton,
-  Table,
-  TableTbody,
-  TableTd,
-  TableTh,
-  TableThead,
-  TableTr,
-} from "@mantine/core";
+import { Anchor, Box, Skeleton, Table, TableTbody, TableTd, TableTh, TableThead, TableTr } from "@mantine/core";
 
 import { EmptyCompanyListState } from "@/ux/components/CompanyList.EmptyState";
 import Link from "next/link";
@@ -47,7 +37,7 @@ export function CompaniesTable({ companies, loading }: CompanyTableProps) {
           // i may have broken this??
           href={`/portal/companies/${company.id}/overview#page=${searchParams.get("page") || 1}&search=${encodeURIComponent(searchParams.get("query") ?? "")}`}
         >
-          {company.name ?? company.origin}
+          {company.name || company.origin}
         </Anchor>
       </TableTd>
       <TableTd
