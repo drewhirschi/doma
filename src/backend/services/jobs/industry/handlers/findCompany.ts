@@ -3,7 +3,6 @@ import { SandboxedJob } from "bullmq";
 import Exa from "exa-js";
 import { IndustryQueueClient } from "@shared/queues/industry-queue";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
-import { CompletionModels, getStructuredCompletion } from "../../llmHelpers";
 import { z } from "zod";
 
 export default async function handler(job: SandboxedJob) {

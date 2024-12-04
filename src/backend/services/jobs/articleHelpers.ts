@@ -1,9 +1,9 @@
 import axios from "axios";
-import { CompletionModels, getCompletion, getEmbedding, getStructuredCompletion } from "./llmHelpers.js";
 import { load } from "cheerio";
 import { z } from "zod";
 import https from "https";
 import { fullAccessServiceClient } from "@shared/supabase-client/server.js";
+import { CompletionModels, getCompletion, getEmbedding, getStructuredCompletion } from "@shared/llmHelpers";
 
 // Axios instance with custom headers
 const axiosInstance = axios.create({
@@ -103,7 +103,6 @@ export async function extractTransactionDetails(title: string, pageText: string)
     schema: transactionSchema,
   });
 
-  console.log("Extracted Transaction:", transaction);
   return transaction;
 }
 
@@ -214,7 +213,6 @@ export async function resolveParticipantCmpId(participant: { name: string; role:
       summary: cmp.description ?? cmp.web_summary,
     }));
 
-    console.log(participant.name, "Companies:", companies);
     const cmp = await determineParticipant(companies, participant.name);
 
     return cmp?.id || null;
@@ -244,7 +242,6 @@ async function determineParticipant<T extends { id: number }>(
     });
 
     const cmpId = Number(res) || null;
-    console.log("Matched Company ID:", cmpId);
     return { id: cmpId };
   } catch (error) {
     console.error("Error in determineParticipant:", error);

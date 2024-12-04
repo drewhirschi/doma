@@ -1002,6 +1002,17 @@ export type Database = {
               dist_meters: number
             }[]
           }
+      proj_cmp_sim: {
+        Args: {
+          pid: number
+        }
+        Returns: {
+          id: number
+          name: string
+          origin: string
+          similarity: number
+        }[]
+      }
       random_color: {
         Args: Record<PropertyKey, never>
         Returns: string

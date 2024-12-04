@@ -1,13 +1,14 @@
 import { Button, Group, Modal, Text } from "@mantine/core";
+
 import { LoadingState } from "@/shared/types/loadingstate";
 import { actionWithNotification } from "@/ux/clientComp";
+import { removeCompaniesFromProject } from "./actions";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
-import { removeCompaniesFromProject } from "./actions";
 
 interface RemoveCompaniesDialogProps {
   selectedCompanies: number[];
-  projectId: string;
+  projectId: number;
   onRemoveSuccess: () => void;
 }
 

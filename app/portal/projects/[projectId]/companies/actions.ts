@@ -1,5 +1,8 @@
 "use server";
 
+import * as XLSX from "xlsx";
+
+import { IndustryQueueClient } from "@/shared/queues/industry-queue";
 import { revalidatePath } from "next/cache";
 import { serverActionClient } from "@/shared/supabase-client/server";
 
@@ -25,4 +28,18 @@ export async function removeCompaniesFromProject(projectId: number, companyIds: 
     .throwOnError();
 
   revalidatePath(`/portal/projects/${projectId}/companies`);
+}
+
+export async function queueCompanyProfiling(cmpIds: number[]) {
+  const queue = new IndustryQueueClient()
+
+
+  for (const cmpId of cmpIds) {
+    await queue.scrapeCompanyWebsite(cmpId, {});
+  }
+
+  await queue.close();
+
+
+
 }

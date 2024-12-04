@@ -7,10 +7,10 @@ import {
   SimialarTransaction,
   resolveParticipantCmpId,
 } from "~/services/jobs/articleHelpers";
-import { getEmbedding } from "~/services/jobs/llmHelpers";
 import { SandboxedJob } from "bullmq";
 import { IndustryQueueClient } from "@shared/queues/industry-queue";
 import { exaRes } from "~/scripts/data";
+import { getEmbedding } from "@shared/llmHelpers";
 
 // Handler for the scrapeArticles job
 export default async function handler(job: SandboxedJob) {
@@ -20,6 +20,7 @@ export default async function handler(job: SandboxedJob) {
 export async function scrapeArticles(cmpId: number) {
   // Set up the supabase client
   const sb = fullAccessServiceClient();
+  const industryQueue = new IndustryQueueClient();
 
   // Get the selected company
   const cmpGet = await sb.from("company_profile").select().eq("id", cmpId).single();
@@ -57,7 +58,6 @@ export async function scrapeArticles(cmpId: number) {
   //   results: exaRes,
   // };
 
-  console.log("Articles:", searchAndContentResults.results);
 
   // First, filter the articles based on GPT qualification
   const filteredArticles = await Promise.all(
@@ -65,12 +65,12 @@ export async function scrapeArticles(cmpId: number) {
       const isRelevant = await isArticleRelevant(article.url, article.title, company.name, article.text);
       return isRelevant
         ? {
-            url: article.url || "",
-            publish_date: article.publishedDate,
-            title: article.title,
-            text: article.text,
-            author: article?.author,
-          }
+          url: article.url || "",
+          publish_date: article.publishedDate,
+          title: article.title,
+          text: article.text,
+          author: article?.author,
+        }
         : null;
     }),
   );
@@ -98,7 +98,6 @@ export async function scrapeArticles(cmpId: number) {
     return;
   }
 
-  console.log("Qualified Articles:", qualifiedArticles);
 
   // Use gpt to extract from the articles the buyer, seller, backer, amount, date, and reason and create a transaction description
   const articleTransactionDetails = await Promise.all(
@@ -163,7 +162,6 @@ export async function scrapeArticles(cmpId: number) {
         console.error(`Error linking transaction ${transactionInsert.data.id} with article:`, supportError.message);
       }
 
-      console.log("Transaction Participants:", article.transaction?.participants);
 
       // Insert the participants of the transaction into the database
       for (const participant of article.transaction?.participants || []) {
@@ -188,9 +186,7 @@ export async function scrapeArticles(cmpId: number) {
               continue;
             }
             resolvedCmpId = cmpInsert.data.id;
-            const industryQueue = new IndustryQueueClient();
             industryQueue.findCompany(cmpInsert.data.id, participant);
-            await industryQueue.close();
           } else {
             // If the participant is found in the database, link them to the transaction
             console.log("Participant found in database:", participant);
@@ -213,5 +209,5 @@ export async function scrapeArticles(cmpId: number) {
     }
   }
 
-  console.log("End of Scraping");
+  await industryQueue.close();
 }

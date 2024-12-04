@@ -15,7 +15,7 @@ export default async function Page({
 
   const supabase = serverClient();
 
-  const projectsGet = await supabase.from("ib_projects").select("*");
+  const projectsGet = await supabase.from("ib_projects").select("*").order("created_at", { ascending: false });
 
   if (projectsGet.error) {
     throw new Error(projectsGet.error.message);

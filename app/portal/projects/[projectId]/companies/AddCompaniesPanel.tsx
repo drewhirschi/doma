@@ -1,8 +1,23 @@
 "use client";
 
-import { Button, Checkbox, Drawer, Group, Table, TextInput } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Center,
+  Checkbox,
+  Drawer,
+  FileInput,
+  Group,
+  SegmentedControl,
+  Stack,
+  Table,
+  TextInput,
+  rem,
+} from "@mantine/core";
+import { IconFileImport, IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { IconPlus } from "@tabler/icons-react";
+
+import ImportTab from "./ImportTab";
 import { actionWithNotification } from "@/ux/clientComp";
 import { addCompaniesToProject } from "./actions";
 import { browserClient } from "@/ux/supabase-client/BrowserClient";
@@ -13,6 +28,7 @@ import { useParams } from "next/navigation";
 interface Props {}
 export function AddCompaniesPanel(props: Props) {
   const [opened, { open, close }] = useDisclosure(false);
+  const [tab, setTab] = useState("doma");
   const [companies, setCompanies] = useState<{ id: number; name: string | null; origin: string | null }[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(false);
@@ -78,34 +94,65 @@ export function AddCompaniesPanel(props: Props) {
         {error && <p>Error</p>}
         {loading && <p>Loading...</p>}
 
-        <TextInput placeholder="Search by name" onChange={(e) => debouncedSetSearchTerm(e.currentTarget.value)} />
+        <SegmentedControl
+          fullWidth
+          value={tab}
+          onChange={setTab}
+          data={[
+            {
+              value: "doma",
+              label: (
+                <Center style={{ gap: 10 }}>
+                  <IconPlus style={{ width: rem(16), height: rem(16) }} />
+                  <span>Add</span>
+                </Center>
+              ),
+            },
+            {
+              value: "import",
+              label: (
+                <Center style={{ gap: 10 }}>
+                  <IconFileImport style={{ width: rem(16), height: rem(16) }} />
+                  <span>Import</span>
+                </Center>
+              ),
+            },
+          ]}
+          mb={"sm"}
+        />
+        {tab === "doma" && (
+          <Box>
+            <TextInput placeholder="Search by name" onChange={(e) => debouncedSetSearchTerm(e.currentTarget.value)} />
 
-        <Table>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th />
-              <Table.Th>ID</Table.Th>
-              <Table.Th>Name</Table.Th>
-              <Table.Th>Site</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>{rows}</Table.Tbody>
-        </Table>
-        <Group justify="flex-end">
-          <Button
-            disabled={selectedRows.length === 0}
-            onClick={async () => {
-              actionWithNotification(() => addCompaniesToProject(Number(projectId), selectedRows));
-              close();
-              setSearchTerm("");
-            }}
-            radius="sm"
-            variant="gradient"
-            gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
-          >
-            Save
-          </Button>
-        </Group>
+            <Table>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th />
+                  <Table.Th>ID</Table.Th>
+                  <Table.Th>Name</Table.Th>
+                  <Table.Th>Site</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>{rows}</Table.Tbody>
+            </Table>
+            <Group justify="flex-end">
+              <Button
+                disabled={selectedRows.length === 0}
+                onClick={async () => {
+                  actionWithNotification(() => addCompaniesToProject(Number(projectId), selectedRows));
+                  close();
+                  setSearchTerm("");
+                }}
+                radius="sm"
+                variant="gradient"
+                gradient={{ deg: 30, from: "blue.8", to: "blue.6" }}
+              >
+                Save
+              </Button>
+            </Group>
+          </Box>
+        )}
+        {tab === "import" && <ImportTab projectId={Number(projectId)} />}
       </Drawer>
       <Button
         variant="subtle"

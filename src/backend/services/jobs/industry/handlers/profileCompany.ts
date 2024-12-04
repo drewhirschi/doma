@@ -1,8 +1,8 @@
 import { CompletionModels, getCompletion, getEmbedding, getStructuredCompletion, recursiveDocumentReduction } from "@shared/llmHelpers";
 
 import { Client } from "@googlemaps/google-maps-services-js";
-import { LinkedInQueueClient } from "@shared/queues/linkedin-queue.js";
 import { IndustryQueueClient } from "@shared/queues/industry-queue.js";
+import { LinkedInQueueClient } from "@shared/queues/linkedin-queue.js";
 import { SandboxedJob } from "bullmq";
 import { companyInfoCombination } from "../../prompts.js";
 import { fullAccessServiceClient } from "@shared/supabase-client/server";
@@ -78,13 +78,13 @@ export async function reduceCompanyPagesToProfile(job: SandboxedJob) {
 
   //TODO: parse summary into structured data
 
-  const linkedinQueue = new LinkedInQueueClient();
-  await linkedinQueue.getCompanyLinkedInProfile(companyGet.data.id);
-  await linkedinQueue.close();
+  // const linkedinQueue = new LinkedInQueueClient();
+  // await linkedinQueue.getCompanyLinkedInProfile(companyGet.data.id);
+  // await linkedinQueue.close();
 
-  const industryQueue = new IndustryQueueClient();
-  await industryQueue.scrapeArticles(companyGet.data.id);
-  await industryQueue.close();
+  // const industryQueue = new IndustryQueueClient();
+  // await industryQueue.scrapeArticles(companyGet.data.id);
+  // await industryQueue.close();
 }
 
 export function weightedAverage(vectorA: number[], vectorB: number[], weightA: number, weightB: number): number[] {
